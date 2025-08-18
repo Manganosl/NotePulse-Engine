@@ -1,5 +1,9 @@
 package states.editors;
 
+import backend.WeekData;
+import states.FreeplayState.SongMetadata;
+
+
 class ModSelector extends MusicBeatState{
     private var modArray:Array<String> = [];
     private var goto:Class<MusicBeatState>;
@@ -138,6 +142,8 @@ class ModSelector extends MusicBeatState{
     }
 
     var holdTime:Float = 0;
+	var updateOn:Bool = true;
+	private var songs:Array<SongMetadata> = [];
     override public function update(elapsed:Float){
         var shiftMult:Int = 1;
 		if(FlxG.keys.pressed.SHIFT/* && controlsActive*/) shiftMult = 3;
@@ -171,9 +177,67 @@ class ModSelector extends MusicBeatState{
 				Mods.currentModDirectory = modArray[curSelected];
 				if(goto != states.editors.ChartingState && goto != states.editors.CharacterEditorState)
                 	try MusicBeatState.switchState(Type.createInstance(goto, gotoArgs));
-            }
-        }
-        updateTexts(elapsed);
+				else if(goto == states.editors.ChartingState){
+					grpAlph.clear();
+					songs = [];
+					updateOn = false;
+					for (i in 0...WeekData.weeksList.length) {
+						var leWeek:WeekData = WeekData.weeksLoaded.get(WeekData.weeksList[i]);
+						var leSongs:Array<String> = [];
+						var leChars:Array<String> = [];
+
+						for (j in 0...leWeek.songs.length){
+							leSongs.push(leWeek.songs[j][0]);
+							leChars.push(leWeek.songs[j][1]);
+						}
+
+						// songs siempre es null, arreglar esto de aqui
+						WeekData.setDirectoryFromWeek(leWeek);
+						for (song in leWeek.songs){
+							var colors:Array<Int> = song[2];
+							if(colors == null || colors.length < 3){
+								colors = [146, 113, 253];
+							}
+							addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]));
+						}
+					}
+					if(songs != null){
+						if (songs.length > 0) {
+							for (i in 0...songs.length){
+								if(songs[i] != null){
+									if(Mods.currentModDirectory == songs[i].folder){
+										var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
+										songText.targetY = i;
+										grpAlph.add(songText);
+
+										songText.scaleX = Math.min(1, 980 / songText.width);
+										songText.snapToPosition();
+
+										//var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
+										//icon.sprTracker = songText;
+
+										songText.visible = songText.active = songText.isMenuItem = false;
+										//icon.visible = icon.active = false;
+
+										//iconArray.push(icon);
+										//add(icon);
+
+										songText.x += 40;
+										songText.screenCenter(X);
+									}
+								}
+							}
+						}
+					}
+            	}
+        	}
+		}
+        if(updateOn && (grpAlph != null)) updateTexts(elapsed);
 		super.update(elapsed);
-    };
+    }
+
+	public function addSong(songName:String, weekNum:Int, songCharacter:String, color:Int)
+	{
+		songs.push(new SongMetadata(songName, weekNum, songCharacter, color));
+	}
 }
