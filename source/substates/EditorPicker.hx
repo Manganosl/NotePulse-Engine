@@ -11,38 +11,32 @@ class EditorPicker extends MusicBeatSubstate {
 		{
 			name: "Chart Editor",
 			iconShit: "chart",
-			state: states.editors.ChartingState,
-			args: [null]
+			state: states.editors.ModSelector,
+			args: [states.editors.ChartingState]
 		},
 		{
 			name: "Character Editor",
 			iconShit: "character",
-			state: states.editors.CharacterEditorState,
-			args: [null, false]
+			state: states.editors.ModSelector,
+			args: [states.editors.CharacterEditorState, [null, false]]
 		},
 		{
 			name: "Week Editor",
 			iconShit: "alphabet",
-			state: states.editors.WeekEditorState,
-			args: [null]
+			state: states.editors.ModSelector,
+			args: [states.editors.WeekEditorState]
 		},
 		{
-			name: "Dialogue Editor",
-			iconShit: "dialogue",
-			state: states.editors.DialogueEditorState,
-			args: [null]
-		},
-		{
-			name: "Dialogue Character Editor",
+			name: "Dialogue Editors",
 			iconShit: "uiDebug",
-			state: states.editors.DialogueCharacterEditorState,
+			state: substates.EditorPicker.DialoguePicker,
 			args: [null]
 		},
 		{
 			name: "Note Splash Debug",
 			iconShit: "noteskin",
-			state: states.editors.NoteSplashDebugState,
-			args: [null]
+			state: states.editors.ModSelector,
+			args: [states.editors.NoteSplashDebugState]
 		},
 		{
 			name: "State Loader",
@@ -134,6 +128,129 @@ class EditorPicker extends MusicBeatSubstate {
 		}
 		if (controls.BACK)
 			close();
+	}
+
+	override function destroy() {
+		super.destroy();
+
+		oldMousePos.put();
+		curMousePos.put();
+
+		if (FlxG.cameras.list.contains(subCam))
+			FlxG.cameras.remove(subCam);
+	}
+
+	public function changeSelection(change:Int) {
+		if (change == 0) return;
+
+		curSelected = FlxMath.wrap(curSelected + change, 0, sprites.length-1);
+
+		for(o in sprites)
+			o.selected = false;
+		sprites[curSelected].selected = true;
+	}
+}
+
+class DialoguePicker extends MusicBeatState {
+	public var bg:FlxSprite;
+
+	public var options:Array<Editor> = [
+		{
+			name: "Dialogue Editor",
+			iconShit: "dialogue",
+			state: states.editors.DialogueEditorState,
+			args: [null]
+		},
+		{
+			name: "Dialogue Character Editor",
+			iconShit: "uiDebug",
+			state: states.editors.DialogueCharacterEditorState,
+			args: [null]
+		}
+	];
+
+	public var sprites:Array<EditorPickerOption> = [];
+
+	public var curSelected:Int = 0;
+
+	public var subCam:FlxCamera;
+	public var oldMousePos:FlxPoint = FlxPoint.get();
+	public var curMousePos:FlxPoint = FlxPoint.get();
+
+	public var optionHeight:Float = 0;
+
+	public var selected:Bool = false;
+
+	public var camVelocity:Float = 0;
+
+	public override function create() {
+		super.create();
+
+		camera = subCam = new FlxCamera();
+		subCam.bgColor = 0;
+		FlxG.cameras.add(subCam, false);
+
+		bg = new FlxSprite().makeGraphic(1, 1, 0xFF000000);
+		bg.scrollFactor.set();
+		bg.scale.set(FlxG.width, FlxG.height);
+		bg.updateHitbox();
+		bg.alpha = 0;
+		add(bg);
+
+		optionHeight = FlxG.height / options.length;
+		for(k=>o in options) {
+			var spr = new EditorPickerOption(o.name, o.iconShit, optionHeight);
+			spr.y = k * optionHeight;
+			add(spr);
+			sprites.push(spr);
+		}
+		sprites[0].selected = true;
+
+		FlxG.mouse.getScreenPosition(subCam, oldMousePos);
+	}
+
+	public override function update(elapsed:Float) {
+		super.update(elapsed);
+
+		bg.alpha = CoolUtil.fpsLerp(bg.alpha, selected ? 1 : 0.5, 0.25);
+		if (bg.alpha >= 0.95 && states.MainMenuState.block.visible == false) states.MainMenuState.block.visible = true;
+
+		if (selected) {
+			camVelocity += FlxG.width * elapsed * 2;
+			subCam.scroll.x += camVelocity * elapsed;
+			return;
+		}
+		changeSelection(-FlxG.mouse.wheel + (controls.UI_UP_P ? -1 : 0) + (controls.UI_DOWN_P ? 1 : 0));
+
+		FlxG.mouse.getScreenPosition(subCam, curMousePos);
+		if (curMousePos.x != oldMousePos.x || curMousePos.y != oldMousePos.y) {
+			oldMousePos.set(curMousePos.x, curMousePos.y);
+			curSelected = -1;
+			changeSelection(Std.int(curMousePos.y / optionHeight)+1);
+		}
+
+		if (controls.ACCEPT || FlxG.mouse.justReleased) {
+			if (options[curSelected].state != null) {
+				selected = true;
+				FlxG.sound.play(Paths.sound('confirmMenu'));
+
+				if (FlxG.sound.music != null)
+					FlxG.sound.music.fadeOut(0.7, 0, function(n) {
+						FlxG.sound.music.stop();
+					});
+
+				sprites[curSelected].flicker(function() {
+					subCam.fade(0xFF000000, 0.25, false, function() {
+						MusicBeatState.switchState(Type.createInstance(options[curSelected].state, options[curSelected].args));
+					});
+				});
+			} else {
+				//CoolUtil.openURL("https://www.youtube.com/watch?v=9Youam7GYdQ");
+			}
+
+		}
+		if (controls.BACK)
+			MusicBeatState.switchState(new states.MainMenuState());
 	}
 
 	override function destroy() {
