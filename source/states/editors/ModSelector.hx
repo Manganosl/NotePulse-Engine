@@ -18,7 +18,7 @@ class ModSelector extends MusicBeatState{
 
     private static var curSelected:Int = 0;
 	var lerpSelected:Float = 0;
-    private var grpMods:FlxTypedGroup<Alphabet>;
+    private var grpAlph:FlxTypedGroup<Alphabet>;
 
     override public function create(){
         bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
@@ -31,13 +31,13 @@ class ModSelector extends MusicBeatState{
 		backdrop.alpha = 0.9;
 		add(backdrop);	
 
-        grpMods = new FlxTypedGroup<Alphabet>();
-		add(grpMods);
+        grpAlph = new FlxTypedGroup<Alphabet>();
+		add(grpAlph);
 
         for (i in 0...modArray.length){
 			var modText:Alphabet = new Alphabet(90, 320, modArray[i], true);
 			modText.targetY = i;
-			grpMods.add(modText);
+			grpAlph.add(modText);
 
 			modText.scaleX = Math.min(1, 980 / modText.width);
 			modText.snapToPosition();
@@ -89,7 +89,7 @@ class ModSelector extends MusicBeatState{
 
 		iconArray[curSelected].alpha = 1;*/
 
-		for (item in grpMods.members)
+		for (item in grpAlph.members)
 		{
 			bullShit++;
 			item.alpha = 0.6;
@@ -107,7 +107,7 @@ class ModSelector extends MusicBeatState{
 	    lerpSelected = FlxMath.lerp(curSelected, lerpSelected, Math.exp(-elapsed * 9.6));
 	    for (i in _lastVisibles)
 	    {
-		    grpMods.members[i].visible = grpMods.members[i].active = false;
+		    grpAlph.members[i].visible = grpAlph.members[i].active = false;
 		    //iconArray[i].visible = iconArray[i].active = false;
 	    }
 	    _lastVisibles = [];
@@ -117,7 +117,7 @@ class ModSelector extends MusicBeatState{
 	
 	    for (i in min...max)
 	    {
-	    	var item:Alphabet = grpMods.members[i];
+	    	var item:Alphabet = grpAlph.members[i];
 	    	item.visible = item.active = true;
 
 	    	var y:Float = ((FlxG.height - 120) / 2) + ((i - lerpSelected) * 135); 
@@ -168,10 +168,9 @@ class ModSelector extends MusicBeatState{
 			}
             if (controls.ACCEPT /*&& controlsActive*/)
 		    {
-                try{
-                    Mods.currentModDirectory = modArray[curSelected];
-                    MusicBeatState.switchState(Type.createInstance(goto, gotoArgs));
-                }
+				Mods.currentModDirectory = modArray[curSelected];
+				if(goto != states.editors.ChartingState && goto != states.editors.CharacterEditorState)
+                	try MusicBeatState.switchState(Type.createInstance(goto, gotoArgs));
             }
         }
         updateTexts(elapsed);

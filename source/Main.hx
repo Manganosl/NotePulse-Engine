@@ -267,20 +267,47 @@ class FridayGame extends FlxGame
 	}
 
 	private final function onCrash(e:haxe.Exception):Void {
-		var errMsg:String = "";
-		for (stackItem in haxe.CallStack.exceptionStack(true)) {
-			switch (stackItem) {
-				case FilePos(s, file, line, column):
-					errMsg += file + " (line " + line + ")\n";
-				default:
-					Sys.println(stackItem);
-					trace(stackItem);
-			}
-		}
-		
-		if(onGameCrash != null) onGameCrash(errMsg, e.message);
-		
-		flixel.addons.transition.FlxTransitionableState.skipNextTransOut = true;
-		FlxG.switchState(new states.CrashHandlerState(FlxG.state, errMsg, e.message));
+    	var errMsg:String = "";
+    	var path:String;
+    	var callStack:Array<StackItem> = haxe.CallStack.exceptionStack(true);
+    	var dateNow:String = Date.now().toString();
+
+    	dateNow = dateNow.replace(" ", "_");
+    	dateNow = dateNow.replace(":", "'");
+
+    	path = "./crash/" + "PsychEngine_" + dateNow + ".txt";
+
+    	for (stackItem in callStack)
+    	{
+    	    switch (stackItem)
+    	    {
+    	        case FilePos(s, file, line, column):
+    	            errMsg += file + " (line " + line + ")\n";
+    	        default:
+    	            Sys.println(stackItem);
+    	            trace(stackItem);
+    	    	}
+    		}
+
+    	errMsg += "\nUncaught Error: " + e.message + "\nIf this is related to EK, report it here: https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK\nIf not, report this error to Psych Engine: https://github.com/ShadowMario/FNF-PsychEngine\n\n> Crash Handler written by: sqirra-rng";
+
+    	if (!sys.FileSystem.exists("./crash/"))
+        	sys.FileSystem.createDirectory("./crash/");
+
+    	sys.io.File.saveContent(path, errMsg + "\n");
+
+    	Sys.println(errMsg);
+    	Sys.println("Crash dump saved in " + haxe.io.Path.normalize(path));
+
+    	#if (!mobile && !web)
+    	try {
+    	    openfl.Lib.application.window.alert(errMsg, "Error!");
+    	} catch(e:Dynamic) {}
+    	#end
+
+    	if(onGameCrash != null) onGameCrash(errMsg, e.message);
+
+   		flixel.addons.transition.FlxTransitionableState.skipNextTransOut = true;
+    	FlxG.switchState(new states.CrashHandlerState(FlxG.state, errMsg, e.message));
 	}
 }
