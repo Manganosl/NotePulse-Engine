@@ -23,8 +23,6 @@ import objects.HealthIcon;
 import objects.MenuCharacter;
 import objects.MenuItem;
 
-import states.editors.MasterEditorMenu;
-
 class WeekEditorState extends MusicBeatState
 {
 	var txtWeekTitle:FlxText;
@@ -791,7 +789,7 @@ class WeekEditorFreeplayState extends MusicBeatState
 		} else {
 			ClientPrefs.toggleVolumeKeys(true);
 			if(FlxG.keys.justPressed.ESCAPE) {
-				MusicBeatState.switchState(new MasterEditorMenu());
+				MusicBeatState.switchState(new states.MainMenuState());
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 			}
 

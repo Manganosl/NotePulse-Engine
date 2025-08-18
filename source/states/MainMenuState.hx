@@ -3,7 +3,6 @@ package states;
 import flixel.FlxObject;
 import flixel.effects.FlxFlicker;
 import lime.app.Application;
-import states.editors.MasterEditorMenu;
 import options.OptionsState;
 import backend.Discord;
 import debug.CodenameBuildField;

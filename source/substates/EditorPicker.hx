@@ -1,5 +1,6 @@
 package substates;
 
+import states.editors.DialogueEditorState;
 import flixel.math.FlxPoint;
 import flixel.effects.FlxFlicker;
 
@@ -23,6 +24,18 @@ class EditorPicker extends MusicBeatSubstate {
 			name: "Week Editor",
 			iconShit: "alphabet",
 			state: states.editors.WeekEditorState,
+			args: [null]
+		},
+		{
+			name: "Dialogue Editor",
+			iconShit: "dialogue",
+			state: states.editors.DialogueEditorState,
+			args: [null]
+		},
+		{
+			name: "Dialogue Character Editor",
+			iconShit: "uiDebug",
+			state: states.editors.DialogueCharacterEditorState,
 			args: [null]
 		},
 		{
