@@ -51,10 +51,13 @@ class HScript extends SScript
 	#end
 
 	public var origin:String;
+	public var scriptName:String;
 	override public function new(?parent:Dynamic, ?file:String, ?varsToBring:Any = null)
 	{
 		if (file == null)
 			file = '';
+
+		scriptName = file;
 
 		this.varsToBring = varsToBring;
 	
@@ -82,6 +85,18 @@ class HScript extends SScript
 		preset();
 		execute();
 	}
+
+	public var subScripts:Array<psychlua.HScript> = [];
+	public function stop() {
+		for (sub in subScripts) {
+			sub.call("onDestroy", []);
+			sub.stop();
+		}
+		subScripts = [];
+		
+        //expr = null;
+        interp = null;
+    }
 
 	var varsToBring:Any = null;
 	override function preset() {
@@ -128,6 +143,9 @@ class HScript extends SScript
 
 		set("FlxEmitter",FlxEmitter);
 		set("FlxEmitterMode",FlxEmitterMode);
+
+		set("CustomState", states.softcoding.CustomState);
+		set("CustomSubstate", states.softcoding.CustomSubstate);
 
 		set("NdllUtil", NdllUtil);  // CNE ahh util
 		set("WindowUtil", WindowUtil);  // Nightmare Vision ahh Util

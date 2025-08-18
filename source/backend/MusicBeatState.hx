@@ -4,14 +4,18 @@ import flixel.addons.ui.FlxUIState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.FlxState;
 import backend.PsychCamera;
-import psychlua.CustomState;
 import flixel.FlxState;
 import hscript.Parser;
 import hscript.Interp;
 import sys.io.File;
 import haxe.io.Path;
+import psychlua.HScript;
+import psychlua.LuaUtils;
+import psychlua.FunkinLua;
+import backend.Paths;
 import tea.SScript;
 import debug.CodenameBuildField;
+import psychlua.HScript;
 
 class MusicBeatState extends FlxUIState
 {
@@ -31,13 +35,50 @@ class MusicBeatState extends FlxUIState
 
 	var _psychCameraInitialized:Bool = false;
 
+	public var className:String = "";
+	public var useCustomStateName:Bool = false;
+	public var scriptsAllowed:Bool = true;
+
+	public var menuScriptArray:Array<HScript> = [];
+	public function runStateFiles(state:String, checkSpecificScript:Bool = false) {
+		if(!scriptsAllowed) return;
+		var filesPushed = [];
+		for (folder in Paths.getStateScripts(state))
+		{
+			if(FileSystem.exists(folder))
+			{
+				for (file in FileSystem.readDirectory(folder))
+				{
+					if (file.endsWith((checkSpecificScript ? (state + ".hx") : '.hx')) && !filesPushed.contains(file)) {
+						menuScriptArray.push(new HScript(folder + file));
+						filesPushed.push(file);
+					}
+				}
+			}
+		}
+	}
+
+	override function destroy() {
+		for (sc in menuScriptArray) {
+			sc.call("onDestroy", []);
+			sc.stop();
+		}
+		menuScriptArray = [];
+		
+		super.destroy();
+	}
+
 	override function create() {
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		#if MODS_ALLOWED Mods.updatedOnState = false; #end
 
+		runStateFiles((useCustomStateName ? className : Type.getClassName(Type.getClass(this))));
+
 		if(!_psychCameraInitialized) initPsychCamera();
 
 		super.create();
+
+		quickCallMenuScript("onCreatePost", []);
 
 		if(!skip) {
 			openSubState(new CustomFadeTransition(0.6, true));
@@ -58,36 +99,40 @@ class MusicBeatState extends FlxUIState
 		}
 	}
 
-	public var sscript:SScript;
-	public static var createdState:FlxState = null;
+	public function setOnMenuScript(variable:String, arg:Dynamic) {
+		if(!scriptsAllowed) return;
+		for (i in 0...menuScriptArray.length) {
+			menuScriptArray[i].set(variable, arg);
+		}
+	}
+	
+	public function quickCallMenuScript(event:String, args:Array<Dynamic>):Dynamic {
+		var returnVal = LuaUtils.Function_Continue;
+		if(!scriptsAllowed) return returnVal;
+		for (sc in menuScriptArray) {
+			var myValue = sc.call(event, args);
+			if(myValue == LuaUtils.Function_StopLua) break;
+			if(myValue != null && myValue != LuaUtils.Function_Continue) returnVal = myValue;
+		}
+		return returnVal;
+	}
+	
+	public function callOnMenuScript(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
+		var returnVal = LuaUtils.Function_Continue;
+		if(!scriptsAllowed) return returnVal;
+		if(exclusions == null) exclusions = [];
+		if(excludeValues == null) excludeValues = [];
 
-public static function loadCustomState(modPath:String):FlxState {
-    var fullPath = 'mods/' + modPath + '.hx';
+		for (sc in menuScriptArray) {
+			if(exclusions.contains(sc.scriptName)) continue;
 
-    if (!sys.FileSystem.exists(fullPath)) {
-        trace('Error: State file not found at $fullPath');
-        return new FlxState();
-    }
-
-    try {
-        var scriptSource = sys.io.File.getContent(fullPath);
-        var sscript = new SScript(scriptSource);
-
-        sscript.execute();
-
-        if (createdState != null) {
-            var state = createdState;
-            createdState = null; // reset for next load
-            return state;
-        } else {
-            trace('Error: Script did not assign to createdState.');
-        }
-    } catch (e:Dynamic) {
-        trace('Error loading SScript state: $e');
-    }
-
-    return new FlxState();
-}
+			var myValue = sc.call(event, args);
+			if(myValue == LuaUtils.Function_StopLua && !ignoreStops) break;
+			
+			if(myValue != null && myValue != LuaUtils.Function_Continue) returnVal = myValue;
+		}
+		return returnVal;
+	}
 
 	public function initPsychCamera():PsychCamera
 	{

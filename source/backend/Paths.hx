@@ -216,6 +216,22 @@ class Paths
 		return inst;
 	}
 
+	inline static public function modsStates(key:String, state:String)
+		return modFolders('states/$state/$key.hx');
+
+	inline public static function getPreloadPath(file:String = '')
+		return 'assets/$file';
+	
+	inline static public function getStateScripts(folder:String):Array<String> {
+		var foldersToCheck:Array<String> = [Paths.getPreloadPath('states/' + folder + '/')];
+		foldersToCheck.insert(0, Paths.mods('states/' + folder + '/'));
+		if(Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0) foldersToCheck.insert(0, Paths.mods(Mods.currentModDirectory + '/states/' + folder + '/'));
+
+		for(mod in Mods.getGlobalMods()) foldersToCheck.insert(0, Paths.mods(mod + '/states/' + folder + '/'));
+			
+		return foldersToCheck;
+	}
+
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 	static public function image(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxGraphic
 	{
