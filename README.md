@@ -1,5 +1,5 @@
 ## warning
-This engine is very WIP and will tend to have lots of error including lots of crashes (Hopefully I'll make a better crash handler)
+This engine is very WIP and will tend to have lots of error including lots of crashes
 
 # NotePulse Engine
 ### What a shitty name
@@ -26,3 +26,12 @@ This engine is a Psych 0.7.3 fork that adds and modifies some things to either m
 - Away3D (Only on HScript)
 
 ### You can find extra LUA functions in [here](LUA.md)
+
+## Thanks
+This engine uses code from:
+- **tposejank**: Extra Keys
+- **CNE Crew**: Fps Counter, NdllUtils, away3d and debug menu
+- **Nightmare Vision Engine**: WindowUtils
+- **Shadow Mario**: Psych Engine
+- **FunkinModchart**: Modchart libraries
+- **Sonic Legacy**: Crash handler
