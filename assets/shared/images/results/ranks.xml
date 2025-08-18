@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="ranks.png">
+	<!-- Created with Adobe Animate version 22.0.3.179 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="cycle0000" x="550" y="1154" width="260" height="559" pivotX="26.35" pivotY="19.9" frameX="-5" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="cycle0001" x="822" y="10" width="260" height="559" frameX="-5" frameY="0" frameWidth="260" frameHeight="559"/>
+	<SubTexture name="cycle0002" x="3792" y="10" width="258" height="562" frameX="-7" frameY="0" frameWidth="258" frameHeight="562"/>
+	<SubTexture name="cycle0003" x="10" y="10" width="258" height="559" frameX="-6" frameY="0" frameWidth="264" frameHeight="562"/>
+	<SubTexture name="cycle0004" x="278" y="10" width="260" height="558" frameX="-4" frameY="0" frameWidth="264" frameHeight="562"/>
+	<SubTexture name="cycle0005" x="548" y="10" width="264" height="560" frameX="0" frameY="0" frameWidth="264" frameHeight="562"/>
+	<SubTexture name="rank_A0000" x="822" y="10" width="260" height="559" pivotX="0.4" pivotY="19.9"/>
+	<SubTexture name="rank_A0001" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0002" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0003" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0004" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0005" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0006" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0007" x="1092" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0008" x="1362" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0009" x="1632" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0010" x="1902" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0011" x="2172" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0012" x="2442" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0013" x="2712" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0014" x="2982" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0015" x="3252" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0016" x="3522" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0017" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0018" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0019" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0020" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0021" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0022" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0023" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_A0024" x="822" y="10" width="260" height="559"/>
+	<SubTexture name="rank_B0000" x="3792" y="10" width="258" height="562" pivotX="-1.55" pivotY="19.9"/>
+	<SubTexture name="rank_B0001" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0002" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0003" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0004" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0005" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0006" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0007" x="10" y="582" width="258" height="562"/>
+	<SubTexture name="rank_B0008" x="278" y="582" width="258" height="562"/>
+	<SubTexture name="rank_B0009" x="546" y="582" width="258" height="562"/>
+	<SubTexture name="rank_B0010" x="814" y="582" width="258" height="562"/>
+	<SubTexture name="rank_B0011" x="1082" y="582" width="258" height="562"/>
+	<SubTexture name="rank_B0012" x="1350" y="582" width="258" height="562"/>
+	<SubTexture name="rank_B0013" x="1618" y="582" width="258" height="562"/>
+	<SubTexture name="rank_B0014" x="1886" y="582" width="258" height="562"/>
+	<SubTexture name="rank_B0015" x="2154" y="582" width="258" height="562"/>
+	<SubTexture name="rank_B0016" x="2422" y="582" width="258" height="562"/>
+	<SubTexture name="rank_B0017" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0018" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0019" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0020" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0021" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0022" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0023" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_B0024" x="3792" y="10" width="258" height="562"/>
+	<SubTexture name="rank_C0000" x="2690" y="582" width="258" height="559" pivotX="-1.15" pivotY="19.9"/>
+	<SubTexture name="rank_D0000" x="2958" y="582" width="260" height="558" pivotX="0.8" pivotY="19.9"/>
+	<SubTexture name="rank_F0000" x="3228" y="582" width="264" height="560" pivotX="5.1" pivotY="19.9"/>
+	<SubTexture name="rank_S0000" x="3502" y="582" width="271" height="559" pivotX="26.35" pivotY="19.9" frameX="-15" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0001" x="3783" y="582" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0002" x="10" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0003" x="280" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0004" x="550" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0005" x="550" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0006" x="550" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0007" x="820" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0008" x="1090" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0009" x="1360" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0010" x="1630" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0011" x="1900" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0012" x="2170" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0013" x="2440" y="1154" width="286" height="559"/>
+	<SubTexture name="rank_S0014" x="2736" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0015" x="3006" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0016" x="3276" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0017" x="550" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0018" x="550" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0019" x="550" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0020" x="550" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0021" x="550" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0022" x="550" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0023" x="550" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+	<SubTexture name="rank_S0024" x="550" y="1154" width="260" height="559" frameX="-26" frameY="0" frameWidth="286" frameHeight="559"/>
+</TextureAtlas>

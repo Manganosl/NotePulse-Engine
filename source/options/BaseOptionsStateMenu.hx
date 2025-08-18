@@ -1,0 +1,486 @@
+package options;
+
+import flixel.input.keyboard.FlxKey;
+import flixel.input.gamepad.FlxGamepad;
+import flixel.input.gamepad.FlxGamepadInputID;
+import flixel.input.gamepad.FlxGamepadManager;
+
+import objects.CheckboxThingie;
+import objects.AttachedText;
+import options.Option;
+import backend.InputFormatter;
+import states.MainMenuState;
+import backend.StageData;
+
+class BaseOptionsStateMenu extends MusicBeatSubstate
+{
+	private var curOption:Option = null;
+	private var curSelected:Int = 0;
+	private var optionsArray:Array<Option>;
+	public static var onPlayState:Bool = false;
+
+	private var grpOptions:FlxTypedGroup<Alphabet>;
+	private var checkboxGroup:FlxTypedGroup<CheckboxThingie>;
+	private var grpTexts:FlxTypedGroup<AttachedText>;
+
+	private var descText:FlxText;
+
+	public var title:String;
+	public var rpcTitle:String;
+
+	public var bg:FlxSprite;
+	public function new()
+	{
+		super();
+
+		if(title == null) title = 'Options';
+		if(rpcTitle == null) rpcTitle = 'Options Menu';
+		
+		#if DISCORD_ALLOWED
+		DiscordClient.changePresence(rpcTitle, null);
+		#end
+		
+		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		bg.color = 0xFFea71fd;
+		bg.screenCenter();
+		bg.antialiasing = ClientPrefs.data.antialiasing;
+		add(bg);
+
+		// avoids lagspikes while scrolling through menus!
+		grpOptions = new FlxTypedGroup<Alphabet>();
+		add(grpOptions);
+
+		grpTexts = new FlxTypedGroup<AttachedText>();
+		add(grpTexts);
+
+		checkboxGroup = new FlxTypedGroup<CheckboxThingie>();
+		add(checkboxGroup);
+
+		var cosanegra:FlxSprite = new FlxSprite().makeGraphic(5000, 300, 0xff000000);
+		cosanegra.antialiasing = ClientPrefs.data.antialiasing;
+		cosanegra.screenCenter();
+		cosanegra.alpha = 0.5;
+		cosanegra.y = -210;
+		add(cosanegra);
+
+		var titleText:FlxText = new FlxText(0, 10, 1145, "Options > " + title, 32); //Alphabet(75, 45, title, true);
+		titleText.alpha = 1;
+		titleText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		titleText.scrollFactor.set();
+		add(titleText);
+
+		descText = new FlxText(0, 50, 11080, "", 15);
+		descText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		descText.scrollFactor.set();
+		add(descText);
+
+		for (i in 0...optionsArray.length)
+		{
+			var optionText:Alphabet = new Alphabet(290, 260, optionsArray[i].name, false);
+			optionText.isMenuItem = true;
+			/*optionText.forceX = 300;
+			optionText.yMult = 90;*/
+			optionText.targetY = i;
+			grpOptions.add(optionText);
+
+			if(optionsArray[i].type == 'bool')
+			{
+				var checkbox:CheckboxThingie = new CheckboxThingie(optionText.x - 105, optionText.y, Std.string(optionsArray[i].getValue()) == 'true');
+				checkbox.sprTracker = optionText;
+				checkbox.ID = i;
+				checkboxGroup.add(checkbox);
+			}
+			else
+			{
+				optionText.x -= 80;
+				optionText.startPosition.x -= 80;
+				//optionText.xAdd -= 80;
+				var valueText:AttachedText = new AttachedText('' + optionsArray[i].getValue(), optionText.width + 60);
+				valueText.sprTracker = optionText;
+				valueText.copyAlpha = true;
+				valueText.ID = i;
+				grpTexts.add(valueText);
+				optionsArray[i].child = valueText;
+			}
+			//optionText.snapToPosition(); //Don't ignore me when i ask for not making a fucking pull request to uncomment this line ok
+			updateTextFrom(optionsArray[i]);
+		}
+
+		changeSelection();
+		reloadCheckboxes();
+	}
+
+	public function addOption(option:Option) {
+		if(optionsArray == null || optionsArray.length < 1) optionsArray = [];
+		optionsArray.push(option);
+		return option;
+	}
+
+	var nextAccept:Int = 5;
+	var holdTime:Float = 0;
+	var holdValue:Float = 0;
+
+	var bindingKey:Bool = false;
+	var holdingEsc:Float = 0;
+	var bindingBlack:FlxSprite;
+	var bindingText:Alphabet;
+	var bindingText2:Alphabet;
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+
+		if(bindingKey)
+		{
+			bindingKeyUpdate(elapsed);
+			return;
+		}
+
+		if (controls.UI_UP_P)
+		{
+			changeSelection(-1);
+		}
+		if (controls.UI_DOWN_P)
+		{
+			changeSelection(1);
+		}
+
+		if (controls.BACK) {
+			if(onPlayState)
+				{
+					StageData.loadDirectory(PlayState.SONG);
+					LoadingState.loadAndSwitchState(new PlayState());
+					FlxG.sound.music.volume = 0;
+				}
+				else MusicBeatState.switchState(new MainMenuState());
+		}
+
+		if(nextAccept <= 0)
+		{
+				if(controls.ACCEPT)
+				{
+					FlxG.sound.play(Paths.sound('scrollMenu'));
+					curOption.setValue((curOption.getValue() == true) ? false : true);
+					curOption.change();
+					reloadCheckboxes();
+				}
+				}
+				else if(controls.UI_LEFT || controls.UI_RIGHT)
+				{
+					var pressed = (controls.UI_LEFT_P || controls.UI_RIGHT_P);
+					if(holdTime > 0.5 || pressed)
+					{
+						if(pressed)
+						{
+							var add:Dynamic = null;
+							if(curOption.type != 'string')
+								add = controls.UI_LEFT ? -curOption.changeValue : curOption.changeValue;
+
+							switch(curOption.type)
+							{
+								case 'int' | 'float' | 'percent':
+									holdValue = curOption.getValue() + add;
+									if(holdValue < curOption.minValue) holdValue = curOption.minValue;
+									else if (holdValue > curOption.maxValue) holdValue = curOption.maxValue;
+
+									switch(curOption.type)
+									{
+										case 'int':
+											holdValue = Math.round(holdValue);
+											curOption.setValue(holdValue);
+
+										case 'float' | 'percent':
+											holdValue = FlxMath.roundDecimal(holdValue, curOption.decimals);
+											curOption.setValue(holdValue);
+									}
+
+								case 'string':
+									var num:Int = curOption.curOption; //lol
+									if(controls.UI_LEFT_P) --num;
+									else num++;
+
+									if(num < 0)
+										num = curOption.options.length - 1;
+									else if(num >= curOption.options.length)
+										num = 0;
+
+									curOption.curOption = num;
+									curOption.setValue(curOption.options[num]); //lol
+									//trace(curOption.options[num]);
+							}
+							updateTextFrom(curOption);
+							curOption.change();
+							FlxG.sound.play(Paths.sound('scrollMenu'));
+						}
+						else if(curOption.type != 'string')
+						{
+							holdValue += curOption.scrollSpeed * elapsed * (controls.UI_LEFT ? -1 : 1);
+							if(holdValue < curOption.minValue) holdValue = curOption.minValue;
+							else if (holdValue > curOption.maxValue) holdValue = curOption.maxValue;
+
+							switch(curOption.type)
+							{
+								case 'int':
+									curOption.setValue(Math.round(holdValue));
+								
+								case 'float' | 'percent':
+									curOption.setValue(FlxMath.roundDecimal(holdValue, curOption.decimals));
+							}
+							updateTextFrom(curOption);
+							curOption.change();
+						}
+					}
+
+					if(curOption.type != 'string')
+						holdTime += elapsed;
+				}
+				else if(controls.UI_LEFT_R || controls.UI_RIGHT_R)
+				{
+					if(holdTime > 0.5) FlxG.sound.play(Paths.sound('scrollMenu'));
+					holdTime = 0;
+				}
+			}
+
+			if(controls.RESET)
+			{
+				var leOption:Option = optionsArray[curSelected];
+				if(leOption.type != 'keybind')
+				{
+					leOption.setValue(leOption.defaultValue);
+					if(leOption.type != 'bool')
+					{
+						if(leOption.type == 'string') leOption.curOption = leOption.options.indexOf(leOption.getValue());
+						updateTextFrom(leOption);
+					}
+				}
+				else
+				{
+					leOption.setValue(!Controls.instance.controllerMode ? leOption.defaultKeys.keyboard : leOption.defaultKeys.gamepad);
+					updateBind(leOption);
+				}
+				leOption.change();
+				FlxG.sound.play(Paths.sound('cancelMenu'));
+				reloadCheckboxes();
+			}
+		}
+
+		if(nextAccept > 0) {
+			nextAccept -= 1;
+		}
+	}
+
+	function bindingKeyUpdate(elapsed:Float)
+	{
+		if(FlxG.keys.pressed.ESCAPE || FlxG.gamepads.anyPressed(B))
+		{
+			holdingEsc += elapsed;
+			if(holdingEsc > 0.5)
+			{
+				FlxG.sound.play(Paths.sound('cancelMenu'));
+				closeBinding();
+			}
+		}
+		else if (FlxG.keys.pressed.BACKSPACE || FlxG.gamepads.anyPressed(BACK))
+		{
+			holdingEsc += elapsed;
+			if(holdingEsc > 0.5)
+			{
+				if (!controls.controllerMode) curOption.keys.keyboard = NONE;
+				else curOption.keys.gamepad = NONE;
+				updateBind(!controls.controllerMode ? InputFormatter.getKeyName(NONE) : InputFormatter.getGamepadName(NONE));
+				FlxG.sound.play(Paths.sound('cancelMenu'));
+				closeBinding();
+			}
+		}
+		else
+		{
+			holdingEsc = 0;
+			var changed:Bool = false;
+			if(!controls.controllerMode)
+			{
+				if(FlxG.keys.justPressed.ANY || FlxG.keys.justReleased.ANY)
+				{
+					var keyPressed:FlxKey = cast (FlxG.keys.firstJustPressed(), FlxKey);
+					var keyReleased:FlxKey = cast (FlxG.keys.firstJustReleased(), FlxKey);
+
+					if(keyPressed != NONE && keyPressed != ESCAPE && keyPressed != BACKSPACE)
+					{
+						changed = true;
+						curOption.keys.keyboard = keyPressed;
+					}
+					else if(keyReleased != NONE && (keyReleased == ESCAPE || keyReleased == BACKSPACE))
+					{
+						changed = true;
+						curOption.keys.keyboard = keyReleased;
+					}
+				}
+			}
+			else if(FlxG.gamepads.anyJustPressed(ANY) || FlxG.gamepads.anyJustPressed(LEFT_TRIGGER) || FlxG.gamepads.anyJustPressed(RIGHT_TRIGGER) || FlxG.gamepads.anyJustReleased(ANY))
+			{
+				var keyPressed:FlxGamepadInputID = NONE;
+				var keyReleased:FlxGamepadInputID = NONE;
+				if(FlxG.gamepads.anyJustPressed(LEFT_TRIGGER))
+					keyPressed = LEFT_TRIGGER; //it wasnt working for some reason
+				else if(FlxG.gamepads.anyJustPressed(RIGHT_TRIGGER))
+					keyPressed = RIGHT_TRIGGER; //it wasnt working for some reason
+				else
+				{
+					for (i in 0...FlxG.gamepads.numActiveGamepads)
+					{
+						var gamepad:FlxGamepad = FlxG.gamepads.getByID(i);
+						if(gamepad != null)
+						{
+							keyPressed = gamepad.firstJustPressedID();
+							keyReleased = gamepad.firstJustReleasedID();
+							if(keyPressed != NONE || keyReleased != NONE) break;
+						}
+					}
+				}
+
+				if(keyPressed != NONE && keyPressed != FlxGamepadInputID.BACK && keyPressed != FlxGamepadInputID.B)
+				{
+					changed = true;
+					curOption.keys.gamepad = keyPressed;
+				}
+				else if(keyReleased != NONE && (keyReleased == FlxGamepadInputID.BACK || keyReleased == FlxGamepadInputID.B))
+				{
+					changed = true;
+					curOption.keys.gamepad = keyReleased;
+				}
+			}
+
+			if(changed)
+			{
+				var key:String = null;
+				if(!controls.controllerMode)
+				{
+					if(curOption.keys.keyboard == null) curOption.keys.keyboard = 'NONE';
+					curOption.setValue(curOption.keys.keyboard);
+					key = InputFormatter.getKeyName(FlxKey.fromString(curOption.keys.keyboard));
+				}
+				else
+				{
+					if(curOption.keys.gamepad == null) curOption.keys.gamepad = 'NONE';
+					curOption.setValue(curOption.keys.gamepad);
+					key = InputFormatter.getGamepadName(FlxGamepadInputID.fromString(curOption.keys.gamepad));
+				}
+				updateBind(key);
+				FlxG.sound.play(Paths.sound('confirmMenu'));
+				closeBinding();
+			}
+		}
+	}
+
+	final MAX_KEYBIND_WIDTH = 320;
+	function updateBind(?text:String = null, ?option:Option = null)
+	{
+		if(option == null) option = curOption;
+		if(text == null)
+		{
+			text = option.getValue();
+			if(text == null) text = 'NONE';
+
+			if(!controls.controllerMode)
+				text = InputFormatter.getKeyName(FlxKey.fromString(text));
+			else
+				text = InputFormatter.getGamepadName(FlxGamepadInputID.fromString(text));
+		}
+
+		var bind:AttachedText = cast option.child;
+		var attach:AttachedText = new AttachedText(text, bind.offsetX);
+		attach.sprTracker = bind.sprTracker;
+		attach.copyAlpha = true;
+		attach.ID = bind.ID;
+		playstationCheck(attach);
+		attach.scaleX = Math.min(1, MAX_KEYBIND_WIDTH / attach.width);
+		attach.x = bind.x;
+		attach.y = bind.y;
+
+		option.child = attach;
+		grpTexts.insert(grpTexts.members.indexOf(bind), attach);
+		grpTexts.remove(bind);
+		bind.destroy();
+	}
+
+	function playstationCheck(alpha:Alphabet)
+	{
+		if(!controls.controllerMode) return;
+
+		var gamepad:FlxGamepad = FlxG.gamepads.firstActive;
+		var model:FlxGamepadModel = gamepad != null ? gamepad.detectedModel : UNKNOWN;
+		var letter = alpha.letters[0];
+		if(model == PS4)
+		{
+			switch(alpha.text)
+			{
+				case '[', ']': //Square and Triangle respectively
+					letter.image = 'alphabet_playstation';
+					letter.updateHitbox();
+					
+					letter.offset.x += 4;
+					letter.offset.y -= 5;
+			}
+		}
+	}
+
+	function closeBinding()
+	{
+		bindingKey = false;
+		bindingBlack.destroy();
+		remove(bindingBlack);
+
+		bindingText.destroy();
+		remove(bindingText);
+
+		bindingText2.destroy();
+		remove(bindingText2);
+		ClientPrefs.toggleVolumeKeys(true);
+	}
+
+	function updateTextFrom(option:Option) {
+		if(option.type == 'keybind')
+		{
+			updateBind(option);
+			return;
+		}
+
+		var text:String = option.displayFormat;
+		var val:Dynamic = option.getValue();
+		if(option.type == 'percent') val *= 100;
+		var def:Dynamic = option.defaultValue;
+		option.text = text.replace('%v', val).replace('%d', def);
+	}
+	
+	function changeSelection(change:Int = 0)
+	{
+		curSelected += change;
+		if (curSelected < 0)
+			curSelected = optionsArray.length - 1;
+		else if (curSelected >= optionsArray.length)
+			curSelected = 0;
+
+		descText.text = optionsArray[curSelected].description;
+
+		var bullShit:Int = 0;
+
+		for (item in grpOptions.members)
+		{
+			item.targetY = bullShit - curSelected;
+			bullShit++;
+
+			item.alpha = 0.6;
+			if (item.targetY == 0) item.alpha = 1;
+		}
+		for (text in grpTexts)
+		{
+			text.alpha = 0.6;
+			if(text.ID == curSelected) text.alpha = 1;
+		}
+
+		curOption = optionsArray[curSelected]; //shorter lol
+		FlxG.sound.play(Paths.sound('scrollMenu'));
+	}
+
+	function reloadCheckboxes()
+		for (checkbox in checkboxGroup)
+			checkbox.daValue = Std.string(optionsArray[checkbox.ID].getValue()) == 'true'; //Do not take off the Std.string() from this, it will break a thing in Mod Settings Menu
+}

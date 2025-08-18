@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="menu_changelog_old.png">
+	<!-- Created with Adobe Animate version 21.0.0.35450 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="changelog basic0000" x="5" y="5" width="562" height="161" frameX="-3" frameY="-5" frameWidth="568" frameHeight="172"/>
+	<SubTexture name="changelog basic0001" x="5" y="5" width="562" height="161" frameX="-3" frameY="-5" frameWidth="568" frameHeight="172"/>
+	<SubTexture name="changelog basic0002" x="572" y="5" width="564" height="167" frameX="-2" frameY="-2" frameWidth="568" frameHeight="172"/>
+	<SubTexture name="changelog basic0003" x="572" y="5" width="564" height="167" frameX="-2" frameY="-2" frameWidth="568" frameHeight="172"/>
+	<SubTexture name="changelog basic0004" x="1141" y="5" width="568" height="172"/>
+	<SubTexture name="changelog basic0005" x="1141" y="5" width="568" height="172"/>
+	<SubTexture name="changelog white0000" x="5" y="182" width="695" height="170" frameX="0" frameY="-1" frameWidth="695" frameHeight="173"/>
+	<SubTexture name="changelog white0001" x="5" y="182" width="695" height="170" frameX="0" frameY="-1" frameWidth="695" frameHeight="173"/>
+	<SubTexture name="changelog white0002" x="705" y="182" width="689" height="170" frameX="-3" frameY="-1" frameWidth="695" frameHeight="173"/>
+	<SubTexture name="changelog white0003" x="705" y="182" width="689" height="170" frameX="-3" frameY="-1" frameWidth="695" frameHeight="173"/>
+	<SubTexture name="changelog white0004" x="5" y="357" width="693" height="173" frameX="-1" frameY="0" frameWidth="695" frameHeight="173"/>
+	<SubTexture name="changelog white0005" x="5" y="357" width="693" height="173" frameX="-1" frameY="0" frameWidth="695" frameHeight="173"/>
+</TextureAtlas>

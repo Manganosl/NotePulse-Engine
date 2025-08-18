@@ -1,0 +1,1 @@
+In case you think this is nasty (Since it is), everything on the folder will end up being fully hardcoded instead of a string full of LUA code

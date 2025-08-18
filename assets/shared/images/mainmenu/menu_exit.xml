@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="menu_exit.png">
+	<!-- Created with Adobe Animate version 21.0.0.35450 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="exit basic0000" x="5" y="5" width="334" height="159" frameX="-1" frameY="0" frameWidth="336" frameHeight="159"/>
+	<SubTexture name="exit basic0001" x="344" y="5" width="332" height="153" frameX="-2" frameY="-3" frameWidth="336" frameHeight="159"/>
+	<SubTexture name="exit basic0002" x="681" y="5" width="336" height="153" frameX="0" frameY="-3" frameWidth="336" frameHeight="159"/>
+	<SubTexture name="exit basic0003" x="5" y="169" width="336" height="155" frameX="0" frameY="-2" frameWidth="336" frameHeight="159"/>
+	<SubTexture name="exit white0000" x="346" y="169" width="422" height="233" frameX="-2" frameY="0" frameWidth="427" frameHeight="233"/>
+	<SubTexture name="exit white0001" x="5" y="407" width="414" height="229" frameX="-6" frameY="-2" frameWidth="427" frameHeight="233"/>
+	<SubTexture name="exit white0002" x="424" y="407" width="422" height="229" frameX="-2" frameY="-2" frameWidth="427" frameHeight="233"/>
+	<SubTexture name="exit white0003" x="5" y="641" width="422" height="233" frameX="-2" frameY="0" frameWidth="427" frameHeight="233"/>
+	<SubTexture name="exit white0004" x="432" y="641" width="427" height="233"/>
+</TextureAtlas>

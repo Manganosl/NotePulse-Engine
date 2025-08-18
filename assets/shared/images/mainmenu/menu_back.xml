@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="menu_back.png">
+	<!-- Created with Adobe Animate version 21.0.0.35450 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="back basic0000" x="5" y="5" width="337" height="173"/>
+	<SubTexture name="back basic0001" x="5" y="5" width="337" height="173"/>
+	<SubTexture name="back basic0002" x="5" y="5" width="337" height="173"/>
+	<SubTexture name="back basic0003" x="347" y="5" width="337" height="173"/>
+	<SubTexture name="back basic0004" x="347" y="5" width="337" height="173"/>
+	<SubTexture name="back basic0005" x="347" y="5" width="337" height="173"/>
+	<SubTexture name="back basic0006" x="5" y="183" width="337" height="173"/>
+	<SubTexture name="back basic0007" x="5" y="183" width="337" height="173"/>
+	<SubTexture name="back basic0008" x="5" y="183" width="337" height="173"/>
+	<SubTexture name="back white0000" x="347" y="183" width="251" height="139" frameX="-3" frameY="0" frameWidth="256" frameHeight="144"/>
+	<SubTexture name="back white0001" x="347" y="183" width="251" height="139" frameX="-3" frameY="0" frameWidth="256" frameHeight="144"/>
+	<SubTexture name="back white0002" x="347" y="183" width="251" height="139" frameX="-3" frameY="0" frameWidth="256" frameHeight="144"/>
+	<SubTexture name="back white0003" x="603" y="183" width="253" height="144" frameX="-2" frameY="0" frameWidth="256" frameHeight="144"/>
+	<SubTexture name="back white0004" x="603" y="183" width="253" height="144" frameX="-2" frameY="0" frameWidth="256" frameHeight="144"/>
+	<SubTexture name="back white0005" x="603" y="183" width="253" height="144" frameX="-2" frameY="0" frameWidth="256" frameHeight="144"/>
+	<SubTexture name="back white0006" x="5" y="361" width="256" height="140" frameX="0" frameY="-2" frameWidth="256" frameHeight="144"/>
+	<SubTexture name="back white0007" x="5" y="361" width="256" height="140" frameX="0" frameY="-2" frameWidth="256" frameHeight="144"/>
+	<SubTexture name="back white0008" x="5" y="361" width="256" height="140" frameX="0" frameY="-2" frameWidth="256" frameHeight="144"/>
+</TextureAtlas>
