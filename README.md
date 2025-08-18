@@ -1,5 +1,6 @@
 ## warning
-This engine is very WIP and will tend to have lots of error including lots of crashes
+This engine is very WIP and will tend to have lots of error including lots of crashes.
+If you notice sofcoded things in here, don't worry, I'm working on hardcoding them
 
 # NotePulse Engine
 ### What a shitty name
