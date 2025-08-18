@@ -9,32 +9,32 @@ class EditorPicker extends MusicBeatSubstate {
 	public var options:Array<Editor> = [
 		{
 			name: "Chart Editor",
-			iconID: 0,
+			iconShit: "chart",
 			state: states.editors.ChartingState,
 			args: [null]
 		},
 		{
 			name: "Character Editor",
-			iconID: 1,
+			iconShit: "character",
 			state: states.editors.CharacterEditorState,
 			args: [null, false]
 		},
 		{
 			name: "Week Editor",
-			iconID: 2,
+			iconShit: "alphabet",
 			state: states.editors.WeekEditorState,
 			args: [null]
 		},
 		{
 			name: "Note Splash Debug",
-			iconID: 3,
+			iconShit: "noteskin",
 			state: states.editors.NoteSplashDebugState,
 			args: [null]
 		},
 		{
 			name: "State Loader",
-			iconID: 4,
-			state: states.CustomStateLoader,
+			iconShit: "debugOptions",
+			state: states.MainMenuState,   // Still working on it
 			args: [null]
 		}
 	];
@@ -69,7 +69,7 @@ class EditorPicker extends MusicBeatSubstate {
 
 		optionHeight = FlxG.height / options.length;
 		for(k=>o in options) {
-			var spr = new EditorPickerOption(o.name, o.iconID, optionHeight);
+			var spr = new EditorPickerOption(o.name, o.iconShit, optionHeight);
 			spr.y = k * optionHeight;
 			add(spr);
 			sprites.push(spr);
@@ -146,7 +146,7 @@ class EditorPicker extends MusicBeatSubstate {
 
 typedef Editor = {
 	var name:String;
-	var iconID:Int;
+	var iconShit:String;
 	var state:Class<MusicBeatState>;
 	var args:Array<Dynamic>;
 }
@@ -162,15 +162,13 @@ class EditorPickerOption extends FlxTypedSpriteGroup<FlxSprite> {
 	public var selectionLerp:Float = 0;
 
 	public var iconRotationCycle:Float = 0;
-	public function new(name:String, iconID:Int, height:Float) {
+	public function new(name:String, iconShit:String, height:Float) {
 		super();
 
 
 		FlxG.mouse.visible = true;
 		iconSpr = new FlxSprite();
-		iconSpr.loadGraphic(Paths.image('editors/icons'), true, 128, 128);
-		iconSpr.animation.add("icon", [iconID], 24, true);
-		iconSpr.animation.play("icon");
+		iconSpr.loadGraphic(Paths.image('editors/icons/'+iconShit), true, 128, 128);
 		iconSpr.antialiasing = true;
 		if (height < 150) {
 			iconSpr.scale.set(height / 150, height / 150);
