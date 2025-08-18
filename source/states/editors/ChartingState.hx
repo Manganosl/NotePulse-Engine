@@ -4873,7 +4873,7 @@ class ChartingOptionsSubmenu extends MusicBeatSubstate
 				case 'Exit to main menu':
 					PlayState.chartingMode = false;	
 					MusicBeatState.switchState(new MainMenuState());
-					//FlxG.switchState(() -> new MainMenuState());
+					FlxG.sound.playMusic(Paths.music('freakyMenu'));
 			}
 		}
 	}
