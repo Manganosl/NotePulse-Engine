@@ -427,8 +427,6 @@ class FreeplayState extends MusicBeatState
 				PlayState.SONG = Song.loadFromJson(poop, songLowercase);
 				PlayState.isStoryMode = false;
 				PlayState.storyDifficulty = curDifficulty;
-
-				trace('Tha Shit: ' + songs[curSelected].week);
 				if(colorTween != null) {
 					colorTween.cancel();
 				}

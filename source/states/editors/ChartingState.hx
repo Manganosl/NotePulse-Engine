@@ -11,6 +11,7 @@ import haxe.io.Bytes;
 import flixel.util.FlxSave;
 
 import states.MainMenuState;
+import states.FreeplayState.SongMetadata;
 
 import flixel.FlxObject;
 import flixel.addons.display.FlxGridOverlay;
@@ -48,6 +49,7 @@ import objects.HealthIcon;
 import objects.AttachedSprite;
 import objects.Character;
 import backend.ui.PsychUIEventHandler;
+import backend.WeekData;
 
 #if sys
 import flash.media.Sound;
@@ -58,6 +60,15 @@ import flash.media.Sound;
 
 class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
+	public function new(song:SongMetadata = null){
+		if(song != null){
+			Mods.currentModDirectory = song.folder;
+			PlayState.storyWeek = song.week;
+			var weekName = WeekData.weeksList[song.week];
+			WeekData.setDirectoryFromWeek(WeekData.weeksLoaded.get(weekName));
+		}
+		super();
+	}
 	public static var noteTypeList:Array<String> = //Used for backwards compatibility with 0.1 - 0.3.2 charts, though, you should add your hardcoded custom note types here too.
 	[
 		'',
@@ -251,6 +262,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	override function create()
 	{
+		trace(Mods.currentModDirectory);
 		if (PlayState.SONG != null)
 			_song = PlayState.SONG;
 		else
