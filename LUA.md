@@ -20,13 +20,9 @@ getSystemUser()
 ```
 makeVideoSprite(tag, video, ?x = 0, ?y = 0, ?camera = "camHUD", ?looped = false)
 ```
-- Make a hidden paused video spritet, great for preloading
+- Preload a video
 ```
-makePausedVideoSprite(tag, video, ?x = 0, ?y = 0, ?camera = "camHUD", ?looped = false)
-```
-- Add and play paused video sprites
-```
-playVideoSprite(tag)
+proloadVideo(video)
 ```
 
 ### Window Functions
