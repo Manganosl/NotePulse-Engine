@@ -2733,9 +2733,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			var func:Void->Void = function()
 			{
-				openNewChart();
+				/*openNewChart();
 				reloadNotesDropdowns();
-				prepareReload();
+				prepareReload();*/
 			}
 
 			openSubState(new Prompt('Are you sure you want to start over?', func));
