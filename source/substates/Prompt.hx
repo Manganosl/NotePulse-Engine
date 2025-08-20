@@ -67,11 +67,6 @@ override public function create():Void
     panelbg.screenCenter();
     panel.screenCenter();
 
-	panelbg.x -= states.editors.ChartingState.instance.camPos.x;
-	panel.x -= states.editors.ChartingState.instance.camPos.x;
-	panelbg.y -= states.editors.ChartingState.instance.camPos.y;
-	panel.y -= states.editors.ChartingState.instance.camPos.y;
-
     add(panelbg);
     add(panel);
 
