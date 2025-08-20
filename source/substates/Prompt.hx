@@ -47,51 +47,56 @@ class Prompt extends MusicBeatSubstate
 		super();	
 	}
 	
-	override public function create():Void 
-	{
-		super.create();
-		if (goAnyway){
-			
-			
-				if(okc != null)okc();
-			close();
-			
-		}else{
-		panel = new FlxSprite(0, 0);
-		panelbg = new FlxSprite(0, 0);
-		makeSelectorGraphic(panel,300,150,0xff999999);
-		makeSelectorGraphic(panelbg,304,154,0xff000000);
-		//panel.makeGraphic(300, 150, 0xff999999);
-		//panel.loadGraphic(Paths.image('ui/promptbg'));
-		/*
-		buttons.frames = Paths.getSparrowAtlas('ui/prompt_buttons');
-		buttons.animation.addByIndices('but0', 'buttons', [0], '', 0);
-		buttons.animation.addByIndices('but1', 'buttons', [1], '', 0);
-		buttons.animation.play('but0');
-		buttons.scrollFactor.set();*/
-		panel.scrollFactor.set();
-		panel.screenCenter();
-		panelbg.scrollFactor.set();
-		panelbg.screenCenter();
-		
-		add(panelbg);
-		add(panel);
-		add(buttonAccept);
-		add(buttonNo);
-		//add(buttons);
-		var textshit:FlxText = new FlxText(buttonNo.width*2, panel.y, 300, theText, 16);
-		textshit.alignment = 'center';
-		add(textshit);
-		textshit.screenCenter();
-		buttonAccept.screenCenter();
-		buttonNo.screenCenter();
-		buttonAccept.x -= buttonNo.width/1.5;
-		buttonAccept.y = panel.y + panel.height-30;
-		buttonNo.x += buttonNo.width/1.5;
-		buttonNo.y = panel.y + panel.height-30;
-		textshit.scrollFactor.set();
-		}
-	}
+override public function create():Void 
+{
+    super.create();
+    if (goAnyway){
+        if(okc != null)okc();
+        close();
+        return;
+    }
+
+    // Panel sizes
+    var panelW = 300;
+    var panelH = 150;
+
+    // Panel background and main panel
+    panelbg = new FlxSprite().makeGraphic(panelW + 4, panelH + 4, 0xff000000);
+    panel = new FlxSprite().makeGraphic(panelW, panelH, 0xff999999);
+
+    panelbg.screenCenter();
+    panel.screenCenter();
+
+    add(panelbg);
+    add(panel);
+
+    // Text
+    var textWidth = panelW - 40;
+    var textshit:FlxText = new FlxText(0, 0, textWidth, theText, 16);
+    textshit.alignment = 'center';
+    textshit.screenCenter(X);
+    textshit.y = panel.y + 24;
+    add(textshit);
+
+    // Buttons
+    var buttonWidth = 100;
+    var buttonHeight = 32;
+    var buttonSpacing = 24;
+
+    buttonAccept.setSize(buttonWidth, buttonHeight);
+    buttonNo.setSize(buttonWidth, buttonHeight);
+
+    var totalButtonsWidth = buttonWidth * 2 + buttonSpacing;
+    var buttonsStartX = panel.x + (panelW - totalButtonsWidth) / 2;
+    var buttonY = panel.y + panelH - buttonHeight - 18;
+
+    buttonAccept.x = buttonsStartX;
+    buttonNo.x = buttonsStartX + buttonWidth + buttonSpacing;
+    buttonAccept.y = buttonNo.y = buttonY;
+
+    add(buttonAccept);
+    add(buttonNo);
+}
 	/*
 	override public function update(elapsed:Float):Void 
 	{
@@ -163,5 +168,4 @@ class Prompt extends MusicBeatSubstate
 		panel.pixels.fillRect(new Rectangle((flipX ? antiX : 6), Std.int(Math.abs(antiY - 2)),  5, 1), color);
 		panel.pixels.fillRect(new Rectangle((flipX ? antiX : 8), Std.int(Math.abs(antiY - 1)),  3, 1), color);
 	}
-	
 }

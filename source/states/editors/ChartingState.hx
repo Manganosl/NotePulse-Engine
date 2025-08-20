@@ -551,7 +551,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				autoSaveTimer();
 			}, function() autoSaveTimer());
 			box.scrollFactor.set();
-			//box.screenCenter();
 			add(box);
 		});
 	}

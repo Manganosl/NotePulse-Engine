@@ -84,28 +84,32 @@ class BasePrompt extends MusicBeatSubstate
 
 	public var bg:FlxSprite;
 	public var titleText:FlxText;
-	override function create()
-	{
-		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-		bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
-		bg.alpha = 0.8;
-		bg.scale.set(_sizeX, _sizeY);
-		bg.updateHitbox();
-		bg.x = FlxG.width / 4 - bg.width / 6;
-		bg.y = FlxG.height / 4 - bg.height / 6;
-		bg.cameras = cameras;
-		add(bg);
-		
-		titleText = new FlxText(0, bg.y + 30, 400, _title, 16);
-		titleText.screenCenter(X);
-		titleText.alignment = CENTER;
-		titleText.cameras = cameras;
-		add(titleText);
-		
-		if(onCreate != null)
-			onCreate(this);
-		super.create();
-	}
+override function create()
+{
+    cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+
+    // Center the background box
+    bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+    bg.alpha = 0.8;
+    bg.scale.set(_sizeX, _sizeY);
+    bg.updateHitbox();
+    bg.x = (FlxG.width - bg.width) / 2;
+    bg.y = (FlxG.height - bg.height) / 2;
+    bg.cameras = cameras;
+    add(bg);
+
+    // Center the title text inside the box
+    titleText = new FlxText(0, 0, _sizeX - 40, _title, 16);
+    titleText.x = bg.x + 20;
+    titleText.y = bg.y + 30;
+    titleText.alignment = CENTER;
+    titleText.cameras = cameras;
+    add(titleText);
+
+    if(onCreate != null)
+        onCreate(this);
+    super.create();
+}
 
 	var _blockInput:Float = 0.1;
 	override function update(elapsed:Float)
