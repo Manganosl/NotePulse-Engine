@@ -546,6 +546,10 @@ class Paths
 		return modFolders('data/' + key + '.json');
 	}
 
+	inline static public function modJson(key:String) {
+		return modFolders(Mods.currentModDirectory + '/data/' + key + '.json');
+	}
+
 	inline static public function modsVideo(key:String) {
 		return modFolders('videos/' + key + '.' + VIDEO_EXT);
 	}

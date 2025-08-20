@@ -164,19 +164,19 @@ class ModSelector extends MusicBeatState{
 	private var currentSongs:Array<SongMetadata> = [];
     override public function update(elapsed:Float){
         var shiftMult:Int = 1;
-		if(FlxG.keys.pressed.SHIFT/* && controlsActive*/) shiftMult = 3;
+		if(FlxG.keys.pressed.SHIFT) shiftMult = 3;
         if(modArray.length > 1){
-			if (controls.UI_UP_P/* && controlsActive*/)
+			if (controls.UI_UP_P)
 			{
 				changeSelection(-shiftMult);
 				holdTime = 0;
 			}
-			if (controls.UI_DOWN_P/* && controlsActive*/)
+			if (controls.UI_DOWN_P)
 			{
 				changeSelection(shiftMult);
 				holdTime = 0;
 			}
-            if(controls.UI_DOWN || controls.UI_UP/* && controlsActive*/)
+            if(controls.UI_DOWN || controls.UI_UP)
 			{
 				var checkLastHold:Int = Math.floor((holdTime - 0.5) * 10);
 				holdTime += elapsed;
@@ -185,14 +185,17 @@ class ModSelector extends MusicBeatState{
 				if(holdTime > 0.5 && checkNewHold - checkLastHold > 0)
 					changeSelection((checkNewHold - checkLastHold) * (controls.UI_UP ? -shiftMult : shiftMult));
 			}
-            if(FlxG.mouse.wheel != 0/* && controlsActive*/) 
+            if(FlxG.mouse.wheel != 0) 
 			{
 				FlxG.sound.play(Paths.sound('scrollMenu'), 0.2);
 				changeSelection(-shiftMult * FlxG.mouse.wheel, false);
 			}
-            if (controls.ACCEPT /*&& controlsActive*/){
-				if(goto != states.editors.ChartingState && goto != states.editors.CharacterEditorState)
+            if (controls.ACCEPT){
+				if(goto != states.editors.ChartingState){
+					currentMod = modArray[curSelected];
+					Mods.currentModDirectory = currentMod;
                 	try MusicBeatState.switchState(Type.createInstance(goto, gotoArgs));
+				}
 				else if(goto == states.editors.ChartingState){
 					if(inDifSelect){
 						curDifficulty = curSelected;
@@ -246,7 +249,7 @@ class ModSelector extends MusicBeatState{
 					}
             	}
         	}
-			if (controls.BACK /*&& controlsActive*/){
+			if (controls.BACK){
 				if(!inDifSelect && !inSongSelect){
                 	try MusicBeatState.switchState(new states.MainMenuState());
 				} else if (inDifSelect){

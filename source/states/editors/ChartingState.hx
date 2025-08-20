@@ -79,6 +79,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		'No Animation'
 	];
 	public var ignoreWarnings = false;
+
+	var outputTxt:FlxText;
+	var outputAlpha:Float = 0;
+
 	var curNoteTypes:Array<String> = [];
 	var undos = [];
 	var redos = [];
@@ -173,8 +177,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var value1InputText:FlxUIInputText;
 	var value2InputText:FlxUIInputText;
 	var currentSongName:String;
-
-	var zoomTxt:FlxText;
 
 	var zoomList:Array<Float> = [
 		0.25,
@@ -462,6 +464,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		\nQ/E - Decrease/Increase Note Sustain Length
 		\nSpace - Stop/Resume song";
 
+		outputTxt = new FlxText(25, FlxG.height - 50, FlxG.width - 50, '', 20);
+		outputTxt.borderSize = 2;
+		outputTxt.borderStyle = OUTLINE_FAST;
+		outputTxt.scrollFactor.set();
+		outputTxt.screenCenter();
+		outputTxt.alpha = 0;
+		add(outputTxt);
+
 		/*var tipTextArray:Array<String> = text.split('\n');
 		for (i in 0...tipTextArray.length) {
 			var tipText:FlxText = new FlxText(UI_box.x, UI_box.y + UI_box.height + 8, 0, tipTextArray[i], 16);
@@ -506,12 +516,17 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		}
 		lastSong = currentSongName;
 
-		zoomTxt = new FlxText(10, 10, 0, "Zoom: 1 / 1", 16);
-		zoomTxt.scrollFactor.set();
-		add(zoomTxt);
-
 		updateGrid();
+		autoSaveTimer();
 		super.create();
+	}
+
+	function autoSaveTimer(){
+		trace("Start auto save timer");
+		new FlxTimer().start(300, function(tmr:FlxTimer) {
+			saveLevel(true);
+			autoSaveTimer();
+		});
 	}
 
 	var check_mute_inst:FlxUICheckBox = null;
@@ -2708,12 +2723,26 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			var func:Void->Void = function()
 			{
-				saveLevel();
+				saveLevel(true);
 			}
 			func();
 		}, btnWid);
 		saveBtn.text.alignment = LEFT;
 		tab_group.add(saveBtn);
+
+		btnY++;
+		btnY += 20;
+
+		var saveAsBtn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Save As...', function()
+		{
+			var func:Void->Void = function()
+			{
+				saveLevel(false);
+			}
+			func();
+		}, btnWid);
+		saveAsBtn.text.alignment = LEFT;
+		tab_group.add(saveAsBtn);
 
 		btnY++;
 		btnY += 20;
@@ -2798,10 +2827,32 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		return daPos;
 	}
 
+	function showOutput(message:String, isError:Bool = false)
+	{
+		outputTxt.text = message;
+		outputTxt.y = FlxG.height - outputTxt.height - 30;
+		outputAlpha = 4;
+		if(isError)
+		{
+			FlxG.sound.play(Paths.sound('cancelMenu'), 0.6);
+			outputTxt.color = FlxColor.RED;
+		}
+		else
+		{
+			FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
+			outputTxt.color = FlxColor.WHITE;
+		}
+	}
+
+
 	var lastConductorPos:Float;
 	var colorSine:Float = 0;
 	override function update(elapsed:Float)
 	{
+		outputTxt.alpha = outputAlpha;
+		outputTxt.visible = (outputAlpha > 0);
+		outputAlpha = Math.max(0, outputAlpha - elapsed);
+
 		curStep = recalculateSteps();
 
 		camPosOffset.x = CoolUtil.fpsLerp(camPosOffset.x, intendedOffset, 0.2);
@@ -3465,9 +3516,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	function updateZoom() {
 		var daZoom:Float = zoomList[curZoom];
-		var zoomThing:String = '1 / ' + daZoom;
-		if(daZoom < 1) zoomThing = Math.round(1 / daZoom) + ' / 1';
-		zoomTxt.text = 'Zoom: ' + zoomThing;
+		var zoomThing:Float = 100/daZoom;
+		var zoomtxt:String = Std.string(Math.round(zoomThing));
+		showOutput('Zoom: $zoomtxt%');
 		reloadGridLayer();
 	}
 		/*var tab_group = mainBox.getTab('Charting').menu;
@@ -4607,19 +4658,25 @@ function getYfromStrumNotes(strumTime:Float, beats:Float):Float
 		updateGrid();
 	}
 
-	private function saveLevel()
+private function ensureDirectory(path:String) {
+    var parent = haxe.io.Path.directory(path);
+    if (parent != "" && !sys.FileSystem.exists(parent)) ensureDirectory(parent);
+    if (!sys.FileSystem.exists(path)) sys.FileSystem.createDirectory(path);
+}
+
+private function saveLevel(auto:Bool = false)
 {
     // Ensure gfStrum is set for every note before saving
     for (section in _song.notes)
     {
         for (note in section.sectionNotes)
         {
-		    var lane:Int = note[1];
+            var lane:Int = note[1];
             var gfStrum:Bool = false;
             if (_song.gfStrums && lane >= (_song.mania + 1) * 2 && lane < (_song.mania + 1) * 3)
                 gfStrum = true;
-			else
-				gfStrum = false;
+            else
+                gfStrum = false;
             note[4] = gfStrum;
         }
     }
@@ -4633,11 +4690,62 @@ function getYfromStrumNotes(strumTime:Float, beats:Float):Float
 
     if ((data != null) && (data.length > 0))
     {
-        _file = new FileReference();
-        _file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
-        _file.addEventListener(Event.CANCEL, onSaveCancel);
-        _file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-        _file.save(data.trim(), Paths.formatToSongPath(_song.song) + ".json");
+        if (auto)
+        {
+		    var songName = Paths.formatToSongPath(_song.song);
+		    var diff = Difficulty.getString();
+		    var diffSuffix = (diff != null && diff != '' && diff != Difficulty.getDefault()) ? '-' + diff : '';
+		    var fileName = songName + diffSuffix;
+
+		    #if MODS_ALLOWED
+		    // This is how Song.loadFromJson builds the path:
+		    // Paths.modsJson(formattedFolder + '/' + formattedSong)
+		    var folder = songName; // Song folder
+		    var chartFile = fileName; // Song file (with diff)
+		    var chartPath = Mods.currentModDirectory != null ? Paths.modsJson(folder + '/' + chartFile) : 'assets/shared/data/' + songName + '/';
+
+		    // Ensure the directory exists
+		    var chartDir = haxe.io.Path.directory(chartPath);
+		    if (!sys.FileSystem.exists(chartDir)) {
+		        var ensureDirectory = function(path:String) {
+		            var parent = haxe.io.Path.directory(path);
+		            if (parent != "" && !sys.FileSystem.exists(parent)) ensureDirectory(parent);
+		            if (!sys.FileSystem.exists(path)) sys.FileSystem.createDirectory(path);
+		        }
+		        ensureDirectory(chartDir);
+		    }
+
+		    try {
+		        sys.io.File.saveContent(chartPath, data.trim());
+		        trace("Saved to: " + chartPath);
+		        showOutput('Saved to: $chartPath');
+		    } catch (e:Dynamic) {
+		        trace("Failed to save chart: " + e);
+		        showOutput('Failed to save chart: $e', true);
+		    }
+		    #else
+		    // Fallback for base assets
+		    var chartDir = 'assets/shared/data/' + songName + '/';
+		    if (!sys.FileSystem.exists(chartDir)) sys.FileSystem.createDirectory(chartDir);
+		    var chartPath = chartDir + fileName;
+		    try {
+		        sys.io.File.saveContent(chartPath, data.trim());
+		        trace("Saved to: " + chartPath);
+		        showOutput('Saved to: $chartPath');
+		    } catch (e:Dynamic) {
+		        trace("Failed to save chart: " + e);
+		        showOutput('Failed to save chart: $e', true);
+		    }
+		    #end
+        }
+        else
+        {
+            _file = new FileReference();
+            _file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
+            _file.addEventListener(Event.CANCEL, onSaveCancel);
+            _file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+            _file.save(data.trim(), Paths.formatToSongPath(_song.song));
+        }
     }
 }
 
