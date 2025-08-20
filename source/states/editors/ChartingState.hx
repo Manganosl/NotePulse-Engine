@@ -499,7 +499,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		addSectionTab();
 		addNoteTab();
 		addEventsTab();
-		//addEditTab();
+		addEditTab();
 		addViewTab();
 		//UI_box.selected_tab = 4;
 
@@ -521,11 +521,38 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		super.create();
 	}
 
+	function addEditTab()
+	{
+		var tab = upperBox.getTab('Edit');
+		var tab_group = tab.menu;
+		var btnX = tab.x - upperBox.x;
+		var btnY = 1;
+		var btnWid = Std.int(tab.width);
+
+		var clearNotesButton:PsychUIButton = new PsychUIButton(btnX, btnY,'  Clear Notes', function()
+		{
+			var func:Void->Void = function(){
+				for (sec in 0..._song.notes.length)
+					_song.notes[sec].sectionNotes = [];
+				updateGrid();
+			};
+			openSubState(new Prompt('Are you sure you want to start over?', func));
+		}, btnWid);
+		clearNotesButton.text.alignment = LEFT;
+		clearNotesButton.normalStyle.bgColor = FlxColor.RED;
+		clearNotesButton.normalStyle.textColor = FlxColor.WHITE;
+		tab_group.add(clearNotesButton);
+	}
+
 	function autoSaveTimer(){
-		trace("Start auto save timer");
-		new FlxTimer().start(300, function(tmr:FlxTimer) {
-			saveLevel(true);
-			autoSaveTimer();
+		new FlxTimer().start(295, function(tmr:FlxTimer) {
+			var box:NPUICountdown = new NPUICountdown(100, 100, 200, 80, "AutoSaving in...", 5, function() {
+    			saveLevel(true);
+				autoSaveTimer();
+			}, function() autoSaveTimer());
+			box.scrollFactor.set();
+			//box.screenCenter();
+			add(box);
 		});
 	}
 
