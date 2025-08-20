@@ -84,9 +84,15 @@ class BasePrompt extends MusicBeatSubstate
 
 	public var bg:FlxSprite;
 	public var titleText:FlxText;
+
+	public var promptCam:FlxCamera;
 override function create()
 {
-    cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+	promptCam = new FlxCamera();
+	promptCam.bgColor = FlxColor.TRANSPARENT;
+	FlxG.cameras.add(promptCam, false);
+
+    cameras = [promptCam];
 
     // Center the background box
     bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
@@ -129,6 +135,11 @@ override function create()
 
 	override function destroy()
 	{
+		if(promptCam != null)
+		{
+			FlxG.cameras.remove(promptCam, true);
+			promptCam = null;
+		}
 		for (member in members) FlxDestroyUtil.destroy(member);
 		super.destroy();
 	}

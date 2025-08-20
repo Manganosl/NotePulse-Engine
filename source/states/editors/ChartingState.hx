@@ -122,7 +122,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	public static var lastSection:Int = 0;
 	private static var lastSong:String = '';
 
-	var camPos:FlxObject;
+	public var camPos:FlxObject;
 	var mustHitIndicator:FlxSprite;
 	var camPosOffset:FlxObject;
 	var intendedOffset:Float = 0;
