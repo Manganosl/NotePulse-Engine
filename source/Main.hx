@@ -289,7 +289,7 @@ class FridayGame extends FlxGame
     	    	}
     		}
 
-    	errMsg += "\nUncaught Error: " + e.message + "\nIf this is related to EK, report it here: https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK\nIf not, report this error to Psych Engine: https://github.com/ShadowMario/FNF-PsychEngine\n\n> Crash Handler written by: sqirra-rng";
+    	errMsg += "\nUncaught Error: " + e.message + "\nIn case this wasn't caused by any modifications, report this error to NotePulse Engine: https://github.com/Manganosl/NotePulse-Engine\n\n> Crash Handler written by: sqirra-rng";
 
     	if (!sys.FileSystem.exists("./crash/"))
         	sys.FileSystem.createDirectory("./crash/");
