@@ -536,7 +536,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					_song.notes[sec].sectionNotes = [];
 				updateGrid();
 			};
-			openSubState(new Prompt('Are you sure you want to start over?', func));
+			openSubState(new Prompt('Are you sure you want to clear all notes?', func));
 		}, btnWid);
 		clearNotesButton.text.alignment = LEFT;
 		clearNotesButton.normalStyle.bgColor = FlxColor.RED;
@@ -2733,9 +2733,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			var func:Void->Void = function()
 			{
-				//openNewChart();
-				//reloadNotesDropdowns();
-				//prepareReload();
+				openNewChart();
+				reloadNotesDropdowns();
+				prepareReload();
 			}
 
 			openSubState(new Prompt('Are you sure you want to start over?', func));
@@ -2794,7 +2794,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			{
 				loadJson(_song.song.toLowerCase());
 			}
-			openSubState(new Prompt('Are you sure you want to start over?', func));
+			openSubState(new Prompt('Are you sure you want to reload the last save?', func));
 		}, btnWid);
 		reloadJSONBtn.text.alignment = LEFT;
 		tab_group.add(reloadJSONBtn);
