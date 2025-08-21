@@ -1625,7 +1625,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		for (anim in anims) animList.push(anim.anim);
 		if(animList.length < 1) animList.push('NO ANIMATIONS'); //Prevents crash
 
-		animationDropDown.list = animList;
+		panimationDropDown.list = animList;
 	}
 
 	// save
