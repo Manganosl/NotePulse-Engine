@@ -40,28 +40,28 @@ class Rating
 	    sick.ratingMod = 1.0;
 	    sick.score = 350;
 	    sick.noteSplash = true;
-	    sick.hitWindow = 40;
+	    sick.hitWindow = 55;
 	    ratingsData.push(sick);
 
 	    var good:Rating = new Rating('good');
 	    good.ratingMod = 0.67;
 	    good.score = 200;
 	    good.noteSplash = false;
-	    good.hitWindow = 90;
+	    good.hitWindow = 100;
 	    ratingsData.push(good);
 
 	    var bad:Rating = new Rating('bad');
 	    bad.ratingMod = 0.34;
 	    bad.score = 100;
 	    bad.noteSplash = false;
-	    bad.hitWindow = 135;
+	    bad.hitWindow = 140;
 	    ratingsData.push(bad);
 
 	    var shit:Rating = new Rating('shit');
 	    shit.ratingMod = 0;
 	    shit.score = 50;
 	    shit.noteSplash = false;
-	    shit.hitWindow = 180;
+	    shit.hitWindow = 200;
 	    ratingsData.push(shit);
 
 	    return ratingsData;

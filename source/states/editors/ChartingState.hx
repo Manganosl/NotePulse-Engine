@@ -48,7 +48,6 @@ import objects.NoteSplash;
 import objects.HealthIcon;
 import objects.AttachedSprite;
 import objects.Character;
-import backend.ui.PsychUIEventHandler;
 import backend.WeekData;
 
 #if sys
