@@ -22,7 +22,7 @@ makeVideoSprite(tag, video, ?x = 0, ?y = 0, ?camera = "camHUD", ?looped = false)
 ```
 - Preload a video
 ```
-proloadVideo(video)
+preloadVideo(video)
 ```
 
 ### Window Functions
