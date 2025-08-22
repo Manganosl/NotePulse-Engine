@@ -151,6 +151,7 @@ class MusicBeatState extends FlxUIState
 		var oldStep:Int = curStep;
 		timePassedOnState += elapsed;
 
+		if(FlxG.keys.justPressed.F12) switchState(new states.MainMenuState());
 		updateCurStep();
 		updateBeat();
 
