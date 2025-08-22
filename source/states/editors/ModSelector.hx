@@ -248,6 +248,8 @@ class ModSelector extends MusicBeatState{
 				} else if (inDifSelect){
 					inDifSelect = false;
 					inSongSelect = true;
+					for(i in iconArray) remove(i);
+					iconArray = [];
 					reloadSongs();
 					arrayModSongs();
 					curSelected = 0;
@@ -363,7 +365,6 @@ class ImIcon extends FlxSprite {
 	override function update(elapsed:Float){
 		if (sprTracker != null)
 			setPosition(sprTracker.x + sprTracker.width + 12, sprTracker.y - 30);
-
 		super.update(elapsed);
 	}
 }
