@@ -286,6 +286,7 @@ class SustainSplash extends FlxSprite {
 	public var strum:StrumNote;
 	public var shouldVisible:Bool = false;
 	public var modchart:Bool = PlayState.fModchart;
+	public var firstTime:Bool = true;
 	override public function new(strum:StrumNote) {
 		super();
 		this.strum = strum;
@@ -325,7 +326,7 @@ class SustainSplash extends FlxSprite {
 		if (miss) {if(!modchart) visible = false; shouldVisible = false;}
 		if (animation.curAnim.name != "splash") {
 			animation.play("splash");
-			strum.playAnim("pressed", true);
+			if (!firstTime) strum.playAnim("pressed", true); else firstTime = false;
 			center();
 		}
 	}

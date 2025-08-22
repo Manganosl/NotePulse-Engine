@@ -3,8 +3,11 @@ package states.editors;
 import backend.WeekData;
 import states.FreeplayState.SongMetadata;
 import objects.HealthIcon;
+import openfl.geom.ColorTransform;
 
 class ModSelector extends MusicBeatState{
+	var exclusions:Array<String> = ["assets", "data", "fonts", "images", "music", "sounds", "videos", "ndlls", "scripts", "shaders", "characters", "songs", "stages", "weeks", "states", "custom_events", "custom_notetypes"];
+
     private var modArray:Array<String> = [];
     private var goto:Class<MusicBeatState>;
     private var gotoArgs:Array<Dynamic> = [];
@@ -14,13 +17,13 @@ class ModSelector extends MusicBeatState{
 	var currentDifficulties:Array<String> = [];
 	var inSongSelect:Bool = false;
 	var inDifSelect:Bool = false;
-	var iconArray:Array<HealthIcon> = [];
+	var iconArray:Array<Dynamic> = [];
 
     public function new(state:Class<MusicBeatState>, args:Array<Dynamic>){
         goto = state;
         gotoArgs = args != null ? args : [];
         for (folder in Mods.getModDirectories()){
-			modArray.push(folder);
+			if(!exclusions.contains(folder)) modArray.push(folder);
 		}
         super();
     }
@@ -58,7 +61,7 @@ class ModSelector extends MusicBeatState{
 		add(grpAlph);
 		iconArray = [];
 
-		addExtraOption("No Mod", null);
+		addExtraOption("No Mod", null, 255);
         for (i in 0...modArray.length){
 			var modText:Alphabet = new Alphabet(90, 320, modArray[i], true);
 			modText.targetY = i+1;
@@ -89,7 +92,7 @@ class ModSelector extends MusicBeatState{
 		    velXtra += (450*listLength - 1)/4;
 		}
 
-		if(inSongSelect){
+		if(inSongSelect || inDifSelect){
 			for (i in 0...iconArray.length){
 				iconArray[i].alpha = 0.6;
 			}
@@ -109,7 +112,7 @@ class ModSelector extends MusicBeatState{
 	    lerpSelected = FlxMath.lerp(curSelected, lerpSelected, Math.exp(-elapsed * 9.6));
 	    for (i in _lastVisibles){
 		    if (i < grpAlph.length) grpAlph.members[i].visible = grpAlph.members[i].active = false;
-		    if(inSongSelect && i < iconArray.length) iconArray[i].visible = iconArray[i].active = false;
+		    if((inSongSelect || inDifSelect) && i < iconArray.length) iconArray[i].visible = iconArray[i].active = false;
 	    }
 	    _lastVisibles = [];
 		var listLength = grpAlph.length;
@@ -128,8 +131,8 @@ class ModSelector extends MusicBeatState{
 		    velXtra = CoolUtil.fpsLerp(velXtra, 0, 0.01);
 		    backdrop.velocity.set(50, 30+velXtra);
 
-			if(inSongSelect && i < iconArray.length){
-    			var icon:HealthIcon = iconArray[i];
+			if((inSongSelect || inDifSelect) && i < iconArray.length){
+    			var icon:Dynamic = iconArray[i];
 		    	icon.visible = icon.active = true;
     			icon.x = item.x - 60;
     			icon.y = y + 20;
@@ -146,7 +149,7 @@ class ModSelector extends MusicBeatState{
     override public function update(elapsed:Float){
         var shiftMult:Int = 1;
 		if(FlxG.keys.pressed.SHIFT) shiftMult = 3;
-        if(grpAlph.length > 1){
+        if(grpAlph.length >= 1){
 			if (controls.UI_UP_P){
 				changeSelection(-shiftMult);
 				holdTime = 0;
@@ -207,7 +210,7 @@ class ModSelector extends MusicBeatState{
     						add(grpAlph);
 							for(i in iconArray) remove(i);
 							iconArray = [];
-							addExtraOption("New Difficulty", "editors/new");
+							addExtraOption("New Difficulty", "editors/new", 0, 255);
     						for (i in 0...currentDifficulties.length) {
         						var diffText:Alphabet = new Alphabet(90, 320, currentDifficulties[i], true);
         						diffText.targetY = i+1;
@@ -304,7 +307,7 @@ class ModSelector extends MusicBeatState{
 			iconArray = [];
 			currentSongs = [];
 			inSongSelect = true;
-			addExtraOption("New Song", "editors/new");
+			addExtraOption("New Song", "editors/new", 0, 255);
 			for (i in 0...songs.length){
 				if(songs[i] != null && currentMod == songs[i].folder){
 					Mods.currentModDirectory = currentMod;
@@ -315,7 +318,7 @@ class ModSelector extends MusicBeatState{
 					songText.scaleX = Math.min(1, 980 / songText.width);
 					songText.snapToPosition();
 
-					var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
+					var icon:Dynamic = new HealthIcon(songs[i].songCharacter);
 					icon.sprTracker = songText;
 					icon.visible = icon.active = false;
 
@@ -330,16 +333,20 @@ class ModSelector extends MusicBeatState{
 		}
 	}
 
-	function addExtraOption(text:String, icona:String){
+	function addExtraOption(text:String, icona:String, redMult:Int = 0, greenMult:Int = 0, blueMult:Int = 0){
 		var optionText:Alphabet = new Alphabet(90, 320, text, true);
 		grpAlph.add(optionText);
 		optionText.scaleX = Math.min(1, 980 / optionText.width);
 		optionText.snapToPosition();
 
-		var icon:HealthIcon = null;
+		optionText.color = FlxColor.fromRGB(redMult, greenMult, blueMult, 255);
+
+		var icon:ImIcon = null;
 		if(icona != null){
-			icon = new HealthIcon(icona);
+			icon = new ImIcon(0, 0, Paths.image(icona));
 			icon.sprTracker = optionText;
+			icon.scale.set(1.6, 1.6);
+			icon.offset.set(-15, -25);
 			icon.visible = icon.active = false;
 			iconArray.push(icon);
 			add(icon);
@@ -348,5 +355,15 @@ class ModSelector extends MusicBeatState{
 		optionText.visible = optionText.active = optionText.isMenuItem = false;
 		optionText.x += 40;
 		optionText.screenCenter(X);		
+	}
+}
+
+class ImIcon extends FlxSprite {
+	public var sprTracker:FlxSprite;
+	override function update(elapsed:Float){
+		if (sprTracker != null)
+			setPosition(sprTracker.x + sprTracker.width + 12, sprTracker.y - 30);
+
+		super.update(elapsed);
 	}
 }
