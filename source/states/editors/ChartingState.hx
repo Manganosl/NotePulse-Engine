@@ -4051,8 +4051,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	{
 		leftIcon.changeIcon(characterData.iconP1);
 		rightIcon.changeIcon(characterData.iconP2);
-		gfIcon.changeIcon("gf");
-		if (_song.notes[curSec].gfSection) leftIcon.changeIcon('gf');
+		gfIcon.changeIcon(_song.gfVersion != null ? _song.gfVersion : "gf");
+		if (_song.notes[curSec].gfSection) leftIcon.changeIcon(_song.gfVersion != null ? _song.gfVersion : "gf");
 		mustHitIndicator.x = _song.notes[curSec].mustHitSection ? 60+(20*_song.mania) : 100+(60*_song.mania);
 		if (_song.notes[curSec].focusGF) 
 			if(_song.gfStrums) mustHitIndicator.x = 140+(100*_song.mania); else mustHitIndicator.x = 80+(40*_song.mania);
