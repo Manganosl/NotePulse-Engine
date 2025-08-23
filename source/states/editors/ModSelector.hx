@@ -18,6 +18,10 @@ class ModSelector extends MusicBeatState{
 	var inSongSelect:Bool = false;
 	var inDifSelect:Bool = false;
 	var iconArray:Array<Dynamic> = [];
+	private var descText:FlxText;
+	private var cosanegra:FlxSprite;
+	private var titleText:FlxText;
+	var shitCam:FlxCamera;
 
     public function new(state:Class<MusicBeatState>, args:Array<Dynamic>){
         goto = state;
@@ -51,6 +55,29 @@ class ModSelector extends MusicBeatState{
         changeSelection();
 		updateTexts();
 		if (goto == states.editors.ChartingState) reloadSongs();
+
+		cosanegra = new FlxSprite().makeGraphic(FlxG.width, 300, 0xff000000);
+		cosanegra.antialiasing = ClientPrefs.data.antialiasing;
+		cosanegra.screenCenter();
+		cosanegra.alpha = 0.5;
+		cosanegra.y = -210;
+		add(cosanegra);
+
+		shitCam = new FlxCamera();
+		FlxG.cameras.add(shitCam);
+
+		titleText = new FlxText(0, 10, 1145, "Mod Selector > ", 32); //Alphabet(75, 45, title, true);
+		titleText.alpha = 1;
+		titleText.setFormat(Paths.font("default.ttf"), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		titleText.scrollFactor.set();
+		add(titleText);
+	
+		descText = new FlxText(0, 50, 1180, "", 15);
+		descText.setFormat(Paths.font("default.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		descText.scrollFactor.set();
+		add(descText);
+
+		titleText.cameras = descText.cameras = [shitCam];
     }
 
     var velXtra:Float = 0;
@@ -198,7 +225,6 @@ class ModSelector extends MusicBeatState{
 						}
 					} else if(inSongSelect){
 						if(curSelected == 0){
-							// New song
 							trace("TODO: new song");
 						} else {
 							currentSong = currentSongs[curSelected-1];
@@ -210,6 +236,7 @@ class ModSelector extends MusicBeatState{
     						add(grpAlph);
 							for(i in iconArray) remove(i);
 							iconArray = [];
+							titleText.text = "Mod Selector > " + currentMod + " > " + currentSong.songName;
 							addExtraOption("New Difficulty", "editors/new", 0, 255);
     						for (i in 0...currentDifficulties.length) {
         						var diffText:Alphabet = new Alphabet(90, 320, currentDifficulties[i], true);
@@ -233,6 +260,7 @@ class ModSelector extends MusicBeatState{
 						PlayState.isStoryMode = false;
 						currentMod = modArray[curSelected-1];
 						Mods.currentModDirectory = currentMod;
+						titleText.text = "Mod Selector > " + currentMod;
 						reloadSongs();
 						arrayModSongs();
 						curSelected = 0;
@@ -249,6 +277,7 @@ class ModSelector extends MusicBeatState{
 					inDifSelect = false;
 					inSongSelect = true;
 					for(i in iconArray) remove(i);
+					titleText.text = "Mod Selector > " + currentMod;
 					iconArray = [];
 					reloadSongs();
 					arrayModSongs();
@@ -260,6 +289,7 @@ class ModSelector extends MusicBeatState{
 					inDifSelect = false;
 					inSongSelect = false;
 					for(i in iconArray) remove(i);
+					titleText.text = "Mod Selector > ";
 					iconArray = [];
 					reloadMods();
 					curSelected = 0;
