@@ -265,8 +265,6 @@ class Paths
 			var retVal = cacheBitmap(file, bitmap, allowGPU);
 			if(retVal != null) return retVal;
 		}
-
-		trace('oh no its returning null NOOOO ($file)');
 		return null;
 	}
 

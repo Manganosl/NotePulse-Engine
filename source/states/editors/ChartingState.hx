@@ -335,17 +335,16 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		rightIcon.setGraphicSize(0, 45);
 		gfIcon.setGraphicSize(0, 45);
 
-		gfIcon.visible = _song.gfStrums;
-
 		add(eventIcon);
 		add(leftIcon);
 		add(rightIcon);
 		add(gfIcon);
 		add(mustHitIndicator);
 
-		leftIcon.setPosition(GRID_SIZE + 10, 5);
-		rightIcon.setPosition(GRID_SIZE * 5.2, 5);
-		gfIcon.setPosition(GRID_SIZE * 10.4, 5);
+		leftIcon.setPosition(-10+(20*_song.mania), 5);
+		rightIcon.setPosition(30+(60*_song.mania), 5);
+		if(_song.gfStrums) gfIcon.setPosition(70+(100*_song.mania), 5);
+		else gfIcon.setPosition(10+(40*_song.mania), 5);
 		mustHitIndicator.setPosition(0, 70);
 
 		curRenderedSustains = new FlxTypedGroup<FlxSprite>();
@@ -1397,7 +1396,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		};
 
 		gfGridChkBox = new PsychUICheckBox(190, scrollSpeedStepper.y, 'GF has strums', 100, function(){
-			_song.gfStrums = gfIcon.visible = gfGridChkBox.checked;
+			_song.gfStrums = gfGridChkBox.checked;
+			if(_song.gfStrums) gfIcon.setPosition(140+(100*_song.mania), 5);
+			else gfIcon.setPosition(100+(40*_song.mania), 5);
 			if(_song.gfStrums) intendedOffset += 40*(_song.mania + 1);
 			else intendedOffset -= 40*(_song.mania + 1);
 			if(littleDad.visible && _song.gfStrums) littleDad2.visible = true; else littleDad2.visible = false;
@@ -3589,11 +3590,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     }
 
     var gridLaneMidPoint = (GRID_SIZE * (_song.mania + 1)) / 2;
-    var leftIconX = (GRID_SIZE + gridLaneMidPoint) - (leftIcon.width / 2);
-    var rightIconX = leftIconX + (GRID_SIZE * (_song.mania + 1));
-    leftIcon.setPosition(leftIconX, -5);
-    rightIcon.setPosition(rightIconX, -5);
-	if(_song.gfStrums) gfIcon.setPosition(rightIconX + (GRID_SIZE * (_song.mania + 1)), -5);
+	leftIcon.setPosition(-10+(20*_song.mania), 5);
+	rightIcon.setPosition(30+(60*_song.mania), 5);
+	if(_song.gfStrums) gfIcon.setPosition(70+(100*_song.mania), 5);
+	else gfIcon.setPosition(10+(40*_song.mania), 5);
+	mustHitIndicator.setPosition(0, 70);
 	mustHitIndicator.setPosition(0, 30);
 	updateHeads();
 
@@ -4053,7 +4054,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		gfIcon.changeIcon("gf");
 		if (_song.notes[curSec].gfSection) leftIcon.changeIcon('gf');
 		mustHitIndicator.x = _song.notes[curSec].mustHitSection ? 60+(20*_song.mania) : 100+(60*_song.mania);
-		if (_song.notes[curSec].focusGF) mustHitIndicator.x = 140+(100*_song.mania);
+		if (_song.notes[curSec].focusGF) 
+			if(_song.gfStrums) mustHitIndicator.x = 140+(100*_song.mania); else mustHitIndicator.x = 80+(40*_song.mania);
 	}
 
 	var characterFailed:Bool = false;
