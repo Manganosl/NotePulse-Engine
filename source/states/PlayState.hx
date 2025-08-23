@@ -2235,41 +2235,9 @@ class PlayState extends MusicBeatState
     	variables.get(tag).play();
 	}
 
-	public function makePausedVideoSprite(tag:String, videoName:String, ?x:Float, ?y:Float, ?camera:String, ?looped:Bool){
-		if(variables.exists(tag)){
-			trace('Video sprite with tag "' + tag + '" already exists!');
-			return;
-		}
-
-		x ??= 0;
-    	y ??= 0;
-    	camera ??= 'camHUD';
-    	looped ??= false;
-
-		var video = new FlxVideoSprite(x, y);
-    	video.antialiasing = ClientPrefs.data.antialiasing;
-    	video.camera = LuaUtils.cameraFromString(camera);
-    	video.load(Paths.video(videoName), looped ? ['input-repeat=65545'] : null);
-    	if (!looped) {
-        	video.bitmap.onEndReached.add(()->{
-            	remove(video);
-				if(variables.exists(tag))
-					variables.remove(tag);
-            	videoSprites.remove(video);
-        	});
-    	}
-    	videoSprites.push(video);
-    	variables.set(tag, video);
-
-    	if (!variables.exists(tag)) {
-    	    trace('Video sprite with tag "'+tag+'" doesn\'t exist!');
-    	    return;
-   		}
-	}
-
-	public function playVideoSprite(tag:String){
-		add(variables.get(tag));
-    	variables.get(tag).play();
+	public function precacheVideo(videoName:String){
+		startVideo(videoName, false, true, false, true);
+		if(videoCutscene != null) videoCutscene.destroy();
 	}
 
 

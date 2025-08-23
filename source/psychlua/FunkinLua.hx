@@ -1006,12 +1006,8 @@ class FunkinLua {
 			game.makeVideoSprite(tag, videoName, x, y, camera, looped);
 		});
 
-		Lua_helper.add_callback(lua, "makePausedVideoSprite", function(tag:String, videoName:String, ?x:Float, ?y:Float, ?camera:String, ?looped:Bool){
-			game.makePausedVideoSprite(tag, videoName, x, y, camera, looped);
-		});
-
-		Lua_helper.add_callback(lua, "playVideoSprite", function(tag:String){
-			game.playVideoSprite(tag);
+		Lua_helper.add_callback(lua, "precacheVideo", function(tag:String){
+			game.precacheVideo(tag);
 		});
 
 		Lua_helper.add_callback(lua, "initNdll", function(tag:String, ndllPath:String, name:String, args:Int){

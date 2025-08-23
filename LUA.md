@@ -20,9 +20,9 @@ getSystemUser()
 ```
 makeVideoSprite(tag, video, ?x = 0, ?y = 0, ?camera = "camHUD", ?looped = false)
 ```
-- Preload a video
+- Precache a video
 ```
-preloadVideo(video)
+precacheVideo(video)
 ```
 
 ### Window Functions
