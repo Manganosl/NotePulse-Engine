@@ -315,18 +315,18 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		waveformSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(1, 1, 0x00FFFFFF);
 		add(waveformSprite);
 
-		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -90).loadGraphic(Paths.image('eventArrow'));
+		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -5).loadGraphic(Paths.image('eventArrow'));
 		eventIcon.antialiasing = ClientPrefs.data.antialiasing;
 		leftIcon = new HealthIcon('bf');
 		rightIcon = new HealthIcon('dad');
 		gfIcon = new HealthIcon('gf');
-		eventIcon.scrollFactor.set(1, 1);
-		leftIcon.scrollFactor.set(1, 1);
-		rightIcon.scrollFactor.set(1, 1);
-		gfIcon.scrollFactor.set(1, 1);
+		eventIcon.scrollFactor.set(1, 0);
+		leftIcon.scrollFactor.set(1, 0);
+		rightIcon.scrollFactor.set(1, 0);
+		gfIcon.scrollFactor.set(1, 0);
 
 		mustHitIndicator = FlxSpriteUtil.drawTriangle(new FlxSprite(0, leftIcon.y - leftIcon.height/2).makeGraphic(16, 16, FlxColor.TRANSPARENT), 0, 0, 16);
-		mustHitIndicator.scrollFactor.set(1, 1);
+		mustHitIndicator.scrollFactor.set(1, 0);
 		mustHitIndicator.flipY = true;
 		mustHitIndicator.offset.x += mustHitIndicator.width/2;
 
@@ -343,9 +343,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		add(gfIcon);
 		add(mustHitIndicator);
 
-		leftIcon.setPosition(GRID_SIZE + 10, -100);
-		rightIcon.setPosition(GRID_SIZE * 5.2, -100);
-		gfIcon.setPosition(GRID_SIZE * 10.4, -100);
+		leftIcon.setPosition(GRID_SIZE + 10, 5);
+		rightIcon.setPosition(GRID_SIZE * 5.2, 5);
+		gfIcon.setPosition(GRID_SIZE * 10.4, 5);
+		mustHitIndicator.setPosition(0, 70);
 
 		curRenderedSustains = new FlxTypedGroup<FlxSprite>();
 		curRenderedNotes = new FlxTypedGroup<Note>();
@@ -3590,9 +3591,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     var gridLaneMidPoint = (GRID_SIZE * (_song.mania + 1)) / 2;
     var leftIconX = (GRID_SIZE + gridLaneMidPoint) - (leftIcon.width / 2);
     var rightIconX = leftIconX + (GRID_SIZE * (_song.mania + 1));
-    leftIcon.setPosition(leftIconX, -100);
-    rightIcon.setPosition(rightIconX, -100);
-	if(_song.gfStrums) gfIcon.setPosition(rightIconX + (GRID_SIZE * (_song.mania + 1)), -100);
+    leftIcon.setPosition(leftIconX, -5);
+    rightIcon.setPosition(rightIconX, -5);
+	if(_song.gfStrums) gfIcon.setPosition(rightIconX + (GRID_SIZE * (_song.mania + 1)), -5);
+	mustHitIndicator.setPosition(0, 30);
+	updateHeads();
 
     columns = (_song.mania * (_song.gfStrums ? 3 : 2)) + 3 + (_song.gfStrums ? 1 : 0);
 
@@ -4049,9 +4052,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		rightIcon.changeIcon(characterData.iconP2);
 		gfIcon.changeIcon("gf");
 		if (_song.notes[curSec].gfSection) leftIcon.changeIcon('gf');
-		mustHitIndicator.x = _song.notes[curSec].mustHitSection ? leftIcon.x+leftIcon.width/2 : rightIcon.x+rightIcon.width/2;
-		if (_song.notes[curSec].focusGF) mustHitIndicator.x = gfIcon.x+gfIcon.width/2;
-		//mustHitIndicator.y = _song.notes[curSec].mustHitSection ? (leftIcon.y-leftIcon.height) : (rightIcon.y-leftIcon.height);
+		mustHitIndicator.x = _song.notes[curSec].mustHitSection ? 60+(20*_song.mania) : 100+(60*_song.mania);
+		if (_song.notes[curSec].focusGF) mustHitIndicator.x = 140+(100*_song.mania);
 	}
 
 	var characterFailed:Bool = false;
@@ -4282,9 +4284,13 @@ function setupNoteData(i:Array<Dynamic>, sectionOffset:Int):Note
         note.noteType = typeStr;
         note.sustainLength = daSus;
     } else { // Event note
-        note.loadGraphic(Paths.image('eventArrow'));
+		note.eventName = getEventName(i[1]);
+		var possiblePath:Dynamic = Paths.image("editors/events/"+note.eventName);
+		if(possiblePath != null)
+			note.loadGraphic(possiblePath);
+        else
+			note.loadGraphic(Paths.image('eventArrow'));
         note.rgbShader.enabled = false;
-        note.eventName = getEventName(i[1]);
         note.eventLength = i[1].length;
         if (i[1].length < 2) {
             note.eventVal1 = i[1][0][1];
@@ -4520,36 +4526,24 @@ private function addNote(strum:Null<Float> = null, data:Null<Int> = null, type:N
     if (data != null) noteData = data;
     if (type != null) daType = type;
 
-    // Always use absolute lane index for all sets
     var noteDataToStore = noteData;
     var noteTypeToStore = curNoteTypes[daType];
-
-	/*var gfStrumVal = false;
-    if (_song.gfStrums && noteData >= (_song.mania + 1) * 2 && noteData < (_song.mania + 1) * 3)
-        gfStrumVal = true;*/
-
-    // Trace for debugging
-    //trace('addNote: strum=' + noteStrum + ', lane=' + noteDataToStore + ', type="' + noteTypeToStore + '"');
 
     if(noteData > -1)
 {
     var noteDataToStore = noteData;
 
-    // Handle reversed sides for !mustHitSection
     if (!_song.notes[curSec].mustHitSection)
     {
         var colOffset = (_song.mania + 1);
         if (noteData >= 0 && noteData <= _song.mania)
         {
-            // Player side visually → store as opponent
             noteDataToStore += colOffset;
         }
         else if (noteData > _song.mania && noteData < colOffset * 2)
         {
-            // Opponent side visually → store as player
             noteDataToStore -= colOffset;
         }
-        // GF notes (set 2) remain unchanged
     }
 
     var newNote:Array<Dynamic> = [noteStrum, noteDataToStore, noteSus, noteTypeToStore];
