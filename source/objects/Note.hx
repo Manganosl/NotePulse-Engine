@@ -37,7 +37,7 @@ typedef NoteSplashData = {
  * 
  * If you want to make a custom note type, you should search for: "function set_noteType"
 **/
-class Note extends FlxSprite
+class Note extends FlxSkewedSprite
 {
 	public var strumTime:Float = 0;
 	public var noteData:Int = 0;

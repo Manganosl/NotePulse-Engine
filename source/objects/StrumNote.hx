@@ -8,7 +8,7 @@ import backend.animation.PsychAnimationController;
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 
-class StrumNote extends FlxSprite
+class StrumNote extends FlxSkewedSprite
 {
 	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;
@@ -281,7 +281,7 @@ class KeybindShowcase extends FlxTypedGroup<FlxBasic> {
 	}
 }
 
-class SustainSplash extends FlxSprite {
+class SustainSplash extends FlxSkewedSprite {
 	public var rgbShader:RGBShaderReference;
 	public var strum:StrumNote;
 	public var shouldVisible:Bool = false;

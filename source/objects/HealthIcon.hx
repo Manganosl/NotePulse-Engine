@@ -1,6 +1,6 @@
 package objects;
 
-class HealthIcon extends FlxSprite
+class HealthIcon extends FlxSkewedSprite
 {
 	public var sprTracker:FlxSprite;
 	private var isOldIcon:Bool = false;

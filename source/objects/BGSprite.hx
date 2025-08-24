@@ -1,6 +1,6 @@
 package objects;
 
-class BGSprite extends FlxSprite
+class BGSprite extends FlxSkewedSprite
 {
 	private var idleAnim:String;
 
