@@ -20,290 +20,144 @@ import modchart.events.types.*;
 @:fileXml('tags="haxe,release"') @:noDebug
 #end
 final class Manager extends FlxBasic {
-	/**
-	 * Instance of the Manager.
-	 */
-	public static var instance:Manager;
+    public static var instance:Manager;
 
-	/**
-	 * Flag to enable or disable rendering of arrow paths.
-	 */
-	@:deprecated("Use `Config.RENDER_ARROW_PATHS` instead.")
-	public var renderArrowPaths:Bool = false;
+    @:deprecated("Use `Config.RENDER_ARROW_PATHS` instead.")
+    public var renderArrowPaths:Bool = false;
 
-	/**
-	 * List of playfields managed by the Manager.
-	 */
-	public var playfields:Vector<PlayField> = new Vector<PlayField>(16);
+    public var playfields:Vector<PlayField> = new Vector<PlayField>(16);
+    private var playfieldCount:Int = 0;
 
-	private var playfieldCount:Int = 0;
+    public function new() {
+        super();
+        instance = this;
 
-	public function new() {
-		super();
+        Adapter.init();
+        Adapter.instance.onModchartingInitialization();
 
-		instance = this;
+        addPlayfield();
+    }
 
-		Adapter.init();
-		Adapter.instance.onModchartingInitialization();
+    /**
+     * Apply a function to all playfields or a specific one.
+     */
+    @:noCompletion
+    private inline function __forEachPlayfield(func:PlayField->Void, player:Int = -1) {
+        if (playfieldCount <= 1 || player != -1) {
+            var pf = playfields[player != -1 ? player : 0];
+            if (pf != null) func(pf);
+            return;
+        }
 
-		addPlayfield();
-	}
+        for (i in 0...playfieldCount) {
+            var pf = playfields[i];
+            if (pf != null) func(pf);
+        }
+    }
 
-	/**
-	 * Internal helper function to apply a function to each playfield.
-	 *
-	 * @param func The function to apply to each playfield.
-	 * @param player Optionally, the specific player to target (-1 for all).
-	 */
-	@:noCompletion
-	private inline function __forEachPlayfield(func:PlayField->Void, player:Int = -1) {
-		// If there's only one playfield or a specific player is provided, apply the function directly
-		if (playfieldCount <= 1 || player != -1)
-			return func(playfields[player != -1 ? player : 0]);
+    public inline function addModifier(name:String, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.addModifier(name), field);
 
-		// Otherwise, apply the function to all playfields
-		for (i in 0...playfields.length)
-			func(playfields[i]);
-	}
+    public inline function addScriptedModifier(name:String, instance:Modifier, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.addScriptedModifier(name, instance), field);
 
-	/**
-	 * Adds a modifier for all playfields or a specific one.
-	 *
-	 * @param name The name of the modifier.
-	 * @param field Optionally, the specific playfield to target.
-	 */
-	public inline function addModifier(name:String, field:Int = -1)
-		__forEachPlayfield((pf) -> pf.addModifier(name), field);
+    public inline function setPercent(name:String, value:Float, player:Int = -1, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.setPercent(name, value, player), field);
 
-	/**
-	 * Adds a scripted modifier for all playfields or a specific one.
-	 *
-	 * @param name The name of the modifier.
-	 * @param instance The instance of the modifier.
-	 * @param field Optionally, the specific playfield to target.
-	 */
-	public inline function addScriptedModifier(name:String, instance:Modifier, field:Int = -1)
-		__forEachPlayfield((pf) -> pf.addScriptedModifier(name, instance), field);
+    public inline function getPercent(name:String, player:Int = 0, field:Int = 0):Float {
+        final possiblePlayfield = playfields[field];
+        if (possiblePlayfield != null)
+            return possiblePlayfield.getPercent(name, player);
+        return 0.;
+    }
 
-	/**
-	 * Sets the percent for a specific modifier for all playfields or a specific one.
-	 *
-	 * @param name The name of the modifier.
-	 * @param value The percent value to set.
-	 * @param player Optionally, the player to target.
-	 * @param field Optionally, the specific playfield to target.
-	 */
-	public inline function setPercent(name:String, value:Float, player:Int = -1, field:Int = -1)
-		__forEachPlayfield((pf) -> pf.setPercent(name, value, player), field);
+    public inline function addEvent(event:Event, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.addEvent(event), field);
 
-	/**
-	 * Gets the percent for a specific modifier.
-	 *
-	 * @param name The name of the modifier.
-	 * @param player The player to target.
-	 * @param field Optionally, the specific playfield to target.
-	 * @return The percent value for the modifier.
-	 */
-	public inline function getPercent(name:String, player:Int = 0, field:Int = 0):Float {
-		final possiblePlayfield = playfields[field];
+    public inline function set(name:String, beat:Float, value:Float, player:Int = -1, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.set(name, beat, value, player), field);
 
-		if (possiblePlayfield != null)
-			return possiblePlayfield.getPercent(name, player);
+    public inline function ease(name:String, beat:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.ease(name, beat, length, value, easeFunc, player), field);
 
-		return 0.;
-	}
+    public inline function doEase(name:String, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.doEase(name, value, easeFunc, player), field);
 
-	/**
-	 * Adds an event to all playfields or a specific one.
-	 *
-	 * @param event The event to add.
-	 * @param field Optionally, the specific playfield to target.
-	 */
-	public inline function addEvent(event:Event, field:Int = -1)
-		__forEachPlayfield((pf) -> pf.addEvent(event), field);
+    public inline function add(name:String, beat:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.add(name, beat, length, value, easeFunc, player), field);
 
-	/**
-	 * Sets a specific value at a certain beat for all playfields or a specific one.
-	 *
-	 * @param name The name of the value.
-	 * @param beat The beat at which the value should be set.
-	 * @param value The value to set.
-	 * @param player Optionally, the player to target.
-	 * @param field Optionally, the specific playfield to target.
-	 */
-	public inline function set(name:String, beat:Float, value:Float, player:Int = -1, field:Int = -1)
-		__forEachPlayfield((pf) -> pf.set(name, beat, value, player), field);
+    public inline function setAdd(name:String, beat:Float, value:Float, player:Int = -1, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.setAdd(name, beat, value, player), field);
 
-	/**
-	 * Applies easing to a modifier.
-	 *
-	 * @param name The name of the modifier.
-	 * @param beat The beat at which to start easing.
-	 * @param length The length of the easing.
-	 * @param value The final value after easing.
-	 * @param easeFunc The easing function to use.
-	 * @param player Optionally, the player to target.
-	 * @param field Optionally, the specific playfield to target.
-	 */
-	public inline function ease(name:String, beat:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
-		__forEachPlayfield((pf) -> pf.ease(name, beat, length, value, easeFunc, player), field);
+    public inline function repeater(beat:Float, length:Float, callback:Event->Void, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.repeater(beat, length, callback), field);
 
-	/**
- * Instantly applies easing to a modifier (does not queue).
- *
- * @param name The name of the modifier.
- * @param value The final value to set.
- * @param easeFunc The easing function to use.
- * @param player Optionally, the player to target.
- * @param field Optionally, the specific playfield to target.
- */
-public inline function doEase(name:String, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
-    __forEachPlayfield((pf) -> pf.doEase(name, value, easeFunc, player), field);
+    public inline function callback(beat:Float, callback:Event->Void, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.callback(beat, callback), field);
 
-	/**
-	 * Adds easing to a modifier.
-	 *
-	 * @param name The name of the modifier.
-	 * @param beat The beat at which to start easing.
-	 * @param length The length of the easing.
-	 * @param value The value to apply after easing.
-	 * @param easeFunc The easing function to use.
-	 * @param player Optionally, the player to target.
-	 * @param field Optionally, the specific playfield to target.
-	 */
-	public inline function add(name:String, beat:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
-		__forEachPlayfield((pf) -> pf.add(name, beat, length, value, easeFunc, player), field);
+    public inline function node(input:Array<String>, output:Array<String>, func:NodeFunction, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.node(input, output, func), field);
 
-	/**
-	 * Sets and adds a value to a modifier.
-	 *
-	 * @param name The name of the modifier.
-	 * @param beat The beat at which the value should be set.
-	 * @param value The value to set.
-	 * @param player Optionally, the player to target.
-	 * @param field Optionally, the specific playfield to target.
-	 */
-	public inline function setAdd(name:String, beat:Float, value:Float, player:Int = -1, field:Int = -1)
-		__forEachPlayfield((pf) -> pf.setAdd(name, beat, value, player), field);
+    public inline function alias(name:String, alias:String, field:Int)
+        __forEachPlayfield((pf) -> pf.alias(name, alias), field);
 
-	/**
-	 * Adds a repeater event for all playfields or a specific one.
-	 *
-	 * @param beat The beat at which the repeater starts.
-	 * @param length The length of the repeat action.
-	 * @param callback The callback function to execute.
-	 * @param field Optionally, the specific playfield to target.
-	 */
-	public inline function repeater(beat:Float, length:Float, callback:Event->Void, field:Int = -1)
-		__forEachPlayfield((pf) -> pf.repeater(beat, length, callback), field);
+    /**
+     * Safely add a new playfield.
+     */
+    public inline function addPlayfield() {
+        if (playfieldCount >= playfields.length) {
+            throw 'Too many playfields! Max = ${playfields.length}';
+        }
+        playfields[playfieldCount++] = new PlayField();
+    }
 
-	/**
-	 * Adds a callback event for all playfields or a specific one.
-	 *
-	 * @param beat The beat at which the callback will be triggered.
-	 * @param callback The callback function to execute.
-	 * @param field Optionally, the specific playfield to target.
-	 */
-	public inline function callback(beat:Float, callback:Event->Void, field:Int = -1)
-		__forEachPlayfield((pf) -> pf.callback(beat, callback), field);
+    override function update(elapsed:Float):Void {
+        super.update(elapsed);
+        __forEachPlayfield(pf -> pf.update(elapsed));
+    }
 
-	/**
-	 * Creates a node linking inputs and outputs to a function.
-	 *
-	 * @param input The list of input names.
-	 * @param output The list of output names.
-	 * @param func The function to execute for the node.
-	 * @param field Optionally, the specific playfield to target.
-	 */
-	public inline function node(input:Array<String>, output:Array<String>, func:NodeFunction, field:Int = -1)
-		__forEachPlayfield((pf) -> pf.node(input, output, func), field);
+    override function draw():Void {
+        var total = 0;
+        __forEachPlayfield(pf -> {
+            pf.draw();
+            total += pf.drawCB.length;
+        });
 
-	/**
-	 * Creates an alias for a given modifier.
-	 *
-	 * @param name The original modifier name.
-	 * @param alias The alias name.
-	 * @param field The specific playfield to apply the alias to.
-	 */
-	public inline function alias(name:String, alias:String, field:Int)
-		__forEachPlayfield((pf) -> pf.alias(name, alias), field);
+        var drawQueue:Vector<Funny> = new Vector<Funny>(total);
+        var j = 0;
 
-	/**
-	 * Adds a new playfield to the Manager.
-	 */
-	public inline function addPlayfield()
-		playfields[playfieldCount++] = new PlayField();
+        __forEachPlayfield(pf -> {
+            for (x in pf.drawCB) {
+                if (x != null && x.callback != null) {
+                    drawQueue[j++] = x;
+                }
+            }
+        });
 
-	/**
-	 * Updates all playfields in the game loop.
-	 *
-	 * @param elapsed The time elapsed since the last update.
-	 */
-	override function update(elapsed:Float):Void {
-		super.update(elapsed);
+        if (j > 1) {
+            var temp:Array<Funny> = [];
+            for (i in 0...j) temp.push(drawQueue[i]);
+            temp.sort((a, b) -> FlxSort.byValues(FlxSort.DESCENDING, a.z, b.z));
+            for (i in 0...j) drawQueue[i] = temp[i];
+        }
 
-		__forEachPlayfield(pf -> pf.update(elapsed));
-	}
-
-	/**
-	 * Draws all playfields, sorting them by z-order before drawing.
-	 */
-	override function draw():Void {
-    var total = 0;
-    __forEachPlayfield(pf -> {
-        pf.draw();
-        total += pf.drawCB.length;
-    });
-
-    var drawQueue:Vector<Funny> = new Vector<Funny>(total);
-    var j = 0;
-
-    __forEachPlayfield(pf -> {
-        for (x in pf.drawCB) {
-            if (x != null && x.callback != null) {
-                drawQueue[j++] = x;
+        for (i in 0...j) {
+            var item = drawQueue[i];
+            if (item != null && item.callback != null) {
+                item.callback();
             }
         }
-    });
-
-    // Sort only the valid filled portion of the vector by z descending
-    if (j > 1) {
-        // Copy valid draw callbacks into temp array for sorting
-        var temp:Array<Funny> = [];
-        for (i in 0...j) temp.push(drawQueue[i]);
-
-        temp.sort((a, b) -> FlxSort.byValues(FlxSort.DESCENDING, a.z, b.z));
-
-        // Copy back sorted items to drawQueue
-        for (i in 0...j) drawQueue[i] = temp[i];
     }
 
-    // Draw all items in sorted order
-    for (i in 0...j) {
-        var item = drawQueue[i];
-        if (item != null && item.callback != null) {
-            item.callback();
-        }
+    override function destroy():Void {
+        super.destroy();
+        __forEachPlayfield(pf -> pf.destroy());
     }
-}
 
-
-	/**
-	 * Destroys all playfields and cleans up.
-	 */
-	override function destroy():Void {
-		super.destroy();
-
-		__forEachPlayfield(pf -> {
-			pf.destroy();
-		});
-	}
-
-	// Constants for hold and arrow sizes
-	public static var HOLD_SIZE:Float = 50 * 0.7;
-	public static var HOLD_SIZEDIV2:Float = (50 * 0.7) * 0.5;
-	public static var ARROW_SIZE:Float = 160 * 0.7;
-	public static var ARROW_SIZEDIV2:Float = (160 * 0.7) * 0.5;
+    public static var HOLD_SIZE:Float = 50 * 0.7;
+    public static var HOLD_SIZEDIV2:Float = (50 * 0.7) * 0.5;
+    public static var ARROW_SIZE:Float = 160 * 0.7;
+    public static var ARROW_SIZEDIV2:Float = (160 * 0.7) * 0.5;
 }
 
 typedef Funny = {callback:Void->Void, z:Float};

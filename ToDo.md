@@ -13,6 +13,6 @@
 - [X] Ndll support
 - [X] 3D models support
 - [X] New crash handler (Avoid needing to reopen the game)
-- [ ] Fix modchartInstance.addPlayfield() causing a black screen
+- [X] Fix modchartInstance.addPlayfield() causing a black screen
 
 ### Now I need to find more things to do
