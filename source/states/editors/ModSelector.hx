@@ -204,7 +204,7 @@ class ModSelector extends MusicBeatState{
 					if(curSelected == 0){
 						currentMod = null;
 					} else {
-						currentMod = modArray[curSelected-1];
+						currentMod = modArray[curSelected];
 						Mods.currentModDirectory = currentMod;
 					}
 					try MusicBeatState.switchState(Type.createInstance(goto, gotoArgs));
@@ -212,7 +212,6 @@ class ModSelector extends MusicBeatState{
 				else if(goto == states.editors.ChartingState){
 					if(inDifSelect){
 						if(curSelected == 0){
-							// New difficulty
 							trace("TODO: new difficulty");
 						} else {
 							curDifficulty = curSelected-1;
