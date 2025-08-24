@@ -89,16 +89,13 @@ class NoteSplash extends FlxSprite
 
 		_textureLoaded = texture;
 		offset.set(10, 10);
-
-		var animNum:Int = FlxG.random.int(1, maxAnims);
-		animation.play('note' + direction + '-' + animNum, true);
+		animation.play('note' + direction + '-1', true);
 		
 		var minFps:Int = 22;
 		var maxFps:Int = 26;
 		if(config != null)
 		{
-			var animID:Int = direction + ((animNum - 1) * Note.colArray.length);
-			//trace('anim: ${animation.curAnim.name}, $animID');
+			var animID:Int = direction + ((1 - 1) * Note.colArray.length);
 			var offs:Array<Float> = config.offsets[FlxMath.wrap(animID, 0, config.offsets.length-1)];
 			offset.x += offs[0] * (ExtraKeysHandler.instance.data.scales[PlayState.SONG.mania] + 0.3);
 			offset.y += offs[1] * (ExtraKeysHandler.instance.data.scales[PlayState.SONG.mania] + 0.3);

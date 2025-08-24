@@ -1282,6 +1282,9 @@ class FlxSprite extends FlxObject
 		return newRect.getRotatedBounds(angle, origin, newRect);
 	}
 	
+	private inline function __shouldDoZoomFactor()
+		return zoomFactor != 1;
+
 	/**
 	 * Calculates the smallest globally aligned bounding box that encompasses this sprite's graphic as it
 	 * would be displayed. Honors scrollFactor, rotation, scale, offset and origin.
@@ -1292,23 +1295,46 @@ class FlxSprite extends FlxObject
 	 */
 	public function getScreenBounds(?newRect:FlxRect, ?camera:FlxCamera):FlxRect
 	{
-		if (newRect == null)
-			newRect = FlxRect.get();
-		
-		if (camera == null)
-			camera = FlxG.camera;
-		
-		newRect.setPosition(x, y);
-		if (pixelPerfectPosition)
-			newRect.floor();
-		_scaledOrigin.set(origin.x * scale.x, origin.y * scale.y);
-		newRect.x += -Std.int(camera.scroll.x * scrollFactor.x) - offset.x + origin.x - _scaledOrigin.x;
-		newRect.y += -Std.int(camera.scroll.y * scrollFactor.y) - offset.y + origin.y - _scaledOrigin.y;
-		if (isPixelPerfectRender(camera))
-			newRect.floor();
-		newRect.setSize(frameWidth * Math.abs(scale.x), frameHeight * Math.abs(scale.y));
-		return newRect.getRotatedBounds(angle, _scaledOrigin, newRect);
+    	if (camera == null)
+    	    camera = FlxG.camera;
+
+    	if (newRect == null)
+        	newRect = FlxRect.get();
+
+    	newRect.setPosition(x, y);
+    	if (pixelPerfectPosition)
+        	newRect.floor();
+
+    	_scaledOrigin.set(origin.x * scale.x, origin.y * scale.y);
+
+    	newRect.x += -Std.int(camera.scroll.x * scrollFactor.x) - offset.x + origin.x - _scaledOrigin.x;
+    	newRect.y += -Std.int(camera.scroll.y * scrollFactor.y) - offset.y + origin.y - _scaledOrigin.y;
+
+    	if (isPixelPerfectRender(camera))
+        	newRect.floor();
+
+    	newRect.setSize(frameWidth * Math.abs(scale.x), frameHeight * Math.abs(scale.y));
+    	newRect = newRect.getRotatedBounds(angle, _scaledOrigin, newRect);
+
+    	if (__shouldDoZoomFactor())
+    	{
+       		newRect.x -= camera.width / 2;
+        	newRect.y -= camera.height / 2;
+
+        	var ratio = (camera.zoom > 0 ? Math.max : Math.min)(0, FlxMath.lerp(1 / camera.zoom, 1, zoomFactor));
+
+        	newRect.x *= ratio;
+        	newRect.y *= ratio;
+        	newRect.width *= ratio;
+        	newRect.height *= ratio;
+
+        	newRect.x += camera.width / 2;
+     	    newRect.y += camera.height / 2;
+    	}
+
+    	return newRect;
 	}
+
 	
 	/**
 	 * Set how a sprite flips when facing in a particular direction.
@@ -1670,6 +1696,7 @@ interface IFlxSprite extends IFlxBasic
 	var acceleration(default, null):FlxPoint;
 	var drag(default, null):FlxPoint;
 	var scrollFactor(default, null):FlxPoint;
+	var zoomFactor(default, null):Float;
 
 	function reset(X:Float, Y:Float):Void;
 	function setPosition(X:Float = 0, Y:Float = 0):Void;

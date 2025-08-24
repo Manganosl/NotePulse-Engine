@@ -31,9 +31,9 @@ class MainMenuState extends MusicBeatState
 
 	//Centered/Text options
 	var optionShit:Array<String> = [
-		//'story_mode',
+		'story_mode',
 		'freeplay',
-		#if MODS_ALLOWED 'mods', #end
+		//#if MODS_ALLOWED 'mods', #end
 		'credits'
 	];
 
@@ -343,8 +343,8 @@ class MainMenuState extends MusicBeatState
 					{
 						switch (option)
 						{
-							//case 'story_mode':
-							//	MusicBeatState.switchState(new StoryMenuState());
+							case 'story_mode':
+								MusicBeatState.switchState(new StoryMenuState());
 							case 'freeplay':
 								MusicBeatState.switchState(new FreeplayState());
 							#if MODS_ALLOWED
@@ -393,6 +393,10 @@ class MainMenuState extends MusicBeatState
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;
 				MusicBeatState.switchState(new StoryMenuState());
+			}
+			if(FlxG.keys.justPressed.TAB){
+				selectedSomethin = true;
+				MusicBeatState.switchState(new ModsMenuState());
 			}
 			#end
 		}

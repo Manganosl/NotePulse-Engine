@@ -364,11 +364,13 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		infoText = new FlxText(15, 15, 230, '', 16);
 		infoText.scrollFactor.set();
 		infoBox.getTab('Information').menu.add(infoText);
+		infoBox.zoomFactor = 0;
 		add(infoBox);
 
 		mainBox = new PsychUIBox(mainBoxPosition.x, mainBoxPosition.y, 300, 280, ['Charting', 'Data', 'Events', 'Note', 'Section', 'Song']);
 		mainBox.selectedName = 'Charting';
 		mainBox.scrollFactor.set();
+		mainBox.zoomFactor = 0;
 		add(mainBox);
 
 		//if(chartEditorSave.data.mainBoxPosition != null && chartEditorSave.data.mainBoxPosition.length > 1)
@@ -382,6 +384,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		upperBox.minimizeOnFocusLost = true;
 		upperBox.canMove = false;
 		upperBox.bg.visible = false;
+		upperBox.zoomFactor = 0;
 		add(upperBox);
 		//FlxG.save.bind('funkin', CoolUtil.getSavePath());
 
@@ -4052,7 +4055,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		leftIcon.changeIcon(characterData.iconP1);
 		rightIcon.changeIcon(characterData.iconP2);
 		gfIcon.changeIcon(_song.gfVersion != null ? _song.gfVersion : "gf");
-		if (_song.notes[curSec].gfSection) leftIcon.changeIcon(_song.gfVersion != null ? _song.gfVersion : "gf");
+		if (_song.notes[curSec].gfSection) 
+			if(_song.notes[curSec].mustHitSection) leftIcon.changeIcon(_song.gfVersion != null ? _song.gfVersion : "gf"); else rightIcon.changeIcon(_song.gfVersion != null ? _song.gfVersion : "gf");
 		mustHitIndicator.x = _song.notes[curSec].mustHitSection ? 60+(20*_song.mania) : 100+(60*_song.mania);
 		if (_song.notes[curSec].focusGF) 
 			if(_song.gfStrums) mustHitIndicator.x = 140+(100*_song.mania); else mustHitIndicator.x = 80+(40*_song.mania);
