@@ -21,7 +21,6 @@ class ModSelector extends MusicBeatState{
 	private var descText:FlxText;
 	private var cosanegra:FlxSprite;
 	private var titleText:FlxText;
-	var shitCam:FlxCamera;
 
     public function new(state:Class<MusicBeatState>, args:Array<Dynamic>){
         goto = state;
@@ -38,6 +37,9 @@ class ModSelector extends MusicBeatState{
     private var curSelected:Int = 0;
 	var lerpSelected:Float = 0;
     private var grpAlph:FlxTypedGroup<Alphabet>;
+
+	var iconGroup:FlxTypedGroup<Dynamic>;
+    var uiGroup:FlxTypedGroup<Dynamic>;
 
     override public function create(){
         bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
@@ -56,28 +58,29 @@ class ModSelector extends MusicBeatState{
 		updateTexts();
 		if (goto == states.editors.ChartingState) reloadSongs();
 
+		iconGroup = new FlxTypedGroup();
+		add(iconGroup);
+
+		uiGroup = new FlxTypedGroup();
+		add(uiGroup);
+
 		cosanegra = new FlxSprite().makeGraphic(FlxG.width, 300, 0xff000000);
 		cosanegra.antialiasing = ClientPrefs.data.antialiasing;
 		cosanegra.screenCenter();
 		cosanegra.alpha = 0.5;
 		cosanegra.y = -210;
-		add(cosanegra);
-
-		shitCam = new FlxCamera();
-		FlxG.cameras.add(shitCam);
+		uiGroup.add(cosanegra);
 
 		titleText = new FlxText(0, 10, 1145, "Mod Selector > ", 32); //Alphabet(75, 45, title, true);
 		titleText.alpha = 1;
 		titleText.setFormat(Paths.font("default.ttf"), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		titleText.scrollFactor.set();
-		add(titleText);
+		uiGroup.add(titleText);
 	
-		descText = new FlxText(0, 50, 1180, "", 15);
+		descText = new FlxText(0, 50, 1180, "Press ACCEPT to select a mod.", 15);
 		descText.setFormat(Paths.font("default.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		descText.scrollFactor.set();
-		add(descText);
-
-		titleText.cameras = descText.cameras = [shitCam];
+		uiGroup.add(descText);
     }
 
     var velXtra:Float = 0;
@@ -88,10 +91,9 @@ class ModSelector extends MusicBeatState{
 		add(grpAlph);
 		iconArray = [];
 
-		addExtraOption("No Mod", null, 255);
         for (i in 0...modArray.length){
 			var modText:Alphabet = new Alphabet(90, 320, modArray[i], true);
-			modText.targetY = i+1;
+			modText.targetY = i;
 			grpAlph.add(modText);
 			modText.scaleX = Math.min(1, 980 / modText.width);
 			modText.snapToPosition();
@@ -234,9 +236,10 @@ class ModSelector extends MusicBeatState{
     						remove(grpAlph);
     						grpAlph = new FlxTypedGroup<Alphabet>();
     						add(grpAlph);
-							for(i in iconArray) remove(i);
+							for(i in iconArray) iconGroup.remove(i);
 							iconArray = [];
 							titleText.text = "Mod Selector > " + currentMod + " > " + currentSong.songName;
+							descText.text = "Press ACCEPT to select a difficulty.";
 							addExtraOption("New Difficulty", "editors/new", 0, 255);
     						for (i in 0...currentDifficulties.length) {
         						var diffText:Alphabet = new Alphabet(90, 320, currentDifficulties[i], true);
@@ -258,9 +261,10 @@ class ModSelector extends MusicBeatState{
 						}
 					} else {
 						PlayState.isStoryMode = false;
-						currentMod = modArray[curSelected-1];
+						currentMod = modArray[curSelected];
 						Mods.currentModDirectory = currentMod;
 						titleText.text = "Mod Selector > " + currentMod;
+						descText.text = "Press ACCEPT to select a song.";
 						reloadSongs();
 						arrayModSongs();
 						curSelected = 0;
@@ -276,8 +280,9 @@ class ModSelector extends MusicBeatState{
 				} else if (inDifSelect){
 					inDifSelect = false;
 					inSongSelect = true;
-					for(i in iconArray) remove(i);
+					for(i in iconArray) iconGroup.remove(i);
 					titleText.text = "Mod Selector > " + currentMod;
+					descText.text = "Press ACCEPT to select a song.";
 					iconArray = [];
 					reloadSongs();
 					arrayModSongs();
@@ -288,8 +293,9 @@ class ModSelector extends MusicBeatState{
 				} else if (inSongSelect){
 					inDifSelect = false;
 					inSongSelect = false;
-					for(i in iconArray) remove(i);
+					for(i in iconArray) iconGroup.remove(i);
 					titleText.text = "Mod Selector > ";
+					descText.text = "Press ACCEPT to select a mod.";
 					iconArray = [];
 					reloadMods();
 					curSelected = 0;
@@ -355,7 +361,7 @@ class ModSelector extends MusicBeatState{
 					icon.visible = icon.active = false;
 
 					iconArray.push(icon);
-					add(icon);
+					iconGroup.add(icon);
 
 					songText.visible = songText.active = songText.isMenuItem = false;
 					songText.x += 40;
@@ -381,7 +387,7 @@ class ModSelector extends MusicBeatState{
 			icon.offset.set(-15, -25);
 			icon.visible = icon.active = false;
 			iconArray.push(icon);
-			add(icon);
+			iconGroup.add(icon);
 		}
 
 		optionText.visible = optionText.active = optionText.isMenuItem = false;
