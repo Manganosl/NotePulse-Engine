@@ -59,15 +59,6 @@ import flash.media.Sound;
 
 class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
-	public function new(song:SongMetadata = null){
-		if(song != null){
-			Mods.currentModDirectory = song.folder;
-			PlayState.storyWeek = song.week;
-			var weekName = WeekData.weeksList[song.week];
-			WeekData.setDirectoryFromWeek(WeekData.weeksLoaded.get(weekName));
-		}
-		super();
-	}
 	public static var noteTypeList:Array<String> = //Used for backwards compatibility with 0.1 - 0.3.2 charts, though, you should add your hardcoded custom note types here too.
 	[
 		'',
@@ -4689,9 +4680,8 @@ private function ensureDirectory(path:String) {
     if (!sys.FileSystem.exists(path)) sys.FileSystem.createDirectory(path);
 }
 
-private function saveLevel(auto:Bool = false)
+public function saveLevel(auto:Bool = false, dif:String = null)
 {
-    // Ensure gfStrum is set for every note before saving
     for (section in _song.notes)
     {
         for (note in section.sectionNotes)
@@ -4718,18 +4708,16 @@ private function saveLevel(auto:Bool = false)
         if (auto)
         {
 		    var songName = Paths.formatToSongPath(_song.song);
-		    var diff = Difficulty.getString();
+			var diff = null;
+		    if(dif == null) diff = Difficulty.getString(); else diff = dif;
 		    var diffSuffix = (diff != null && diff != '' && diff != Difficulty.getDefault()) ? '-' + diff : '';
 		    var fileName = songName + diffSuffix;
 
 		    #if MODS_ALLOWED
-		    // This is how Song.loadFromJson builds the path:
-		    // Paths.modsJson(formattedFolder + '/' + formattedSong)
-		    var folder = songName; // Song folder
-		    var chartFile = fileName; // Song file (with diff)
+		    var folder = songName;
+		    var chartFile = fileName;
 		    var chartPath = Mods.currentModDirectory != null ? Paths.modsJson(folder + '/' + chartFile) : 'assets/shared/data/' + songName + '/';
 
-		    // Ensure the directory exists
 		    var chartDir = haxe.io.Path.directory(chartPath);
 		    if (!sys.FileSystem.exists(chartDir)) {
 		        var ensureDirectory = function(path:String) {

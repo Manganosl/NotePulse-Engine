@@ -1,9 +1,13 @@
 package states.editors;
 
+import backend.ui.*;
 import backend.WeekData;
 import states.FreeplayState.SongMetadata;
 import objects.HealthIcon;
-import openfl.geom.ColorTransform;
+import openfl.net.FileReference;
+import openfl.events.Event;
+import openfl.events.IOErrorEvent;
+import flixel.util.FlxSort;
 
 class ModSelector extends MusicBeatState{
 	var exclusions:Array<String> = ["assets", "data", "fonts", "images", "music", "sounds", "videos", "ndlls", "scripts", "shaders", "characters", "songs", "stages", "weeks", "states", "custom_events", "custom_notetypes"];
@@ -21,6 +25,7 @@ class ModSelector extends MusicBeatState{
 	private var descText:FlxText;
 	private var cosanegra:FlxSprite;
 	private var titleText:FlxText;
+	var _file:FileReference;
 
     public function new(state:Class<MusicBeatState>, args:Array<Dynamic>){
         goto = state;
@@ -212,7 +217,28 @@ class ModSelector extends MusicBeatState{
 				else if(goto == states.editors.ChartingState){
 					if(inDifSelect){
 						if(curSelected == 0){
-							trace("TODO: new difficulty");
+							var newDiffName:String = null;
+							openSubState(new NewJson("Enter new difficulty name (No spaces)", function(str2){
+								newDiffName = str2;
+
+						        var newSong:Dynamic = {
+						            song: newSongName,
+						            notes: [],
+						            events: [],
+						            bpm: 150.0,
+						            mania: 3,
+						            needsVoices: true,
+						            gfStrums: false,
+						            player1: 'bf',
+						            player2: 'dad',
+						            gfVersion: 'gf',
+						            speed: 1,
+						            stage: 'stage'
+						        };
+
+						        saveLevel(newSong, true, newDiffName);
+								openSubState(new GoodBye());
+							}));
 						} else {
 							curDifficulty = curSelected-1;
 							Mods.currentModDirectory = currentMod;
@@ -221,12 +247,40 @@ class ModSelector extends MusicBeatState{
 							var weekName = WeekData.weeksList[currentSong.week];
 							WeekData.setDirectoryFromWeek(WeekData.weeksLoaded.get(weekName));
 							var formated = backend.Highscore.formatSong(currentSong.songName.toLowerCase(), curDifficulty);
+							trace(formated);
 							PlayState.SONG = backend.Song.loadFromJson(formated, currentSong.songName.toLowerCase());
-							try LoadingState.loadAndSwitchState(new ChartingState(currentSong), false);
+							try LoadingState.loadAndSwitchState(new ChartingState(), false);
 						}
 					} else if(inSongSelect){
-						if(curSelected == 0){
-							trace("TODO: new song");
+						if (curSelected == 0) {
+						    var newSongName:String = null;
+						    var newDiffName:String = null;
+
+						    openSubState(new NewJson("Enter new song name (No spaces)", function(str) {
+						        newSongName = str;
+
+						        openSubState(new NewJson("Enter new difficulty name (No spaces)", function(str2) {
+						            newDiffName = str2;
+
+						            var newSong:Dynamic = {
+						                song: newSongName,
+						                notes: [],
+						                events: [],
+						                bpm: 150.0,
+						                mania: 3,
+						                needsVoices: true,
+						                gfStrums: false,
+						                player1: 'bf',
+						                player2: 'dad',
+						                gfVersion: 'gf',
+						                speed: 1,
+						                stage: 'stage'
+						            };
+
+						            saveLevel(newSong, true, newDiffName);
+									openSubState(new GoodBye());
+						        }));
+						    }));
 						} else {
 							currentSong = currentSongs[curSelected-1];
 							PlayState.storyWeek = currentSong.week;						
@@ -393,6 +447,86 @@ class ModSelector extends MusicBeatState{
 		optionText.x += 40;
 		optionText.screenCenter(X);		
 	}
+
+	function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
+		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
+
+	public function saveLevel(songData:Dynamic, auto:Bool = false, dif:String = null):Void{
+    	if (songData.events != null && songData.events.length > 1)
+    	    songData.events.sort(sortByTime);
+
+    	var json = { song: songData };
+    	var data:String = haxe.Json.stringify(json, "\t");
+
+    	if (data != null && data.length > 0)
+    	{
+    	    if (auto)
+    	    {
+    	        var songName = Paths.formatToSongPath(songData.song);
+    	        var diff = dif;
+    	        var diffSuffix = (diff != null && diff != '' && diff != Difficulty.getDefault()) ? '-' + diff : '';
+    	        var fileName = songName + diffSuffix;
+
+    	        #if MODS_ALLOWED
+    	        var folder = songName;
+    	        var chartFile = fileName;
+    	        var chartPath = Mods.currentModDirectory != null ? Paths.modJson(folder + '/' + chartFile) : 'assets/shared/data/' + songName + '/';
+
+    	        var chartDir = haxe.io.Path.directory(chartPath);
+    	        if (!sys.FileSystem.exists(chartDir)) {
+    	            var ensureDirectory = function(path:String) {
+    	                var parent = haxe.io.Path.directory(path);
+    	                if (parent != "" && !sys.FileSystem.exists(parent)) ensureDirectory(parent);
+    	                if (!sys.FileSystem.exists(path)) sys.FileSystem.createDirectory(path);
+    	            }
+    	            ensureDirectory(chartDir);
+    	        }
+
+    	        try
+    	            sys.io.File.saveContent(chartPath, data.trim());
+    	        #else
+    	        var chartDir = 'assets/shared/data/' + songName + '/';
+    	        if (!sys.FileSystem.exists(chartDir)) sys.FileSystem.createDirectory(chartDir);
+    	        var chartPath = chartDir + fileName + ".json";
+    	        try {
+    	            sys.io.File.saveContent(chartPath, data.trim());
+    	        }
+    	        #end
+    	    }
+    	}
+	}
+
+	function onSaveComplete(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+		FlxG.log.notice("Successfully saved LEVEL DATA.");
+	}
+
+	function onSaveCancel(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+	}
+
+	function onSaveError(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+		FlxG.log.error("Problem saving Level data");
+	}
+
+	private function ensureDirectory(path:String) {
+    	var parent = haxe.io.Path.directory(path);
+    	if (parent != "" && !sys.FileSystem.exists(parent)) ensureDirectory(parent);
+    	if (!sys.FileSystem.exists(path)) sys.FileSystem.createDirectory(path);
+	}
 }
 
 class ImIcon extends FlxSprite {
@@ -401,5 +535,54 @@ class ImIcon extends FlxSprite {
 		if (sprTracker != null)
 			setPosition(sprTracker.x + sprTracker.width + 12, sprTracker.y - 30);
 		super.update(elapsed);
+	}
+}
+
+class NewJson extends MusicBeatSubstate{
+	var txt:String;
+	var callback:String->Void;
+	public function new(txt:String, callback:String->Void){
+		this.txt = txt;
+		this.callback = callback;
+		super();
+	}
+	override public function create(){
+		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xff000000);
+		bg.scrollFactor.set(0, 0);
+		bg.screenCenter();
+		bg.alpha = 0.25;
+		add(bg);
+
+		var input:PsychUIInputText = new PsychUIInputText(0, 0, 300, "", 16);
+		input.screenCenter();
+		input.scrollFactor.set(0, 0);
+		add(input);
+
+		var textString:FlxText = new FlxText(0, input.y-input.height-100, 0, txt, 32);
+		textString.setFormat(Paths.font("default.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		textString.scrollFactor.set(0, 0);
+		textString.screenCenter();
+		textString.y = input.y-input.height-10;
+		add(textString);
+
+		var confirmButton:PsychUIButton = new PsychUIButton(0, input.y+input.height+100, "Confirm", function(){
+			callback(input.text);
+			close();
+		});
+		confirmButton.screenCenter();
+		confirmButton.scrollFactor.set(0, 0);
+		confirmButton.y = input.y+input.height;
+		add(confirmButton);
+	}
+}
+
+class GoodBye extends MusicBeatSubstate{
+	override public function create(){
+		var warningText:FlxText = new FlxText(0, 0, 1000, "Song File Created!\nNow you'll be redirected to the Week Editor so you can add this song\nThen, you'll be able to access this song directly from here!");
+		warningText.setFormat(Paths.font("default.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		warningText.scrollFactor.set(0, 0);
+		warningText.screenCenter();
+		add(warningText);
+		new FlxTimer().start(5, function(tmr:FlxTimer){ try MusicBeatState.switchState(new states.editors.WeekEditorState()); close();});
 	}
 }
