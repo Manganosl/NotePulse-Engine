@@ -36,15 +36,15 @@ class CreditsState extends MusicBeatState
 		add(grpOptions);
 
 		var defaultList:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
-			['Unnamed Engine Team'],
-			['Manganos', 			'face',		'Useless Owner of this Engine',			 								'', 		'6a329f'],
+			['NotePulse Engine'],
+			['Manganos', 			'face',				'Useless Owner of this Engine',			 					 'https://github.com/Manganosl', 		'6a329f'],
 			[''],
 			['More credits'],
-			['tposejank', 			'tposejank',		'EK Programmer',			 								'https://twitter.com/tposejank', 		'B9AF27'],	//mensajes subliminales
-			['srPerez', 			'perez', 			'1-9 keys art', 											'https://twitter.com/NewSrPerez', 		'FF9E00'],
-['CNE Team', 			'face',		'FPS counter, NdllUtils, debug menu and more ideas',			 								'', 		'6a329f'],
-['FunkinModchart', 			'face',		'Awesome modcharting tools',			 								'', 		'6a329f'],
-['NightmareVision Engine', 			'face',		'Window Utils, design inspiration',			 								'', 		'6a329f'],
+			['tposejank', 			'tposejank',		'EK Programmer',			 								 'https://twitter.com/tposejank', 		'B9AF27'],	//mensajes subliminales
+			['srPerez', 			'perez', 			'1-9 keys art', 											 'https://twitter.com/NewSrPerez', 		'FF9E00'],
+			['CNE Team', 			'face',				'FPS counter, NdllUtils, debug menu and more ideas',		 'https://codename-engine.com/', 		'6a329f'],
+			['FunkinModchart', 		'face',				'Awesome modcharting tools',			 					 'https://github.com/theoo-h/FunkinModchart', 		'6a329f'],
+			['NightmareVision Engine', 		'face',		'Window Utils, design inspiration',			 				 'https://github.com/DuskieWhy/NightmareVision', 		'6a329f'],
 			[''],
 			['Psych Engine Team'],
 			['Shadow Mario',		'shadowmario',		'Main Programmer and Head of Psych Engine',					 'https://ko-fi.com/shadowmario',		'444444'],
