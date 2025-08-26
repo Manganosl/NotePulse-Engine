@@ -80,8 +80,8 @@ final class Manager extends FlxBasic {
     public inline function ease(name:String, beat:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
         __forEachPlayfield((pf) -> pf.ease(name, beat, length, value, easeFunc, player), field);
 
-    public inline function doEase(name:String, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
-        __forEachPlayfield((pf) -> pf.doEase(name, value, easeFunc, player), field);
+    public inline function doEase(name:String, value:Float = 1, length:Float, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
+        __forEachPlayfield((pf) -> pf.doEase(name, value, length, easeFunc, player), field);
 
     public inline function add(name:String, beat:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
         __forEachPlayfield((pf) -> pf.add(name, beat, length, value, easeFunc, player), field);

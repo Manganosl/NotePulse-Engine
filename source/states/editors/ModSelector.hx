@@ -222,7 +222,7 @@ class ModSelector extends MusicBeatState{
 								newDiffName = str2;
 
 						        var newSong:Dynamic = {
-						            song: newSongName,
+						            song: currentSong.songName,
 						            notes: [],
 						            events: [],
 						            bpm: 150.0,
