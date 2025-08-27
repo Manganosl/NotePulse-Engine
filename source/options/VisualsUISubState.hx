@@ -81,7 +81,7 @@ class VisualsUISubState extends BaseOptionsMenu
 		    "In which camera do you want rating to be displayed?",
 		    'ratingCam',
 		    'string',
-		    ['HUD', 'Game']);
+		    ['HUD', 'Game', 'Bellow Note']);
 	    addOption(option);
 
 		var option:Option = new Option('Hide HUD',

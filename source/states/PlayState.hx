@@ -642,7 +642,7 @@ class PlayState extends MusicBeatState
 
 		uiGroup.cameras = [camHUD];
 		noteGroup.cameras = [camHUD];
-		if(ClientPrefs.data.ratingCam == "HUD")
+		if(ClientPrefs.data.ratingCam == "HUD" || ClientPrefs.data.ratingCam == "Bellow Note")
 			comboGroup.cameras = [camHUD];
 		else
 			comboGroup.cameras = [camGame];
@@ -2969,14 +2969,19 @@ private function popUpScore(note:Note = null):Void
         }
     }
 
-    var useGameCam = (ClientPrefs.data.ratingCam == "Game");
-    var ratingCamArr = useGameCam ? [camGame] : [camHUD];
+    // --- Camera mode handling ---
+    var camMode:String = ClientPrefs.data.ratingCam; // "Game" | "HUD" | "Bellow Note"
+    var ratingCamArr:Array<FlxCamera> = (camMode == "Game") ? [camGame] : [camHUD];
 
+    // Default anchor (HUD style)
     var placement:Float = FlxG.width * 0.35;
     var baseX:Float = placement - 40;
     var baseY:Float = FlxG.height / 2 - 60;
 
-    if (useGameCam) {
+	var linkStrum:StrumNote = playerStrums.members[note.noteData];
+
+    // Position derivation by mode
+    if (camMode == "Game") {
         if (isPlayerOpponent) {
             baseX = dad.getMidpoint().x + dad.width/1.5;
             baseY = dad.getMidpoint().y - dad.height/1.2;
@@ -2984,6 +2989,11 @@ private function popUpScore(note:Note = null):Void
             baseX = boyfriend.getMidpoint().x - boyfriend.width/1.5;
             baseY = boyfriend.getMidpoint().y - boyfriend.height/1.2;
         }
+    } else if (camMode == "Bellow Note") {
+        // Lock to the note on the HUD, below its visual
+        ratingCamArr = [camHUD];
+        baseX = linkStrum.x; // left edge of the note; keeps math simple & avoids offsets
+        baseY = linkStrum.y + linkStrum.height + 10; // slightly below the note
     }
 
     var daRating:Rating = Conductor.judgeNote(ratingsData, noteDiff / playbackRate);
@@ -3018,7 +3028,10 @@ private function popUpScore(note:Note = null):Void
         antialias = !isPixelStage;
     }
 
-    // Rating sprite
+	var scaX:Float = (linkStrum.scale.x*0.6);
+	var scaY:Float = (linkStrum.scale.y*0.6);
+
+    // --- Rating sprite ---
     var rating:FlxSprite = new FlxSprite();
     rating.loadGraphic(Paths.image(uiPrefix + daRating.image + uiSuffix));
     rating.x = baseX;
@@ -3028,20 +3041,24 @@ private function popUpScore(note:Note = null):Void
     rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
     rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
     rating.visible = (!ClientPrefs.data.hideHud && showRating);
-    if(ClientPrefs.data.ratingCam == "HUD") rating.x += ClientPrefs.data.comboOffset[0];
-    if(ClientPrefs.data.ratingCam == "HUD") rating.y -= ClientPrefs.data.comboOffset[1];
+	if(ClientPrefs.data.ratingCam == "Bellow Note"){
+		rating.scale.set(scaX, scaY);
+	}
+
+    // Apply HUD offsets ONLY in HUD mode (not in Bellow Note)
+    if(camMode == "HUD") {
+        rating.x += ClientPrefs.data.comboOffset[0];
+        rating.y -= ClientPrefs.data.comboOffset[1];
+    }
     rating.antialiasing = antialias;
 
-    // Early/Late sprite
+    // --- Early/Late sprite ---
     var earlyLateSpr:FlxSprite = null;
     var earlyLateType:String = null;
     var earlyLateThreshold:Float = 20;
 
     if (absNoteDiff > earlyLateThreshold && daRating.image != "marvelous"){
-        if (noteDiff < 0)
-            earlyLateType = "late";
-        else
-            earlyLateType = "early";
+        if (noteDiff < 0) earlyLateType = "late"; else earlyLateType = "early";
 
         earlyLateSpr = new FlxSprite();
         earlyLateSpr.loadGraphic(Paths.image(earlyLateType));
@@ -3050,16 +3067,17 @@ private function popUpScore(note:Note = null):Void
         earlyLateSpr.cameras = ratingCamArr;
         earlyLateSpr.antialiasing = ClientPrefs.data.antialiasing;
         earlyLateSpr.alpha = 1;
+		if(ClientPrefs.data.ratingCam == "Bellow Note"){
+			earlyLateSpr.scale.set(scaX, scaY);
+		}
         comboGroup.add(earlyLateSpr);
 
         FlxTween.tween(earlyLateSpr, {alpha: 0, y: earlyLateSpr.y - 30}, 0.5 / playbackRate, {
-            onComplete: function(twn:FlxTween) {
-                earlyLateSpr.destroy();
-            }
+            onComplete: function(twn:FlxTween) earlyLateSpr.destroy()
         });
     }
 
-    // Combo sprite
+    // --- Combo sprite ---
     var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(uiPrefix + 'combo' + uiSuffix));
     comboSpr.x = baseX + 40;
     comboSpr.y = baseY + 60;
@@ -3067,8 +3085,16 @@ private function popUpScore(note:Note = null):Void
     comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
     comboSpr.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
     comboSpr.visible = (!ClientPrefs.data.hideHud && showCombo);
-    if(ClientPrefs.data.ratingCam == "HUD") comboSpr.x += ClientPrefs.data.comboOffset[0];
-    if(ClientPrefs.data.ratingCam == "HUD") comboSpr.y -= ClientPrefs.data.comboOffset[1];
+
+	if(ClientPrefs.data.ratingCam == "Bellow Note"){
+		comboSpr.scale.set(scaX, scaY);
+	}
+
+    if(camMode == "HUD") {
+        comboSpr.x += ClientPrefs.data.comboOffset[0];
+        comboSpr.y -= ClientPrefs.data.comboOffset[1];
+    }
+
     comboSpr.antialiasing = antialias;
     comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
 
@@ -3083,32 +3109,48 @@ private function popUpScore(note:Note = null):Void
         comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
     }
 
-    comboSpr.updateHitbox();
     rating.updateHitbox();
+    comboSpr.updateHitbox();
+
+    // Optionally center the rating under the note in Bellow Note mode (no offsets)
+    if (camMode == "Bellow Note") {
+        rating.x = linkStrum.x + (linkStrum.width - rating.width) * 0.5;
+        rating.y = linkStrum.y + linkStrum.height + 10;
+        comboSpr.x = rating.x + 40; // keep relative spacing
+        comboSpr.y = rating.y + 60;
+    }
 
     comboGroup.add(rating);
 
     var seperatedScore:Array<Int> = [];
-
-    if(combo >= 1000) {
-        seperatedScore.push(Math.floor(combo / 1000) % 10);
-    }
+    if(combo >= 1000) seperatedScore.push(Math.floor(combo / 1000) % 10);
     seperatedScore.push(Math.floor(combo / 100) % 10);
     seperatedScore.push(Math.floor(combo / 10) % 10);
     seperatedScore.push(combo % 10);
 
     var daLoop:Int = 0;
     var xThing:Float = 0;
-    if (showCombo)
-        comboGroup.add(comboSpr);
+    if (showCombo) comboGroup.add(comboSpr);
 
     for (i in seperatedScore)
     {
         var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(uiPrefix + 'num' + Std.int(i) + uiSuffix));
-        if(ClientPrefs.data.ratingCam == "HUD") numScore.x = placement + (43 * daLoop) - 90 + ClientPrefs.data.comboOffset[2];
-		else numScore.x = baseX + (43 * daLoop) - 90;
-        if(ClientPrefs.data.ratingCam == "HUD") numScore.y = baseY + 140 - ClientPrefs.data.comboOffset[3];
-		else numScore.y = baseY + 140;
+
+        if(camMode == "HUD") {
+            numScore.x = placement + (43 * daLoop) - 90 + ClientPrefs.data.comboOffset[2];
+            numScore.y = baseY + 140 - ClientPrefs.data.comboOffset[3];
+        } else {
+            numScore.x = baseX + (43 * daLoop) - 90;
+            numScore.y = baseY + 140;
+        }
+
+        // In Bellow Note, baseX/baseY already sit under the note and ignore offsets
+        if (camMode == "Bellow Note") {
+            // ensure numbers are aligned to centered rating
+            numScore.x = rating.x + (43 * daLoop) - 50; // relative to rating
+            numScore.y = rating.y + 80;
+        }
+
         numScore.cameras = ratingCamArr;
         numScore.antialiasing = antialias;
 
@@ -3120,22 +3162,23 @@ private function popUpScore(note:Note = null):Void
         numScore.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
         numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
         numScore.visible = !ClientPrefs.data.hideHud;
+		if(ClientPrefs.data.ratingCam == "Bellow Note"){
+			numScore.scale.set(scaX, scaY);
+		}
 
-        if(showComboNum)
-            comboGroup.add(numScore);
+        if(showComboNum) comboGroup.add(numScore);
 
         FlxTween.tween(numScore, {alpha: 0}, 0.2 / playbackRate, {
-            onComplete: function(tween:FlxTween)
-            {
-                numScore.destroy();
-            },
+            onComplete: function(tween:FlxTween) numScore.destroy(),
             startDelay: Conductor.crochet * 0.002 / playbackRate
         });
 
         daLoop++;
         if(numScore.x > xThing) xThing = numScore.x;
     }
-    comboSpr.x = xThing + 50;
+
+    // Keep original behavior of nudging combo label after numbers
+    comboSpr.x = (camMode == "Bellow Note") ? (rating.x + 50 + (43 * Math.max(0, seperatedScore.length - 1))) : (xThing + 50);
 
     FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {
         startDelay: Conductor.crochet * 0.001 / playbackRate
@@ -3150,19 +3193,30 @@ private function popUpScore(note:Note = null):Void
         startDelay: Conductor.crochet * 0.002 / playbackRate
     });
 
-    // MS Text
+    // --- MS Text (always visible where rating spawned) ---
     var msText:FlxText = new FlxText();
-    msText.x = baseX + rating.width / 2;
-    msText.y = baseY + rating.height;
     msText.cameras = ratingCamArr;
     msText.text = FlxMath.roundDecimal(noteDiff, 2) + "ms";
     msText.setFormat(null, 24, 0x7109F8, 'center');
+
+    // default placement under rating
+    msText.x = rating.x + rating.width / 2;
+    msText.y = rating.y + rating.height;
+
+    // Apply HUD offsets ONLY in HUD mode (keeps old behavior)
+    if (camMode == "HUD") {
+        msText.x += ClientPrefs.data.comboOffset[0];
+        msText.y -= ClientPrefs.data.comboOffset[1];
+    }
+
+	if(ClientPrefs.data.ratingCam == "Bellow Note"){
+		msText.scale.set(scaX, scaY);
+	}
+
     comboGroup.add(msText);
 
     FlxTween.tween(msText, {alpha: 0, y: msText.y - 30}, 0.5 / playbackRate, {
-        onComplete: function(twn:FlxTween) {
-            msText.destroy();
-        }
+        onComplete: function(twn:FlxTween) msText.destroy()
     });
 }
 
