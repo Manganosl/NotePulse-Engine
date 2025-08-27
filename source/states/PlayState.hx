@@ -3041,9 +3041,7 @@ private function popUpScore(note:Note = null):Void
     rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
     rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
     rating.visible = (!ClientPrefs.data.hideHud && showRating);
-	if(ClientPrefs.data.ratingCam == "Bellow Note"){
-		rating.scale.set(scaX, scaY);
-	}
+	rating.extraData["linkStrum"] = linkStrum;
 
     // Apply HUD offsets ONLY in HUD mode (not in Bellow Note)
     if(camMode == "HUD") {
@@ -3067,6 +3065,7 @@ private function popUpScore(note:Note = null):Void
         earlyLateSpr.cameras = ratingCamArr;
         earlyLateSpr.antialiasing = ClientPrefs.data.antialiasing;
         earlyLateSpr.alpha = 1;
+		earlyLateSpr.extraData["linkStrum"] = linkStrum;
 		if(ClientPrefs.data.ratingCam == "Bellow Note"){
 			earlyLateSpr.scale.set(scaX, scaY);
 		}
@@ -3085,6 +3084,7 @@ private function popUpScore(note:Note = null):Void
     comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
     comboSpr.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
     comboSpr.visible = (!ClientPrefs.data.hideHud && showCombo);
+	comboSpr.extraData["linkStrum"] = linkStrum;
 
 	if(ClientPrefs.data.ratingCam == "Bellow Note"){
 		comboSpr.scale.set(scaX, scaY);
@@ -3109,8 +3109,13 @@ private function popUpScore(note:Note = null):Void
         comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
     }
 
+	if(ClientPrefs.data.ratingCam == "Bellow Note"){
+		rating.scale.set(scaX, scaY);
+	}
+
     rating.updateHitbox();
     comboSpr.updateHitbox();
+	
 
     // Optionally center the rating under the note in Bellow Note mode (no offsets)
     if (camMode == "Bellow Note") {
@@ -3156,17 +3161,17 @@ private function popUpScore(note:Note = null):Void
 
         if (!PlayState.isPixelStage) numScore.setGraphicSize(Std.int(numScore.width * 0.5));
         else numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
+		if(ClientPrefs.data.ratingCam == "Bellow Note"){
+			numScore.scale.set(scaX, scaY);
+		}
         numScore.updateHitbox();
 
         numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
         numScore.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
         numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
         numScore.visible = !ClientPrefs.data.hideHud;
-		if(ClientPrefs.data.ratingCam == "Bellow Note"){
-			numScore.scale.set(scaX, scaY);
-		}
 
-        if(showComboNum) comboGroup.add(numScore);
+        if(showComboNum && ClientPrefs.data.ratingCam != "Bellow Note") comboGroup.add(numScore);
 
         FlxTween.tween(numScore, {alpha: 0}, 0.2 / playbackRate, {
             onComplete: function(tween:FlxTween) numScore.destroy(),
@@ -3213,7 +3218,7 @@ private function popUpScore(note:Note = null):Void
 		msText.scale.set(scaX, scaY);
 	}
 
-    comboGroup.add(msText);
+    if(ClientPrefs.data.ratingCam != "Bellow Note") comboGroup.add(msText);
 
     FlxTween.tween(msText, {alpha: 0, y: msText.y - 30}, 0.5 / playbackRate, {
         onComplete: function(twn:FlxTween) msText.destroy()

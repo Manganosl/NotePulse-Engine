@@ -69,6 +69,8 @@ class Psych implements IAdapter {
 	public function getLaneFromArrow(arrow:FlxSprite) {
 		if (arrow is Note)
 			return cast(arrow, Note).noteData;
+		if (arrow is FlxSprite && arrow.extraData["linkStrum"] != null)
+			return cast(arrow, FlxSprite).extraData["linkStrum"].noteData;
 		else if (arrow is Strum) @:privateAccess
 			return cast(arrow, Strum).noteData;
 		if (arrow is NoteSplash) @:privateAccess
@@ -82,6 +84,8 @@ class Psych implements IAdapter {
 	public function getPlayerFromArrow(arrow:FlxSprite) {
 		if (arrow is Note)
 			return cast(arrow, Note).gfStrum ? 2 : cast(arrow, Note).mustPress ? 1 : 0;
+		if (arrow is FlxSprite && arrow.extraData["linkStrum"] != null)
+			return cast(arrow, FlxSprite).extraData["linkStrum"].player;
 		if (arrow is Strum) @:privateAccess
 			return cast(arrow, Strum).player;
 		if (arrow is NoteSplash) @:privateAccess
@@ -152,7 +156,7 @@ class Psych implements IAdapter {
 		return PlayState.instance.songSpeed * .45;
 	}
 
-		public function getArrowItems() {
+	public function getArrowItems() {
 		var pspr:Array<Array<Array<FlxSprite>>> = [[[], [], [], []], [[], [], [], []], [[], [], [], []]];
 
 		@:privateAccess
@@ -162,6 +166,22 @@ class Psych implements IAdapter {
 
 			pspr[strumNote.player][0].push(strumNote);
 		});
+
+		if(ClientPrefs.data.ratingCam == "Bellow Note"){
+			PlayState.instance.comboGroup.forEachAlive(comboSprite -> {
+			@:privateAccess
+				if (comboSprite != null) {
+					if (comboSprite.extraData["linkStrum"] != null) {
+						final player = comboSprite.extraData["linkStrum"].player;
+						if (pspr[player] == null)
+							pspr[player] = [];
+
+						pspr[player][0].push(comboSprite);
+					}
+				}
+			});
+		};
+
 		PlayState.instance.notes.forEachAlive(strumNote -> {
 			final player = Adapter.instance.getPlayerFromArrow(strumNote);
 			if (pspr[player] == null)
@@ -183,7 +203,7 @@ class Psych implements IAdapter {
 			}
 		});
 
-			PlayState.instance.grpSustainSplashes.forEachAlive(splash -> {
+		PlayState.instance.grpSustainSplashes.forEachAlive(splash -> {
 			@:privateAccess
 			if (splash != null) {
 				if (splash.strum != null && splash.shouldVisible) {
