@@ -12,10 +12,27 @@ class CustomShader {
         shader = PlayState.instance.createRuntimeShader(shaderName);
     }
 
-    public function addToCamera(camera:Array<FlxCamera>) {
+    public function addToCameras(camera:Array<FlxCamera>) {
         for(cam in camera){
-            if(cam.filters == null) cam.filters = [];
-            cam.filters.push(new ShaderFilter(shader));
+            addToCamera(cam);
+        }
+    }
+
+    public function addToCamera(cam:FlxCamera) {
+        if(cam.filters == null) cam.filters = [];
+        cam.filters.push(new ShaderFilter(shader));
+    }
+
+    public function removeFromCameras(cameras:Array<FlxCamera>) {
+        for (cam in cameras) {
+            removeFromCamera(cam);
+        }
+    }
+
+    public function removeFromCamera(cam:FlxCamera) {
+        if (cam.filters != null) {
+            cam.filters = [for (f in cam.filters) if (!(f is ShaderFilter && cast(f, ShaderFilter).shader == shader)) f];
+            if (cam.filters.length == 0) cam.filters = null;
         }
     }
 
