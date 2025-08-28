@@ -150,6 +150,7 @@ class HScript extends SScript
 		set("NdllUtil", NdllUtil);  // CNE ahh util
 		set("WindowUtil", WindowUtil);  // Nightmare Vision ahh Util
 		set("Manager", Manager);  // No need to import modchart anymore
+		set("CustomShader", CustomShader);
 
 		set("Flx3DCamera", flx3d.Flx3DCamera);
         set("Flx3DView", flx3d.Flx3DView);
