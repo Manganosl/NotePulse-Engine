@@ -1644,6 +1644,7 @@ class PlayState extends MusicBeatState
 
 			var babyArrow:StrumNote = new StrumNote(strumLineX, strumLineY, i, player);
 			babyArrow.downScroll = ClientPrefs.data.downScroll;
+			babyArrow.cpuControlled = isPlayerOpponent ? (player == 0 ? false : true) : (player == 1 ? false : true);
 			if (!isStoryMode && !skipArrowStartTween)
 			{
 				//babyArrow.y -= 10;

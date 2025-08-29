@@ -15,6 +15,7 @@ class StrumNote extends FlxSkewedSprite
 	private var noteData:Int = 0;
 	public var direction:Float = 90;//plan on doing scroll directions soon -bb
 	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
+	public var cpuControlled:Bool = false;
 	public var sustainReduce:Bool = true;
 	public var trackedScale:Float = 0.7;
 	private var player:Int;
