@@ -220,7 +220,7 @@ class PlayState extends MusicBeatState
 	public var health(default, set):Float = 1;
 	private var healthLerp:Float = 1;
 	public var combo:Int = 0;
-	public var isPlayerOpponent:Bool = false;
+	public static var isPlayerOpponent:Bool = false;
 	public var camTween:FlxTween;
 	var cameraZoomTween:FlxTween;
 
@@ -672,14 +672,6 @@ class PlayState extends MusicBeatState
 		}
 		if(ClientPrefs.data.doubletrail) new FunkinLua(functions.Trail.script, true);
 		if(ClientPrefs.data.noteTimer) new FunkinLua(functions.NoteTimer.script, true);
-		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'data/'))
-			for (file in FileSystem.readDirectory(folder))
-			{
-				if(file.toLowerCase().endsWith('substate.hx'))
-					initHScript(folder + file);
-				if(file.toLowerCase().endsWith('pplay.lua'))
-					new FunkinLua(folder + file);
-			}
 
 		// SONG SPECIFIC SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -1644,7 +1636,6 @@ class PlayState extends MusicBeatState
 
 			var babyArrow:StrumNote = new StrumNote(strumLineX, strumLineY, i, player);
 			babyArrow.downScroll = ClientPrefs.data.downScroll;
-			babyArrow.cpuControlled = isPlayerOpponent ? (player == 0 ? false : true) : (player == 1 ? false : true);
 			if (!isStoryMode && !skipArrowStartTween)
 			{
 				//babyArrow.y -= 10;
@@ -1671,16 +1662,31 @@ class PlayState extends MusicBeatState
 		adaptStrumline(gfStrums);
 
 		if (ClientPrefs.data.keybindShowcase) {
-			for (i in 0...playerStrums.members.length) {
-				var keyShowcase = new KeybindShowcase(
-					playerStrums.members[i].x, 
-					ClientPrefs.data.downScroll ? playerStrums.members[i].y - 30 : playerStrums.members[i].y + playerStrums.members[i].height + 5, 
-					ClientPrefs.keyBinds.get(keysArray[i]), 
-					camHUD, 
-					playerStrums.members[i].width / 2, 
-					SONG.mania);
-				keyShowcase.onComplete = function() {
-					remove(keyShowcase);
+			var keyLength = !isPlayerOpponent ? playerStrums.members.length : opponentStrums.members.length;
+			for (i in 0...keyLength) {
+				var keyShowcase = null; 
+				if(!isPlayerOpponent){
+					keyShowcase = new KeybindShowcase(
+						playerStrums.members[i].x, 
+						ClientPrefs.data.downScroll ? playerStrums.members[i].y - 30 : playerStrums.members[i].y + playerStrums.members[i].height + 5, 
+						ClientPrefs.keyBinds.get(keysArray[i]), 
+						camHUD, 
+						playerStrums.members[i].width / 2, 
+						SONG.mania);
+					keyShowcase.onComplete = function() {
+						remove(keyShowcase);
+					}
+				} else{
+					keyShowcase = new KeybindShowcase(
+						opponentStrums.members[i].x, 
+						ClientPrefs.data.downScroll ? opponentStrums.members[i].y - 30 : opponentStrums.members[i].y + opponentStrums.members[i].height + 5, 
+						ClientPrefs.keyBinds.get(keysArray[i]), 
+						camHUD, 
+						opponentStrums.members[i].width / 2, 
+						SONG.mania);
+					keyShowcase.onComplete = function() {
+						remove(keyShowcase);
+					}
 				}
 				add(keyShowcase);
 			}
@@ -1922,6 +1928,7 @@ class PlayState extends MusicBeatState
 			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
 			{
 				var dunceNote:Note = unspawnNotes[0];
+				if(isPlayerOpponent) dunceNote.mustPress = !dunceNote.mustPress;
 				notes.insert(0, dunceNote);
 				dunceNote.spawned = true;
 
@@ -1951,8 +1958,8 @@ class PlayState extends MusicBeatState
 						var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
 						notes.forEachAlive(function(daNote:Note)
 						{
-							var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
-							if(!daNote.mustPress) strumGroup = opponentStrums;
+							var strumGroup:FlxTypedGroup<StrumNote> = !isPlayerOpponent ? playerStrums : opponentStrums;
+							if(!daNote.mustPress) strumGroup = !isPlayerOpponent ? opponentStrums : playerStrums;
 							if(daNote.gfStrum) strumGroup = gfStrums;	
 
 							var strum:StrumNote = strumGroup.members[daNote.noteData];
@@ -2089,7 +2096,7 @@ class PlayState extends MusicBeatState
 		}
 		if(!cpuControlled)
 		{
-			for (note in playerStrums)
+			for (note in (!isPlayerOpponent ? playerStrums : opponentStrums))
 				if(note.animation.curAnim != null && note.animation.curAnim.name != 'static')
 				{
 					note.playAnim('static');
@@ -2979,7 +2986,7 @@ private function popUpScore(note:Note = null):Void
     var baseX:Float = placement - 40;
     var baseY:Float = FlxG.height / 2 - 60;
 
-	var linkStrum:StrumNote = playerStrums.members[note.noteData];
+	var linkStrum:StrumNote = !isPlayerOpponent ? playerStrums.members[note.noteData] : opponentStrums.members[note.noteData];
 
     // Position derivation by mode
     if (camMode == "Game") {
@@ -3246,7 +3253,7 @@ private function popUpScore(note:Note = null):Void
 
 	private function keyPressed(key:Int)
 	{
-		if(cpuControlled || paused || inCutscene || key < 0 || key >= playerStrums.length || !generatedMusic || endingSong || boyfriend.stunned) return;
+		if(cpuControlled || paused || inCutscene || key < 0 || key >= (!isPlayerOpponent ? playerStrums.length : opponentStrums.length) || !generatedMusic || endingSong || boyfriend.stunned) return;
 
 		var ret:Dynamic = callOnScripts('onKeyPressPre', [key]);
 		if(ret == LuaUtils.Function_Stop) return;
@@ -3296,7 +3303,7 @@ private function popUpScore(note:Note = null):Void
 		//more accurate hit time for the ratings? part 2 (Now that the calculations are done, go back to the time it was before for not causing a note stutter)
 		Conductor.songPosition = lastTime;
 
-		var spr:StrumNote = playerStrums.members[key];
+		var spr:StrumNote = !isPlayerOpponent ? playerStrums.members[key] : opponentStrums.members[key];
 		if(strumsBlocked[key] != true && spr != null && spr.animation.curAnim.name != 'confirm')
 		{
 			spr.playAnim('pressed');
@@ -3324,12 +3331,12 @@ private function popUpScore(note:Note = null):Void
 
 	private function keyReleased(key:Int)
 	{
-		if(cpuControlled || !startedCountdown || paused || key < 0 || key >= playerStrums.length) return;
+		if(cpuControlled || !startedCountdown || paused || key < 0 || key >= (!isPlayerOpponent ? playerStrums.length : opponentStrums.length)) return;
 
 		var ret:Dynamic = callOnScripts('onKeyReleasePre', [key]);
 		if(ret == LuaUtils.Function_Stop) return;
 
-		var spr:StrumNote = playerStrums.members[key];
+		var spr:StrumNote = !isPlayerOpponent ? playerStrums.members[key] : opponentStrums.members[key];
 		if(spr != null)
 		{
 			spr.playAnim('static');
@@ -3531,10 +3538,10 @@ private function popUpScore(note:Note = null):Void
 		if (songName != 'tutorial')
 			camZooming = true;
 
-		if(note.noteType == 'Hey!' && dad.animOffsets.exists('hey')) {
-			dad.playAnim('hey', true);
-			dad.specialAnim = true;
-			dad.heyTimer = 0.6;
+		if(note.noteType == 'Hey!' && (!isPlayerOpponent ? dad.animOffsets.exists('hey') : boyfriend.animOffsets.exists('hey'))) {
+			!isPlayerOpponent ? dad.playAnim('hey', true) : boyfriend.playAnim('hey', true);
+			!isPlayerOpponent ? dad.specialAnim = true : boyfriend.specialAnim = true;
+			!isPlayerOpponent ? dad.heyTimer = 0.6 : boyfriend.heyTimer = 0.6;
 		} else if(!note.noAnimation) {
 			var altAnim:String = note.animSuffix;
 
@@ -3542,7 +3549,7 @@ private function popUpScore(note:Note = null):Void
 				if (SONG.notes[curSection].altAnim && !SONG.notes[curSection].gfSection)
 					altAnim = '-alt';
 
-			var char:Character = dad;
+			var char:Character = !isPlayerOpponent ? dad : boyfriend;
 			var animToPlay:String = singAnimation(note.noteData) + altAnim;
 			if(note.gfNote || note.gfStrum) char = gf;
 
@@ -3557,8 +3564,8 @@ private function popUpScore(note:Note = null):Void
 		strumPlayAnim(note.gfStrum ? 2 : 0, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
 		note.hitByOpponent = true;
 		
-		var result:Dynamic = callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
-		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('opponentNoteHit', [note]);
+		var result:Dynamic = !isPlayerOpponent ? callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]) : callOnLuas('goodNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
+		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) (!isPlayerOpponent ? callOnHScript('opponentNoteHit', [note]) : callOnHScript('goodNoteHit', [note]));
 
 		if (!note.isSustainNote) invalidateNote(note);
 	}
@@ -3572,8 +3579,8 @@ private function popUpScore(note:Note = null):Void
 		var leData:Int = Math.round(Math.abs(note.noteData));
 		var leType:String = note.noteType;
 
-		var result:Dynamic = callOnLuas('goodNoteHitPre', [notes.members.indexOf(note), leData, leType, isSus]);
-		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('goodNoteHitPre', [note]);
+		var result:Dynamic = !isPlayerOpponent ? callOnLuas('goodNoteHitPre', [notes.members.indexOf(note), leData, leType, isSus]) : callOnLuas('opponentNoteHitPre', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
+		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) (!isPlayerOpponent ? callOnHScript('goodNoteHitPre', [note]) : callOnHScript('opponentNoteHitPre', [note]));
 
 		note.wasGoodHit = true;
 
@@ -3584,9 +3591,15 @@ private function popUpScore(note:Note = null):Void
 			if(!note.noMissAnimation) {
 				switch(note.noteType) {
 					case 'Hurt Note': 
-						if(boyfriend.animOffsets.exists('hurt')) {
-							boyfriend.playAnim('hurt', true);
-							boyfriend.specialAnim = true;
+						if(!isPlayerOpponent){
+							if(boyfriend.animOffsets.exists('hurt')) {
+								boyfriend.playAnim('hurt', true);
+								boyfriend.specialAnim = true;
+							}
+							if(dad.animOffsets.exists('hurt')) {
+								dad.playAnim('hurt', true);
+								dad.specialAnim = true;
+							}
 						}
 				}
 			}
@@ -3600,7 +3613,7 @@ private function popUpScore(note:Note = null):Void
 		if(!note.noAnimation) {
 			var animToPlay:String = singAnimation(note.noteData);
 
-			var char:Character = boyfriend;
+			var char:Character = isPlayerOpponent ? dad : boyfriend;
 			var animCheck:String = 'hey';
 			if(note.gfNote || note.gfStrum)
 			{
@@ -3625,7 +3638,7 @@ private function popUpScore(note:Note = null):Void
 
 		if(!cpuControlled)
 		{
-			var spr = playerStrums.members[note.noteData];
+			var spr = !isPlayerOpponent ? playerStrums.members[note.noteData] : opponentStrums.members[note.noteData];
 			if(spr != null) spr.playAnim('confirm', true);
 		}
 		else strumPlayAnim(1, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
@@ -3641,8 +3654,8 @@ private function popUpScore(note:Note = null):Void
 		if (guitarHeroSustains && note.isSustainNote) gainHealth = false;
 		if (gainHealth) health += note.hitHealth * healthGain;
 
-		var result:Dynamic = callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
-		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('goodNoteHit', [note]);
+		var result:Dynamic = !isPlayerOpponent ? callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]) : callOnLuas('opponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
+		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) (!isPlayerOpponent ? callOnHScript('goodNoteHit', [note]) : callOnHScript('opponentNoteHit', [note]));
 
 		if(!note.isSustainNote) invalidateNote(note);
 	}
@@ -3655,7 +3668,7 @@ private function popUpScore(note:Note = null):Void
 
 	public function spawnNoteSplashOnNote(note:Note) {
 		if(note != null) {
-			var strum:StrumNote = playerStrums.members[note.noteData];
+			var strum:StrumNote = !isPlayerOpponent ? playerStrums.members[note.noteData] : opponentStrums.members[note.noteData];
 			if(strum != null)
 				spawnNoteSplash(strum.x, strum.y, note.noteData, note, strum);
 		}
@@ -4056,9 +4069,9 @@ private function popUpScore(note:Note = null):Void
 	function strumPlayAnim(player:Int, id:Int, time:Float) {
 		var spr:StrumNote = null;
 		if(player == 0) {
-			spr = opponentStrums.members[id];
+			spr = !isPlayerOpponent ? opponentStrums.members[id] : playerStrums.members[id];
 		} else if(player == 1) {
-			spr = playerStrums.members[id];
+			spr = !isPlayerOpponent ? playerStrums.members[id] : opponentStrums.members[id];
 		} else {
 			spr = gfStrums.members[id];
 		}	

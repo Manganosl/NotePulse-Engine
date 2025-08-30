@@ -46,6 +46,8 @@ class Note extends FlxSkewedSprite
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
 
+	public var strum:StrumNote = null;
+
 	public var wasGoodHit:Bool = false;
 	public var missed:Bool = false;
 	public var gfStrum:Bool = false;

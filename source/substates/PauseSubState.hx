@@ -305,14 +305,8 @@ class PauseSubState extends MusicBeatSubstate
 				case "Restart Song":
 					restartSong();
 				case "Change Player":
-					var save:FlxSave = new FlxSave();
-					save.bind('PlayAsOpponent_Settings', CoolUtil.getSavePath() + '/' + 'psychenginemods');
-					PlayState.instance.modchartSaves.set('PlayAsOpponent_Settings', save);
-					var saveData = PlayState.instance.modchartSaves.get('PlayAsOpponent_Settings').data;
-					var currentPlayer = Reflect.field(saveData, 'enabled');
-					Reflect.setField(PlayState.instance.modchartSaves.get('PlayAsOpponent_Settings').data, 'enabled', currentPlayer ? false : true);
-					PlayState.instance.modchartSaves.get('PlayAsOpponent_Settings').flush();
 					restartSong();
+					PlayState.isPlayerOpponent = !PlayState.isPlayerOpponent;
 				case "Leave Charting Mode":
 					restartSong();
 					PlayState.chartingMode = false;
