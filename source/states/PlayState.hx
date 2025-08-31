@@ -599,10 +599,10 @@ class PlayState extends MusicBeatState
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
 		moveCameraSection();
 
-		healthBar = new Bar(0, FlxG.height * (!ClientPrefs.data.downScroll ? 0.89 : 0.11), 'healthBar', function(){
-			healthLerp = FlxMath.lerp(healthLerp, health, 0.15);
-			return healthLerp;
-		}, 0, 2);
+			healthBar = new Bar(0, FlxG.height * (!ClientPrefs.data.downScroll ? 0.89 : 0.11), 'healthBar', function(){
+				healthLerp = FlxMath.lerp(healthLerp, health, 0.15);
+				return healthLerp;
+			}, 0, 2);
 		healthBar.screenCenter(X);
 		healthBar.leftToRight = false;
 		healthBar.scrollFactor.set();
@@ -2142,7 +2142,7 @@ class PlayState extends MusicBeatState
 
 	public var isDead:Bool = false; //Don't mess with this on Lua!!!
 	function doDeathCheck(?skipHealthCheck:Bool = false) {
-		if (((skipHealthCheck && instakillOnMiss) || health <= 0) && !practiceMode && !isDead)
+		if (((skipHealthCheck && instakillOnMiss) || (!isPlayerOpponent ? (health <= 0) : (health >= 2))) && !practiceMode && !isDead)
 		{
 			var ret:Dynamic = callOnScripts('onGameOver', null, true);
 			if(ret != LuaUtils.Function_Stop) {
@@ -3652,7 +3652,8 @@ private function popUpScore(note:Note = null):Void
 		}
 		var gainHealth:Bool = true; // prevent health gain, *if* sustains are treated as a singular note
 		if (guitarHeroSustains && note.isSustainNote) gainHealth = false;
-		if (gainHealth) health += note.hitHealth * healthGain;
+		if (gainHealth && !isPlayerOpponent) health += note.hitHealth * healthGain;
+		if (gainHealth && isPlayerOpponent) health -= note.hitHealth * healthGain;
 
 		var result:Dynamic = !isPlayerOpponent ? callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]) : callOnLuas('opponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) (!isPlayerOpponent ? callOnHScript('goodNoteHit', [note]) : callOnHScript('opponentNoteHit', [note]));
