@@ -3595,7 +3595,7 @@ private function popUpScore(note:Note = null):Void
 		var lastCombo:Int = combo;
 		combo = 0;
 
-		health -= subtract * healthLoss;
+		if(!isPlayerOpponent) health -= subtract * healthLoss; else health += subtract * healthLoss;
 		if(!practiceMode) songScore -= 10;
 		if(!endingSong) songMisses++;
 		totalPlayed++;
