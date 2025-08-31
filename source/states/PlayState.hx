@@ -2965,7 +2965,7 @@ class PlayState extends MusicBeatState
 				if (storyPlaylist.length <= 0)
 				{
 					Mods.loadTopMod();
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+					FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic));
 					#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 					cancelMusicFadeTween();
 
@@ -3014,7 +3014,7 @@ class PlayState extends MusicBeatState
 				{*/
 					Mods.loadTopMod();
 					MusicBeatState.switchState(new FreeplayState());
-					FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+					FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic));
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
 				//}
 				changedDifficulty = false;
