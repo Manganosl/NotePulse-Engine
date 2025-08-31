@@ -1968,6 +1968,9 @@ class PlayState extends MusicBeatState
 		if (healthBar.bounds.max != null && health > healthBar.bounds.max)
 			health = healthBar.bounds.max;
 
+		if (healthBar.bounds.min != null && health < healthBar.bounds.min)
+			health = healthBar.bounds.min;
+
 		updateIconsScale(elapsed);
 		updateIconsPosition();
 
