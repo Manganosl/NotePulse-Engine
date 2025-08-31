@@ -143,9 +143,9 @@ class VisualsUISubState extends BaseOptionsMenu
 		addOption(option);
 		option.onChange = onChangePauseMusic;
 
-		{var option:Option = new Option('Main Menu Song:',
+		var option:Option = new Option('Main Menu Song:',
 			"What song do you prefer while in the Main Menu?",
-			'mainMusic',
+			'menuMusic',
 			'string',
 			['Vanilla', 'JS']);
 		addOption(option);
@@ -226,7 +226,7 @@ class VisualsUISubState extends BaseOptionsMenu
 
 	override function destroy()
 	{
-		if(changedMusic && !OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music('freakyMenu'), 1, true);
+		if(changedMusic && !OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 1, true);
 		super.destroy();
 	}
 
@@ -237,5 +237,4 @@ class VisualsUISubState extends BaseOptionsMenu
 			Main.fpsVar.visible = ClientPrefs.data.showFPS;
 	}
 	#end*/
-}
 }

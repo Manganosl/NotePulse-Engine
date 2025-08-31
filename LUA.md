@@ -1,3 +1,48 @@
+# Extra HScript utils
+Here's a list of all utilities added this this engine.
+
+### CustomShader
+This util will help to create shaders and add them to cameras directly
+```
+var shader:CustomShader = new CustomShader("shaderName");
+shader.addToCamera(camera);
+shader.addToCameras(cameras);
+shader.removeFromCamera(camera);
+shader.removeFromCameras(cameras);
+shader.setFloat("val", num);
+shader.setArrayFloat("val", [nums]);
+shader.setInt("val", num);
+shader.setArrayInt("val", [nums]);
+shader.setBool("val", bool);
+shader.setArrayBool("val", [bools]);
+shader.setSampler2D("val", texture);
+shader.setArraySampler2D("val", [textures]);
+```
+
+### WindowUtils
+(Still more functions to be added!) This util helps with manipulating the game window
+```
+setTitle("name", add? = false)
+setGameDimensions(width:Int, height:Int, cameras:Array<FlxCamera>)
+centerWindowOnPoint(point)
+getCenterWindowPoint()
+```
+### NdllUtil
+(Thanks to CNE for this one!) This util loads custom ndlls located in the ndlls directory from your mod
+```
+var ndll = NdllUtil.getFunction("ndll", "funcName", args:Int)
+```
+From there you can just
+```
+ndll(val)
+```
+
+### Others
+More things added are:
+- [FunkinModchart functions](https://github.com/theoo-h/FunkinModchart/blob/main/DOC.md)
+- [FlxEmitter](https://api.haxeflixel.com/flixel/effects/particles/FlxTypedEmitter.html)
+- Away3D (I've got no idea how to use it right now)
+
 # Extra LUA functions
 Here you'll find multiple LUA functions added to make coding easier and do some things without the need of runHaxeCode() or a separate HScript file
 

@@ -37,7 +37,8 @@ class CreditsState extends MusicBeatState
 
 		var defaultList:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
 			['NotePulse Engine'],
-			['Manganos', 			'face',				'Useless Owner of this Engine',			 					 'https://github.com/Manganosl', 		'6a329f'],
+			['Manganos', 			'idk',				'Useless Owner of this Engine',			 					 'https://github.com/Manganosl', 		'6a329f'],
+			['Alvarititi', 			'face',				'Emotional Support',			 					 'https://github.com/Alvarititi', 		'6a329f'],
 			[''],
 			['More credits'],
 			['tposejank', 			'tposejank',		'EK Programmer',			 								 'https://twitter.com/tposejank', 		'B9AF27'],	//mensajes subliminales
