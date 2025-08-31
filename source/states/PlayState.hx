@@ -60,6 +60,11 @@ import psychlua.HScript;
 
 #if SScript
 import tea.SScript;
+import flixel.FlxSprite;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import shaders.CircleShader;
+
 #end
 
 /**
@@ -671,7 +676,6 @@ class PlayState extends MusicBeatState
 			eventNotes.sort(sortByTime);
 		}
 		if(ClientPrefs.data.doubletrail) new FunkinLua(functions.Trail.script, true);
-		if(ClientPrefs.data.noteTimer) new FunkinLua(functions.NoteTimer.script, true);
 
 		// SONG SPECIFIC SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -1375,6 +1379,24 @@ class PlayState extends MusicBeatState
 		#end
 		setOnScripts('songLength', songLength);
 		callOnScripts('onSongStart');
+
+		cc_upcoming = [];
+		for (note in unspawnNotes) {
+			if (!isPlayerOpponent ? note.mustPress : !note.mustPress) cc_upcoming.push(note.strumTime);
+		}
+		if (cc_circle == null) {
+			cc_circle = new FlxSprite();
+			cc_circle.loadGraphic(Paths.image('circleThing'));
+			cc_circle.scrollFactor.set();
+			cc_circle.antialiasing = true;
+			cc_circle.scale.set(0.75, 0.75);
+			cc_shader = new CircleShader();
+			cc_shader.percent.value = [1.0];
+			cc_circle.shader = cc_shader;
+			if (cc_camCamera == 'hud') cc_circle.cameras = [camHUD]; else cc_circle.cameras = [camOther];
+			if(ClientPrefs.data.noteTimer) add(cc_circle);
+		}
+		cc_circle.alpha = 0;
 	}
 
 	var debugNum:Int = 0;
@@ -1818,6 +1840,79 @@ class PlayState extends MusicBeatState
 	var canPause:Bool = true;
 	var freezeCamera:Bool = false;
 	var allowDebugKeys:Bool = true;
+	public var cc_startTimer:Int = 2;
+	public var cc_camCamera:String = 'hud';
+	var cc_upcoming:Array<Float> = [];
+	var cc_circle:FlxSprite;
+	var cc_shader:CircleShader;
+	var cc_takeTweenTime:Bool = true;
+	var cc_currentPercent:Float = 1;
+	var cc_percentTween:FlxTween;
+
+	inline function cc_lerp(a:Float, b:Float, ratio:Float):Float return a + ratio * (b - a);
+
+	function cc_computeMiddleStrum():{x:Float, y:Float} {
+		var grp = !isPlayerOpponent ? playerStrums : opponentStrums;
+		if (grp == null || grp.members == null || grp.length <= 0) return {x: FlxG.width * 0.5, y: FlxG.height * 0.5};
+		var n = grp.length;
+		var x:Float = 0;
+		var y:Float = 0;
+		if (n % 2 == 0) {
+			var i1 = Std.int(n/2 - 1);
+			var i2 = Std.int(n/2);
+			x = (grp.members[i1].x + grp.members[i2].x) * 0.5;
+			y = (grp.members[i1].y + grp.members[i2].y) * 0.5;
+		} else {
+			var mid = Std.int(n/2);
+			x = grp.members[mid].x;
+			y = grp.members[mid].y;
+		}
+		return {x:x, y:y};
+	}
+
+	function cc_startPercentTween(durationSec:Float) {
+		if (cc_percentTween != null) cc_percentTween.cancel();
+		var rate:Float = 1.0;
+		#if FLX_PITCH
+		if (FlxG.sound.music != null && FlxG.sound.music.pitch != 0) rate = FlxG.sound.music.pitch;
+		#end
+		var dur = Math.max(0.001, durationSec / rate);
+		cc_currentPercent = 1;
+		cc_percentTween = FlxTween.num(1, 0, dur, {ease: FlxEase.linear}, function(val:Float) {
+			cc_currentPercent = val;
+			if (cc_shader != null) cc_shader.percent.value = [cc_currentPercent];
+		});
+	}
+
+	function cc_updateHUD(elapsed:Float) {
+		if (cc_circle == null) return;
+		if (cc_upcoming.length <= 0) { cc_circle.alpha = cc_lerp(cc_circle.alpha, 0, elapsed * 8); return; }
+		var nextTime:Float = 1e30;
+		for (t in cc_upcoming) if (t < nextTime) nextTime = t;
+		var noteTimer:Float = nextTime - Conductor.songPosition;
+		var i = cc_upcoming.length - 1;
+		while (i >= 0) {
+			if (Conductor.songPosition >= cc_upcoming[i]) cc_upcoming.splice(i, 1);
+			i--;
+		}
+		if (noteTimer > 1000 * cc_startTimer) {
+			cc_circle.alpha = cc_lerp(cc_circle.alpha, 1, elapsed * 32);
+			if (cc_takeTweenTime) {
+				cc_startPercentTween(noteTimer / 1000);
+				cc_takeTweenTime = false;
+			}
+		} else if (noteTimer < 1000) {
+			cc_circle.alpha = cc_lerp(cc_circle.alpha, 0, elapsed * 8);
+			cc_takeTweenTime = true;
+		}
+	}
+
+	function cc_updatePosition() {
+		if (cc_circle == null) return;
+		var pos = cc_computeMiddleStrum();
+		cc_circle.x = pos.x + 12.5;
+		cc_circle.y = pos.y + 128;
+	}
 
 	override public function update(elapsed:Float)
 	{
@@ -2041,10 +2136,13 @@ class PlayState extends MusicBeatState
 		setOnScripts('cameraX', camFollow.x);
 		setOnScripts('cameraY', camFollow.y);
 		setOnScripts('botPlay', cpuControlled);
+		
+		cc_updateHUD(elapsed);
+		cc_updatePosition();
+
 		callOnScripts('onUpdatePost', [elapsed]);
 	}
 
-	// Health icon updaters
 	public dynamic function updateIconsScale(elapsed:Float)
 	{
 		var mult:Float = FlxMath.lerp(1, iconP1.scale.x, Math.exp(-elapsed * 9 * playbackRate));
