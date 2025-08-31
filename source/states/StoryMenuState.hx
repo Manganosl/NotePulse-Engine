@@ -116,6 +116,8 @@ class StoryMenuState extends MusicBeatState
 			}
 		}
 
+		debug.CodenameBuildField.engineName = "NotePulse Engine "+states.MainMenuState.npeVersion;
+
 		WeekData.setDirectoryFromWeek(loadedWeeks[0]);
 		var charArray:Array<String> = loadedWeeks[0].weekCharacters;
 		for (char in 0...3)

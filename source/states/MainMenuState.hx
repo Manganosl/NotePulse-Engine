@@ -15,9 +15,8 @@ enum MainMenuColumn {
 
 class MainMenuState extends MusicBeatState
 {
-	public static var krazyEngineVersion:String = '1.1a';
+	public static var npeVersion:String = '0.3';
 	public static var psychEngineVersion:String = '0.7.3'; // This is also used for Discord RPC
-	public static var extraKeysVersion:String = '0.4.9'; // This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 	public static var curColumn:MainMenuColumn = CENTER;
 	var allowMouse:Bool = true; //Turn this off to block mouse movement in menus
@@ -50,7 +49,7 @@ class MainMenuState extends MusicBeatState
 		#end
 		Mods.loadTopMod();
 
-		CodenameBuildField.engineName = "NotePulse Engine 2.2";
+		CodenameBuildField.engineName = "NotePulse Engine "+states.MainMenuState.npeVersion;
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
@@ -122,29 +121,13 @@ class MainMenuState extends MusicBeatState
 			add(titleText);
 	
 			if (DiscordClient.dUser != null)
-				descText = new FlxText(0, 50, 1180, "Connected to discord - " + DiscordClient.dUser + "\nNotePulse Engine v" + krazyEngineVersion + "\nPsych Engine v" + psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
+				descText = new FlxText(0, 50, 1180, "Connected to discord - " + DiscordClient.dUser + "\nNotePulse Engine v" + npeVersion + "\nPsych Engine v" + psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
 			else
-				descText = new FlxText(0, 50, 1180, "NotePulse Engine v" + krazyEngineVersion + "\nPsych Engine v" + psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
+				descText = new FlxText(0, 50, 1180, "NotePulse Engine v" + npeVersion + "\nPsych Engine v" + psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
 			descText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			descText.scrollFactor.set();
 			add(descText);
 		
-		/*var krazyVer:FlxText;
-		if (DiscordClient.dUser != null)
-			krazyVer = new FlxText(12, FlxG.height - 84, 0, "Connected to discord - " + DiscordClient.dUser + "\nNotePulse Engine v" + krazyEngineVersion, 12);
-		else
-			krazyVer = new FlxText(12, FlxG.height - 64, 0, "NotePulse Engine v" + krazyEngineVersion, 12);
-		krazyVer.scrollFactor.set();
-		krazyVer.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		add(krazyVer);
-		var psychVer:FlxText = new FlxText(12, FlxG.height - 44, 0, "Psych Engine v" + psychEngineVersion, 12);
-		psychVer.scrollFactor.set();
-		psychVer.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		add(psychVer);
-		var fnfVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "Friday Night Funkin' v" + Application.current.meta.get('version'), 12);
-		fnfVer.scrollFactor.set();
-		fnfVer.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		add(fnfVer);*/
 		changeItem();
 
 		#if ACHIEVEMENTS_ALLOWED

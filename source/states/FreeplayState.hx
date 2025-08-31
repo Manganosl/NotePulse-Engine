@@ -142,7 +142,7 @@ class FreeplayState extends MusicBeatState
 			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
 			icon.sprTracker = songText;
 
-			CodenameBuildField.engineName = "NotePulse Engine 2.2";
+			CodenameBuildField.engineName = "NotePulse Engine "+states.MainMenuState.npeVersion;
 
 			// too laggy with a lot of songs, so i had to recode the logic for it
 			songText.visible = songText.active = songText.isMenuItem = false;

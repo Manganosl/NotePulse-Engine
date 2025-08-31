@@ -6,7 +6,7 @@ import openfl.text.TextField;
 
 class CodenameBuildField extends Sprite {
 	public var codenameTextField:TextField;
-	public static var engineName:String = "NotePulse Engine 2.2";
+	public static var engineName:String = "NotePulse Engine "+states.MainMenuState.npeVersion;
 	public static var oldEName:String = engineName;
 	public function new() {
 		super();

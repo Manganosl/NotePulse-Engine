@@ -97,15 +97,15 @@ class TitleState extends MusicBeatState
 		if (ExtraKeysHandler.instance.data.scales == null)
 			MusicBeatState.switchState(new ScaleSimulationState());
 
-		/*#if CHECK_FOR_UPDATES
+		#if CHECK_FOR_UPDATES
 		if(ClientPrefs.data.checkForUpdates && !closedState) {
 			trace('checking for update');
-			var http = new haxe.Http("https://fnlookup-apiv2.vercel.app/api?extrakeys");
+			var http = new haxe.Http("https://raw.githubusercontent.com/Manganosl/NotePulse-Engine/refs/heads/main/CurrentVersion.md");
 
 			http.onData = function (data:String)
 			{
 				updateVersion = data.split('\n')[0].trim();
-				var curVersion:String = MainMenuState.extraKeysVersion.trim();
+				var curVersion:String = MainMenuState.npeVersion.trim();
 				trace('version online: ' + updateVersion + ', your version: ' + curVersion);
 				if(updateVersion != curVersion) {
 					trace('versions arent matching!');
@@ -119,7 +119,7 @@ class TitleState extends MusicBeatState
 
 			http.request();
 		}
-		#end*/
+		#end
 
 		Highscore.load();
 
