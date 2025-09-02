@@ -2345,8 +2345,18 @@ class PlayState extends MusicBeatState
 	}
 
 	public function precacheVideo(videoName:String){
-		startVideo(videoName, false, true, false, true);
-		if(videoCutscene != null) videoCutscene.destroy();
+		var video = new FlxVideoSprite(0,0);
+    	video.antialiasing = ClientPrefs.data.antialiasing;
+    	video.load(Paths.video(videoName), looped ? ['input-repeat=65545'] : null);
+    	if (!looped) {
+        	video.bitmap.onEndReached.add(()->{
+            	remove(video);
+        	});
+    	}
+    	videoSprites.push(video);
+		video.play();
+
+		remove(video);
 	}
 
 
