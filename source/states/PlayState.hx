@@ -3639,7 +3639,7 @@ private function popUpScore(note:Note = null):Void
 		if (songName != 'tutorial')
 			camZooming = true;
 
-		if(note.noteType == 'Hey!' && (!isPlayerOpponent ? dad.animOffsets.exists('hey') : boyfriend.animOffsets.exists('hey'))) {
+		if((isPlayerOpponent ? !boyfriend.noNoteAnim : !dad.noNoteAnim) && note.noteType == 'Hey!' && (!isPlayerOpponent ? dad.animOffsets.exists('hey') : boyfriend.animOffsets.exists('hey'))) {
 			!isPlayerOpponent ? dad.playAnim('hey', true) : boyfriend.playAnim('hey', true);
 			!isPlayerOpponent ? dad.specialAnim = true : boyfriend.specialAnim = true;
 			!isPlayerOpponent ? dad.heyTimer = 0.6 : boyfriend.heyTimer = 0.6;
@@ -3654,7 +3654,7 @@ private function popUpScore(note:Note = null):Void
 			var animToPlay:String = singAnimation(note.noteData) + altAnim;
 			if(note.gfNote || note.gfStrum) char = gf;
 
-			if(char != null)
+			if(char != null && !char.noNoteAnim)
 			{
 				char.playAnim(animToPlay, true);
 				char.holdTimer = 0;
@@ -3693,11 +3693,11 @@ private function popUpScore(note:Note = null):Void
 				switch(note.noteType) {
 					case 'Hurt Note': 
 						if(!isPlayerOpponent){
-							if(boyfriend.animOffsets.exists('hurt')) {
+							if(boyfriend.animOffsets.exists('hurt') && !boyfriend.noNoteAnim) {
 								boyfriend.playAnim('hurt', true);
 								boyfriend.specialAnim = true;
 							}
-							if(dad.animOffsets.exists('hurt')) {
+							if(dad.animOffsets.exists('hurt') && !dad.noNoteAnim) {
 								dad.playAnim('hurt', true);
 								dad.specialAnim = true;
 							}
@@ -3711,10 +3711,9 @@ private function popUpScore(note:Note = null):Void
 			return;
 		}
 
-		if(!note.noAnimation) {
+		var char:Character = isPlayerOpponent ? dad : boyfriend;
+		if(!note.noAnimation && !char.noNoteAnim) {
 			var animToPlay:String = singAnimation(note.noteData);
-
-			var char:Character = isPlayerOpponent ? dad : boyfriend;
 			var animCheck:String = 'hey';
 			if(note.gfNote || note.gfStrum)
 			{

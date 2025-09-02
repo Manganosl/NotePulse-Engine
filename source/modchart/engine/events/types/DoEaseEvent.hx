@@ -5,46 +5,48 @@ import flixel.tweens.FlxEase.EaseFunction;
 import flixel.tweens.FlxEase;
 
 class DoEaseEvent extends Event {
-	public var beatLength:Float;
-	public var ease:EaseFunction;
+    public var beatLength:Float;
+    public var ease:EaseFunction;
 
-	var entryPerc:Null<Float> = null;
-	var elapsed:Float = 0;
-	var totalDuration:Float;
+    var entryPerc:Float;
+    var elapsed:Float = 0;
+    var totalDuration:Float;
 
-	public function new(mod:String, beatLength:Float, target:Float, ease:EaseFunction, player:Int, parent:EventManager) {
-		this.name = mod;
-		this.player = player;
+    public function new(mod:String, len:Float, target:Float, ease:EaseFunction, player:Int, parent:EventManager) {
+        this.name = mod;
+        this.player = player;
 
-		this.beatLength = beatLength;
-		this.ease = ease != null ? ease : FlxEase.linear;
-		this.target = target;
+        this.beatLength = len;
+        this.ease = ease != null ? ease : FlxEase.linear;
+        this.target = target;
 
-		var beatDuration:Float = (backend.Conductor.stepCrochet * 0.001) * 4;
-		this.totalDuration = beatLength * beatDuration;
+        // duration in seconds (same math as EaseEvent but immediate)
+        var beatDuration:Float = (backend.Conductor.stepCrochet * 0.001) * 4;
+        this.totalDuration = len * beatDuration;
 
-		super(0, (_) -> {}, parent, true);
+        // snapshot of current value at creation
+        this.entryPerc = ModchartUtil.findEntryFrom(this);
 
-		type = EASE;
-	}
+        super(0, (_) -> {}, parent, true);
 
-	override function update(elapsedTime:Float) {
-		if (fired)
-			return;
+        type = EASE;
+    }
 
-		if (entryPerc == null)
-			entryPerc = ModchartUtil.findEntryFrom(this);
+    override function update(elapsedTime:Float) {
+        if (fired) return;
 
-		elapsed += elapsedTime;
+        elapsed += elapsedTime;
 
-		var progress = FlxMath.bound(elapsed / totalDuration, 0, 1);
+        if (elapsed < totalDuration) {
+            var progress = FlxMath.bound(elapsed / totalDuration, 0, 1);
+            var out = FlxMath.lerp(entryPerc, target, ease(progress));
 
-		var out = FlxMath.lerp(entryPerc, target, ease(progress));
-		setModPercent(name, out, player);
-
-		if (progress >= 1) {
-			fired = true;
-			setModPercent(name, ease(1) * target, player);
-		}
-	}
+            setModPercent(name, out, player);
+            fired = false;
+        } else {
+            fired = true;
+            // ensure it finishes at exact target
+            setModPercent(name, ease(1) * target, player);
+        }
+    }
 }
