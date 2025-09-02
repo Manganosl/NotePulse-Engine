@@ -3602,10 +3602,10 @@ private function popUpScore(note:Note = null):Void
 		RecalculateRating(true);
 
 		// play character anims
-		var char:Character = boyfriend;
+		var char:Character = !isPlayerOpponent ? boyfriend : dad;
 		if((note != null && (note.gfNote || note.gfStrum)) || (SONG.notes[curSection] != null && SONG.notes[curSection].gfSection)) char = gf;
 
-		if(char != null && (note == null || !note.noMissAnimation) && char.hasMissAnimations)
+		if(char != null && (note == null || !note.noMissAnimation) && char.hasMissAnimations && !char.noNoteAnim)
 		{
 			var suffix:String = '';
 			if(note != null) suffix = note.animSuffix;
