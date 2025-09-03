@@ -3,7 +3,9 @@ package backend.extraUtils;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.FlxCamera;
 import openfl.filters.ShaderFilter;
+import haxe.DynamicAccess;
 
+@:dynamic
 class CustomShader {
     public var shader:FlxRuntimeShader;
 
@@ -33,15 +35,26 @@ class CustomShader {
     }
 
     // ---- NEW DYNAMIC ACCESS ----
-    @:keep
-    public function resolve(name:String):Dynamic {
-        return getUniform(name);
+    @:resolve
+    public function resolveDynamic(name:String):Dynamic {
+        return {
+            get: () -> getUniform(name),
+            set: (v:Dynamic) -> { setUniform(name, v); return v; }
+        };
     }
 
-    @:keep
     public function setField(name:String, value:Dynamic):Dynamic {
-        setUniform(name, value);
+        if (shader.data.exists(name)) {
+            setUniform(name, value);
+            return value;
+        }
+        Reflect.setField(this, name, value);
         return value;
+    }
+
+    public function getField(name:String):Dynamic {
+        if (shader.data.exists(name)) return getUniform(name);
+        return Reflect.field(this, name);
     }
 
     private function setUniform(name:String, value:Dynamic):Void {
@@ -78,7 +91,7 @@ class CustomShader {
         return null;
     }
 
-    // For legacy (or if you are masochistic)
+    // ---- LEGACY FUNCTIONS (still work) ----
 
     public function setFloat(name:String, value:Float) {
         shader.setFloat(name, value);
