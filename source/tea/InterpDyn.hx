@@ -1,85 +1,56 @@
 package tea;
 
 import hscriptBase.Interp;
+import tea.backend.SScriptCustomBehavior;
 
 /**
- * InterpDyn extends the base interpreter to add safe fallbacks:
- * - If base resolution fails, consult the SScript host (if it implements
- *   SScriptCustomBehavior) and/or the target object's getField/setField/resolve.
+ * InterpDyn: route field access and assignment through SScriptCustomBehavior
+ * (customGet/customSet) when the target object implements it, mirroring the
+ * way Funkin's Interp handles IHScriptCustomBehaviour (hget/hset).
+ *
+ * This version gives priority to the object's custom behaviour, then falls
+ * back to the normal Interp get/set logic.
  */
 class InterpDyn extends Interp {
     public function new() {
         super();
     }
 
+    // ---------------- GET ----------------
     #if (hscript_pos)
     override public function get(o:Dynamic, f:String, p:Dynamic):Dynamic {
-        try {
-            return super.get(o, f, p);
-        } catch (_:Dynamic) {
+        if (o != null && Std.isOfType(o, SScriptCustomBehavior)) {
+            var b:SScriptCustomBehavior = cast o;
+            return b.customGet(o, f);
         }
-        return fallbackGet(o, f);
+        return super.get(o, f, p);
     }
     #else
     override public function get(o:Dynamic, f:String):Dynamic {
-        try {
-            return super.get(o, f);
-        } catch (_:Dynamic) {
+        if (o != null && Std.isOfType(o, SScriptCustomBehavior)) {
+            var b:SScriptCustomBehavior = cast o;
+            return b.customGet(o, f);
         }
-        return fallbackGet(o, f);
+        return super.get(o, f);
     }
     #end
 
+    // ---------------- SET ----------------
     #if (hscript_pos)
     override public function set(o:Dynamic, f:String, v:Dynamic, p:Dynamic):Dynamic {
-        if (Reflect.hasField(o, f)) {
-            return super.set(o, f, v, p);
+        if (o != null && Std.isOfType(o, SScriptCustomBehavior)) {
+            var b:SScriptCustomBehavior = cast o;
+            return b.customSet(o, f, v);
         }
-        return fallbackSet(o, f, v);
+        return super.set(o, f, v, p);
     }
     #else
     override public function set(o:Dynamic, f:String, v:Dynamic):Dynamic {
-        if (Reflect.hasField(o, f)) {
-            return super.set(o, f, v);
+        if (o != null && Std.isOfType(o, SScriptCustomBehavior)) {
+            var b:SScriptCustomBehavior = cast o;
+            return b.customSet(o, f, v);
         }
-        return fallbackSet(o, f, v);
+        return super.set(o, f, v);
     }
     #end
-
-    function fallbackGet(o:Dynamic, f:String):Dynamic {
-        var scr:Dynamic = Reflect.field(this, "scr");
-        if (scr != null && Std.isOfType(scr, tea.backend.SScriptCustomBehavior)) {
-            try {
-                if (Std.isOfType(scr, tea.backend.SScriptCustomBehavior)) {
-                    var handler:tea.backend.SScriptCustomBehavior = cast scr;
-                    return handler.customGet(o, f);
-                }
-            } catch (_:Dynamic) {}
-        }
-
-        var fn = Reflect.field(o, "getField");
-        if (fn != null) return Reflect.callMethod(o, fn, [f]);
-        var res = Reflect.field(o, "resolve");
-        if (res != null) return Reflect.callMethod(o, res, [f]);
-
-        return Reflect.field(o, f);
-    }
-
-    function fallbackSet(o:Dynamic, f:String, v:Dynamic):Dynamic {
-        var scr:Dynamic = Reflect.field(this, "scr");
-        if (scr != null && Std.isOfType(scr, tea.backend.SScriptCustomBehavior)) {
-            try {
-                if (Std.isOfType(scr, tea.backend.SScriptCustomBehavior)) {
-                    var handler:tea.backend.SScriptCustomBehavior = cast scr;
-                    return handler.customSet(o, f, v);
-                }
-            } catch (_:Dynamic) {}
-        }
-
-        var fn = Reflect.field(o, "setField");
-        if (fn != null) return Reflect.callMethod(o, fn, [f, v]);
-
-        Reflect.setField(o, f, v);
-        return v;
-    }
 }

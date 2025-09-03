@@ -3,10 +3,11 @@ package backend.extraUtils;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.FlxCamera;
 import openfl.filters.ShaderFilter;
-import haxe.DynamicAccess;
+import tea.backend.SScriptCustomBehavior;
+import flixel.graphics.FlxGraphic;
+import openfl.display.BitmapData;
 
-@:dynamic
-class CustomShader {
+class CustomShader implements SScriptCustomBehavior {
     public var shader:FlxRuntimeShader;
 
     public function new(shaderName:String) {
@@ -34,118 +35,102 @@ class CustomShader {
         }
     }
 
-    // ---- NEW DYNAMIC ACCESS ----
-    @:resolve
-    public function resolveDynamic(name:String):Dynamic {
-        return {
-            get: () -> getUniform(name),
-            set: (v:Dynamic) -> { setUniform(name, v); return v; }
-        };
-    }
+    public function customSet(o:Dynamic, f:String, v:Dynamic):Dynamic return hset(f, v);
+    public function customGet(o:Dynamic, f:String):Dynamic return hget(f);
 
-    public function setField(name:String, value:Dynamic):Dynamic {
-        if (shader.data.exists(name)) {
-            setUniform(name, value);
-            return value;
+    public function hget(name:String):Dynamic {
+        var fields = Type.getInstanceFields(Type.getClass(this));
+        if (fields != null && (fields.indexOf(name) != -1 || fields.indexOf('get_${name}') != -1)) {
+            return Reflect.getProperty(this, name);
         }
-        Reflect.setField(this, name, value);
-        return value;
+
+        return getUniform(name);
     }
 
-    public function getField(name:String):Dynamic {
-        if (shader.data.exists(name)) return getUniform(name);
-        return Reflect.field(this, name);
+    public function hset(name:String, val:Dynamic):Dynamic {
+        var fields = Type.getInstanceFields(Type.getClass(this));
+        if (fields != null && (fields.indexOf(name) != -1 || fields.indexOf('set_${name}') != -1)) {
+            Reflect.setProperty(this, name, val);
+            return val;
+        }
+
+        setUniform(name, val);
+        return val;
+    }
+
+    private inline function isNumber(x:Dynamic):Bool {
+        return x is Float || x is Int;
     }
 
     private function setUniform(name:String, value:Dynamic):Void {
+        if (value is FlxGraphic) {
+            shader.setSampler2D(name, cast(value, FlxGraphic).bitmap);
+            return;
+        } else if (value is BitmapData) {
+            shader.setSampler2D(name, value);
+            return;
+        }
+    
         switch (Type.typeof(value)) {
             case TFloat:
                 shader.setFloat(name, value);
+        
             case TInt:
-                shader.setInt(name, value);
+                try shader.setInt(name, value) catch (_:Dynamic) {}
+                try shader.setFloat(name, value) catch (_:Dynamic) {}
+
             case TBool:
                 shader.setBool(name, value);
+        
             case TClass(Array):
-                if (value.length > 0) {
-                    switch (Type.typeof(value[0])) {
-                        case TFloat: shader.setFloatArray(name, cast value);
-                        case TInt:   shader.setIntArray(name, cast value);
-                        case TBool:  shader.setBoolArray(name, cast value);
-                        default:
-                    }
+                var arr:Array<Dynamic> = cast value;
+                if (arr == null || arr.length == 0) return;
+                var t = Type.typeof(arr[0]);
+                switch (t) {
+                    case TFloat:
+                        shader.setFloatArray(name, cast arr);
+                    case TInt:
+                        var fa:Array<Float> = [for (x in arr) (x:Float)];
+                        var ia:Array<Int>   = [for (x in arr) (x:Int)];
+                        try shader.setIntArray(name, ia) catch (_:Dynamic) {}
+                        try shader.setFloatArray(name, fa) catch (_:Dynamic) {}
+                    case TBool:
+                        shader.setBoolArray(name, cast arr);
+                    default:
+                        var fa:Array<Float> = [for (x in arr) Std.parseFloat(Std.string(x))];
+                        shader.setFloatArray(name, fa);
                 }
+
             default:
-                // Assume sampler2D/texture
                 shader.setSampler2D(name, value);
         }
     }
 
     private function getUniform(name:String):Dynamic {
-        try return shader.getFloat(name) catch (_) {}
-        try return shader.getInt(name) catch (_) {}
-        try return shader.getBool(name) catch (_) {}
-        try return shader.getFloatArray(name) catch (_) {}
-        try return shader.getIntArray(name) catch (_) {}
-        try return shader.getBoolArray(name) catch (_) {}
-        try return shader.getSampler2D(name) catch (_) {}
-        return null;
+        try return shader.getFloat(name) catch (_:Dynamic) {}
+        try return shader.getInt(name) catch (_:Dynamic) {}
+        try return shader.getBool(name) catch (_:Dynamic) {}
+        try return shader.getFloatArray(name) catch (_:Dynamic) {}
+        try return shader.getIntArray(name) catch (_:Dynamic) {}
+        try return shader.getBoolArray(name) catch (_:Dynamic) {}
+        try return shader.getSampler2D(name) catch (_:Dynamic) {}
+        return 0;  // 0 to prevent errors
     }
 
-    // ---- LEGACY FUNCTIONS (still work) ----
+    // In case something goes wrong!
+    public function setFloat(name:String, value:Float) shader.setFloat(name, value);
+    public function setInt(name:String, value:Int) shader.setInt(name, value);
+    public function setBool(name:String, value:Bool) shader.setBool(name, value);
+    public function setFloatArray(name:String, values:Array<Float>) shader.setFloatArray(name, values);
+    public function setIntArray(name:String, values:Array<Int>) shader.setIntArray(name, values);
+    public function setBoolArray(name:String, values:Array<Bool>) shader.setBoolArray(name, values);
+    public function setSampler2D(name:String, texture:Dynamic) shader.setSampler2D(name, texture);
 
-    public function setFloat(name:String, value:Float) {
-        shader.setFloat(name, value);
-    }
-
-    public function setInt(name:String, value:Int) {
-        shader.setInt(name, value);
-    }
-
-    public function setBool(name:String, value:Bool) {
-        shader.setBool(name, value);
-    }
-
-    public function setFloatArray(name:String, values:Array<Float>) {
-        shader.setFloatArray(name, values);
-    }
-
-    public function setIntArray(name:String, values:Array<Int>) {
-        shader.setIntArray(name, values);
-    }
-
-    public function setBoolArray(name:String, values:Array<Bool>) {
-        shader.setBoolArray(name, values);
-    }
-
-    public function setSampler2D(name:String, texture:Dynamic) {
-        shader.setSampler2D(name, texture);
-    }
-
-    public function getFloat(name:String) {
-        return shader.getFloat(name);
-    }
-
-    public function getInt(name:String) {
-        return shader.getInt(name);
-    }
-
-    public function getBool(name:String) {
-        return shader.getBool(name);
-    }
-
-    public function getFloatArray(name:String) {
-        return shader.getFloatArray(name);
-    }
-
-    public function getIntArray(name:String) {
-        return shader.getIntArray(name);
-    }
-
-    public function getBoolArray(name:String) {
-        return shader.getBoolArray(name);
-    }
-
-    public function getSampler2D(name:String) {
-        return shader.getSampler2D(name);
-    }
+    public function getFloat(name:String) return shader.getFloat(name);
+    public function getInt(name:String) return shader.getInt(name);
+    public function getBool(name:String) return shader.getBool(name);
+    public function getFloatArray(name:String) return shader.getFloatArray(name);
+    public function getIntArray(name:String) return shader.getIntArray(name);
+    public function getBoolArray(name:String) return shader.getBoolArray(name);
+    public function getSampler2D(name:String) return shader.getSampler2D(name);
 }
