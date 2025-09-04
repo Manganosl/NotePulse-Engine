@@ -16,7 +16,7 @@ import sys.io.File;
 import tea.backend.*;
 import tea.backend.crypto.Base32;
 
-import tea.backend.SScriptCustomBehavior.DefaultSScriptCustomBehavior;
+import tea.backend.SScriptCustomBehavior.HandleSScriptCustomBehavior;
 
 using StringTools;
 
@@ -64,19 +64,19 @@ class SScript implements SScriptCustomBehavior
 	/**
 		Init Custom Behavior. 
 	**/
-	public var customBehavior:SScriptCustomBehavior = new DefaultSScriptCustomBehavior();
+	public var customBehavior:SScriptCustomBehavior = new HandleSScriptCustomBehavior();
 
 	/**
 		Idk
 	**/
-	public function customGet(o:Dynamic, f:String):Dynamic 
-		return customBehavior.customGet(o, f);
+	public function hGet(o:Dynamic, f:String):Dynamic 
+		return customBehavior.hGet(o, f);
 
 	/**
 		Idk either
 	**/
-	public function customSet(o:Dynamic, f:String, v:Dynamic):Dynamic
-    	return customBehavior.customSet(o, f, v);
+	public function hSet(o:Dynamic, f:String, v:Dynamic):Dynamic
+    	return customBehavior.hSet(o, f, v);
 
 	/**
 		Ignore return value 

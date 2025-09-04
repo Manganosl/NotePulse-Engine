@@ -35,10 +35,7 @@ class CustomShader implements SScriptCustomBehavior {
         }
     }
 
-    public function customSet(o:Dynamic, f:String, v:Dynamic):Dynamic return hset(f, v);
-    public function customGet(o:Dynamic, f:String):Dynamic return hget(f);
-
-    public function hget(name:String):Dynamic {
+    public function hGet(o:Dynamic, name:String):Dynamic {
         var fields = Type.getInstanceFields(Type.getClass(this));
         if (fields != null && (fields.indexOf(name) != -1 || fields.indexOf('get_${name}') != -1)) {
             return Reflect.getProperty(this, name);
@@ -47,7 +44,7 @@ class CustomShader implements SScriptCustomBehavior {
         return getUniform(name);
     }
 
-    public function hset(name:String, val:Dynamic):Dynamic {
+    public function hSet(o:Dynamic, name:String, val:Dynamic):Dynamic {
         var fields = Type.getInstanceFields(Type.getClass(this));
         if (fields != null && (fields.indexOf(name) != -1 || fields.indexOf('set_${name}') != -1)) {
             Reflect.setProperty(this, name, val);
@@ -107,15 +104,25 @@ class CustomShader implements SScriptCustomBehavior {
     }
 
     private function getUniform(name:String):Dynamic {
-        try return shader.getFloat(name) catch (_:Dynamic) {}
-        try return shader.getInt(name) catch (_:Dynamic) {}
-        try return shader.getBool(name) catch (_:Dynamic) {}
-        try return shader.getFloatArray(name) catch (_:Dynamic) {}
-        try return shader.getIntArray(name) catch (_:Dynamic) {}
-        try return shader.getBoolArray(name) catch (_:Dynamic) {}
-        try return shader.getSampler2D(name) catch (_:Dynamic) {}
-        return 0;  // 0 to prevent errors
+        var v:Dynamic;
+
+        v = shader.getFloat(name);
+        if (v != null) return v;
+        v = shader.getInt(name);
+        if (v != null) return v;
+        v = shader.getBool(name);
+        if (v != null) return v;
+        v = shader.getFloatArray(name);
+        if (v != null) return v;
+        v = shader.getIntArray(name);
+        if (v != null) return v;
+        v = shader.getBoolArray(name);
+        if (v != null) return v;
+        v = shader.getSampler2D(name);
+        if (v != null) return v;
+        return 0; // fallback if all are null
     }
+
 
     // In case something goes wrong!
     public function setFloat(name:String, value:Float) shader.setFloat(name, value);
