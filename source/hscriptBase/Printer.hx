@@ -72,7 +72,7 @@ class Printer {
 			for (a in args)
 				switch a {
 					case CTNamed(_, _): type(a);
-					default: type(CTNamed('_', a));
+											default: type(CTNamed('_', a));
 				}
 			add(')->');
 			type(ret);
@@ -115,10 +115,20 @@ class Printer {
 			return;
 		}
 		switch( e.e ) {
+        case EPublic(e2):
+            add("public ");
+            expr(e2);
+        case EPrivate(e2):
+            add("private ");
+            expr(e2);
+        case EStatic(e2):
+            add("static ");
+            expr(e2);
+        
 		case EConst(c):
 			switch( c ) {
-			case CInt(i): add(i);
-			case CFloat(f): add(f);
+			case CInt(i): add(Std.string(i));
+			case CFloat(f): add(Std.string(f));
 			case CString(s): add('"'); add(s.split('"').join('\\"').split("\n").join("\\n").split("\r").join("\\r").split("\t").join("\\t")); add('"');
 			}
 		case EIdent(v):
@@ -167,7 +177,7 @@ class Printer {
 			else switch( e.e ) {
 			case EField(_), EIdent(_), EConst(_):
 				expr(e);
-			default:
+		default:
 				add("(");
 				expr(e);
 				add(")");
@@ -282,47 +292,27 @@ class Printer {
 			expr(e1);
 			add(" : ");
 			expr(e2);
-		case ESwitch(e, cases, def):
-			add("switch( ");
-			expr(e);
-			add(") {");
-			for( c in cases ) {
-				add("case ");
-				var first = true;
-				for( v in c.values ) {
-					if( first ) first = false else add(", ");
-					expr(v);
-				}
-				add(": ");
-				expr(c.expr);
-				add(";\n");
-			}
-			if( def != null ) {
-				add("default: ");
-				expr(def);
-				add(";\n");
-			}
-			add("}");
-		case EMeta(name, args, e):
-			add("@");
-			add(name);
-			if( args != null && args.length > 0 ) {
-				add("(");
-				var first = true;
-				for( a in args ) {
-					if( first ) first = false else add(", ");
-					expr(e);
-				}
-				add(")");
-			}
-			add(" ");
-			expr(e);
-		case ECheckType(e, t):
-			add("(");
-			expr(e);
-			add(" : ");
-			addType(t);
-			add(")");
+case ESwitch(e, cases, def):
+    add("switch( ");
+    expr(e);
+    add(") {");
+    for( c in cases ) {
+        add("case ");
+        var first = true;
+        for( v in c.values ) {
+            if( first ) first = false else add(", ");
+            expr(v);
+        }
+        add(": ");
+        expr(c.expr);
+        add(";\n");
+    }
+    if( def != null ) {
+        add("default: ");
+        expr(def);
+        add(";\n");
+    }
+    add("}");
 		case EImport(n, _, asIdent ):
 			var n = Type.getClassName(n);
 			if( n == null )

@@ -52,6 +52,10 @@ enum Token {
 @:keep
 @:access(tea.SScript)
 class Parser {
+	var inPublic:Bool = false;
+	var inPrivate:Bool = false;
+	var inStatic:Bool = false;
+
 
 	// config / variables
 	public var line : Int = 0;
@@ -557,6 +561,45 @@ class Parser {
 	function parseStructure(id, ?d : DynamicToken) {
 		var p1 = tokenMin;
 		return switch( id ) {
+        case "public":
+            {
+                var wasPublic = inPublic; var wasPrivate = inPrivate;
+                inPublic = true; inPrivate = false;
+                var tk = token();
+                var makeStatic = false;
+                switch( tk ){
+                    case TId("static"): makeStatic = true;
+                    default: push(tk);
+                }
+                var e = parseExpr();
+                if (makeStatic) e = mk(EStatic(e), p1, pmax(e));
+                inPublic = wasPublic; inPrivate = wasPrivate;
+                return mk(EPublic(e), p1, pmax(e));
+            }
+        case "private":
+            {
+                var wasPublic = inPublic; var wasPrivate = inPrivate;
+                inPrivate = true; inPublic = false;
+                var tk = token();
+                var makeStatic = false;
+                switch( tk ){
+                    case TId("static"): makeStatic = true;
+                    default: push(tk);
+                }
+                var e = parseExpr();
+                if (makeStatic) e = mk(EStatic(e), p1, pmax(e));
+                inPrivate = wasPrivate; inPublic = wasPublic;
+                return mk(EPrivate(e), p1, pmax(e));
+            }
+        case "static":
+            {
+                var wasStatic = inStatic;
+                inStatic = true;
+                var e = parseExpr();
+                inStatic = wasStatic;
+                return mk(EStatic(e), p1, pmax(e));
+            }
+
 		case "if":
 			ensure(TPOpen);
 			var cond = parseExpr();

@@ -39,6 +39,9 @@ typedef Expr = {
 }
 
 enum ExprDef {
+	EPublic(e:Expr);
+	EPrivate(e:Expr);
+	EStatic(e:Expr);
 	EConst( c : Const );
 	EIdent( v : String , ?isFinal : Bool );
 	EVar( n : String, ?t : CType, ?e : Expr , ?g : Array<String> );

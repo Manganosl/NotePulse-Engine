@@ -1003,11 +1003,16 @@ class SScript implements SScriptCustomBehavior
 			global.remove(script);
 		if (global.exists(scriptFile) && scriptFile != null && scriptFile.length > 0)
 			global.remove(scriptFile);
+        // remove globals this script published
+        if (interp != null && interp.pushedVars != null) {
+            for (n in interp.pushedVars) {
+                if (globalVariables.exists(n)) globalVariables.remove(n);
+            }
+        }
 
-		clear();
-		resetInterp();
-
-		customOrigin = null;
+        clear();
+        resetInterp();
+        customOrigin = null;
 		parser = null;
 		interp = null;
 		script = null;
