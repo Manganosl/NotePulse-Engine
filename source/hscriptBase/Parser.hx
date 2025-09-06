@@ -668,6 +668,50 @@ class Parser {
 				default: unexpected(tk);
 			}
 			mk(EVar(ident,tp,e,null),p1,(e == null) ? tokenMax : pmax(e));
+        case "class":
+            var tk2 = token();
+            var name:String = null;
+            switch(tk2) {
+                case TId(id): name = id;
+                default: push(tk2);
+            }
+
+            var extendPath:Array<String> = null;
+            var tk3 = token();
+			switch (tk3) {
+			    case TId("extends"):
+			        extendPath = parsePath();
+			    default:
+			        push(tk3);
+			}
+
+            var interfaces:Array<String> = null;
+            var tk4 = token();
+			switch (tk4) {
+            	case TId("implements"):
+                	interfaces = [];
+                	while (true) {
+                    	var p = parsePath();
+                    	interfaces.push(p.join("."));
+                    	var t5 = token();
+                    	if (t5 == TComma) continue;
+                    	push(t5);
+                    	break;
+                	}
+            	default:
+                	push(tk4);
+            }
+
+            ensure(TBrOpen);
+            var fields = [];
+            while (true) {
+                var tkb = token();
+                if (tkb == TBrClose) break;
+                push(tkb);
+
+                fields.push(parseExpr());
+            }
+            mk(EClass(name, fields, extendPath, interfaces), p1, tokenMax);
 		case "final":
 			var tk = token();
 			var ident = switch tk {

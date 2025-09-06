@@ -40,6 +40,7 @@ private enum Stop {
 class Interp {
 	public static var publicVariables:Map<String, Dynamic> = new Map();
 	public static var staticVariables:Map<String, Dynamic> = new Map();
+	public static var customClasses:Map<String, Dynamic> = new Map();
 
 	public var inPublic:Bool = false;
 	public var inPrivate:Bool = false;
@@ -493,6 +494,16 @@ case EField(e,f):
 		case CInt32(v): return v;
 		#end
 		}
+    case EClass(name, fields, extend, interfaces):
+        var handler = new tea.backend.SScriptClassHandler(this, name, fields, extend);
+        variables.set(name, handler);
+        if (inStatic && inPublic) {
+            if (pushedVars.indexOf(name) == -1) pushedVars.push(name);
+            Interp.publicVariables.set(name, handler);
+        }
+        customClasses.set(name, handler);
+        return handler;
+
 	case EIdent(id):
 		return resolve(id);
 
@@ -1064,12 +1075,21 @@ case EFinal(n,t,e):
 	}
 
 	function cnew( cl : String, args : Array<Dynamic> ) : Dynamic {
-		var c : Dynamic = try resolve(cl) catch(e) null;
-		if( c == null ) c = Type.resolveClass(cl);
-		if( c == null ) error(EInvalidAccess(cl));
+    	var c : Dynamic = try resolve(cl) catch(e) null;
 
-		return Type.createInstance(c,args);
+    	if (c != null) {
+        	var hnew = Reflect.field(c, "hnew");
+        	if (hnew != null) {
+        	    return Reflect.callMethod(c, hnew, [args]);
+        	}
+    	}
+
+    	if (c == null) c = Type.resolveClass(cl);
+    	if (c == null) error(EInvalidAccess(cl));
+
+    	return Type.createInstance(c,args);
 	}
+
 
 	function stringToolsFunction( o : Dynamic , f : String , args : Array<Dynamic> ) : Dynamic {
 		var func = StringFunctionTools.getStringToolsFunction(f);

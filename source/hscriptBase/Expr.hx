@@ -65,6 +65,7 @@ enum ExprDef {
 	EArray( e : Expr, index : Expr );
 	EArrayDecl( e : Array<Expr> );
 	ENew( cl : String, params : Array<Expr> , ?subIds : Array<String> );
+    EClass( name : String, fields : Array<Expr>, ?extend : Array<String>, ?interfaces : Array<String> );
 	EThrow( e : Expr );
 	ETry( e : Expr, v : String, t : Null<CType>, ecatch : Expr );
 	EObject( fl : Array<{ name : String, e : Expr }> );
