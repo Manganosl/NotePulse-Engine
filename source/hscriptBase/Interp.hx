@@ -40,7 +40,7 @@ private enum Stop {
 class Interp {
 	public static var publicVariables:Map<String, Dynamic> = new Map();
 	public static var staticVariables:Map<String, Dynamic> = new Map();
-	public static var customClasses:Map<String, Dynamic> = new Map();
+	public var customClasses:Map<String, Dynamic> = new Map();
 
 	public var inPublic:Bool = false;
 	public var inPrivate:Bool = false;
@@ -1077,19 +1077,19 @@ case EFinal(n,t,e):
 	function cnew( cl : String, args : Array<Dynamic> ) : Dynamic {
     	var c : Dynamic = try resolve(cl) catch(e) null;
 
-    	if (c != null) {
-        	var hnew = Reflect.field(c, "hnew");
-        	if (hnew != null) {
-        	    return Reflect.callMethod(c, hnew, [args]);
-        	}
-    	}
+		if (c != null) {
+    		var hnew = Reflect.field(c, "hnew");
+    		if (hnew != null) {
+        		// PASS THE ARG ARRAY DIRECTLY (do not wrap it in another array) ////////// Fuck this shit
+        		return Reflect.callMethod(c, hnew, [args]);
+    		}
+		}
 
     	if (c == null) c = Type.resolveClass(cl);
     	if (c == null) error(EInvalidAccess(cl));
 
     	return Type.createInstance(c,args);
 	}
-
 
 	function stringToolsFunction( o : Dynamic , f : String , args : Array<Dynamic> ) : Dynamic {
 		var func = StringFunctionTools.getStringToolsFunction(f);

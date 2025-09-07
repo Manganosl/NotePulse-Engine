@@ -702,16 +702,23 @@ class Parser {
                 	push(tk4);
             }
 
-            ensure(TBrOpen);
-            var fields = [];
-            while (true) {
-                var tkb = token();
-                if (tkb == TBrClose) break;
-                push(tkb);
+			ensure(TBrOpen);
+			var fields = [];
+			while (true) {
+    			var tkb = token();
+    			if (tkb == TBrClose) break;
+    			push(tkb);
 
-                fields.push(parseExpr());
-            }
-            mk(EClass(name, fields, extendPath, interfaces), p1, tokenMax);
+    			var e = parseExpr();
+
+    			// swallow an optional semicolon between class members
+    			var tkAfter = token();
+    			if (tkAfter != TStatement) push(tkAfter);
+
+    			fields.push(e);
+			}
+			mk(EClass(name, fields, extendPath, interfaces), p1, tokenMax);
+
 		case "final":
 			var tk = token();
 			var ident = switch tk {
