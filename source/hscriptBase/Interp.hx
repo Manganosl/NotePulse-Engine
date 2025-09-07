@@ -501,7 +501,15 @@ case EField(e,f):
             if (pushedVars.indexOf(name) == -1) pushedVars.push(name);
             Interp.publicVariables.set(name, handler);
         }
-        customClasses.set(name, handler);
+		try {
+    		customClasses.set(name, handler);
+    		var short = name;
+    		if (name.indexOf(".") != -1) {
+    		    var parts = name.split(".");
+    		    short = parts[parts.length - 1];
+    		}
+    		if (short != name) customClasses.set(short, handler);
+		} catch(_) {}
         return handler;
 
 	case EIdent(id):
@@ -614,7 +622,17 @@ case EFinal(n,t,e):
 		restore(old);
 		return v;
 	case EField(e,f):
-		return get(expr(e),f);
+		var o = expr(e);
+
+		try {
+		    if (o != null && Std.isOfType(o, tea.backend.SScriptCustomBehavior)) {
+		        var b:tea.backend.SScriptCustomBehavior = cast o;
+		        var getter = b.hGet(o, f);
+		        return getter;
+		    }
+		} catch(_) {}
+
+		return Reflect.field(o, f);
 	case ESwitchBinop(p, e1, e2):
 		var parent = expr(p);
 		var e1 = expr(e1), e2 = expr(e2);

@@ -78,7 +78,14 @@ class SScriptClassHandler {
         }
         var inst = if (hostBacking != null) new SScriptTemplate(instInterp, hostBacking)
         else new SScriptTemplate(instInterp, null);
-
+    
+        if (hostBacking != null) {
+            inst.parentInstance = hostBacking;
+            inst.parentInterp   = parentInterp;
+            try {
+                trace("[SScriptClassHandler] linked native parent for " + name + " -> " + Std.string(Type.getClassName(Type.getClass(hostBacking))));
+            } catch(_) {}
+        }
         // inject a "super" function into the child interpreter
         var softParent:Dynamic = null;
         if (extend != null && extend.length > 0) {
@@ -97,9 +104,7 @@ class SScriptClassHandler {
                     var hnewParent = Reflect.field(softParent, "hnew");
                     if (hnewParent != null) result = Reflect.callMethod(softParent, hnewParent, args);
                 } else if (hostBacking != null) {
-                    // host/native parent constructor
-                    var ctor = Reflect.field(Type.getClass(hostBacking), "new");
-                    if (ctor != null) result = Reflect.callMethod(hostBacking, ctor, args);
+                    result = hostBacking;
                 }
 
                 return result;
@@ -108,6 +113,9 @@ class SScriptClassHandler {
 
         var superProxy = new SScriptSuper(inst.parentInstance, (softParent == null ? null : softParent), parentInterp);
         instInterp.variables.set("super", superProxy);
+
+        instInterp.variables.set("this", inst);
+        instInterp.variables.set("self", inst);
 
         for (f in fields) {
             instInterp.expr(f);
@@ -135,56 +143,92 @@ public function new(interp:Interp, ?host:Dynamic) {
 }
 
 public function hGet(o:Dynamic, f:String):Dynamic {
+    // Prefer script-defined getter: get_<name>
     var gname = "get_" + f;
     if (__interp.variables.exists(gname)) {
         var getter = __interp.variables.get(gname);
         return Reflect.callMethod(this, getter, []);
     }
 
+    // Instance-local stored fields
     if (__interp.variables.exists(f)) {
-        return __interp.variables.get(f);
-    }
-
-    // parent script instance override (if any)
-    if (parentInstance != null) {
-        var pf = null;
-        var pfGetter = Reflect.field(parentInstance, "getField");
-        if (pfGetter != null) {
-            pf = Reflect.callMethod(parentInstance, pfGetter, [f]);
-            if (pf != null) return pf;
-        }
+        var instVal = __interp.variables.get(f);
         try {
-            var pval = Reflect.getProperty(parentInstance, f);
-            if (pval != null) return pval;
+            // If instance field is a function, bind it to the script instance
+            if (Reflect.isFunction != null && Reflect.isFunction(instVal)) {
+                var self = this;
+                var fn = instVal;
+                return function(args:Array<Dynamic>) {
+                    return Reflect.callMethod(self, fn, args);
+                };
+            }
         } catch(_) {}
+        return instVal;
     }
 
-    // parent interpreter globals (static members / methods)
-    if (parentInterp != null && parentInterp.variables.exists(f)) {
-        return parentInterp.variables.get(f);
+    // If there is a host backing object, check it and bind its methods
+    if (_host != null) {
+        var hostVal = Reflect.getProperty(_host, f);
+        if (hostVal != null) {
+            try {
+                if (Reflect.isFunction != null && Reflect.isFunction(hostVal)) {
+                    var hostRef = _host;
+                    var hostFn = hostVal;
+                    return function(args:Array<Dynamic>) {
+                        return Reflect.callMethod(hostRef, hostFn, args);
+                    };
+                }
+            } catch(_) {}
+            return hostVal;
+        }
     }
 
-    if (_host != null) return Reflect.getProperty(_host, f);
+    // Descend to parentInstance (script or native parent)
+    if (parentInstance != null) {
+        var pval = Reflect.field(parentInstance, f);
+        if (pval != null) {
+            try {
+                if (Reflect.isFunction != null && Reflect.isFunction(pval)) {
+                    var pinst = parentInstance;
+                    var pfn = pval;
+                    return function(args:Array<Dynamic>) {
+                        return Reflect.callMethod(pinst, pfn, args);
+                    };
+                }
+            } catch(_) {}
+            return pval;
+        }
+    }
 
     return null;
 }
 
 public function hSet(o:Dynamic, f:String, v:Dynamic):Dynamic {
+    // Prefer script-defined setter: set_<name>
     var sname = "set_" + f;
     if (__interp.variables.exists(sname)) {
         var setter = __interp.variables.get(sname);
         return Reflect.callMethod(this, setter, [v]);
     }
 
-    // if parent instance exists and we prefer to forward set to parent instance:
+    // Prefer calling parent/host setters
     if (parentInstance != null) {
-        var pfSetter = Reflect.field(parentInstance, "setField");
-        if (pfSetter != null) {
-            Reflect.callMethod(parentInstance, pfSetter, [f, v]);
+        var psetter = Reflect.field(parentInstance, "set_" + f);
+        if (psetter != null) return Reflect.callMethod(parentInstance, psetter, [v]);
+        try {
+            Reflect.setProperty(parentInstance, f, v);
             return v;
-        }
+        } catch(_) {}
     }
 
+    if (_host != null) {
+        try {
+            Reflect.setProperty(_host, f, v);
+            return v;
+        } catch(_) {}
+    }
+
+    // fallback: store on the script instance interpreter variables
     __interp.variables.set(f, v);
     return v;
 }
