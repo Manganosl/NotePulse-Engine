@@ -4,6 +4,7 @@ If you notice softcoded things in here, don't worry, I'm working on hardcoding t
 
 # NotePulse Engine
 ### What a shitty name
+![NotePulse Engine](docs/img/logo.png)
 
 This engine is a Psych 0.7.3 fork that adds and modifies some things to either make life easier or just add functionalities. Some of them are:
 

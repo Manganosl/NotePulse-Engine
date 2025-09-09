@@ -40,7 +40,7 @@ private enum Stop {
 class Interp {
 	public static var publicVariables:Map<String, Dynamic> = new Map();
 	public static var staticVariables:Map<String, Dynamic> = new Map();
-	public var customClasses:Map<String, Dynamic> = new Map();
+	public static var customClasses:Map<String, Dynamic> = new Map();
 
 	public var inPublic:Bool = false;
 	public var inPrivate:Bool = false;
@@ -501,15 +501,7 @@ case EField(e,f):
             if (pushedVars.indexOf(name) == -1) pushedVars.push(name);
             Interp.publicVariables.set(name, handler);
         }
-		try {
-    		customClasses.set(name, handler);
-    		var short = name;
-    		if (name.indexOf(".") != -1) {
-    		    var parts = name.split(".");
-    		    short = parts[parts.length - 1];
-    		}
-    		if (short != name) customClasses.set(short, handler);
-		} catch(_) {}
+        customClasses.set(name, handler);
         return handler;
 
 	case EIdent(id):
@@ -622,17 +614,7 @@ case EFinal(n,t,e):
 		restore(old);
 		return v;
 	case EField(e,f):
-		var o = expr(e);
-
-		try {
-		    if (o != null && Std.isOfType(o, tea.backend.SScriptCustomBehavior)) {
-		        var b:tea.backend.SScriptCustomBehavior = cast o;
-		        var getter = b.hGet(o, f);
-		        return getter;
-		    }
-		} catch(_) {}
-
-		return Reflect.field(o, f);
+		return get(expr(e),f);
 	case ESwitchBinop(p, e1, e2):
 		var parent = expr(p);
 		var e1 = expr(e1), e2 = expr(e2);
@@ -1095,19 +1077,19 @@ case EFinal(n,t,e):
 	function cnew( cl : String, args : Array<Dynamic> ) : Dynamic {
     	var c : Dynamic = try resolve(cl) catch(e) null;
 
-		if (c != null) {
-    		var hnew = Reflect.field(c, "hnew");
-    		if (hnew != null) {
-        		// PASS THE ARG ARRAY DIRECTLY (do not wrap it in another array) ////////// Fuck this shit
-        		return Reflect.callMethod(c, hnew, [args]);
-    		}
-		}
+    	if (c != null) {
+        	var hnew = Reflect.field(c, "hnew");
+        	if (hnew != null) {
+        	    return Reflect.callMethod(c, hnew, [args]);
+        	}
+    	}
 
     	if (c == null) c = Type.resolveClass(cl);
     	if (c == null) error(EInvalidAccess(cl));
 
     	return Type.createInstance(c,args);
 	}
+
 
 	function stringToolsFunction( o : Dynamic , f : String , args : Array<Dynamic> ) : Dynamic {
 		var func = StringFunctionTools.getStringToolsFunction(f);
