@@ -132,7 +132,7 @@ class OSTSubstate extends MusicBeatSubstate
 		    FlxG.sound.music.volume = 0;
 		    destroyVocals();
 		
-		    FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+			FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);
 			FlxG.sound.music.fadeIn(4, 0, 0.7);		
 		    
 			FlxG.sound.play(Paths.sound('cancelMenu'));

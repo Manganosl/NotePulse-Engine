@@ -3068,7 +3068,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				autosaveSong();
 				PlayState.chartingMode = false;
 				MusicBeatState.switchState(new states.MainMenuState());
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic));
 				FlxG.mouse.visible = false;
 				return;
 			}
@@ -5006,7 +5006,7 @@ class ChartingOptionsSubmenu extends MusicBeatSubstate
 				case 'Exit to main menu':
 					PlayState.chartingMode = false;	
 					MusicBeatState.switchState(new MainMenuState());
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+					FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic));
 			}
 		}
 	}

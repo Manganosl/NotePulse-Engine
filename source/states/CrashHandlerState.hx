@@ -57,7 +57,7 @@ class CrashHandlerState extends MusicBeatState
 	}
 
 	override function destroy() {
-		flixel.FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+		flixel.FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);
 		Conductor.set_bpm(100);
 
 		super.destroy();

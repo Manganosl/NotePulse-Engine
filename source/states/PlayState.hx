@@ -3019,7 +3019,7 @@ class PlayState extends MusicBeatState
 				{*/
 					Mods.loadTopMod();
 					MusicBeatState.switchState(new FreeplayState());
-					FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic));
+					FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
 				//}
 				changedDifficulty = false;
