@@ -5,8 +5,8 @@ import ex.*;
 import haxe.Exception;
 import haxe.Timer;
 
-import hscriptBase.*;
-import hscriptBase.Expr;
+import tea.hscriptBase.*;
+import tea.hscriptBase.Expr;
 
 #if sys
 import sys.FileSystem;
@@ -16,7 +16,7 @@ import sys.io.File;
 import tea.backend.*;
 import tea.backend.crypto.Base32;
 
-import tea.backend.SScriptCustomBehavior.HandleSScriptCustomBehavior;
+import tea.backend.handlers.SScriptCustomBehavior.*;
 
 using StringTools;
 
@@ -56,15 +56,14 @@ typedef TeaCall =
 	The base class for dynamic Haxe scripts.
 **/
 @:structInit
-@:access(hscriptBase.Interp)
-@:access(hscriptBase.Parser)
+@:access(tea.hscriptBase.Interp)
+@:access(tea.hscriptBase.Parser)
 @:keepSub
-class SScript implements SScriptCustomBehavior
-{
+class SScript implements tea.backend.handlers.SScriptCustomBehavior {
 	/**
 		Init Custom Behavior. 
 	**/
-	public var customBehavior:SScriptCustomBehavior = new HandleSScriptCustomBehavior();
+	public var customBehavior:tea.backend.handlers.SScriptCustomBehavior = new tea.backend.handlers.SScriptCustomBehavior.HandleSScriptCustomBehavior();
 
 	/**
 		Idk

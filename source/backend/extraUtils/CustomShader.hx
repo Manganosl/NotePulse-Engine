@@ -3,7 +3,7 @@ package backend.extraUtils;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.FlxCamera;
 import openfl.filters.ShaderFilter;
-import tea.backend.SScriptCustomBehavior;
+import tea.backend.handlers.SScriptCustomBehavior;
 import flixel.graphics.FlxGraphic;
 import openfl.display.BitmapData;
 

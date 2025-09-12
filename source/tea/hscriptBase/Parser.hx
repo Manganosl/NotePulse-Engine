@@ -19,9 +19,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package hscriptBase;
+package tea.hscriptBase;
 import haxe.Exception;
-import hscriptBase.Expr;
+import tea.hscriptBase.Expr;
 import tea.SScript;
 using StringTools;
 

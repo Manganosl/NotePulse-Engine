@@ -19,8 +19,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package hscriptBase;
-import hscriptBase.Expr;
+package tea.hscriptBase;
+import tea.hscriptBase.Expr;
 
 #if macro
 import haxe.macro.Context;
@@ -29,9 +29,9 @@ import haxe.macro.TypeTools;
 
 using StringTools;
 
-@:access(hscriptBase.Interp)
+@:access(tea.hscriptBase.Interp)
 class Tools {
-	static final thisName:String = 'hscriptBase.Tools';
+	static final thisName:String = 'tea.hscriptBase.Tools';
 
 	public static var keys:Array<String> = [
 		"import", "package", "if", "var", "for", "while", "final", "do", "as", "using", "break", "continue",

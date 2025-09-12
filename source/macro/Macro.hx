@@ -29,7 +29,7 @@ typedef SuperlativeSettings = {
 	public var loopCost:Int;
 }
 
-@:access(hscriptBase.Tools)
+@:access(tea.hscriptBase.Tools)
 class Macro
 {
 	public static final defaultSettings:SuperlativeSettings = {
@@ -39,7 +39,7 @@ class Macro
 	}
 
 	#if !macro
-	public static final allClassesAvailable:Map<String, Class<Dynamic>> = hscriptBase.Tools.names.copy();
+	public static final allClassesAvailable:Map<String, Class<Dynamic>> = tea.hscriptBase.Tools.names.copy();
 	#end
 
 	public static var VERSION(default, null):SScriptVer = new SScriptVer(7, 7, 0);

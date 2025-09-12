@@ -1,4 +1,4 @@
-package hscriptBase;
+package tea.hscriptBase;
 
 import haxe.Constraints;
 

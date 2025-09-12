@@ -1,7 +1,7 @@
-package hscriptBase;
+package tea.hscriptBase;
 
 @:keepSub
-@:access(hscriptBase.Interp)
+@:access(tea.hscriptBase.Interp)
 class InterpIterator 
 {
 	public var min:Int;

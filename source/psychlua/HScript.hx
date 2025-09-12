@@ -9,6 +9,7 @@ import psychlua.LuaUtils;
 import psychlua.CustomSubstate;
 import modchart.Manager;
 
+import flixel.text.FlxText.FlxTextAlign;
 #if LUA_ALLOWED
 import psychlua.FunkinLua;
 #end
@@ -137,9 +138,13 @@ class HScript extends SScript
 		set('FlxVideoSprite',hxvlc.flixel.FlxVideoSprite);
 		#end
 
-		//why is this not a default thing imma crash out shadow mario
 		set("FlxTypedSpriteGroup",FlxTypedSpriteGroup);
 		set("FlxSpriteGroup",FlxSpriteGroup);
+
+		set("FlxText", flixel.text.FlxText);
+		set("FlxTextFormat", flixel.text.FlxTextFormat);
+		set("FlxTextFormatMarkerPair", flixel.text.FlxTextFormatMarkerPair);
+		set("FlxTextBorderStyle", flixel.text.FlxTextBorderStyle);
 
 		set("FlxEmitter",FlxEmitter);
 		set("FlxEmitterMode",FlxEmitterMode);
@@ -147,9 +152,9 @@ class HScript extends SScript
 		set("CustomState", states.softcoding.CustomState);
 		set("CustomSubstate", states.softcoding.CustomSubstate);
 
-		set("NdllUtil", NdllUtil);  // CNE ahh util
-		set("WindowUtil", WindowUtil);  // Nightmare Vision ahh Util
-		set("Manager", Manager);  // No need to import modchart anymore
+		set("NdllUtil", NdllUtil);
+		set("WindowUtil", WindowUtil);
+		set("Manager", Manager);
 		set("CustomShader", CustomShader);
 
 		set("Flx3DCamera", flx3d.Flx3DCamera);

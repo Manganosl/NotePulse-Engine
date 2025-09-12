@@ -19,8 +19,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package hscriptBase;
-import hscriptBase.Expr;
+package tea.hscriptBase;
+import tea.hscriptBase.Expr;
 
 @:keep
 class Printer {

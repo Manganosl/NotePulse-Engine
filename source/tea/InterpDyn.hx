@@ -1,7 +1,7 @@
 package tea;
 
-import hscriptBase.Interp;
-import tea.backend.SScriptCustomBehavior;
+import tea.hscriptBase.Interp;
+import tea.backend.handlers.SScriptCustomBehavior;
 
 class InterpDyn extends Interp {
     public function new() {

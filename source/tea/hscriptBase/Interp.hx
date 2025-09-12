@@ -19,11 +19,11 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package hscriptBase;
+package tea.hscriptBase;
 
 import haxe.ds.*;
 import haxe.PosInfos;
-import hscriptBase.Expr;
+import tea.hscriptBase.Expr;
 import haxe.Constraints;
 import tea.SScript;
 
@@ -495,7 +495,7 @@ case EField(e,f):
 		#end
 		}
     case EClass(name, fields, extend, interfaces):
-        var handler = new tea.backend.SScriptClassHandler(this, name, fields, extend);
+        var handler = new tea.backend.handlers.SScriptClassHandler(this, name, fields, extend);
         variables.set(name, handler);
         if (inStatic && inPublic) {
             if (pushedVars.indexOf(name) == -1) pushedVars.push(name);
