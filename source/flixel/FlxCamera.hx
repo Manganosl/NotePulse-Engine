@@ -972,11 +972,18 @@ class FlxCamera extends FlxBasic
 	 * @param shader Shader to add
 	 * @return ShaderFilter
 	 */
-	public function addShader(shader:FlxShader)
+	public function addShader(shader)
 	{
-		var filter:ShaderFilter = null;
-		if (_filters == null) _filters = [];
-		_filters.push(filter = new ShaderFilter(shader));
+		var filter:Dynamic;
+		if(shader is backend.extraUtils.CustomShader)
+			filter = shader.shader;
+		else
+			filter = shader;
+
+		try {
+			if (filters == null) filters = [];
+			filters.push(filter);
+		} catch(_) {};
 		return filter;
 	}
 
@@ -985,14 +992,20 @@ class FlxCamera extends FlxBasic
 	 * @param shader Shader to remove
 	 * @return Whenever the shader has been successfully removed or not.
 	 */
-	public function removeShader(shader:FlxShader):Bool
+	public function removeShader(shaderInput):Bool
 	{
-		if (_filters == null) _filters = [];
-		for (f in _filters) {
+		var shader:Dynamic;
+		if(shaderInput is backend.extraUtils.CustomShader)
+			shader = shaderInput.shader;
+		else
+			shader = shaderInput;
+
+		if (filters == null) filters = [];
+		for (f in filters) {
 			if (f is ShaderFilter) {
 				var sf = cast(f, ShaderFilter);
 				if (sf.shader == shader) {
-					_filters.remove(f);
+					filters.remove(f);
 					return true;
 				}
 			}

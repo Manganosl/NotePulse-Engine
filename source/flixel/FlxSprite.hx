@@ -286,7 +286,7 @@ class FlxSprite extends FlxObject
 	#if openfl_legacy
 	@:noCompletion
 	#end
-	public var shader:FlxShader;
+	public var shader:Dynamic;
 
 	/**
 	 * The actual frame used for sprite rendering
@@ -854,7 +854,7 @@ class FlxSprite extends FlxObject
 			_matrix.ty = Math.floor(_matrix.ty);
 		}
 
-		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
+		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader is backend.extraUtils.CustomShader ? shader.shader : shader);
 	}
 
 	/**
