@@ -97,6 +97,11 @@
 	<haxelib name="json2object" />
 	<haxelib name="away3d"/>
 
+	<haxelib name="funkin-modchart" />
+	<haxedef name="FM_ENGINE" value="PSYCH"/>
+	<haxedef name="FM_ENGINE_VERSION" value="0.7"/>
+	<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
+
 	<!--Psych stuff needed-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<define name="SScript" if="HSCRIPT_ALLOWED"/>    <!--Now incluided-->
@@ -177,9 +182,4 @@
 	<icon path="art/icon64.png" size='64'/>
 	<icon path="art/iconOG.png" />
 
-	<haxedef name="FM_ENGINE" value="PSYCH"/>
-	<haxedef name="FM_ENGINE_VERSION" value="0.7"/>
-
-	<haxelib name="funkin-modchart" />
-	<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
 </project>
