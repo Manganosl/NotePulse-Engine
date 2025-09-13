@@ -6,22 +6,8 @@ import flixel.system.ui.FlxSoundTray;
 import flixel.FlxG;
 import flixel.math.FlxMath;
 import flixel.system.FlxAssets;
-import flixel.util.FlxColor;
-import openfl.Lib;
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
 import openfl.display.Sprite;
-import openfl.geom.ColorTransform;
-import openfl.text.TextField;
-import openfl.text.TextFormat;
-import openfl.text.TextFormatAlign;
-import haxe.ds.Map;
-
-#if flash
-import openfl.text.AntiAliasType;
-import openfl.text.GridFitType;
-#end
-
 import backend.Paths;
 
 class VolumeTray extends FlxSoundTray
@@ -31,14 +17,16 @@ class VolumeTray extends FlxSoundTray
   var alphaTarget:Float = 0;
   var volumeMaxSound:String;
 
-  var _barTweens:Map<Bitmap, { r:Float, g:Float, b:Float, t:Float, phase:Int }> = new Map();
-  var _barTargets:Map<Bitmap, { r:Float, g:Float, b:Float }> = new Map();
+  var _progressBg:Sprite;
+  var _progressFill:Sprite;
+  var targetFill:Float = 0; // target scaleX for smooth lerp
 
   public function new()
   {
     super();
     removeChildren();
 
+    // Box that holds the bar (kept original size)
     var bg:Bitmap = new Bitmap(FlxAssets.getBitmapData("assets/shared/images/engineStuff/main/soundtray/volumebox.png"));
     bg.scaleX = graphicScale;
     bg.scaleY = graphicScale;
@@ -47,26 +35,24 @@ class VolumeTray extends FlxSoundTray
     y = -height;
     visible = false;
 
-    var backingBar:Bitmap = new Bitmap(FlxAssets.getBitmapData("assets/shared/images/engineStuff/main/soundtray/bars_10.png"));
-    backingBar.x = 9;
-    backingBar.y = 5;
-    backingBar.scaleX = graphicScale;
-    backingBar.scaleY = graphicScale;
-    backingBar.alpha = 0.4;
-    addChild(backingBar);
+    // Slim rectangle bar
+    _progressBg = new Sprite();
+    _progressBg.graphics.beginFill(0x666666);
+    _progressBg.graphics.drawRect(0, 0, 60, 6);
+    _progressBg.graphics.endFill();
+    _progressBg.x = 9;
+    _progressBg.y = 8;
+    addChild(_progressBg);
 
-    _bars = [];
+    _progressFill = new Sprite();
+    _progressFill.graphics.beginFill(0xFFFFFF);
+    _progressFill.graphics.drawRect(0, 0, 60, 6);
+    _progressFill.graphics.endFill();
+    _progressFill.x = 9;
+    _progressFill.y = 8;
+    addChild(_progressFill);
 
-    for (i in 1...11)
-    {
-      var bar:Bitmap = new Bitmap(FlxAssets.getBitmapData("assets/shared/images/engineStuff/main/soundtray/bars_" + i + ".png"));
-      bar.x = 9;
-      bar.y = 5;
-      bar.scaleX = graphicScale;
-      bar.scaleY = graphicScale;
-      addChild(bar);
-      _bars.push(bar);
-    }
+    _progressFill.scaleX = 0;
 
     y = -height;
     screenCenter();
@@ -110,49 +96,9 @@ class VolumeTray extends FlxSoundTray
       }
       #end
     }
-
-    for (bar in _barTweens.keys())
+    if (_progressFill != null)
     {
-      var tweenData = _barTweens.get(bar);
-      var target = _barTargets.get(bar);
-      if (tweenData == null || target == null) continue;
-
-      var speed = MS / 50;
-
-      tweenData.t += speed;
-      if (tweenData.t > 1) tweenData.t = 1;
-
-      if (tweenData.phase == 0)
-      {
-        var r = tweenData.r + (1 - tweenData.r) * tweenData.t;
-        var g = tweenData.g + (1 - tweenData.g) * tweenData.t;
-        var b = tweenData.b + (1 - tweenData.b) * tweenData.t;
-
-        bar.transform.colorTransform = new ColorTransform(r, g, b, 1);
-
-        if (tweenData.t >= 1)
-        {
-          tweenData.phase = 1;
-          tweenData.t = 0;
-          tweenData.r = 1;
-          tweenData.g = 1;
-          tweenData.b = 1;
-        }
-      }
-      else
-      {
-        var r = tweenData.r + (target.r - tweenData.r) * tweenData.t;
-        var g = tweenData.g + (target.g - tweenData.g) * tweenData.t;
-        var b = tweenData.b + (target.b - tweenData.b) * tweenData.t;
-
-        bar.transform.colorTransform = new ColorTransform(r, g, b, 1);
-
-        if (tweenData.t >= 1)
-        {
-          _barTweens.remove(bar);
-          _barTargets.remove(bar);
-        }
-      }
+      _progressFill.scaleX = FlxMath.lerp(_progressFill.scaleX, targetFill, 0.2);
     }
   }
 
@@ -172,37 +118,7 @@ class VolumeTray extends FlxSoundTray
       if (globalVolume == 10) sound = volumeMaxSound;
       if (sound != null) FlxG.sound.load(sound).play();
     }
-
-    for (i in 0..._bars.length)
-    {
-      var bar = _bars[i];
-
-      if (i < globalVolume)
-      {
-        bar.visible = true;
-
-        var color = FlxColor.RED;
-        if (globalVolume <= 3) color = FlxColor.BLUE;
-        else if (globalVolume <= 6) color = FlxColor.GREEN;
-        else if (globalVolume <= 9) color = FlxColor.YELLOW;
-
-        var current = bar.transform.colorTransform;
-        var startR = current.redMultiplier;
-        var startG = current.greenMultiplier;
-        var startB = current.blueMultiplier;
-
-        var targetR = color.red / 255;
-        var targetG = color.green / 255;
-        var targetB = color.blue / 255;
-
-        _barTweens.set(bar, { r: startR, g: startG, b: startB, t: 0, phase: 0 });
-        _barTargets.set(bar, { r: targetR, g: targetG, b: targetB });
-      }
-      else
-      {
-        bar.visible = false;
-      }
-    }
+    targetFill = (globalVolume / 10);
   }
 }
 #end
