@@ -702,16 +702,20 @@ class Parser {
                 	push(tk4);
             }
 
-            ensure(TBrOpen);
-            var fields = [];
-            while (true) {
-                var tkb = token();
-                if (tkb == TBrClose) break;
-                push(tkb);
+			ensure(TBrOpen);
+			var fields = [];
+			while (true) {
+			    var tkb = token();
+			    if (tkb == TBrClose) break;
 
-                fields.push(parseExpr());
-            }
-            mk(EClass(name, fields, extendPath, interfaces), p1, tokenMax);
+			    if (tkb == TStatement) continue;
+
+			    push(tkb);
+			    fields.push(parseExpr());
+
+			    maybe(TStatement);
+			}
+			mk(EClass(name, fields, extendPath, interfaces), p1, tokenMax);
 		case "final":
 			var tk = token();
 			var ident = switch tk {

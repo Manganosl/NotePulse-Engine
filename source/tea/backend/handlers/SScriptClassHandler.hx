@@ -108,7 +108,15 @@ public function hnew(args:Array<Dynamic>):Dynamic {
     }
 
     // Evaluate this class' own fields (child overrides ancestor names here)
-    for (f in fields) instInterp.expr(f);
+    for (f in fields) {
+        try {
+            instInterp.expr(f);
+        } catch (e:Dynamic) {
+            haxe.Log.trace("SScript: class field init failed in class '" + name + "': " + Std.string(e));
+            // rethrow to let host handle it (but we logged first)
+            throw e;
+        }
+    }
 
     // Build a plain Haxe object holding ancestor implementations for 'super'
     var superObj = {};
@@ -131,7 +139,12 @@ public function hnew(args:Array<Dynamic>):Dynamic {
     // Finally call this class's constructor (if present)
     if (instInterp.variables.exists("new")) {
         var ctor = instInterp.variables.get("new");
-        ctor(args);
+        try {
+            ctor(args);
+        } catch (e:Dynamic) {
+            haxe.Log.trace("SScript: constructor threw in class '" + name + "': " + Std.string(e));
+            throw e;
+        }
     }
 
     return inst;

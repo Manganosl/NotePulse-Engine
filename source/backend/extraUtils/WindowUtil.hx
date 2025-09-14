@@ -74,21 +74,21 @@ class WindowUtil
 	{
 		return FlxPoint.get(Lib.application.window.x + (Lib.application.window.width / 2), Lib.application.window.y + (Lib.application.window.height / 2));
 	}
-	
-	#if FEATURE_DEBUG_TRACY
-	/**
-	 * Initialize the tracy profiler
-	 * taken from base game https://github.com/FunkinCrew/Funkin/blob/main/source/funkin/util/WindowUtil.hx
-	 */
-	public static function initTracy():Void
-	{
-		// Apply a marker to indicate frame end for the Tracy profiler.
-		//  Do this only if Tracy is configured to prevent lag.
-		openfl.Lib.current.stage.addEventListener(openfl.events.Event.EXIT_FRAME, (e:openfl.events.Event) -> {
-			cpp.vm.tracy.TracyProfiler.frameMark();
+
+	public static var preventClosing:Bool = true;
+	public static var onClosing:Void->Void;
+	public static var playstate_onClosing:Void->Void;
+
+	static var __triedClosing:Bool = false;
+	public static inline function resetClosing() __triedClosing = false;
+
+	public static inline function init() {
+		Lib.application.window.onClose.add(function () {
+			if (preventClosing && !__triedClosing) {
+				Lib.application.window.onClose.cancel();
+				__triedClosing = true;
+			}
+			if (onClosing != null) {onClosing(); playstate_onClosing();}
 		});
-		
-		cpp.vm.tracy.TracyProfiler.setThreadName("main");
 	}
-	#end
 }

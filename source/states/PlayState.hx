@@ -718,6 +718,9 @@ class PlayState extends MusicBeatState
 
 		callOnScripts('initModchart'); // Could use onCreatePost? Yes but this could be used to do some stuff
 		callOnScripts('onCreatePost');
+    	backend.extraUtils.WindowUtil.playstate_onClosing = () -> {
+			destroy();
+    	}
 		notesLength = notes.length;
 		unspawnNotesLength = unspawnNotes.length;
 
