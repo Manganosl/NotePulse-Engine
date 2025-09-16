@@ -6,6 +6,12 @@ import lime.app.Application;
 
 import flash.system.System;
 
+import lime.ui.Window;
+
+import lime.ui.WindowAttributes;
+
+import flixel.FlxGame;
+
 // WIP
 // functions used to mess with some window properties for ease
 class WindowUtil

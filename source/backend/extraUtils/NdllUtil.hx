@@ -13,7 +13,6 @@ import backend.Paths;
 	public static function getFunction(ndllPath:String, name:String, args:Int):Dynamic {
 		var finalPath = Paths.ndll("ndlls/"+ndllPath);
 		var func:Dynamic = _getNdllFunc(finalPath, name, args);
-		trace(finalPath);
 
 		return Reflect.makeVarArgs(function(a:Array<Dynamic>) {
 			return backend.extraUtils.MacroUtil.generateReflectionLike(25, "func", "a");

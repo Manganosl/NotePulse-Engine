@@ -17,7 +17,6 @@ class VolumeTray extends FlxSoundTray
   var alphaTarget:Float = 0;
   var volumeMaxSound:String;
 
-  var _progressBg:Sprite;
   var _progressFill:Sprite;
   var targetFill:Float = 0; // target scaleX for smooth lerp
 
@@ -30,27 +29,19 @@ class VolumeTray extends FlxSoundTray
     var bg:Bitmap = new Bitmap(FlxAssets.getBitmapData("assets/shared/images/engineStuff/main/soundtray/volumebox.png"));
     bg.scaleX = graphicScale;
     bg.scaleY = graphicScale;
-    addChild(bg);
 
     y = -height;
     visible = false;
 
-    // Slim rectangle bar
-    _progressBg = new Sprite();
-    _progressBg.graphics.beginFill(0x666666);
-    _progressBg.graphics.drawRect(0, 0, 60, 6);
-    _progressBg.graphics.endFill();
-    _progressBg.x = 9;
-    _progressBg.y = 8;
-    addChild(_progressBg);
-
     _progressFill = new Sprite();
     _progressFill.graphics.beginFill(0xFFFFFF);
-    _progressFill.graphics.drawRect(0, 0, 60, 6);
+    _progressFill.graphics.drawRect(0, 0, bg.width-4, bg.height/2.5);
     _progressFill.graphics.endFill();
-    _progressFill.x = 9;
-    _progressFill.y = 8;
+    _progressFill.x = bg.x+2;
+    _progressFill.y = bg.y+2;
     addChild(_progressFill);
+
+    addChild(bg);
 
     _progressFill.scaleX = 0;
 

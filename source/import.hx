@@ -2,6 +2,18 @@
 //Discord API
 #if DISCORD_ALLOWED
 import backend.Discord;
+
+import modchart.Config;
+import modchart.Manager;
+import modchart.backend.core.*;
+import modchart.backend.graphics.*;
+import modchart.backend.math.*;
+import modchart.backend.standalone.Adapter;
+import modchart.backend.util.ModchartUtil;
+import modchart.engine.*;
+import modchart.engine.events.*;
+import modchart.engine.modifiers.*;
+import openfl.geom.Vector3D;
 #end
 
 //Psych
@@ -24,8 +36,8 @@ import js.html.*;
 import backend.Paths;
 import backend.Controls;
 import backend.CoolUtil;
-import backend.MusicBeatState;
-import backend.MusicBeatSubstate;
+import states.base.MusicBeatState;
+import states.base.MusicBeatSubstate;
 import backend.CustomFadeTransition;
 import backend.ClientPrefs;
 import backend.Conductor;

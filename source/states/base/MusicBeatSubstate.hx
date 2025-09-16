@@ -1,4 +1,4 @@
-package backend;
+package states.base;
 
 import flixel.FlxSubState;
 import psychlua.HScript;
