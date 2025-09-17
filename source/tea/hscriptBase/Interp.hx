@@ -466,7 +466,10 @@ case EField(e,f):
 		if( l != null )
 			return l.r;
 		var v = variables.get(id);
-		// Fallback to shared public/static maps
+		
+		// Fallback to registered custom classes (SScript/RuleScript compatibility)
+		if (v == null && Interp.customClasses.exists(id)) return Interp.customClasses.get(id);
+// Fallback to shared public/static maps
 		if (v == null && Interp.publicVariables.exists(id)) return Interp.publicVariables.get(id);
 		if (v == null && Interp.staticVariables.exists(id)) return Interp.staticVariables.get(id);
 

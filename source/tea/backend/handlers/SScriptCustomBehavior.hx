@@ -15,7 +15,9 @@ class HandleSScriptCustomBehavior implements SScriptCustomBehavior {
         var fn = Reflect.field(o, "getField");
         if (fn != null) return Reflect.callMethod(o, fn, [f]);
 
-        var res = Reflect.field(o, "resolve");
+        var hfn = Reflect.field(o, "hget");
+		if (hfn != null) return Reflect.callMethod(o, hfn, [f]);
+var res = Reflect.field(o, "resolve");
         if (res != null) return Reflect.callMethod(o, res, [f]);
 
         return Reflect.field(o, f);
@@ -25,7 +27,9 @@ class HandleSScriptCustomBehavior implements SScriptCustomBehavior {
         var fn = Reflect.field(o, "setField");
         if (fn != null) return Reflect.callMethod(o, fn, [f, v]);
 
-        Reflect.setField(o, f, v);
+        var hfn = Reflect.field(o, "hset");
+		if (hfn != null) return Reflect.callMethod(o, hfn, [f, v]);
+Reflect.setField(o, f, v);
         return v;
     }
 }
