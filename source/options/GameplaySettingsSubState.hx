@@ -26,12 +26,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
-		var option:Option = new Option('Trail on Double Note',
-		    'A ghost of the player will appear when pressing 2 notes at the same time to play the other animation',
-		    'doubletrail',
-		    'bool');
-	    addOption(option);
-
 		var option:Option = new Option('Opponent Notes',
 			'If unchecked, opponent notes get hidden.',
 			'opponentStrums',

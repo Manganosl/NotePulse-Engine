@@ -168,6 +168,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var value2InputText:FlxUIInputText;
 	var currentSongName:String;
 
+	var boyfriend:Character = null;
+	var dad:Character = null;
+	var gf:Character = null;
+
 	var zoomList:Array<Float> = [
 		0.25,
 		0.5,
@@ -210,45 +214,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var text:String = "";
 	public static var vortex:Bool = false;
 	public var mouseQuant:Bool = false;
-
-	var littleBF:OurLittleFriend;
-	var littleDad:OurLittleFriend;
-	var littleDad2:OurLittleFriend;
-	var littleStage:FlxSprite;
-
-	function createFriends(){
-		littleBF = new OurLittleFriend('dingalingdemon');
-		littleBF.setPosition((640 + GRID_SIZE / 2) + 255 + 200, FlxG.height - littleBF.height - 50);
-		littleBF.scrollFactor.set();
-
-		littleDad2 = new OurLittleFriend("opp");
-		littleDad2.setPosition((640 + GRID_SIZE / 2) + 285, FlxG.height - littleDad2.height - 50);
-		littleDad2.scrollFactor.set();
-		if(!_song.gfStrums)littleDad2.visible = false;
-
-		littleDad = new OurLittleFriend('fella');
-		littleDad.setPosition((640 + GRID_SIZE / 2) + 225, FlxG.height - littleDad.height - 50);
-		littleDad.scrollFactor.set();
-
-		littleStage = new FlxSprite().loadGraphic(Paths.image('editors/friends/stage'));
-		littleStage.scrollFactor.set();
-		littleStage.scale.set(littleDad.scale.x, littleDad.scale.x);
-		littleStage.updateHitbox();
-		littleStage.x = littleDad.x;
-		littleStage.y = littleDad.y + littleDad.height + (-10);
-
-		add(littleStage);
-		add(littleDad2);
-		add(littleDad);
-		add(littleBF);
-	}
-
-	inline function resetLittleFriends()
-	{
-		littleBF?.sing(4);
-		littleDad?.sing(4);
-		littleDad2?.sing(4);
-	}
 
 	var infoText:FlxText;
 
@@ -364,6 +329,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		mainBox.zoomFactor = 0;
 		add(mainBox);
 
+		charBox = new PsychUIBox(infoBox.x, infoBox.y-infoBox.height-50, 400, 280, ['Characters']);
+		charBox.selectedName = 'Characters';
+		charBox.scrollFactor.set();
+		charBox.zoomFactor = 0;
+		add(charBox);
+
 		//if(chartEditorSave.data.mainBoxPosition != null && chartEditorSave.data.mainBoxPosition.length > 1)
 		//	mainBox.setPosition(chartEditorSave.data.mainBoxPosition[0], chartEditorSave.data.mainBoxPosition[1]);
 		//if(chartEditorSave.data.infoBoxPosition != null && chartEditorSave.data.infoBoxPosition.length > 1)
@@ -465,18 +436,25 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		outputTxt.alpha = 0;
 		add(outputTxt);
 
-		/*var tipTextArray:Array<String> = text.split('\n');
-		for (i in 0...tipTextArray.length) {
-			var tipText:FlxText = new FlxText(UI_box.x, UI_box.y + UI_box.height + 8, 0, tipTextArray[i], 16);
-			tipText.y += i * 10;
-			tipText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT);
-			//tipText.borderSize = 2;
-			tipText.scrollFactor.set();
-			add(tipText);
-		}*/
+		boyfriend = new Character(150-50, -75+50, "bf", true);
+		boyfriend.scrollFactor.set(0, 0);
+		boyfriend.scale.x /= 3;
+		boyfriend.scale.y /= 3;
+		dad = new Character(-100-50, -300+50, "dad", false);
+		dad.scrollFactor.set(0, 0);
+		dad.scale.x /= 3;
+		dad.scale.y /= 3;
+		gf = new Character(-100-50, -250+50, "gf", false);
+		gf.scrollFactor.set(0, 0);
+		gf.scale.x /= 3;
+		gf.scale.y /= 3;
+
+		charBox.getTab('Characters').menu.add(gf);
+		charBox.getTab('Characters').menu.add(boyfriend);
+		charBox.getTab('Characters').menu.add(dad);
+
 		add(UI_box);
 
-		createFriends();
 		addSongUI();
 		addSectionUI();
 		addNoteUI();
@@ -512,6 +490,16 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		updateGrid();
 		autoSaveTimer();
 		super.create();
+	}
+
+	public function characterBopper(beat:Int):Void
+	{
+		if (gf != null && beat % Math.round(gf.danceEveryNumBeats) == 0 && !gf.getAnimationName().startsWith('sing') && !gf.stunned)
+			gf.dance();
+		if (boyfriend != null && beat % boyfriend.danceEveryNumBeats == 0 && !boyfriend.getAnimationName().startsWith('sing') && !boyfriend.stunned)
+			boyfriend.dance();
+		if (dad != null && beat % dad.danceEveryNumBeats == 0 && !dad.getAnimationName().startsWith('sing') && !dad.stunned)
+			dad.dance();
 	}
 
 	function addEditTab()
@@ -1340,6 +1328,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var mainBoxPosition:FlxPoint = FlxPoint.get(920, 40);
 	var infoBox:PsychUIBox;
 	var infoBoxPosition:FlxPoint = FlxPoint.get(1000, 360);
+	var charBox:PsychUIBox;
 	var upperBox:PsychUIBox;
 
 	var songNameInputText:PsychUIInputText;
@@ -1395,7 +1384,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			else gfIcon.setPosition(100+(40*_song.mania), 5);
 			if(_song.gfStrums) intendedOffset += 40*(_song.mania + 1);
 			else intendedOffset -= 40*(_song.mania + 1);
-			if(littleDad.visible && _song.gfStrums) littleDad2.visible = true; else littleDad2.visible = false;
 			updateHeads();
 			reloadGridLayer();
 		});
@@ -2795,7 +2783,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tab_group.add(reloadJSONBtn);
 	}
 
-	var showLilFriendsButton:PsychUIButton;
 	var vortexEditorButton:PsychUIButton;
 	function addViewTab()
 	{
@@ -2805,19 +2792,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		var btnY = 1;
 		var btnWid = Std.int(tab.width);
 
-		showLilFriendsButton = new PsychUIButton(btnX, btnY, littleDad.visible ? '  Hide Little Friends' : '  Show Little Friends', function()
-		{
-			littleDad.visible = !littleDad.visible;
-			if(_song.gfStrums)littleDad2.visible = !littleDad2.visible; else littleDad2.visible = false;
-			littleBF.visible = !littleBF.visible;
-			littleStage.visible = !littleStage.visible;
-			showLilFriendsButton.text.text = littleDad.visible ? '  Hide Little Friends' : '  Show Little Friends';
-		}, btnWid);
-		showLilFriendsButton.text.alignment = LEFT;
-		tab_group.add(showLilFriendsButton);
-
-		btnY++;
-		btnY += 20;
 		vortexEditorButton = new PsychUIButton(btnX, btnY, vortex ? '  Vortex Editor ON' : '  Vortex Editor OFF', function()
 		{
 			if (vortex) FlxG.save.data.chart_vortex = false;
@@ -2868,8 +2842,15 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	var lastConductorPos:Float;
 	var colorSine:Float = 0;
+
+	var oldBeat:Int = 0;
 	override function update(elapsed:Float)
 	{
+		if(oldBeat != curBeat){
+			characterBopper(curBeat);
+			oldBeat = curBeat;
+		}
+
 		outputTxt.alpha = outputAlpha;
 		outputTxt.visible = (outputAlpha > 0);
 		outputAlpha = Math.max(0, outputAlpha - elapsed);
@@ -3126,7 +3107,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 			if (FlxG.mouse.wheel != 0)
 			{
-				resetLittleFriends();
 				FlxG.sound.music.pause();
 				if (!mouseQuant)
 					FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet*0.8);
@@ -3152,7 +3132,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 			if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
 			{
-				resetLittleFriends();
 				FlxG.sound.music.pause();
 
 				var holdingShift:Float = 1;
@@ -3160,7 +3139,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				else if (FlxG.keys.pressed.SHIFT) holdingShift = 4;
 
 				var daTime:Float = 700 * FlxG.elapsed * holdingShift;
-				resetLittleFriends();
 
 				FlxG.sound.music.time += daTime * (FlxG.keys.pressed.W ? -1 : 1);
 
@@ -3368,106 +3346,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				if(note.strumTime > lastConductorPos && FlxG.sound.music.playing && note.noteData > -1) {
 					var data:Int = note.noteData % (_song.mania + 1);
 					var line:Int = note.column;
-					if (note.strumTime >= lastConductorPos - 100 && FlxG.sound.music.playing && note.noteData > -1)
-					{
-						var char:OurLittleFriend = note.mustPress ? littleBF : littleDad;
-						if(line <= ((_song.mania+2)*3) && line >= (_song.mania+1)*2) char = littleDad2;
-						var charData:Int = 0;
-						if (_song.mania == 3) char.sing(data);
-						if (_song.mania == 4){
-							if (data == 0) charData = 0;
-							if (data == 1) charData = 1;
-							if (data == 2) charData = 2;
-							if (data == 3) charData = 2;
-							if (data == 4) charData = 3;
-							char.sing(charData);
-						}
-						if (_song.mania == 5){
-							if (data == 0) charData = 0;
-							if (data == 1) charData = 1;
-							if (data == 2) charData = 3;
-							if (data == 3) charData = 0;
-							if (data == 4) charData = 2;
-							if (data == 5) charData = 3;
-							char.sing(charData);
-						}
-						if (_song.mania == 6){
-							if (data == 0) charData = 0;
-							if (data == 1) charData = 1;
-							if (data == 2) charData = 3;
-							if (data == 3) charData = 2;
-							if (data == 4) charData = 0;
-							if (data == 5) charData = 2;
-							if (data == 6) charData = 3;
-							char.sing(charData);
-						}
-						if (_song.mania == 7){
-							if (data == 0) charData = 0;
-							if (data == 1) charData = 1;
-							if (data == 2) charData = 2;
-							if (data == 3) charData = 3;
-							if (data == 4) charData = 0;
-							if (data == 5) charData = 1;
-							if (data == 6) charData = 2;
-							if (data == 7) charData = 3;
-							char.sing(charData);
-						}
-						if (_song.mania == 8){
-							if (data == 0) charData = 0;
-							if (data == 1) charData = 1;
-							if (data == 2) charData = 2;
-							if (data == 3) charData = 3;
-							if (data == 4) charData = 2;
-							if (data == 5) charData = 0;
-							if (data == 6) charData = 1;
-							if (data == 7) charData = 2;
-							if (data == 8) charData = 3;
-							char.sing(charData);
-						}
-						if (_song.mania == 9){
-							if (data == 0) charData = 0;
-							if (data == 1) charData = 1;
-							if (data == 2) charData = 2;
-							if (data == 3) charData = 3;
-							if (data == 4) charData = 1;
-							if (data == 5) charData = 2;
-							if (data == 6) charData = 0;
-							if (data == 7) charData = 1;
-							if (data == 8) charData = 2;
-							if (data == 9) charData = 3;
-							char.sing(charData);
-						}
-						if (_song.mania == 10){
-							if (data == 0) charData = 0;
-							if (data == 1) charData = 1;
-							if (data == 2) charData = 2;
-							if (data == 3) charData = 3;
-							if (data == 4) charData = 0;
-							if (data == 5) charData = 2;
-							if (data == 6) charData = 3;
-							if (data == 7) charData = 0;
-							if (data == 8) charData = 1;
-							if (data == 9) charData = 2;
-							if (data == 10) charData = 3;
-							char.sing(charData);
-						}
-						if (_song.mania == 11){
-							if (data == 0) charData = 0;
-							if (data == 1) charData = 1;
-							if (data == 2) charData = 2;
-							if (data == 3) charData = 3;
-							if (data == 4) charData = 0;
-							if (data == 5) charData = 1;
-							if (data == 6) charData = 2;
-							if (data == 7) charData = 3;
-							if (data == 8) charData = 0;
-							if (data == 9) charData = 1;
-							if (data == 10) charData = 2;
-							if (data == 11) charData = 3;
-							if (note.noteType != "No Animation") char.sing(charData);
-						}
-						
-					}
 					var noteDataToCheck:Int = 0;
 					if(!_song.gfStrums) noteDataToCheck = note.noteData;
 					else noteDataToCheck = note.column <= _song.mania ? note.column : note.column - (_song.mania+1);	
@@ -3487,12 +3365,21 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 								soundToPlay = 'GF_' + Std.string(data + 1);
 
 							if(!_song.gfStrums){
-								if(noteDataToCheck <= ((strumLineNotes.members.length/2)-1) && chkSoundBF.checked) FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;
-								else if(noteDataToCheck <= ((strumLineNotes.members.length)-1) && chkSoundDAD.checked) FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;
+								if(noteDataToCheck <= ((strumLineNotes.members.length/2)-1) && chkSoundBF.checked) {FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;}
+								else if(noteDataToCheck <= ((strumLineNotes.members.length)-1) && chkSoundDAD.checked) {FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3}
 							} else {
-								if(noteDataToCheck <= ((strumLineNotes.members.length/3)-1) && chkSoundBF.checked) FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;
-								else if(noteDataToCheck <= ((strumLineNotes.members.length/3)*2) && chkSoundDAD.checked) FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;
-								else if(noteDataToCheck >= ((strumLineNotes.members.length/3)*2) && chkSoundGF.checked) FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;
+								if(noteDataToCheck <= ((strumLineNotes.members.length/3)-1) && chkSoundBF.checked) {FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;}
+								else if(noteDataToCheck <= ((strumLineNotes.members.length/3)*2) && chkSoundDAD.checked) {FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3}
+								else if(noteDataToCheck >= ((strumLineNotes.members.length/3)*2) && chkSoundGF.checked) {FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;}
+							}
+
+							if(!_song.gfStrums){
+								if(noteDataToCheck <= ((strumLineNotes.members.length/2)-1)) {boyfriend.playAnim(singAnimation(note.noteData), true);}
+								else if(noteDataToCheck <= ((strumLineNotes.members.length)-1)) {dad.playAnim(singAnimation(note.noteData), true);}
+							} else {
+								if(noteDataToCheck <= ((strumLineNotes.members.length/3)-1)) {boyfriend.playAnim(singAnimation(note.noteData), true);}
+								else if(noteDataToCheck <= ((strumLineNotes.members.length/3)*2)) {dad.playAnim(singAnimation(note.noteData), true);}
+								else if(noteDataToCheck >= ((strumLineNotes.members.length/3)*2)) {gf.playAnim(singAnimation(note.noteData), true);}
 							}
 							playedSound[data] = true;
 						}
@@ -3707,6 +3594,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     if(sectionStartTime(1) > FlxG.sound.music.length) lastSecBeatsNext = 0;
     else getSectionBeats(curSec + 1);
 }
+
+	public dynamic function singAnimation(noteData:Int):String {
+		return 'sing' + ExtraKeysHandler.instance.data.animations[ExtraKeysHandler.instance.data.keys[_song.mania].notes[noteData]].sing;
+	}
 
 
 	function strumLineUpdateY()
@@ -3948,7 +3839,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		FlxG.sound.music.pause();
 		// Basically old shit from changeSection???
 		FlxG.sound.music.time = sectionStartTime();
-		resetLittleFriends();
 
 		if (songBeginning)
 		{
@@ -4000,7 +3890,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		}
 		Conductor.songPosition = FlxG.sound.music.time;
 		if(!waveformChanged) updateWaveform();
-		resetLittleFriends();
 		mustHitCheckBoxUI.checked = _song.notes[curSec].mustHitSection;
 		gfSectionCheckBoxUI.checked = _song.notes[curSec].gfSection;
 		changeBpmCheckBoxUI.checked = _song.notes[curSec].changeBPM;
@@ -4850,66 +4739,6 @@ class AttachedFlxText extends FlxText
 			angle = sprTracker.angle;
 			alpha = sprTracker.alpha;
 		}
-	}
-}
-
-class OurLittleFriend extends FlxSprite
-{
-	var _colors:Array<FlxColor> = [FlxColor.MAGENTA, FlxColor.CYAN, FlxColor.LIME, FlxColor.RED, FlxColor.WHITE];
-	var _dances:Array<String> = ['left', 'down', 'up', 'right', 'idle'];
-
-	var _offsetPath:String = '';
-
-	public var offsets:IntMap<Array<Float>> = new IntMap();
-
-	public function new(char:String)
-	{
-		super();
-		final basePath = 'images/editors/friends/$char';
-		if (FileSystem.exists(Paths.getSharedPath('$basePath.png')))
-		{
-			frames = Paths.getSparrowAtlas(basePath.substr(basePath.indexOf('/') + 1));
-			animation.addByPrefix('idle', 'i', 24);
-			animation.addByPrefix('left', 'l', 24, false);
-			animation.addByPrefix('down', 'd', 24, false);
-			animation.addByPrefix('up', 'u', 24, false);
-			animation.addByPrefix('right', 'r', 24, false);
-
-			setGraphicSize(100);
-			updateHitbox();
-
-			buildOffsets(basePath);
-
-			sing(4);
-		}
-	}
-
-	function buildOffsets(?path:String)
-	{
-		path ??= _offsetPath;
-		if (FileSystem.exists(Paths.getSharedPath('$path.txt'))) for (k => i in File.getContent(Paths.getSharedPath('$path.txt')).trim().split('\n'))
-		{
-			var value = i.trim().split(',');
-			offsets.set(k, [Std.parseFloat(value[0]), Std.parseFloat(value[1])]);
-		}
-
-		_offsetPath = path;
-	}
-
-	public function sing(dir:Int)
-	{
-		animation.play(_dances[dir]);
-
-		color = _colors[dir];
-
-		centerOffsets();
-
-		if (offsets.exists(dir))
-		{
-			offset.x += offsets.get(dir)[0] * scale.x;
-			offset.y += offsets.get(dir)[1] * scale.y;
-		}
-		// else offset.set();
 	}
 }
 

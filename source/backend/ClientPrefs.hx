@@ -28,7 +28,6 @@ import states.TitleState;
 	public var framerate:Int = 60;
 	public var camZooms:Bool = true;
 	public var skipTitleVideo:Bool = false;
-	public var doubletrail:Bool = true;
 	public var noteTimer:Bool = true;
 	public var ratingCam:String = "HUD";
 	public var hideHud:Bool = false;

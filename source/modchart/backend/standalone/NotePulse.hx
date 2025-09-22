@@ -1,6 +1,5 @@
-package modchart.backend.standalone.adapters.psych;
+package modchart.backend.standalone;
 
-#if (FM_ENGINE_VERSION == "1.0" || FM_ENGINE_VERSION == "0.7")
 import backend.ClientPrefs;
 import backend.Conductor;
 import objects.Note;
@@ -8,20 +7,12 @@ import objects.StrumNote.SustainSplash;
 import objects.NoteSplash;
 import objects.StrumNote as Strum;
 import states.PlayState;
-#else
-import ClientPrefs;
-import Conductor;
-import Note;
-import PlayState;
-import StrumNote as Strum;
-#end
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import modchart.Manager;
 import modchart.backend.standalone.IAdapter;
 
-class Psych implements IAdapter {
+class NotePulse implements IAdapter {
 	private var __fCrochet:Float = 0;
 	
 	public function onModchartingInitialization() {
@@ -33,7 +24,6 @@ class Psych implements IAdapter {
 		return sprite is Note;
 	}
 
-	// Song related
 	public function getSongPosition():Float {
 		return Conductor.songPosition;
 	}
@@ -123,11 +113,7 @@ class Psych implements IAdapter {
 	}
 
 	public function getDownscroll():Bool {
-		#if (FM_ENGINE_VERSION >= "0.7")
 		return ClientPrefs.data.downScroll;
-		#else
-		return ClientPrefs.downScroll;
-		#end
 	}
 
 	inline function getStrumFromInfo(lane:Int, player:Int) {

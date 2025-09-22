@@ -675,7 +675,6 @@ class PlayState extends MusicBeatState
 			for (event in eventNotes) event.strumTime -= eventEarlyTrigger(event);
 			eventNotes.sort(sortByTime);
 		}
-		if(ClientPrefs.data.doubletrail) new FunkinLua(functions.Trail.script, true);
 
 		// SONG SPECIFIC SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
