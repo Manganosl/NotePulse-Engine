@@ -3022,10 +3022,11 @@ class PlayState extends MusicBeatState
 				trace('WENT BACK TO FREEPLAY??');
 				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
-				    rsSicks = ratingsData[0].hits;
-	                rsGoods = ratingsData[1].hits;
-	                rsBads = ratingsData[2].hits;
-	                rsShits = ratingsData[3].hits;
+					rsMarvelous = ratingsData[0].hits;
+				    rsSicks = ratingsData[1].hits;
+	                rsGoods = ratingsData[2].hits;
+	                rsBads = ratingsData[3].hits;
+	                rsShits = ratingsData[4].hits;
 	                
 	                rsACC = ratingPercent;
 	                rsScore = songScore;
