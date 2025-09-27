@@ -139,6 +139,8 @@ class PlayState extends MusicBeatState
 	public var sickCount:Int = 0;
 	public var marvCount:Int = 0;
 
+	var noteRows:Array<Array<Array<Note>>> = [[], [], []];
+
 	public var boyfriendGroup:FlxSpriteGroup;
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
@@ -727,9 +729,6 @@ class PlayState extends MusicBeatState
 
 		callOnScripts('initModchart'); // Could use onCreatePost? Yes but this could be used to do some stuff
 		callOnScripts('onCreatePost');
-    	backend.extraUtils.WindowUtil.playstate_onClosing = () -> {
-			destroy();
-    	}
 		notesLength = notes.length;
 		unspawnNotesLength = unspawnNotes.length;
 
@@ -1503,6 +1502,10 @@ class PlayState extends MusicBeatState
 					oldNote = null;
 
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
+				swagNote.row = Conductor.secsToRow(daStrumTime);
+				var rowArray = noteRows[gottaHitNote ? 0 : 1];
+				if (rowArray[swagNote.row] == null) rowArray[swagNote.row] = [];
+				rowArray[swagNote.row].push(swagNote);
 				swagNote.mustPress = gottaHitNote;
 				swagNote.sustainLength = songNotes[2];
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<(SONG.mania + 1)));
@@ -3683,11 +3686,52 @@ private function popUpScore(note:Note = null):Void
 			var animToPlay:String = singAnimation(note.noteData) + altAnim;
 			if(note.gfNote || note.gfStrum) char = gf;
 
-			if(char != null && !char.noNoteAnim)
+			if (char != null && !char.noNoteAnim)
 			{
-				char.playAnim(animToPlay, true);
-				char.holdTimer = 0;
+			    char.holdTimer = 0;
+			
+			    var fullAnim:String = animToPlay;
+			
+			    if (char.ghostsEnabled
+			        && !note.isSustainNote
+			        && noteRows[note.gfNote ? 2 : (note.mustPress ? 0 : 1)][note.row] != null
+			        && noteRows[note.gfNote ? 2 : (note.mustPress ? 0 : 1)][note.row].length > 1
+			        && note.noteType != "Ghost Note")
+			    {
+			        var chord = noteRows[note.gfNote ? 2 : (note.mustPress ? 0 : 1)][note.row];
+			        var animNote = chord[0];
+			        var realAnim:String = singAnimation(Std.int(Math.abs(animNote.noteData))) + (altAnim == null ? "" : altAnim);
+
+			        if (char.mostRecentRow != note.row) char.playAnim(realAnim, true);
+				
+			        if (note.nextNote != null && note.prevNote != null)
+			        {
+			            var shouldPlayGhost:Bool = true;
+			            try {
+			                var hookResult = callOnHScript('onGhostAnim', [fullAnim, note]);
+			                if (hookResult == LuaUtils.Function_StopHScript) shouldPlayGhost = false;
+			            } catch(e:Dynamic) {}
+					
+			            if (note != animNote && !note.nextNote.isSustainNote && shouldPlayGhost)
+			            {
+			                char.playGhostAnim(chord.indexOf(note), fullAnim, true);
+			            }
+			            else if (note.nextNote.isSustainNote)
+			            {
+			                char.playAnim(realAnim, true);
+			                char.playGhostAnim(chord.indexOf(note), fullAnim, true);
+			            }
+			        }
+
+			        char.mostRecentRow = note.row;
+			    }
+			    else
+			    {
+			        if (note.noteType != "Ghost Note") char.playAnim(fullAnim, true);
+			        else char.playGhostAnim(note.noteData, fullAnim, true);
+			    }
 			}
+
 		}
 
 		if(opponentVocals.length <= 0) vocals.volume = 1;
@@ -3750,18 +3794,60 @@ private function popUpScore(note:Note = null):Void
 				animCheck = 'cheer';
 			}
 
-			if(char != null)
+			if (char != null)
 			{
-				char.playAnim(animToPlay + note.animSuffix, true);
-				char.holdTimer = 0;
+			    char.holdTimer = 0;
 
-				if(note.noteType == 'Hey!') {
-					if(char.animOffsets.exists(animCheck)) {
-						char.playAnim(animCheck, true);
-						char.specialAnim = true;
-						char.heyTimer = 0.6;
-					}
-				}
+			    var fullAnim:String = animToPlay + note.animSuffix;
+
+			    if (char.ghostsEnabled
+			        && !note.isSustainNote
+			        && noteRows[note.gfNote ? 2 : (note.mustPress ? 0 : 1)][note.row] != null
+			        && noteRows[note.gfNote ? 2 : (note.mustPress ? 0 : 1)][note.row].length > 1
+			        && note.noteType != "Ghost Note")
+			    {
+			        var chord = noteRows[note.gfNote ? 2 : (note.mustPress ? 0 : 1)][note.row];
+			        var animNote = chord[0];
+			        var realAnim:String = singAnimation(Std.int(Math.abs(animNote.noteData))) + note.animSuffix;
+
+			        if (char.mostRecentRow != note.row) char.playAnim(realAnim, true);
+
+			        if (note.nextNote != null && note.prevNote != null)
+			        {
+			            var shouldPlayGhost:Bool = true;
+			            try {
+			                var hookResult = callOnHScript('onGhostAnim', [fullAnim, note]);
+			                if (hookResult == LuaUtils.Function_StopHScript) shouldPlayGhost = false;
+			            } catch(e:Dynamic) {}
+					
+			            if (note != animNote && !note.nextNote.isSustainNote && shouldPlayGhost)
+			            {
+			                char.playGhostAnim(chord.indexOf(note), fullAnim, true);
+			            }
+			            else if (note.nextNote.isSustainNote)
+			            {
+			                char.playAnim(realAnim, true);
+			                char.playGhostAnim(chord.indexOf(note), fullAnim, true);
+			            }
+			        }
+				
+			        char.mostRecentRow = note.row;
+			    }
+			    else
+			    {
+			        if (note.noteType != "Ghost Note")
+			            char.playAnim(fullAnim, true);
+			        else
+			            char.playGhostAnim(note.noteData, fullAnim, true);
+			    }
+
+			    if (note.noteType == 'Hey!') {
+			        if (char.animOffsets.exists(animCheck)) {
+			            char.playAnim(animCheck, true);
+			            char.specialAnim = true;
+			            char.heyTimer = 0.6;
+			        }
+			    }
 			}
 		}
 

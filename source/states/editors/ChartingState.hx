@@ -66,7 +66,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		'Hey!',
 		'Hurt Note',
 		'GF Sing',
-		'No Animation'
+		'No Animation',
+		'Ghost Note'
 	];
 	public var ignoreWarnings = false;
 

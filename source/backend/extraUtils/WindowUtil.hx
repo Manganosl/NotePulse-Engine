@@ -83,7 +83,6 @@ class WindowUtil
 
 	public static var preventClosing:Bool = true;
 	public static var onClosing:Void->Void;
-	public static var playstate_onClosing:Void->Void;
 
 	static var __triedClosing:Bool = false;
 	public static inline function resetClosing() __triedClosing = false;
@@ -94,7 +93,7 @@ class WindowUtil
 				Lib.application.window.onClose.cancel();
 				__triedClosing = true;
 			}
-			if (onClosing != null) {onClosing(); playstate_onClosing();}
+			if (onClosing != null) onClosing();
 		});
 	}
 }
