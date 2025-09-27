@@ -46,10 +46,10 @@ class Character extends FlxSkewedSprite
 	**/
 	public static final DEFAULT_CHARACTER:String = 'bf';
 
-/**
+	/**
 	 * how much the ghost anims move when played
 	 */
-	public var ghostDisplacement:Float = 40;
+	public var ghostDisplacement:Float = 60;
 	
 	/**
 	 *	if enabled, ghosts will show on double notes for the character
@@ -69,7 +69,7 @@ class Character extends FlxSkewedSprite
 	/**
 	 * Alpha that the ghosts doubles appear at
 	 */
-	public var ghostAlpha:Float = 0.6;
+	public var ghostAlpha:Float = 0.75;
 	
 	/**
 	 * Last hit row index
