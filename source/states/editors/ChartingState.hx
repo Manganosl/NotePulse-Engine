@@ -3366,10 +3366,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 							if(!_song.gfStrums){
 								if(noteDataToCheck <= ((strumLineNotes.members.length/2)-1) && chkSoundBF.checked) {FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;}
-								else if(noteDataToCheck <= ((strumLineNotes.members.length)-1) && chkSoundDAD.checked) {FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3}
+								else if(noteDataToCheck <= ((strumLineNotes.members.length)-1) && chkSoundDAD.checked) {FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;}
 							} else {
 								if(noteDataToCheck <= ((strumLineNotes.members.length/3)-1) && chkSoundBF.checked) {FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;}
-								else if(noteDataToCheck <= ((strumLineNotes.members.length/3)*2) && chkSoundDAD.checked) {FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3}
+								else if(noteDataToCheck <= ((strumLineNotes.members.length/3)*2) && chkSoundDAD.checked) {FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;}
 								else if(noteDataToCheck >= ((strumLineNotes.members.length/3)*2) && chkSoundGF.checked) {FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < (_song.mania + 1)? -0.3 : 0.3;}
 							}
 

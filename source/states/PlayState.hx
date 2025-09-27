@@ -9,7 +9,6 @@ import backend.WeekData;
 import backend.Song;
 import backend.Section;
 import backend.Rating;
-import backend.CustomFadeTransition;
 import lime.app.Application;
 
 import flixel.FlxBasic;
@@ -21,17 +20,11 @@ import flixel.util.FlxSort;
 import flixel.util.FlxStringUtil;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
-import flixel.animation.FlxAnimationController;
-import lime.utils.Assets;
-import openfl.utils.Assets as OpenFlAssets;
 import openfl.events.KeyboardEvent;
-import haxe.Json;
 
-import cutscenes.CutsceneHandler;
 import cutscenes.DialogueBoxPsych;
 
 import states.StoryMenuState;
-import states.FreeplayState;
 import states.editors.ChartingState;
 import states.editors.CharacterEditorState;
 
@@ -41,14 +34,12 @@ import substates.GameOverSubstate;
 import psychlua.ModchartSprite.ModchartBackdrop;
 #if !flash
 import flixel.addons.display.FlxRuntimeShader;
-import openfl.filters.ShaderFilter;
 #end
 
 import hxvlc.flixel.*;
 
 import objects.Note.EventNote;
 import objects.*;
-import states.stages.objects.*;
 import objects.StrumNote.SustainSplash;
 
 #if LUA_ALLOWED
@@ -64,7 +55,6 @@ import flixel.FlxSprite;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import shaders.CircleShader;
-
 #end
 
 /**
@@ -102,7 +92,6 @@ class PlayState extends MusicBeatState
 	];
 
 	public var judgementCounter:FlxText;
-	var rsCheck:Bool = false;
 	public static var fModchart:Bool = false;
 
 	//event variables
@@ -242,6 +231,23 @@ class PlayState extends MusicBeatState
 	public static var changedDifficulty:Bool = false;
 	public static var chartingMode:Bool = false;
 
+	public static var rsNoteMs:Array<Float> = [];
+    public static var rsNoteTime:Array<Float> = [];
+	public static var rsMarvelous:Int = 0;
+    public static var rsSicks:Int = 0;
+	public static var rsGoods:Int = 0;
+	public static var rsBads:Int = 0;
+	public static var rsShits:Int = 0;
+	public static var rsMisses:Int = 0;
+	
+	public static var rsACC:Float = 0;
+    public static var rsScore:Int = 0;
+	public static var rsHits:Int = 0;
+	var rsCheck:Bool = false;
+	
+	public static var rsRatingFC:String = '';
+    public static var rsRatingName:String = '';
+
 	//Gameplay settings
 	public var healthGain:Float = 1;
 	public var healthLoss:Float = 1;
@@ -282,6 +288,7 @@ class PlayState extends MusicBeatState
 	public var inCutscene:Bool = false;
 	public var skipCountdown:Bool = false;
 	var songLength:Float = 0;
+	public static var rsSongLength:Float = 0;
 
 	public var boyfriendCameraOffset:Array<Float> = null;
 	public var opponentCameraOffset:Array<Float> = null;
@@ -419,6 +426,9 @@ class PlayState extends MusicBeatState
 		GF_Y = stageData.girlfriend[1];
 		DAD_X = stageData.opponent[0];
 		DAD_Y = stageData.opponent[1];
+
+		rsNoteMs = [];
+		rsNoteTime = [];
 
 		if(stageData.camera_speed != null)
 			cameraSpeed = stageData.camera_speed;
@@ -1372,6 +1382,7 @@ class PlayState extends MusicBeatState
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
+		rsSongLength = FlxG.sound.music.length;
 		FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 		FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 
@@ -3011,19 +3022,24 @@ class PlayState extends MusicBeatState
 				trace('WENT BACK TO FREEPLAY??');
 				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
-				/*if (ClientPrefs.data.resultsScreen)
-				{
-					rsCheck = true;
+				    rsSicks = ratingsData[0].hits;
+	                rsGoods = ratingsData[1].hits;
+	                rsBads = ratingsData[2].hits;
+	                rsShits = ratingsData[3].hits;
+	                
+	                rsACC = ratingPercent;
+	                rsScore = songScore;
+	                rsHits = songHits;
+	                rsMisses = songMisses;
+	                
+	                rsRatingFC = ratingFC;
+                    rsRatingName = ratingName;
+                    rsCheck = true;
 					openSubState(new substates.ResultsScreen(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
-					FlxG.sound.playMusic(Paths.music('freakyMenu'), 0.7);
-				}
-				else
-				{*/
-					Mods.loadTopMod();
-					MusicBeatState.switchState(new FreeplayState());
-					FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);
-					FlxG.sound.music.fadeIn(4, 0, 0.7);
-				//}
+					//Mods.loadTopMod();
+					//MusicBeatState.switchState(new FreeplayState());
+					//FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);
+					//FlxG.sound.music.fadeIn(4, 0, 0.7);
 				changedDifficulty = false;
 			}
 			transitioning = true;
@@ -3599,6 +3615,11 @@ private function popUpScore(note:Note = null):Void
 			doDeathCheck(true);
 		}
 
+        if (!note.isSustainNote){
+		    rsNoteMs.push(167);
+		    rsNoteTime.push(note.strumTime);
+		}
+
 		var lastCombo:Int = combo;
 		combo = 0;
 
@@ -3756,6 +3777,10 @@ private function popUpScore(note:Note = null):Void
 			combo++;
 			if(combo > 9999) combo = 9999;
 			popUpScore(note);
+
+			var noteDiff:Float = (Conductor.songPosition - note.strumTime + ClientPrefs.data.ratingOffset) / playbackRate;
+			rsNoteMs.push((noteDiff));
+			rsNoteTime.push(note.strumTime);
 		}
 		var gainHealth:Bool = true; // prevent health gain, *if* sustains are treated as a singular note
 		if (guitarHeroSustains && note.isSustainNote) gainHealth = false;

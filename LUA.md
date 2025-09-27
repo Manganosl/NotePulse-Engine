@@ -9,6 +9,10 @@ shader.addToCamera(camera);
 shader.addToCameras(cameras);
 shader.removeFromCamera(camera);
 shader.removeFromCameras(cameras);
+
+shader.val = whatever;
+
+// All of this is possible to use, but the best way is above
 shader.setFloat("val", num);
 shader.setArrayFloat("val", [nums]);
 shader.setInt("val", num);

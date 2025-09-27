@@ -15,6 +15,6 @@
 - [X] New crash handler (Avoid needing to reopen the game)
 - [X] Fix modchartInstance.addPlayfield() causing a black screen
 - [ ] Custom Classes
-- [ ] HScript public vars
+- [X] HScript public vars
 
 ### Now I need to find more things to do
