@@ -3714,12 +3714,12 @@ private function popUpScore(note:Note = null):Void
 					
 			            if (note != animNote && !note.nextNote.isSustainNote && shouldPlayGhost)
 			            {
-			                char.playGhostAnim(chord.indexOf(note), fullAnim, true);
+			                if(char != gf) char.playGhostAnim(chord.indexOf(note), fullAnim, true);
 			            }
 			            else if (note.nextNote.isSustainNote)
 			            {
 			                char.playAnim(realAnim, true);
-			                char.playGhostAnim(chord.indexOf(note), fullAnim, true);
+			                if(char != gf) char.playGhostAnim(chord.indexOf(note), fullAnim, true);
 			            }
 			        }
 
