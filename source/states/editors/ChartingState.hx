@@ -324,13 +324,21 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		infoBox.zoomFactor = 0;
 		add(infoBox);
 
-		mainBox = new PsychUIBox(mainBoxPosition.x, mainBoxPosition.y, 300, 280, ['Charting', 'Data', 'Events', 'Note', 'Section', 'Song']);
+		mainBox = new PsychUIBox(mainBoxPosition.x, mainBoxPosition.y, 300, 280, ['Charting', 'Data', 'Actions', 'Note', 'Section', 'Song']);
 		mainBox.selectedName = 'Charting';
 		mainBox.scrollFactor.set();
 		mainBox.zoomFactor = 0;
 		add(mainBox);
 
-		charBox = new PsychUIBox(infoBox.x, infoBox.y-infoBox.height-50, 400, 280, ['Characters']);
+		eventsBox = new PsychUIBox(0, 0, 300, 0, ['Events', 'Modchart']);
+		eventsBox.selectedName = 'Charting';
+		eventsBox.scrollFactor.set();
+		eventsBox.zoomFactor = 0;
+		eventsBox.canMove = false;
+		eventsBox.canMinimize = false;
+		mainBox.getTab('Actions').menu.add(eventsBox);
+
+		charBox = new PsychUIBox(infoBox.x-1000, infoBox.y-infoBox.height-50, 400, 280, ['Characters']);
 		charBox.selectedName = 'Characters';
 		charBox.scrollFactor.set();
 		charBox.zoomFactor = 0;
@@ -471,6 +479,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		addSectionTab();
 		addNoteTab();
 		addEventsTab();
+		addModchartTab();
 		addEditTab();
 		addViewTab();
 		//UI_box.selected_tab = 4;
@@ -1326,6 +1335,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	var chartEditorSave:FlxSave;
 	var mainBox:PsychUIBox;
+	var eventsBox:PsychUIBox;
 	var mainBoxPosition:FlxPoint = FlxPoint.get(920, 40);
 	var infoBox:PsychUIBox;
 	var infoBoxPosition:FlxPoint = FlxPoint.get(1000, 360);
@@ -1823,7 +1833,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var value1LabelText:FlxText;
 
 	function addEventsTab():Void{
-		var tabGroupEvents = mainBox.getTab('Events').menu;
+		var tabGroupEvents = eventsBox.getTab('Events').menu;
 		var posX = 10;
 		var posY = 25;
 
@@ -1859,7 +1869,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		var eventNames:Array<String> = [];
 		for(event in eventStuff) eventNames.push(event[0]);
 
-		eventsDescText = new FlxText(posX, posY + 170, 280, eventStuff.length > 0 ? eventStuff[0][1] : 'No events found');
+		eventsDescText = new FlxText(posX, posY + 140, 280, eventStuff.length > 0 ? eventStuff[0][1] : 'No events found');
 
 		eventsMenuDropdown = new PsychUIDropDownMenu(posX, posY, eventNames, function(index:Int, name:String){
 			eventsDescText.text = eventStuff[index][1];
@@ -1951,6 +1961,43 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tabGroupEvents.add(eventInputField1);
 		tabGroupEvents.add(eventInputField2);
 		tabGroupEvents.add(eventsMenuDropdown);
+	}
+
+	var modifierInput:PsychUIInputText;
+	var actionsDropdown:PsychUIDropDownMenu;
+	var actionsThing:Array<String> = [
+		"Add Modifier",
+		"Set",
+		"Ease"
+	];
+
+	function addModchartTab():Void {
+		var tabGroupModchart = eventsBox.getTab('Modchart').menu;
+		var posX = 10;
+		var posY = 25;
+
+		modifierInput = new PsychUIInputText(posX, posY, 120, '', 8);
+    	modifierInput.onChange = function(old:String, cur:String){
+			if(curSelectedNote != null){
+				if(curSelectedNote[1] != null){
+					if(curSelectedNote[1][curEventSelected] != null){
+						curSelectedNote[1][curEventSelected][1] = eventInputField1.text;
+						updateGrid();
+					}
+				}
+			}
+		}
+
+		actionsDropdown = new PsychUIDropDownMenu(posX+150, posY, actionsThing, function(index:Int, name:String){
+			if(curSelectedNote != null && curSelectedNote[2] == null){
+				curSelectedNote[1][curEventSelected][0] = eventStuff[index][0];
+				updateGrid();
+			}
+		});
+
+		//tabGroupEvents.add(eventInputField1);
+		tabGroupModchart.add(modifierInput);
+		tabGroupModchart.add(actionsDropdown);
 	}
 
 	function changeEventSelected(change:Int = 0)
@@ -3005,17 +3052,25 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			if (FlxG.keys.justPressed.ESCAPE)
 			{
-				FlxG.sound.music.stop();
-				if(vocals != null) vocals.stop();
-				if(opponentVocals != null) opponentVocals.stop();
-				openSubState(new ChartingOptionsSubmenu());
-			}
-			if (FlxG.keys.justPressed.ESCAPE)
-			{
-								FlxG.sound.music.stop();
-				if(vocals != null) vocals.stop();
-				if(opponentVocals != null) opponentVocals.stop();
-				openSubState(new ChartingOptionsSubmenu());
+				if(FlxG.sound.music != null)
+					FlxG.sound.music.stop();
+
+				if(vocals != null)
+				{
+					vocals.pause();
+					vocals.volume = 0;
+				}
+				if(opponentVocals != null)
+				{
+					opponentVocals.pause();
+					opponentVocals.volume = 0;
+				}
+
+				autosaveSong();
+				playtesting = true;
+				playtestingTime = Conductor.songPosition;
+				playtestingOnComplete = FlxG.sound.music.onComplete;
+				openSubState(new states.editors.EditorPlayState(playbackSpeed));
 			}
 			else if (FlxG.keys.justPressed.ENTER)
 			{
@@ -4440,9 +4495,9 @@ private function addNote(strum:Null<Float> = null, data:Null<Int> = null, type:N
 }
     else
     {
-        var event = eventsMenuDropdown.selectedLabel;
-        var text1 = eventInputField1.text;
-        var text2 = eventInputField2.text;
+        var event = eventsBox.selectedName == "Events" ? eventsMenuDropdown.selectedLabel : "Modchart Event";
+        var text1 = /*eventsBox.selectedName == "Events" ? */eventInputField1.text/* : */;
+        var text2 = /*eventsBox.selectedName == "Events" ? */eventInputField2.text/* : */;
         _song.events.push([noteStrum, [[event, text1, text2]]]);
         curSelectedNote = _song.events[_song.events.length - 1];
         curEventSelected = 0;
@@ -4740,132 +4795,5 @@ class AttachedFlxText extends FlxText
 			angle = sprTracker.angle;
 			alpha = sprTracker.alpha;
 		}
-	}
-}
-
-class ChartingOptionsSubmenu extends MusicBeatSubstate
-{
-	var grpMenuShit:FlxTypedGroup<Alphabet>;
-	var menuItems:Array<String> = [
-		'Resume',
-		'Play from beginning',
-		'Play from here',
-		'Set start time',
-		'Play from start time' /*, 'Botplay'*/,
-		'Exit to main menu'
-	]; // shamelessly stolen from andromeda im sorry
-	var curSelected:Int = 0;
-	var canexit:Bool = false;
-
-	public function new()
-	{
-		super();
-
-		var bg:FlxSprite = new FlxSprite().makeGraphic(1280, 720, FlxColor.BLACK);
-		bg.scrollFactor.set();
-		bg.alpha = 0.6;
-		add(bg);
-
-		grpMenuShit = new FlxTypedGroup<Alphabet>();
-		add(grpMenuShit);
-		for (i in 0...menuItems.length)
-		{
-			var item = new Alphabet(0, 70 * i, menuItems[i], true);
-			item.isMenuItem = true;
-			item.targetY = i;
-			item.scrollFactor.set();
-			// if(menuItems[i] == 'Botplay'){
-			// 	if(PlayState.instance.cpuControlled)
-			// 		item.color = FlxColor.GREEN;
-			// 	else
-			// 		item.color = FlxColor.RED;
-			// }
-			grpMenuShit.add(item);
-		}
-
-		new FlxTimer().start(0.05, function(shit:FlxTimer) {
-			canexit = true;
-		});
-		changeSelection();
-	}
-
-	override public function update(elapsed:Float)
-	{
-		if (FlxG.keys.justPressed.ESCAPE && canexit)
-		{
-			close();
-		}
-
-		var upP = controls.UI_UP_P;
-		var downP = controls.UI_DOWN_P;
-		var accepted = controls.ACCEPT;
-
-		if (upP) changeSelection(-1);
-		if (downP) changeSelection(1);
-		if (accepted)
-		{
-			switch (menuItems[curSelected])
-			{
-				case 'Resume':
-					close();
-				case 'Play from beginning':
-					ChartingState.autosaveSong();
-					FlxG.mouse.visible = false;
-					PlayState.SONG = ChartingState._song;
-					StageData.loadDirectory(ChartingState._song);
-					LoadingState.loadAndSwitchState(new PlayState());
-				//case 'Play from here':
-				//	ChartingState.playSongFromTimestamp(FlxG.sound.music.time);
-				//case 'Play from start time':
-				//	ChartingState.playSongFromTimestamp(ChartingState.startTime);
-				//case 'Set start time':
-				//	ChartingState.startTime = FlxG.sound.music.time;
-				// close();
-				// case 'Botplay':
-				// 	PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
-				// 	PlayState.changedDifficulty = true;
-				// 	PlayState.instance.botplayTxt.visible = PlayState.instance.cpuControlled;
-				// 	PlayState.instance.botplayTxt.alpha = 1;
-				// 	PlayState.instance.botplaySine = 0;
-				// 	trace(PlayState.instance.cpuControlled);
-				// 	if(PlayState.instance.cpuControlled)
-				// 		grpMenuShit.members[curSelected].color = FlxColor.GREEN;
-				// 	else
-				// 		grpMenuShit.members[curSelected].color = FlxColor.RED;
-				// 	// close();
-				case 'Exit to main menu':
-					PlayState.chartingMode = false;	
-					MusicBeatState.switchState(new MainMenuState());
-					FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic));
-			}
-		}
-	}
-
-	function changeSelection(change:Int = 0):Void
-	{
-		curSelected += change;
-
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
-
-		if (curSelected < 0) curSelected = menuItems.length - 1;
-		if (curSelected >= menuItems.length) curSelected = 0;
-
-		var bullShit:Int = 0;
-
-		for (item in grpMenuShit.members)
-		{
-			item.targetY = bullShit - curSelected;
-			bullShit++;
-
-			item.alpha = 0.6;
-			// item.setGraphicSize(Std.int(item.width * 0.8));
-
-			if (item.targetY == 0)
-			{
-				item.alpha = 1;
-				// item.setGraphicSize(Std.int(item.width));
-			}
-		}
-		trace(menuItems[curSelected]);
 	}
 }
