@@ -21,6 +21,8 @@ import openfl.utils.Assets as OpenFlAssets;
 class EditorPlayState extends MusicBeatSubstate
 {
 	// Borrowed from original PlayState
+	public var camHUD:FlxCamera = new FlxCamera();
+
 	var finishTimer:FlxTimer = null;
 	var noteKillOffset:Float = 350;
 	var spawnTime:Float = 2000;
@@ -31,14 +33,15 @@ class EditorPlayState extends MusicBeatSubstate
 	var opponentVocals:FlxSound;
 	var inst:FlxSound;
 	
-	var notes:FlxTypedGroup<Note>;
-	var unspawnNotes:Array<Note> = [];
+	public var notes:FlxTypedGroup<Note>;
+	public var unspawnNotes:Array<Note> = [];
 	var ratingsData:Array<Rating> = Rating.loadDefault();
 	
-	var strumLineNotes:FlxTypedGroup<StrumNote>;
-	var opponentStrums:FlxTypedGroup<StrumNote>;
-	var playerStrums:FlxTypedGroup<StrumNote>;
-	var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
+	public var strumLineNotes:FlxTypedGroup<StrumNote>;
+	public var opponentStrums:FlxTypedGroup<StrumNote>;
+	public var gfStrums:FlxTypedGroup<StrumNote>;
+	public var playerStrums:FlxTypedGroup<StrumNote>;
+	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 	
 	var combo:Int = 0;
 	var lastRating:FlxSprite;
@@ -54,7 +57,7 @@ class EditorPlayState extends MusicBeatSubstate
 	var songHits:Int = 0;
 	var songMisses:Int = 0;
 	var songLength:Float = 0;
-	var songSpeed:Float = 1;
+	public var songSpeed:Float = 1;
 	
 	var totalPlayed:Int = 0;
 	var totalNotesHit:Float = 0.0;
@@ -74,6 +77,10 @@ class EditorPlayState extends MusicBeatSubstate
 	var dataTxt:FlxText;
 	var guitarHeroSustains:Bool = false;
 
+	public static var instance:EditorPlayState;
+
+	public var modchartInstance:modchart.Manager;
+
 	public function new(playbackRate:Float)
 	{
 		super();
@@ -82,6 +89,10 @@ class EditorPlayState extends MusicBeatSubstate
 		for (i in 0...PlayState.SONG.mania + 1){
 			keysArray.push(PlayState.SONG.mania + '_key_$i');
 		}
+
+		instance = this;
+		camHUD.bgColor = 0x00000000;
+		FlxG.cameras.add(camHUD, false);
 		
 		/* setting up some important data */
 		this.playbackRate = playbackRate;
@@ -278,6 +289,12 @@ class EditorPlayState extends MusicBeatSubstate
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		FlxG.mouse.visible = true;
+		modchart.Config.RENDER_ARROW_PATHS = false;
+		remove(modchartInstance);
+		modchartInstance = null;
+		FlxG.cameras.remove(camHUD);
+		camHUD.destroy();
+		camHUD = null;
 		super.destroy();
 	}
 	
@@ -298,6 +315,10 @@ class EditorPlayState extends MusicBeatSubstate
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
+
+		modchart.Config.RENDER_ARROW_PATHS = true;
+		modchartInstance = new modchart.Manager();
+		add(modchartInstance);
 	}
 
 	// Borrowed from PlayState
@@ -945,12 +966,13 @@ class EditorPlayState extends MusicBeatSubstate
 		if(note != null) {
 			var strum:StrumNote = playerStrums.members[note.noteData];
 			if(strum != null)
-				spawnNoteSplash(strum.x, strum.y, note.noteData, note);
+				spawnNoteSplash(strum.x, strum.y, note.noteData, note, strum);
 		}
 	}
 
-	function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null) {
+	function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null, ?strum:StrumNote) {
 		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
+		splash.extraData["strumNote"] = strum;
 		splash.setupNoteSplash(x, y, data, note);
 		grpNoteSplashes.add(splash);
 	}
