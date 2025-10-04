@@ -24,6 +24,9 @@ typedef SwagSong =
 	var gfVersion:String;
 	var stage:String;
 
+	@:optional var nativeModchart:Bool;
+	@:optional var playfields:Int;
+
 	@:optional var gameOverChar:String;
 	@:optional var gameOverSound:String;
 	@:optional var gameOverLoop:String;
@@ -120,6 +123,15 @@ class Song
 		if (songJson.mania == null){
         	songJson.mania = 3;
     	}
+
+		if (songJson.playfields == null){
+        	songJson.playfields = 1;
+    	}
+
+		if (songJson.nativeModchart == null || songJson.nativeModchart == false){
+        	songJson.nativeModchart = false;
+    	}
+
 		if (convertedChart && Std.is(songJson.notes, Array)) {
 		    var sections:Array<Dynamic> = cast songJson.notes;
 

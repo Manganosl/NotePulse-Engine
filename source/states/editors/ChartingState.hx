@@ -234,6 +234,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				mania: 3,
 				needsVoices: true,
 				gfStrums: false,
+				nativeModchart: false,
+				playfields: 1,
 				player1: 'bf',
 				player2: 'dad',
 				gfVersion: 'gf',
@@ -1963,40 +1965,106 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tabGroupEvents.add(eventsMenuDropdown);
 	}
 
+	var modchartCheckbox:PsychUICheckBox;
+	var playfieldStepper:PsychUINumericStepper;
 	var modifierInput:PsychUIInputText;
 	var actionsDropdown:PsychUIDropDownMenu;
-	var actionsThing:Array<String> = [
-		"Add Modifier",
-		"Set",
-		"Ease"
-	];
+	var timeStepper:PsychUINumericStepper;
+	var valueStepper:PsychUINumericStepper;
+	var easeInput:PsychUIInputText;
+	var playerStepper:PsychUINumericStepper;
+	var playfieldModStepper:PsychUINumericStepper;
 
 	function addModchartTab():Void {
 		var tabGroupModchart = eventsBox.getTab('Modchart').menu;
 		var posX = 10;
 		var posY = 25;
 
-		modifierInput = new PsychUIInputText(posX, posY, 120, '', 8);
+		modchartCheckbox = new PsychUICheckBox(posX, posY-7.5, 'Modchart', 150, function(){
+			_song.nativeModchart = modchartCheckbox.checked;
+		});
+		modchartCheckbox.checked = _song.nativeModchart;
+
+		playfieldStepper = new PsychUINumericStepper(posX + 150, posY, 1, 0, 1, 20, 1);
+		playfieldStepper.value = _song.playfields;	
+		playfieldStepper.onValueChange = function() {
+			_song.playfields = Std.int(playfieldStepper.value);
+		};
+
+		var playfieldsLabelText = new FlxText(playfieldStepper.x, playfieldStepper.y - 15, 80, 'Playfields:');
+
+		posY += 40;
+
+		modifierInput = new PsychUIInputText(posX+150, posY, 120, '', 8);
     	modifierInput.onChange = function(old:String, cur:String){
-			if(curSelectedNote != null){
-				if(curSelectedNote[1] != null){
-					if(curSelectedNote[1][curEventSelected] != null){
-						curSelectedNote[1][curEventSelected][1] = eventInputField1.text;
-						updateGrid();
-					}
-				}
-			}
+			// TODO
 		}
 
-		actionsDropdown = new PsychUIDropDownMenu(posX+150, posY, actionsThing, function(index:Int, name:String){
+		var modifierLabelText = new FlxText(modifierInput.x, modifierInput.y - 15, 80, 'Modifier:');
+
+		actionsDropdown = new PsychUIDropDownMenu(posX, posY, ["Add Modifier", "Set", "Ease"], function(index:Int, name:String){
 			if(curSelectedNote != null && curSelectedNote[2] == null){
 				curSelectedNote[1][curEventSelected][0] = eventStuff[index][0];
 				updateGrid();
 			}
 		});
 
+		var actionsLabelText = new FlxText(actionsDropdown.x, actionsDropdown.y - 15, 80, 'Action:');
+
+		posY += 40;
+
+		timeStepper = new PsychUINumericStepper(posX, posY, 0.01, 0, 0, 9999, 2);
+		timeStepper.onValueChange = function() {
+			// TODO
+		};
+
+		valueStepper = new PsychUINumericStepper(posX + 150, posY, 0.01, 0, 0, 9999, 2);
+		valueStepper.onValueChange = function() {
+			// TODO
+		};
+
+		posY += 40;
+
+		easeInput = new PsychUIInputText(posX, posY, 120, '', 8);
+		easeInput.onChange = function(old:String, cur:String){
+			// TODO
+		}
+
+		posY += 40;
+
+		playerStepper = new PsychUINumericStepper(posX, posY, 1, 0, -1, playfieldStepper.value*2, 0);
+		playerStepper.onValueChange = function() {
+			// TODO
+		};
+
+		playfieldModStepper = new PsychUINumericStepper(posX + 150, posY, 1, 0, 1, 20, 0);
+		playfieldModStepper.onValueChange = function() {
+			// TODO
+		};
+
+		var timeLabelText = new FlxText(timeStepper.x, timeStepper.y - 15, 80, 'Time (beats):');
+		var valueLabelText = new FlxText(valueStepper.x, valueStepper.y - 15, 80, 'Value:');
+		var easeLabelText = new FlxText(easeInput.x, easeInput.y - 15, 80, 'Ease (if ease):');
+		var playerLabelText = new FlxText(playerStepper.x, playerStepper.y - 15, 80, 'Player:');
+		var playfieldModLabelText = new FlxText(playfieldModStepper.x, playfieldModStepper.y - 15, 80, 'Playfield:');
+
 		//tabGroupEvents.add(eventInputField1);
+		tabGroupModchart.add(modchartCheckbox);
+		tabGroupModchart.add(playfieldStepper);
+		tabGroupModchart.add(playfieldsLabelText);
 		tabGroupModchart.add(modifierInput);
+		tabGroupModchart.add(modifierLabelText);
+		tabGroupModchart.add(actionsLabelText);
+		tabGroupModchart.add(timeStepper);
+		tabGroupModchart.add(valueStepper);
+		tabGroupModchart.add(easeInput);
+		tabGroupModchart.add(playerStepper);
+		tabGroupModchart.add(playfieldModStepper);
+		tabGroupModchart.add(timeLabelText);
+		tabGroupModchart.add(valueLabelText);
+		tabGroupModchart.add(easeLabelText);
+		tabGroupModchart.add(playerLabelText);
+		tabGroupModchart.add(playfieldModLabelText);
 		tabGroupModchart.add(actionsDropdown);
 	}
 
@@ -4496,8 +4564,8 @@ private function addNote(strum:Null<Float> = null, data:Null<Int> = null, type:N
     else
     {
         var event = eventsBox.selectedName == "Events" ? eventsMenuDropdown.selectedLabel : "Modchart Event";
-        var text1 = /*eventsBox.selectedName == "Events" ? */eventInputField1.text/* : */;
-        var text2 = /*eventsBox.selectedName == "Events" ? */eventInputField2.text/* : */;
+        var text1 = actionsDropdown.selectedLabel;
+        var text2 = modifierInput.text;
         _song.events.push([noteStrum, [[event, text1, text2]]]);
         curSelectedNote = _song.events[_song.events.length - 1];
         curEventSelected = 0;

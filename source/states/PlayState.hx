@@ -327,6 +327,8 @@ class PlayState extends MusicBeatState
 	public var startCallback:Void->Void = null;
 	public var endCallback:Void->Void = null;
 
+	public var manager:modchart.Manager;
+
 	override public function create()
 	{
 		var pack:Dynamic = Mods.getPack();
@@ -727,6 +729,9 @@ class PlayState extends MusicBeatState
 		setOnScripts('mania', SONG.mania);
 		setOnScripts("isPlayerOpponent", isPlayerOpponent);
 
+		if(SONG.nativeModchart) manager = new modchart.Manager();
+		if(SONG.nativeModchart) add(manager);
+		
 		callOnScripts('initModchart'); // Could use onCreatePost? Yes but this could be used to do some stuff
 		callOnScripts('onCreatePost');
 		notesLength = notes.length;

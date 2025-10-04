@@ -79,7 +79,7 @@ class EditorPlayState extends MusicBeatSubstate
 
 	public static var instance:EditorPlayState;
 
-	public var modchartInstance:modchart.Manager;
+	public var manager:modchart.Manager;
 
 	public function new(playbackRate:Float)
 	{
@@ -290,8 +290,8 @@ class EditorPlayState extends MusicBeatSubstate
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		FlxG.mouse.visible = true;
 		modchart.Config.RENDER_ARROW_PATHS = false;
-		remove(modchartInstance);
-		modchartInstance = null;
+		if(PlayState.SONG.nativeModchart) remove(manager);
+		if(PlayState.SONG.nativeModchart) manager = null;
 		FlxG.cameras.remove(camHUD);
 		camHUD.destroy();
 		camHUD = null;
@@ -317,8 +317,8 @@ class EditorPlayState extends MusicBeatSubstate
 		songLength = FlxG.sound.music.length;
 
 		modchart.Config.RENDER_ARROW_PATHS = true;
-		modchartInstance = new modchart.Manager();
-		add(modchartInstance);
+		if(PlayState.SONG.nativeModchart) manager = new modchart.Manager();
+		if(PlayState.SONG.nativeModchart) add(manager);
 	}
 
 	// Borrowed from PlayState
