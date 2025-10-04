@@ -290,8 +290,10 @@ class EditorPlayState extends MusicBeatSubstate
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		FlxG.mouse.visible = true;
 		modchart.Config.RENDER_ARROW_PATHS = false;
-		if(PlayState.SONG.nativeModchart) remove(manager);
-		if(PlayState.SONG.nativeModchart) manager = null;
+		if(PlayState.SONG.nativeModchart){ 
+			remove(manager);
+			manager = null;
+		}
 		FlxG.cameras.remove(camHUD);
 		camHUD.destroy();
 		camHUD = null;
@@ -317,8 +319,16 @@ class EditorPlayState extends MusicBeatSubstate
 		songLength = FlxG.sound.music.length;
 
 		modchart.Config.RENDER_ARROW_PATHS = true;
-		if(PlayState.SONG.nativeModchart) manager = new modchart.Manager();
-		if(PlayState.SONG.nativeModchart) add(manager);
+		if(PlayState.SONG.nativeModchart){ 
+			var fields = 1;
+			manager = new modchart.Manager();
+			add(manager);
+
+			while(fields != PlayState.SONG.playfields){
+				fields += 1;
+				manager.addPlayfield();
+			}
+		}
 	}
 
 	// Borrowed from PlayState

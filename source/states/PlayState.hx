@@ -681,6 +681,33 @@ class PlayState extends MusicBeatState
 		for (event in eventsPushed)
 			startHScriptsNamed('custom_events/' + event + '.hx');
 		#end
+
+		if(SONG.nativeModchart){ 
+			manager = new modchart.Manager();
+			add(manager);
+
+			var fields = 1;
+			while(fields != SONG.playfields){
+				fields += 1;
+				manager.addPlayfield();
+			}
+
+			for (event in entEventsPushed){
+				if(event.event == "Modchart Event"){
+					var info = event.value1.split(',');
+					if(info[0] == "Add Modifier")
+						manager.addModifier(info[1], Std.parseInt(info[6]));
+					if(info[0] == "Ease"){
+						var ease = FlxEase.linear;
+						if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4])
+						manager.ease(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+					}
+					if(info[0] == "Set")
+						manager.set(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+				}
+			}
+		}
+
 		noteTypes = null;
 		eventsPushed = null;
 
@@ -728,9 +755,6 @@ class PlayState extends MusicBeatState
 
 		setOnScripts('mania', SONG.mania);
 		setOnScripts("isPlayerOpponent", isPlayerOpponent);
-
-		if(SONG.nativeModchart) manager = new modchart.Manager();
-		if(SONG.nativeModchart) add(manager);
 		
 		callOnScripts('initModchart'); // Could use onCreatePost? Yes but this could be used to do some stuff
 		callOnScripts('onCreatePost');
@@ -1419,6 +1443,7 @@ class PlayState extends MusicBeatState
 	var debugNum:Int = 0;
 	private var noteTypes:Array<String> = [];
 	private var eventsPushed:Array<String> = [];
+	private var entEventsPushed:Array<EventNote> = [];
 	private function generateSong(dataPath:String):Void
 	{
 		// FlxG.log.add(ChartParser.parse());
@@ -1600,12 +1625,22 @@ class PlayState extends MusicBeatState
 	// called only once per different event (Used for precaching)
 	function eventPushed(event:EventNote) {
 		eventPushedUnique(event);
+		entEventPushed(event);
 		if(eventsPushed.contains(event.event)) {
 			return;
 		}
 
 		stagesFunc(function(stage:BaseStage) stage.eventPushed(event));
 		eventsPushed.push(event.event);
+	}
+
+	function entEventPushed(event:EventNote) {
+		if(entEventsPushed.contains(event)) {
+			return;
+		}
+
+		stagesFunc(function(stage:BaseStage) stage.entEventPushed(event));
+		entEventsPushed.push(event);
 	}
 
 	// called by every event with the same name
