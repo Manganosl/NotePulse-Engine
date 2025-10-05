@@ -1,5 +1,7 @@
 package states.editors;
 
+import psychlua.LuaUtils;
+
 import backend.Song;
 import backend.Section;
 import backend.Rating;
@@ -18,6 +20,7 @@ import haxe.Json;
 import objects.Character;
 import openfl.utils.Assets as OpenFlAssets;
 
+import psychlua.LuaUtils;
 class EditorPlayState extends MusicBeatSubstate
 {
 	// Borrowed from original PlayState
@@ -131,9 +134,18 @@ class EditorPlayState extends MusicBeatSubstate
 
 		opponentStrums = new FlxTypedGroup<StrumNote>();
 		playerStrums = new FlxTypedGroup<StrumNote>();
+		gfStrums = new FlxTypedGroup<StrumNote>();
 		
 		generateStaticArrows(0);
 		generateStaticArrows(1);
+		if (PlayState.SONG.gfStrums) {
+			generateStaticArrows(2);
+			for (i in 0...gfStrums.length) {
+				gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
+			}
+			adaptStrumline(gfStrums);
+		}
+
 		/***************/
 		
 		scoreTxt = new FlxText(10, FlxG.height - 50, FlxG.width - 20, "", 20);
@@ -157,6 +169,39 @@ class EditorPlayState extends MusicBeatSubstate
 		FlxG.mouse.visible = false;
 		
 		generateSong(PlayState.SONG.song);
+
+		modchart.Config.RENDER_ARROW_PATHS = true;
+		if(PlayState.SONG.nativeModchart){ 
+			var fields = 1;
+			manager = new modchart.Manager();
+			add(manager);
+
+			while(fields != PlayState.SONG.playfields){
+				fields += 1;
+				manager.addPlayfield();
+			}
+
+			for (songEvent in PlayState.SONG.events){
+				for (i in 0...songEvent[1].length){
+					var evName:String = songEvent[1][i][0];
+					if(evName == "Modchart Event"){
+						var value1:String = songEvent[1][i][1];
+						if(value1 == null) continue;
+						var info = value1.split(',');
+						if(info[0] == "Add Modifier")
+							manager.addModifier(info[1], Std.parseInt(info[6]));
+						if(info[0] == "Ease"){
+							var ease = FlxEase.linear;
+							if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
+							var strumTime:Float = songEvent[0] + ClientPrefs.data.noteOffset;
+							manager.ease(info[1], strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+						}
+						if(info[0] == "Set")
+							manager.set(info[1], (songEvent[0] + ClientPrefs.data.noteOffset)/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+					}
+				}
+			}
+		}
 
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
@@ -210,6 +255,7 @@ class EditorPlayState extends MusicBeatSubstate
 			{
 				var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
 				if(!daNote.mustPress) strumGroup = opponentStrums;
+				if(daNote.gfStrum) strumGroup = gfStrums;
 
 				var strum:StrumNote = strumGroup.members[daNote.noteData];
 				daNote.followStrumNote(strum, fakeCrochet, songSpeed / playbackRate);
@@ -317,18 +363,6 @@ class EditorPlayState extends MusicBeatSubstate
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
-
-		modchart.Config.RENDER_ARROW_PATHS = true;
-		if(PlayState.SONG.nativeModchart){ 
-			var fields = 1;
-			manager = new modchart.Manager();
-			add(manager);
-
-			while(fields != PlayState.SONG.playfields){
-				fields += 1;
-				manager.addPlayfield();
-			}
-		}
 	}
 
 	// Borrowed from PlayState
@@ -415,6 +449,8 @@ class EditorPlayState extends MusicBeatSubstate
 				//swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
 				swagNote.noteType = songNotes[3];
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+				swagNote.gfStrum = (songNotes[4] == true);
+				if(swagNote.gfStrum) swagNote.mustPress = false;
 
 				swagNote.scrollFactor.set();
 
@@ -434,6 +470,8 @@ class EditorPlayState extends MusicBeatSubstate
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.scrollFactor.set();
 						sustainNote.parent = swagNote;
+						sustainNote.gfStrum = swagNote.gfStrum;
+						if(sustainNote.gfStrum) sustainNote.mustPress = false;
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 
@@ -504,6 +542,8 @@ class EditorPlayState extends MusicBeatSubstate
 
 			if (player == 1)
 				playerStrums.add(babyArrow);
+				else if (player == 2)
+					gfStrums.add(babyArrow);
 			else
 			{
 				if(ClientPrefs.data.middleScroll)
@@ -522,6 +562,7 @@ class EditorPlayState extends MusicBeatSubstate
 
 		adaptStrumline(opponentStrums);
 		adaptStrumline(playerStrums);
+		if (PlayState.SONG.gfStrums) adaptStrumline(gfStrums);
 	}
 
 	public function adaptStrumline(strumline:FlxTypedGroup<StrumNote>) {
@@ -875,6 +916,7 @@ class EditorPlayState extends MusicBeatSubstate
 			vocals.volume = 1;
 
 		var strum:StrumNote = opponentStrums.members[Std.int(Math.abs(note.noteData))];
+		if(note.gfStrum) strum = gfStrums.members[Std.int(Math.abs(note.noteData))];
 		if(strum != null) {
 			strum.playAnim('confirm', true);
 			strum.resetAnim = Conductor.stepCrochet * 1.25 / 1000 / playbackRate;

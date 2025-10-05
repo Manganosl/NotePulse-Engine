@@ -2049,12 +2049,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		posY += 40;
 
-		playerStepper = new PsychUINumericStepper(posX, posY, 1, 0, -1, playfieldStepper.value*2, 0);
+		playerStepper = new PsychUINumericStepper(posX, posY, 1, -1, -1, playfieldStepper.value*2, 0);
 		playerStepper.onValueChange = function() {
 			updateModEvV1();
 		};
 
-		playfieldModStepper = new PsychUINumericStepper(posX + 150, posY, 1, 0, 1, 20, 0);
+		playfieldModStepper = new PsychUINumericStepper(posX + 150, posY, 1, -1, -1, 16, 0);
 		playfieldModStepper.onValueChange = function() {
 			updateModEvV1();
 		};
