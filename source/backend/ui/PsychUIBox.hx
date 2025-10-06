@@ -224,7 +224,7 @@ class PsychUIBox extends FlxSpriteGroup
 	}
 
 	var _originalHeight:Int = 0;
-	public function resize(width:Int, height:Int)
+	public function resize(width:Dynamic, height:Dynamic)
 	{
 		_originalHeight = height;
 		bg.setGraphicSize(width, height);

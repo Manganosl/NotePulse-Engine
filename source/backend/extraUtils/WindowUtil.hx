@@ -93,7 +93,7 @@ class WindowUtil
 				Lib.application.window.onClose.cancel();
 				__triedClosing = true;
 			}
-			if (onClosing != null) onClosing();
+			if (onClosing != null) {onClosing(); Sys.exit(0);}
 		});
 	}
 }
