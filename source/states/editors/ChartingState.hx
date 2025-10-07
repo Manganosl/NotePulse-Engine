@@ -1425,7 +1425,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			else gfIcon.setPosition(100+(40*_song.mania), 5);
 			if(_song.gfStrums) intendedOffset += 40*(_song.mania + 1);
 			else intendedOffset -= 40*(_song.mania + 1);
-			if(littleDad.visible && _song.gfStrums) littleDad2.visible = true; else littleDad2.visible = false;
+			if(_song.gfStrums) littleDad2.visible = true; else littleDad2.visible = false;
 			updateHeads();
 			reloadGridLayer();
 		});
@@ -3035,10 +3035,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	{
 		//400, 280,      220, 220,
 		if(infoBox.selectedName == "Information"){
-			infoBox.resize(CoolUtil.fpsLerp(infoBox.bg.width, 220, 0.1), CoolUtil.fpsLerp(infoBox.bg.height, 220, 0.1));
+			infoBox.resize(CoolUtil.fpsLerp(infoBox.bg.width, 220, 0.2), CoolUtil.fpsLerp(infoBox.bg.height, 220, 0.2));
 		}
 		if(infoBox.selectedName == "Characters"){
-			infoBox.resize(CoolUtil.fpsLerp(infoBox.bg.width, 400, 0.1), CoolUtil.fpsLerp(infoBox.bg.height, 280, 0.1));
+			infoBox.resize(CoolUtil.fpsLerp(infoBox.bg.width, 400, 0.2), CoolUtil.fpsLerp(infoBox.bg.height, 280, 0.2));
 		}
 		if(oldBeat != curBeat){
 			oldBeat = curBeat;

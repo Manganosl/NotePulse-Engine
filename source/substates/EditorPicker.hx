@@ -39,6 +39,12 @@ class EditorPicker extends MusicBeatSubstate {
 			args: [states.editors.NoteSplashDebugState]
 		},
 		{
+			name: "Stage Editor",
+			iconShit: "stage",
+			state: states.editors.StageEditorState,
+			args: [null]
+		},
+		{
 			name: "State Loader",
 			iconShit: "debugOptions",
 			state: states.MainMenuState,   // Still working on it

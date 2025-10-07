@@ -167,6 +167,50 @@ class Character extends FlxSkewedSprite
 		}
 	}
 
+	public function changeCharacter(character:String)
+	{
+		animationsArray = [];
+		animOffsets = [];
+		curCharacter = character;
+		var characterPath:String = 'characters/$character.json';
+
+		var path:String = Paths.getPath(characterPath, TEXT);
+		#if MODS_ALLOWED
+		if (!FileSystem.exists(path))
+		#else
+		if (!Assets.exists(path))
+		#end
+		{
+			path = Paths.getSharedPath('characters/' + DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
+			//missingCharacter = true;
+			//missingText = new FlxText(0, 0, 300, 'ERROR:\n$character.json', 16);
+			//missingText.alignment = CENTER;
+		}
+
+		try
+		{
+			#if MODS_ALLOWED
+			loadCharacterFile(Json.parse(File.getContent(path)));
+			#else
+			loadCharacterFile(Json.parse(Assets.getText(path)));
+			#end
+		}
+		catch(e:Dynamic)
+		{
+			trace('Error loading character file of "$character": $e');
+		}
+
+		skipDance = false;
+		hasMissAnimations = hasAnimation('singLEFTmiss') || hasAnimation('singDOWNmiss') || hasAnimation('singUPmiss') || hasAnimation('singRIGHTmiss');
+		recalculateDanceIdle();
+		dance();
+	}
+
+	public function hasAnimation(anim:String):Bool
+	{
+		return animOffsets.exists(anim);
+	}
+
 	function buildGhosts() {
 		for (i in 0...4)
 		{
