@@ -21,11 +21,13 @@ This engine is a Psych 0.7.3 fork that adds and modifies some things to either m
 - Compatibility with Psych 1.0 charts
 - Possibility to force the camera to look at Girlfriend without being a gf section
 - CNE ahh FPS counter (To change build field, add "engineName" to your mod's JSON with a string containing the name you want)
-- V-Slice results screen
+- Results screen
 - Play as opponent
 - Camera movement on note hit
 - Ndll support
 - Away3D (Only on HScript)
+- Psych 1.0 Stage Editor
+- Modchart Events on Charting State (Something like Zoro's Modcharting Editor)
 
 ### You can find extra LUA functions in [here](LUA.md)
 

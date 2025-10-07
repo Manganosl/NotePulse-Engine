@@ -41,13 +41,13 @@ class EditorPicker extends MusicBeatSubstate {
 		{
 			name: "Stage Editor",
 			iconShit: "stage",
-			state: states.editors.StageEditorState,
-			args: [null]
+			state: states.editors.ModSelector,
+			args: [states.editors.StageEditorState]
 		},
 		{
 			name: "State Loader",
 			iconShit: "debugOptions",
-			state: states.MainMenuState,   // Still working on it
+			state: states.MainMenuState,  
 			args: [null]
 		}
 	];
