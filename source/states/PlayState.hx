@@ -3213,8 +3213,8 @@ private function popUpScore(note:Note = null):Void
         antialias = !isPixelStage;
     }
 
-	var scaX:Float = (linkStrum.scale.x*0.6);
-	var scaY:Float = (linkStrum.scale.y*0.6);
+	var scaX:Float = (linkStrum.scale.x*0.6)+0.085;
+	var scaY:Float = (linkStrum.scale.y*0.6)+0.085;
 
     // --- Rating sprite ---
     var rating:FlxSprite = new FlxSprite();
@@ -3285,12 +3285,10 @@ private function popUpScore(note:Note = null):Void
 
     if (!PlayState.isPixelStage)
     {
-        rating.setGraphicSize(Std.int(rating.width * 0.7));
         comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
     }
     else
     {
-        rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
         comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
     }
 
@@ -3408,6 +3406,18 @@ private function popUpScore(note:Note = null):Void
     FlxTween.tween(msText, {alpha: 0, y: msText.y - 30}, 0.5 / playbackRate, {
         onComplete: function(twn:FlxTween) msText.destroy()
     });
+
+	if (!PlayState.isPixelStage)
+	{
+		rating.antialiasing = ClientPrefs.data.antialiasing;
+		FlxTween.cancelTweensOf(rating, ['scale.x', 'scale.y']);
+		FlxTween.tween(rating.scale, {x: rating.scale.x-0.085, y: rating.scale.y-0.085}, 0.5, {ease: FlxEase.expoOut});
+	}
+	else
+	{
+		rating.setGraphicSize(Std.int(rating.width * 6 * 0.85));
+	}
+	rating.updateHitbox();
 }
 
 	public var strumsBlocked:Array<Bool> = [];

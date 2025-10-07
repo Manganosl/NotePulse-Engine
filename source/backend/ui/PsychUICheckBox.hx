@@ -44,7 +44,7 @@ class PsychUICheckBox extends FlxSpriteGroup
 		{
 			var screenPos:FlxPoint = getScreenPosition(null, camera);
 			var mousePos:FlxPoint = FlxG.mouse.getPositionInCameraView(camera);
-			if((mousePos.x >= screenPos.x && mousePos.x < screenPos.x + width) &&
+			if((mousePos.x >= screenPos.x && mousePos.x < screenPos.x + width/2) &&
 				(mousePos.y >= screenPos.y && mousePos.y < screenPos.y + height))
 			{
 				checked = !checked;
