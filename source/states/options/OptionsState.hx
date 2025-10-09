@@ -1,8 +1,7 @@
-package options;
+package states.options;
 
 import states.MainMenuState;
 import backend.StageData;
-import backend.CoolUtil;
 
 class OptionsState extends MusicBeatState
 {
@@ -24,17 +23,17 @@ class OptionsState extends MusicBeatState
 	function openSelectedSubstate(label:String) {
 		switch(label) {
 			case 'Note Colors':
-				openSubState(new options.NotesSubState());
+				openSubState(new substates.options.NotesSubState());
 			case 'Controls':
-				openSubState(new options.ControlsSubState());
+				openSubState(new substates.options.ControlsSubState());
 			case 'Graphics':
-				openSubState(new options.GraphicsSettingsSubState());
+				openSubState(new substates.options.GraphicsSettingsSubState());
 			case 'Visuals and UI':
-				openSubState(new options.VisualsUISubState());
+				openSubState(new substates.options.VisualsUISubState());
 			case 'Gameplay':
-				openSubState(new options.GameplaySettingsSubState());
+				openSubState(new substates.options.GameplaySettingsSubState());
 			case 'Adjust Delay and Combo':
-				MusicBeatState.switchState(new options.NoteOffsetState());
+				MusicBeatState.switchState(new states.options.NoteOffsetState());
 		}
 	}
 

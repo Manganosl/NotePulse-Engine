@@ -1,4 +1,4 @@
-package options;
+package substates.options;
 
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;

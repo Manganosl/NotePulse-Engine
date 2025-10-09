@@ -21,7 +21,7 @@ import flixel.FlxObject;
 
 import states.StoryMenuState;
 import states.FreeplayState;
-import options.OptionsState;
+import states.options.OptionsState;
 
 class PauseSubState extends MusicBeatSubstate
 {

@@ -1,4 +1,4 @@
-package options;
+package states.options;
 
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepad;
@@ -7,7 +7,7 @@ import flixel.input.gamepad.FlxGamepadManager;
 
 import objects.CheckboxThingie;
 import objects.AttachedText;
-import options.Option;
+import states.options.Option;
 import backend.InputFormatter;
 import states.MainMenuState;
 import backend.StageData;

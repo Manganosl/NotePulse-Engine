@@ -4,6 +4,7 @@ import backend.ExtraKeysHandler.EKNoteColor;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
+import backend.utils.CoolUtil.*;
 
 import states.TitleState;
 
@@ -269,7 +270,7 @@ class ClientPrefs {
 	#end
 
 	public static function loadArrowRGBData(path:String, pixel:Bool = false, defaultColors:Array<EKNoteColor>) {
-		var savedColors:CoolUtil.ArrowRGBSavedData = CoolUtil.getArrowRGB(path, defaultColors);
+		var savedColors:ArrowRGBSavedData = CoolUtil.getArrowRGB(path, defaultColors);
 
 		if (pixel)
 			ClientPrefs.defaultData.arrowRGBPixel = [];

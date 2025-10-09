@@ -1,4 +1,4 @@
-package options;
+package substates.options;
 
 typedef Keybind = {
 	keyboard:String,

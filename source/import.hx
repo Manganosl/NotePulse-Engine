@@ -2,7 +2,9 @@
 //Discord API
 #if DISCORD_ALLOWED
 import backend.Discord;
+#end
 
+//FunkinModchart
 import modchart.Config;
 import modchart.Manager;
 import modchart.backend.core.*;
@@ -14,7 +16,6 @@ import modchart.engine.*;
 import modchart.engine.events.*;
 import modchart.engine.modifiers.*;
 import openfl.geom.Vector3D;
-#end
 
 //Psych
 #if LUA_ALLOWED
@@ -35,7 +36,7 @@ import js.html.*;
 
 import backend.Paths;
 import backend.Controls;
-import backend.CoolUtil;
+import backend.utils.CoolUtil;
 import states.base.MusicBeatState;
 import states.base.MusicBeatSubstate;
 import backend.CustomFadeTransition;
@@ -54,9 +55,6 @@ import states.LoadingState;
 #if flxanimate
 import flxanimate.*;
 #end
-
-//import hxvlc.flixel.*;
-//import hxvlc.util.*;
 
 //Flixel
 import flixel.sound.FlxSound;

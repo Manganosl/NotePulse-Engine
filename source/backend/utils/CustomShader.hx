@@ -1,4 +1,4 @@
-package backend.extraUtils;
+package backend.utils;
 
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.FlxCamera;

@@ -1,7 +1,7 @@
 package psychlua;
 
 import flixel.effects.particles.FlxEmitter;
-import backend.extraUtils.*;
+import backend.utils.*;
 import flixel.addons.display.FlxTiledSprite;
 import flixel.FlxBasic;
 import objects.Character;
@@ -156,6 +156,7 @@ class HScript extends SScript
 		set("WindowUtil", WindowUtil);
 		set("Manager", Manager);
 		set("CustomShader", CustomShader);
+		set("CoolUtil", CoolUtil);
 
 		set("Flx3DCamera", flx3d.Flx3DCamera);
         set("Flx3DView", flx3d.Flx3DView);

@@ -1,4 +1,4 @@
-package options;
+package substates.options;
 
 import objects.Character;
 

@@ -1,4 +1,4 @@
-package options;
+package substates.options;
 
 import objects.Note;
 import objects.StrumNote;
@@ -226,7 +226,7 @@ class VisualsUISubState extends BaseOptionsMenu
 
 	override function destroy()
 	{
-		if(changedMusic && !OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 1, true);
+		if(changedMusic && !states.options.OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 1, true);
 		super.destroy();
 	}
 

@@ -12,7 +12,7 @@ import openfl.utils.Assets as OpenFlAssets;
 import openfl.system.System;
 import openfl.geom.Rectangle;
 
-import backend.extraUtils.NdllUtil;
+import backend.utils.NdllUtil;
 
 import lime.utils.Assets;
 import flash.media.Sound;

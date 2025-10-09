@@ -139,7 +139,9 @@ class Main extends Sprite
 		Lib.current.stage.window.setIcon(icon);
 		#end
 
-		backend.extraUtils.WindowUtil.init();
+		backend.utils.WindowUtil.setDarkMode();
+		backend.utils.WindowUtil.init();
+		backend.ALSoftConfig.init();
 
 		#if html5
 		FlxG.autoPause = false;

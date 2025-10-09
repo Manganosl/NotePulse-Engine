@@ -854,7 +854,7 @@ class FlxSprite extends FlxObject
 			_matrix.ty = Math.floor(_matrix.ty);
 		}
 
-		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader is backend.extraUtils.CustomShader ? shader.shader : shader);
+		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader is backend.utils.CustomShader ? shader.shader : shader);
 	}
 
 	/**

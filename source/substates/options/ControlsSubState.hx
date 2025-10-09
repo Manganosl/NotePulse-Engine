@@ -1,4 +1,4 @@
-package options;
+package substates.options;
 
 import backend.ExtraKeysHandler;
 import backend.InputFormatter;

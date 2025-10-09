@@ -3,7 +3,7 @@ package modchart.backend.standalone;
 import backend.ClientPrefs;
 import backend.Conductor;
 import objects.Note;
-import objects.StrumNote.SustainSplash;
+import objects.SustainSplash;
 import objects.NoteSplash;
 import objects.StrumNote as Strum;
 import states.PlayState;

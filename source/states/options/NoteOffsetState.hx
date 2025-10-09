@@ -1,4 +1,4 @@
-package options;
+package states.options;
 
 import backend.StageData;
 import objects.Character;
@@ -405,7 +405,7 @@ class NoteOffsetState extends MusicBeatState
 			if(beatTween != null) beatTween.cancel();
 
 			persistentUpdate = false;
-			MusicBeatState.switchState(new options.OptionsState());
+			MusicBeatState.switchState(new states.options.OptionsState());
 			if(OptionsState.onPlayState)
 			{
 				if(ClientPrefs.data.pauseMusic != 'None')

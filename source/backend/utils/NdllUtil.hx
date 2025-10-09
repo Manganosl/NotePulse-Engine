@@ -1,4 +1,4 @@
-package backend.extraUtils;
+package backend.utils;
 
 import sys.FileSystem;
 import lime.app.Application;
@@ -15,7 +15,7 @@ import backend.Paths;
 		var func:Dynamic = _getNdllFunc(finalPath, name, args);
 
 		return Reflect.makeVarArgs(function(a:Array<Dynamic>) {
-			return backend.extraUtils.MacroUtil.generateReflectionLike(25, "func", "a");
+			return backend.utils.MacroUtil.generateReflectionLike(25, "func", "a");
 		});
 	}
 

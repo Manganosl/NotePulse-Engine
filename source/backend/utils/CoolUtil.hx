@@ -1,4 +1,4 @@
-package backend;
+package backend.utils;
 
 import backend.ExtraKeysHandler.EKNoteColor;
 import openfl.utils.Assets;

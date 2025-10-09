@@ -165,7 +165,6 @@ class SystemInfo extends FramerateCategory {
 		if (alpha <= 0.05) return;
 
 		_text = __formattedSysText;
-		_text += '${__formattedSysText == "" ? "" : "\n"}Garbage Collector: ${disableCount > 0 ? "OFF" : "ON"} (${disableCount})';
 
 		this.text.text = _text;
 		super.__enterFrame(t);
@@ -247,33 +246,5 @@ class SystemInfo extends FramerateCategory {
 		// when launching the engine through the CLI, REIMPLEMENT LATER. 
 		#end
 		return "Unknown";
-	}
-
-	public static var disableCount:Int = 0;
-
-	public static function askDisable() {
-		disableCount++;
-		if (disableCount > 0)
-			disable();
-		else
-			enable();
-	}
-	public static function askEnable() {
-		disableCount--;
-		if (disableCount > 0)
-			disable();
-		else
-			enable();
-	}
-	public static function enable() {
-		#if (cpp || hl)
-		Gc.enable(true);
-		#end
-	}
-
-	public static function disable() {
-		#if (cpp || hl)
-		Gc.enable(false);
-		#end
 	}
 }

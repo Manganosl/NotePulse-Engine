@@ -13,7 +13,7 @@ import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.addons.transition.FlxTransitionableState;
 
-import backend.extraUtils.NdllUtil;
+import backend.utils.NdllUtil;
 import lime.app.Application;
 
 import modchart.Manager;

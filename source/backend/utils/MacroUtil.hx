@@ -1,4 +1,4 @@
-package backend.extraUtils;
+package backend.utils;
 
 #if macro
 import haxe.macro.Expr;

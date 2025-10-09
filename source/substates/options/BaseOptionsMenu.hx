@@ -1,14 +1,13 @@
-package options;
+package substates.options;
 
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepad;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.gamepad.FlxGamepadManager;
-import options.OptionsState;
+import states.options.OptionsState;
 
 import objects.CheckboxThingie;
 import objects.AttachedText;
-import options.Option;
 import backend.InputFormatter;
 
 class BaseOptionsMenu extends MusicBeatSubstate

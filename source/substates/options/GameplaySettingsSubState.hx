@@ -1,4 +1,4 @@
-package options;
+package substates.options;
 
 class GameplaySettingsSubState extends BaseOptionsMenu
 {

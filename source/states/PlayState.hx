@@ -40,7 +40,7 @@ import hxvlc.flixel.*;
 
 import objects.Note.EventNote;
 import objects.*;
-import objects.StrumNote.SustainSplash;
+import objects.SustainSplash;
 
 #if LUA_ALLOWED
 import psychlua.*;
@@ -1935,6 +1935,132 @@ class PlayState extends MusicBeatState
 		return {x:x, y:y};
 	}
 
+private function regenerateUnspawnNotesFrom(startTime:Float):Void {
+    for (n in notes.members) {
+        if (n != null && n.strumTime >= startTime) {
+            n.destroy();
+        }
+    }
+
+    unspawnNotes = [];
+
+    for (section in SONG.notes) {
+        for (songNotes in section.sectionNotes) {
+            var daStrumTime:Float = songNotes[0];
+            if (daStrumTime < startTime) continue;
+
+            var daNoteData:Int = Std.int(songNotes[1] % (SONG.mania + 1));
+            var gottaHitNote:Bool = section.mustHitSection;
+            if (songNotes[1] > SONG.mania) {
+                gottaHitNote = !section.mustHitSection;
+            }
+
+            var oldNote:Note = unspawnNotes.length > 0 ? unspawnNotes[Std.int(unspawnNotes.length - 1)] : null;
+            var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
+            swagNote.row = Conductor.secsToRow(daStrumTime);
+            var rowArray = noteRows[gottaHitNote ? 0 : 1];
+            if (rowArray[swagNote.row] == null) rowArray[swagNote.row] = [];
+            rowArray[swagNote.row].push(swagNote);
+            swagNote.mustPress = gottaHitNote;
+            swagNote.sustainLength = songNotes[2];
+            swagNote.gfNote = (section.gfSection && (songNotes[1] < (SONG.mania + 1)));
+            swagNote.noteType = songNotes[3];
+            if (!Std.isOfType(songNotes[3], String)) swagNote.noteType = songNotes[3][0]; // keep your existing compatibility logic
+            swagNote.gfStrum = (songNotes[4] == true);
+            if (swagNote.gfStrum) swagNote.mustPress = isPlayerOpponent ? true : false;
+            swagNote.scrollFactor.set();
+            unspawnNotes.push(swagNote);
+
+            if (swagNote.sustainLength > 0) {
+                var susCount = Std.int(Math.round(swagNote.sustainLength / Conductor.stepCrochet));
+                for (sus in 0...susCount) {
+                    var susNote = new Note(daStrumTime + (Conductor.stepCrochet * sus), daNoteData, oldNote, true);
+                    susNote.gfStrum = swagNote.gfStrum;
+                    susNote.mustPress = swagNote.mustPress;
+                    susNote.parent = swagNote;
+                    swagNote.tail.push(susNote);
+                    unspawnNotes.push(susNote);
+                }
+            }
+        }
+    }
+
+    unspawnNotes.sort(sortByTime);
+    unspawnNotesLength = unspawnNotes.length;
+}
+
+private function remapIndex(oldIndex:Int, oldCount:Int, newCount:Int):Int {
+    if (oldCount <= 1) return 0;
+    var normalized:Float = oldIndex / (oldCount - 1); // 0..1
+    var newIndex:Int = Std.int(Math.round(normalized * (newCount - 1)));
+    if (newIndex < 0) newIndex = 0;
+    if (newIndex >= newCount) newIndex = newCount - 1;
+    return newIndex;
+}
+
+public function changeMania(newMania:Int):Void {
+    if (newMania == SONG.mania) return;
+
+    if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+        var minMania = ExtraKeysHandler.instance.data.minKeys - 1;
+        var maxMania = ExtraKeysHandler.instance.data.maxKeys - 1;
+        if (newMania < minMania) newMania = minMania;
+        if (newMania > maxMania) newMania = maxMania;
+    }
+
+    var oldMania:Int = SONG.mania;
+    var oldCount:Int = oldMania + 1;
+    SONG.mania = newMania;
+    var newCount:Int = SONG.mania + 1;
+
+    keysArray = [];
+    for (i in 0...SONG.mania + 1) {
+        keysArray.push(SONG.mania + '_key_$i');
+    }
+
+    for (s in playerStrums.members) if (s != null) s.destroy();
+    playerStrums.clear();
+
+    for (s in opponentStrums.members) if (s != null) s.destroy();
+    opponentStrums.clear();
+
+    for (s in gfStrums.members) if (s != null) s.destroy();
+    gfStrums.clear();
+
+    for (s in strumLineNotes.members) if (s != null) s.destroy();
+    strumLineNotes.clear();
+
+    generateStaticArrows(0);
+    generateStaticArrows(1);
+    if (SONG.gfStrums) generateStaticArrows(2);
+
+    adaptStrumline(opponentStrums);
+    adaptStrumline(playerStrums);
+    if (SONG.gfStrums) adaptStrumline(gfStrums);
+
+    var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
+    for (n in notes.members) {
+        if (n == null) continue;
+        if (n.strumTime < Conductor.songPosition) continue;
+
+        var oldIndex = Math.max(0, Math.min(oldCount - 1, n.noteData));
+        var newIndex = remapIndex(Std.int(oldIndex), oldCount, newCount);
+        n.noteData = newIndex;
+        n.column = newIndex;
+
+        var strumGroup:FlxTypedGroup<StrumNote> = !n.mustPress ? opponentStrums : playerStrums;
+        if (n.gfStrum) strumGroup = gfStrums;
+
+        if (newIndex < strumGroup.length) {
+            var strum:StrumNote = strumGroup.members[newIndex];
+            if (strum != null) n.followStrumNote(strum, fakeCrochet, songSpeed / playbackRate);
+        }
+    }
+
+    regenerateUnspawnNotesFrom(Conductor.songPosition);
+}
+
+
 	function cc_startPercentTween(durationSec:Float) {
 		if (cc_percentTween != null) cc_percentTween.cancel();
 		var rate:Float = 1.0;
@@ -2427,6 +2553,24 @@ class PlayState extends MusicBeatState
 		if(Math.isNaN(flValue2)) flValue2 = null;
 
 		switch(eventName) {
+case 'Change Mania':
+    var parsed = Std.parseInt(value1);
+    if (Math.isNaN(parsed)) {
+        trace('Change Mania event: value1 not a number => "' + value1 + '"');
+        return;
+    }
+
+    var newMania:Int = parsed - 1;
+
+    if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+        var minMania = ExtraKeysHandler.instance.data.minKeys - 1;
+        var maxMania = ExtraKeysHandler.instance.data.maxKeys - 1;
+        if (newMania < minMania) newMania = minMania;
+        if (newMania > maxMania) newMania = maxMania;
+    }
+
+    changeMania(newMania);
+    return;
 			case 'Hey!':
 				var value:Int = 2;
 				switch(value1.toLowerCase().trim()) {
