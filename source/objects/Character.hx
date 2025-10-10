@@ -57,12 +57,12 @@ class Character extends FlxSkewedSprite
 	public var ghostsEnabled:Bool = true;
 	
 	/**
-	 * Array of all ghosts
+	 * Array of all ghosts (now holds on-demand created ghosts)
 	 */
 	public var doubleGhosts:Array<FlxSprite> = [];
 	
 	/**
-	 * Array of all ghosts tweens
+	 * Array of all ghosts tweens (parallel to doubleGhosts)
 	 */
 	public var ghostTweenGrp:Array<FlxTween> = [];
 	
@@ -155,7 +155,7 @@ class Character extends FlxSkewedSprite
 
 		if(animOffsets.exists('singLEFTmiss') || animOffsets.exists('singDOWNmiss') || animOffsets.exists('singUPmiss') || animOffsets.exists('singRIGHTmiss')) hasMissAnimations = true;
 		recalculateDanceIdle();
-		buildGhosts();
+		// buildGhosts() removed — ghosts are created on-demand now
 		dance();
 
 		switch(curCharacter)
@@ -211,15 +211,9 @@ class Character extends FlxSkewedSprite
 		return animOffsets.exists(anim);
 	}
 
+	// buildGhosts removed (no pre-created ghosts). Keep a no-op in case anything references it.
 	function buildGhosts() {
-		for (i in 0...4)
-		{
-			var ghost = new FlxSprite();
-			ghost.visible = false;
-			ghost.antialiasing = true;
-			ghost.alpha = ghostAlpha;
-			doubleGhosts.push(ghost);
-		}
+		// ghosts are created on demand in playGhostAnim()
 	}
 
 	public function loadCharacterFile(json:Dynamic)
@@ -581,10 +575,11 @@ class Character extends FlxSkewedSprite
 			atlas.color = color;
 		}
 	}
+	#end
 
 	public function playGhostAnim(ghostID = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0)
 	{
-		var ghost:FlxSprite = doubleGhosts[ghostID];
+		var ghost:FlxSprite = new FlxSprite();
 		ghost.scale.copyFrom(scale);
 		ghost.frames = frames;
 		ghost.animation.copyFrom(animation);
@@ -596,12 +591,17 @@ class Character extends FlxSkewedSprite
 		ghost.alpha = alpha * ghostAlpha;
 		ghost.visible = true;
 		ghost.color = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
+
 		ghost.animation.play(animName, force, reversed, frame);
-		
-		ghostTweenGrp[ghostID]?.cancel();
-		
+
+		if (animOffsets.exists(animName))
+		{
+			var daOffset = animOffsets.get(animName);
+			ghost.offset.set(daOffset[0], daOffset[1]);
+		}
+
 		final direction:String = animName.substring(4).split('-')[0];
-		
+
 		inline function resolveDir(xDir:Bool = false):Float
 		{
 			var output:Float = 0;
@@ -623,31 +623,40 @@ class Character extends FlxSkewedSprite
 		final moveX = x + resolveDir(true);
 		final moveY = y + resolveDir(false);
 		
-		ghostTweenGrp[ghostID] = FlxTween.tween(ghost, {alpha: 0, x: moveX, y: moveY}, 0.75,
-			{
-				onComplete: (twn) -> {
-					ghost.visible = false;
-					ghostTweenGrp[ghostID] = null;
-				}
-			});
-			
-		if (animOffsets.exists(animName))
+		doubleGhosts.push(ghost);
+		ghostTweenGrp.push(null);
+		var myIndex:Int = doubleGhosts.length - 1;
+
+		var twn:FlxTween = FlxTween.tween(ghost, {alpha: 0, x: moveX, y: moveY}, 0.75,
 		{
-			final daOffset = animOffsets.get(animName);
-			ghost.offset.set(daOffset[0], daOffset[1]);
-		}
+			onComplete: (completedTween) ->
+			{
+				var idx = doubleGhosts.indexOf(ghost);
+				if (idx >= 0)
+				{
+					var oldTween = ghostTweenGrp[idx];
+					if (oldTween != null) oldTween.cancel();
+					ghostTweenGrp.splice(idx, 1);
+					doubleGhosts.splice(idx, 1);
+				}
+
+				ghost.visible = false;
+				FlxDestroyUtil.destroy(ghost);
+			}
+		});
+
+		ghostTweenGrp[myIndex] = twn;
 	}
 
 	public override function destroy()
 	{
-		for (i in ghostTweenGrp)
+		for (t in ghostTweenGrp)
 		{
-			i?.cancel();
-			i = null;
+			t?.cancel();
 		}
-		
+
+		// destroy tween array and active ghosts
 		ghostTweenGrp = FlxDestroyUtil.destroyArray(ghostTweenGrp);
-		
 		doubleGhosts = FlxDestroyUtil.destroyArray(doubleGhosts);
 
 		super.destroy();
@@ -659,5 +668,4 @@ class Character extends FlxSkewedSprite
 		if (atlas != null)
 			atlas = FlxDestroyUtil.destroy(atlas);
 	}
-	#end
 }
