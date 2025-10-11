@@ -451,7 +451,7 @@ class FreeplayState extends MusicBeatState
 			//FlxTween.tween(text, {x: 1500}, 0.8, {ease: FlxEase.backIn, type: PINGPONG});
 			controlsActive = false;
 			FlxG.sound.play(Paths.sound('confirmMenu'));
-			if (FlxG.sound.music != null) FlxTween.tween(FlxG.sound.music, {pitch: 0, volume: 0}, 2.5, {ease: FlxEase.sineInOut});
+			if (FlxG.sound.music != null) FlxTween.tween(FlxG.sound.music, {pitch: 0, volume: 0}, 0.75, {ease: FlxEase.sineInOut});
 			FlxTween.tween(scoreText, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
 			FlxTween.tween(scoreBG, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
 			FlxTween.tween(diffText, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
@@ -470,12 +470,14 @@ class FreeplayState extends MusicBeatState
 				if (item.targetY == curSelected)
 					FlxTween.tween(item, {alpha: 1}, 0.6, {ease: FlxEase.sineInOut});
 			}
-			new FlxTimer().start(2.5, function(tmr:FlxTimer) {
+			new FlxTimer().start(0.75, function(tmr:FlxTimer) {
 				if (FlxG.keys.pressed.SHIFT) {
 					PlayState.chartingMode = true;
-					LoadingState.loadAndSwitchState(new ChartingState());
+					MusicBeatState.switchState(new LoadingState(new ChartingState(), true));
+					LoadingState.prepareToSong();
 				} else {
-					LoadingState.loadAndSwitchState(new PlayState());
+					MusicBeatState.switchState(new LoadingState(new PlayState(), true));
+					LoadingState.prepareToSong();
 				}
 			});
 					

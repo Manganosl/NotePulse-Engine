@@ -204,6 +204,7 @@ class Song
 		return rawJson;
 	}
 
+	public static var loadedSongName:String;
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
 		// FIX THE CASTING ON WINDOWS/NATIVE
@@ -222,6 +223,7 @@ class Song
 				daSong = songData.song;
 				daBpm = songData.bpm; */
 
+				loadedSongName = folder;
 		return parseRawJSON(jsonInput, loadRawSong(jsonInput, folder));
 	}
 

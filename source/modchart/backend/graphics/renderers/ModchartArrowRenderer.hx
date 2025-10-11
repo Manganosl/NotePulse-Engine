@@ -75,9 +75,21 @@ final class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
 		final output = instance.modifiers.getPath(arrowPosition, arrowData);
 		arrowPosition.copyFrom(output.pos.clone());
 
-		if (arrow.extraData != null && arrow.extraData["linkStrum"] != null) {
-    		arrowPosition.y += (arrow.extraData["linkStrum"].scale.y*110);
-		}
+if (arrow.extraData != null && arrow.extraData["linkStrum"] != null) {
+    final nextOutputForLink = instance.modifiers.getPath(
+        new Vector3(
+            Adapter.instance.getDefaultReceptorX(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2,
+            Adapter.instance.getDefaultReceptorY(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2
+        ),
+        arrowData,
+        1,
+        false,
+        true
+    );
+
+    arrowPosition.y = nextOutputForLink.pos.y + (arrow.extraData["linkStrum"].scale.y * 110);
+}
+
 
 		// internal mods
 		if (orient != 0) {
