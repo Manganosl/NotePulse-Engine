@@ -6,7 +6,7 @@ import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 import backend.utils.CoolUtil.*;
 
-import states.TitleState;
+import states.menus.TitleState;
 
 // Add a variable here and it will get automatically saved
 @:structInit class SaveVariables {

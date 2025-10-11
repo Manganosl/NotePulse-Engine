@@ -19,8 +19,8 @@ import flixel.FlxSprite;
 import openfl.utils.Assets;
 import flixel.FlxObject;
 
-import states.StoryMenuState;
-import states.FreeplayState;
+import states.menus.StoryMenuState;
+import states.menus.FreeplayState;
 import states.options.OptionsState;
 
 class PauseSubState extends MusicBeatSubstate

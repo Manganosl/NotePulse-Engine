@@ -2,7 +2,7 @@ package states.editors;
 
 import backend.ui.*;
 import backend.WeekData;
-import states.FreeplayState.SongMetadata;
+import states.menus.FreeplayState.SongMetadata;
 import objects.HealthIcon;
 import openfl.net.FileReference;
 import openfl.events.Event;

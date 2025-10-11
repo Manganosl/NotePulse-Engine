@@ -31,8 +31,8 @@ import objects.NoteSplash;
 import objects.Character;
 
 import states.MainMenuState;
-import states.StoryMenuState;
-import states.FreeplayState;
+import states.menus.StoryMenuState;
+import states.menus.FreeplayState;
 
 import substates.PauseSubState;
 import substates.GameOverSubstate;

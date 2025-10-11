@@ -1,4 +1,4 @@
-package states;
+package states.menus;
 
 import backend.ExtraKeysHandler;
 import backend.WeekData;
@@ -18,8 +18,8 @@ import openfl.display.BitmapData;
 
 import shaders.ColorSwap;
 
-import states.StoryMenuState;
-import states.OutdatedState;
+import states.menus.StoryMenuState;
+import states.handlers.OutdatedState;
 import states.MainMenuState;
 
 typedef TitleData =
@@ -95,7 +95,7 @@ class TitleState extends MusicBeatState
 		ClientPrefs.loadPrefs();
 
 		if (ExtraKeysHandler.instance.data.scales == null)
-			MusicBeatState.switchState(new ScaleSimulationState());
+			MusicBeatState.switchState(new states.init.ScaleSimulationState());
 
 		#if CHECK_FOR_UPDATES
 		if(ClientPrefs.data.checkForUpdates && !closedState) {
@@ -162,14 +162,14 @@ class TitleState extends MusicBeatState
 
 		FlxG.mouse.visible = false;
 		#if FREEPLAY
-		MusicBeatState.switchState(new FreeplayState());
+		MusicBeatState.switchState(new states.menus.FreeplayState());
 		#elseif CHARTING
 		MusicBeatState.switchState(new ChartingState());
 		#else
-		if(FlxG.save.data.flashing == null && !FlashingState.leftState) {
+		if(FlxG.save.data.flashing == null && !states.init.FlashingState.leftState) {
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
-			MusicBeatState.switchState(new FlashingState());
+			MusicBeatState.switchState(new states.init.FlashingState());
 		} else {
 			if (initialized)
 				startIntro();
@@ -432,9 +432,9 @@ class TitleState extends MusicBeatState
 				new FlxTimer().start(1, function(tmr:FlxTimer)
 				{
 					if (mustUpdate) {
-						MusicBeatState.switchState(new OutdatedState());
+						MusicBeatState.switchState(new states.handlers.OutdatedState());
 					} else {
-						MusicBeatState.switchState(new MainMenuState());
+						MusicBeatState.switchState(new states.MainMenuState());
 					}
 					closedState = true;
 				});
@@ -472,7 +472,7 @@ class TitleState extends MusicBeatState
 								function(twn:FlxTween) {
 									FlxTransitionableState.skipNextTransIn = true;
 									FlxTransitionableState.skipNextTransOut = true;
-									MusicBeatState.switchState(new TitleState());
+									MusicBeatState.switchState(new states.menus.TitleState());
 								}
 							});
 							FlxG.sound.music.fadeOut();

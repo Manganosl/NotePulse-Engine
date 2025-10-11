@@ -1,4 +1,4 @@
-package states;
+package states.handlers;
 
 import lime.app.Future;
 import sys.thread.FixedThreadPool;

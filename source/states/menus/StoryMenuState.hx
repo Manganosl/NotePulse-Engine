@@ -1,4 +1,4 @@
-package states;
+package states.menus;
 
 import backend.WeekData;
 import backend.Highscore;
@@ -257,7 +257,7 @@ class StoryMenuState extends MusicBeatState
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			movedBack = true;
-			MusicBeatState.switchState(new MainMenuState());
+			MusicBeatState.switchState(new states.MainMenuState());
 		}
 
 		super.update(elapsed);
@@ -323,7 +323,7 @@ class StoryMenuState extends MusicBeatState
 
 			new FlxTimer().start(1, function(tmr:FlxTimer)
 			{
-				LoadingState.loadAndSwitchState(new PlayState(), true);
+				LoadingState.loadAndSwitchState(new states.PlayState(), true);
 				FreeplayState.destroyFreeplayVocals();
 			});
 			

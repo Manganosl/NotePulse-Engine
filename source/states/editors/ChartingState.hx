@@ -11,7 +11,7 @@ import haxe.io.Bytes;
 import flixel.util.FlxSave;
 
 import states.MainMenuState;
-import states.FreeplayState.SongMetadata;
+import states.menus.FreeplayState.SongMetadata;
 
 import flixel.FlxObject;
 import flixel.addons.display.FlxGridOverlay;

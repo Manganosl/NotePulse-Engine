@@ -286,7 +286,7 @@ class MainMenuState extends MusicBeatState
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
-				MusicBeatState.switchState(new TitleState());
+				MusicBeatState.switchState(new states.menus.TitleState());
 			}
 
 			if (controls.ACCEPT || (FlxG.mouse.justPressed && allowMouse))
@@ -327,21 +327,21 @@ class MainMenuState extends MusicBeatState
 						switch (option)
 						{
 							case 'story_mode':
-								MusicBeatState.switchState(new StoryMenuState());
+								MusicBeatState.switchState(new states.menus.StoryMenuState());
 							case 'freeplay':
-								MusicBeatState.switchState(new FreeplayState());
+								MusicBeatState.switchState(new states.menus.FreeplayState());
 							#if MODS_ALLOWED
 							case 'mods':
-								MusicBeatState.switchState(new ModsMenuState());
+								MusicBeatState.switchState(new states.menus.ModsMenuState());
 							#end
 
 							#if ACHIEVEMENTS_ALLOWED
 							case 'achievements':
-								MusicBeatState.switchState(new AchievementsMenuState());
+								MusicBeatState.switchState(new states.menus.AchievementsMenuState());
 							#end
 
 							case 'credits':
-								MusicBeatState.switchState(new CreditsState());
+								MusicBeatState.switchState(new states.menus.CreditsState());
 							case 'options':
 								MusicBeatState.switchState(new OptionsState());
 								OptionsState.onPlayState = false;
@@ -375,11 +375,11 @@ class MainMenuState extends MusicBeatState
 			{
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;
-				MusicBeatState.switchState(new StoryMenuState());
+				MusicBeatState.switchState(new states.menus.StoryMenuState());
 			}
 			if(FlxG.keys.justPressed.TAB){
 				selectedSomethin = true;
-				MusicBeatState.switchState(new ModsMenuState());
+				MusicBeatState.switchState(new states.menus.ModsMenuState());
 			}
 			#end
 		}

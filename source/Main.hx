@@ -18,7 +18,7 @@ import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.display.StageScaleMode;
 import lime.app.Application;
-import states.TitleState;
+import states.menus.TitleState;
 
 #if linux
 import lime.graphics.Image;
@@ -312,6 +312,6 @@ class FridayGame extends FlxGame
     	if(onGameCrash != null) onGameCrash(errMsg, e.message);
 
    		flixel.addons.transition.FlxTransitionableState.skipNextTransOut = true;
-    	FlxG.switchState(new states.CrashHandlerState(FlxG.state, errMsg, e.message));
+    	FlxG.switchState(new states.handlers.CrashHandlerState(FlxG.state, errMsg, e.message));
 	}
 }

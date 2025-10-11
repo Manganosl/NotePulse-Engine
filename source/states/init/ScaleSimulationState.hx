@@ -1,4 +1,4 @@
-package states;
+package states.init;
 
 import objects.StrumNote;
 import backend.ExtraKeysHandler;
@@ -165,7 +165,7 @@ class ScaleSimulationState extends MusicBeatState {
 
         PlayState.SONG = null;
 
-        MusicBeatState.switchState(new TitleState());
+        MusicBeatState.switchState(new states.menus.TitleState());
     }
 
     override public function update(elapsed:Float)

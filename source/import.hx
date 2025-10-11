@@ -16,6 +16,7 @@ import modchart.engine.*;
 import modchart.engine.events.*;
 import modchart.engine.modifiers.*;
 import openfl.geom.Vector3D;
+import flixel.graphics.tile.FlxDrawTrianglesItem;
 
 //Psych
 #if LUA_ALLOWED
@@ -50,7 +51,7 @@ import objects.Alphabet;
 import objects.BGSprite;
 
 import states.PlayState;
-import states.LoadingState;
+import states.handlers.LoadingState;
 
 #if flxanimate
 import flxanimate.*;

@@ -24,7 +24,7 @@ import openfl.events.KeyboardEvent;
 
 import cutscenes.DialogueBoxPsych;
 
-import states.StoryMenuState;
+import states.menus.StoryMenuState;
 import states.editors.ChartingState;
 import states.editors.CharacterEditorState;
 
@@ -3242,7 +3242,7 @@ case 'Change Mania':
 					#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 					cancelMusicFadeTween();
 
-					MusicBeatState.switchState(new StoryMenuState());
+					MusicBeatState.switchState(new states.menus.StoryMenuState());
 
 					// if ()
 					if(!ClientPrefs.getGameplaySetting('practice') && !ClientPrefs.getGameplaySetting('botplay')) {
@@ -3455,7 +3455,7 @@ private function popUpScore(note:Note = null):Void
         earlyLateSpr.alpha = 1;
 		earlyLateSpr.extraData["linkStrum"] = linkStrum;
 		if(ClientPrefs.data.ratingCam == "Bellow Note"){
-			earlyLateSpr.scale.set(scaX, scaY);
+			earlyLateSpr.scale.set(scaX/(PlayState.isPixelStage ? daPixelZoom : 1), scaY/(PlayState.isPixelStage ? daPixelZoom : 1));
 		}
         comboGroup.add(earlyLateSpr);
 
@@ -3496,7 +3496,7 @@ private function popUpScore(note:Note = null):Void
     }
 
 	if(ClientPrefs.data.ratingCam == "Bellow Note"){
-		rating.scale.set(scaX, scaY);
+		rating.scale.set(scaX/(PlayState.isPixelStage ? daPixelZoom : 1), scaY/(PlayState.isPixelStage ? daPixelZoom : 1));
 	}
 
     rating.updateHitbox();

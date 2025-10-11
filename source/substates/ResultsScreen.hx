@@ -1,7 +1,7 @@
 package substates;
 
 import states.PlayState;
-import states.FreeplayState;
+import states.menus.FreeplayState;
 
 import flixel.util.FlxSpriteUtil;
 import openfl.geom.Rectangle;

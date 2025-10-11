@@ -1,4 +1,4 @@
-package states;
+package states.menus;
 
 import backend.WeekData;
 import backend.Highscore;
@@ -29,8 +29,8 @@ import openfl.display.BitmapData;
 
 import shaders.ColorSwap;
 
-import states.StoryMenuState;
-import states.OutdatedState;
+import states.menus.StoryMenuState;
+import states.handlers.OutdatedState;
 import states.MainMenuState;
 import states.editors.ChartingState;
 
@@ -355,7 +355,7 @@ class FreeplayState extends MusicBeatState
 					colorTween.cancel();
 				}
 				FlxG.sound.play(Paths.sound('cancelMenu'));
-				MusicBeatState.switchState(new MainMenuState());
+				MusicBeatState.switchState(new states.MainMenuState());
 			}
 		}
 
@@ -473,10 +473,10 @@ class FreeplayState extends MusicBeatState
 			new FlxTimer().start(0.75, function(tmr:FlxTimer) {
 				if (FlxG.keys.pressed.SHIFT) {
 					PlayState.chartingMode = true;
-					MusicBeatState.switchState(new LoadingState(new ChartingState(), true));
+					MusicBeatState.switchState(new states.handlers.LoadingState(new ChartingState(), true));
 					LoadingState.prepareToSong();
 				} else {
-					MusicBeatState.switchState(new LoadingState(new PlayState(), true));
+					MusicBeatState.switchState(new states.handlers.LoadingState(new PlayState(), true));
 					LoadingState.prepareToSong();
 				}
 			});
