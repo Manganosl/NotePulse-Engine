@@ -155,6 +155,9 @@ class HScript extends SScript
 		set("CustomShader", CustomShader);
 		set("CoolUtil", CoolUtil);
 
+		set("ScriptedState", states.scripted.ScriptedState);
+		set("ScriptedSubstate", states.scripted.ScriptedSubstate);
+
 		set("Flx3DCamera", flx3d.Flx3DCamera);
         set("Flx3DView", flx3d.Flx3DView);
         set("FlxView3D", flx3d.FlxView3D);

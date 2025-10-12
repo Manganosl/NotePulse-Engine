@@ -5,7 +5,7 @@
 - [X] Fix audio bugs (fixed i think??)
 - [X] Add FlxEmitter
 - [X] Making a decent results screen
-- [X] Fix Custom HScript States (I have nightmares with this one)
+- [ ] Fix Custom HScript States (I have nightmares with this one)
 - [X] Remake OptionsState
 - [X] Change the UI on editors
 - [X] Fix ChartingState bugs (I think)

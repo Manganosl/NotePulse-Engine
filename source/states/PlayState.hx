@@ -2336,6 +2336,9 @@ public function changeMania(newMania:Int):Void {
 									}
 								} else {
 									strum.sustainSplash.show();
+									strum.sustainSplash.rgbShader.r = daNote.rgbShader.r;
+									strum.sustainSplash.rgbShader.g = daNote.rgbShader.g;
+									strum.sustainSplash.rgbShader.b = daNote.rgbShader.b;
 								}
 							}
 

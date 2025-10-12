@@ -216,6 +216,9 @@ class Paths
 		return inst;
 	}
 
+	inline static public function modState(key:String)
+		return modFolders('states/$key.hx');
+
 	inline static public function modsStates(key:String, state:String)
 		return modFolders('states/$state/$key.hx');
 
