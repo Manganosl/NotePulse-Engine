@@ -586,6 +586,10 @@ class Character extends FlxSkewedSprite
 		ghost.antialiasing = antialiasing;
 		ghost.x = x;
 		ghost.y = y;
+		ghost.shader = shader;
+		ghost.cameras = cameras;
+		ghost.scrollFactor.x = scrollFactor.x;
+		ghost.scrollFactor.y = scrollFactor.y;
 		ghost.flipX = flipX;
 		ghost.flipY = flipY;
 		ghost.alpha = alpha * ghostAlpha;

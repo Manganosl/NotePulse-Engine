@@ -35,7 +35,7 @@ class MadnessTrans extends FlxGraphicsShader
         vec2 uvCenter = (uv - 0.5) * 2.0;
         uv.x *= aspectRatio;
     
-        uv = fract(uv * 10.0); // tiling factor
+        uv = fract(uv * 30.0); // tiling factor
         uv -= 0.5; // shifts the 0.0 point to the middle of each tile
         uv *= 2.0; // changes the scale of each tile to -1 to 1
     

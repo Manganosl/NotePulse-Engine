@@ -98,7 +98,6 @@
 	<haxelib name="away3d"/>
 
 	<!--FunkinModchart-->
-
 	<haxedef name="funkin-modchart" />
 	<haxedef name="FM_ENGINE" value="notepulse"/>
 	<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>

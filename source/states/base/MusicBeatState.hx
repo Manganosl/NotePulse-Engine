@@ -35,36 +35,7 @@ class MusicBeatState extends FlxUIState
 
 	var _psychCameraInitialized:Bool = false;
 
-	public var className:String = "";
-	public var useCustomStateName:Bool = false;
-	public var scriptsAllowed:Bool = true;
-
-	public var menuScriptArray:Array<HScript> = [];
-	public function runStateFiles(state:String, checkSpecificScript:Bool = false) {
-		if(!scriptsAllowed) return;
-		var filesPushed = [];
-		for (folder in Paths.getStateScripts(state))
-		{
-			if(FileSystem.exists(folder))
-			{
-				for (file in FileSystem.readDirectory(folder))
-				{
-					if (file.endsWith((checkSpecificScript ? (state + ".hx") : '.hx')) && !filesPushed.contains(file)) {
-						menuScriptArray.push(new HScript(folder + file));
-						filesPushed.push(file);
-					}
-				}
-			}
-		}
-	}
-
 	override function destroy() {
-		for (sc in menuScriptArray) {
-			sc.call("onDestroy", []);
-			sc.stop();
-		}
-		menuScriptArray = [];
-		
 		super.destroy();
 	}
 
@@ -72,13 +43,9 @@ class MusicBeatState extends FlxUIState
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		#if MODS_ALLOWED Mods.updatedOnState = false; #end
 
-		runStateFiles((useCustomStateName ? className : Type.getClassName(Type.getClass(this))));
-
 		if(!_psychCameraInitialized) initPsychCamera();
 
 		super.create();
-
-		quickCallMenuScript("onCreatePost", []);
 
 		if(!skip) {
 			openSubState(new CustomFadeTransition(0.6, true));
@@ -97,41 +64,6 @@ class MusicBeatState extends FlxUIState
 				FlxTween.tween(debug.Framerate.offset, {y: 2}, 1, {ease: FlxEase.cubeInOut});
 			}
 		}
-	}
-
-	public function setOnMenuScript(variable:String, arg:Dynamic) {
-		if(!scriptsAllowed) return;
-		for (i in 0...menuScriptArray.length) {
-			menuScriptArray[i].set(variable, arg);
-		}
-	}
-	
-	public function quickCallMenuScript(event:String, args:Array<Dynamic>):Dynamic {
-		var returnVal = LuaUtils.Function_Continue;
-		if(!scriptsAllowed) return returnVal;
-		for (sc in menuScriptArray) {
-			var myValue = sc.call(event, args);
-			if(myValue == LuaUtils.Function_StopLua) break;
-			if(myValue != null && myValue != LuaUtils.Function_Continue) returnVal = myValue;
-		}
-		return returnVal;
-	}
-	
-	public function callOnMenuScript(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
-		var returnVal = LuaUtils.Function_Continue;
-		if(!scriptsAllowed) return returnVal;
-		if(exclusions == null) exclusions = [];
-		if(excludeValues == null) excludeValues = [];
-
-		for (sc in menuScriptArray) {
-			if(exclusions.contains(sc.scriptName)) continue;
-
-			var myValue = sc.call(event, args);
-			if(myValue == LuaUtils.Function_StopLua && !ignoreStops) break;
-			
-			if(myValue != null && myValue != LuaUtils.Function_Continue) returnVal = myValue;
-		}
-		return returnVal;
 	}
 
 	public function initPsychCamera():PsychCamera
@@ -285,7 +217,6 @@ class MusicBeatState extends FlxUIState
 
 	public function sectionHit():Void
 	{
-		//trace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
 		stagesFunc(function(stage:BaseStage) {
 			stage.curSection = curSection;
 			stage.sectionHit();

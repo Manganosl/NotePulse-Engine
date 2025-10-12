@@ -1,10 +1,6 @@
 package objects;
 
-import shaders.RGBPalette;
-import shaders.RGBPalette.RGBShaderReference;
-
 class SustainSplash extends FlxSkewedSprite {
-	public var rgbShader:RGBShaderReference;
 	public var strum:StrumNote;
 	public var shouldVisible:Bool = false;
 	public var modchart:Bool = PlayState.fModchart;
@@ -12,9 +8,6 @@ class SustainSplash extends FlxSkewedSprite {
 	override public function new(strum:StrumNote) {
 		super();
 		this.strum = strum;
-
-		@:privateAccess
-		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(strum.noteData));
 
 		frames = Paths.getSparrowAtlas('noteSplashes/holdSplashes/sustain_cover');
 		animation.addByPrefix('cover', 'sustain cover pre0', 24, false);
@@ -43,7 +36,6 @@ class SustainSplash extends FlxSkewedSprite {
 	}
 	public inline function hide(miss:Bool = false) {
 		if (animation.curAnim.name == "splash") return;
-
 		updatedThisFrame = true;
 		if (miss) {if(!modchart) visible = false; shouldVisible = false;}
 		if (animation.curAnim.name != "splash") {
@@ -54,17 +46,16 @@ class SustainSplash extends FlxSkewedSprite {
 	}
 
 	override public function update(elapsed:Float) {
+		shader = strum.shader;
 		super.update(elapsed);
 		updatedThisFrame = false;
 		modchart = PlayState.fModchart;	
+
 
 		if (animation.curAnim.finished) {
 			if (animation.curAnim.name == "cover") animation.play("loop");
 			if (animation.curAnim.name == "splash") {if(!modchart) visible = false; shouldVisible = false;}
 		}
-		
-		//if (animation.curAnim.name != "splash") center();
-		//updateHitbox();
 		center();
 	}
 

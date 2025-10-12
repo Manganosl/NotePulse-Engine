@@ -149,9 +149,6 @@ class HScript extends SScript
 		set("FlxEmitter",FlxEmitter);
 		set("FlxEmitterMode",FlxEmitterMode);
 
-		set("CustomState", states.softcoding.CustomState);
-		set("CustomSubstate", states.softcoding.CustomSubstate);
-
 		set("NdllUtil", NdllUtil);
 		set("WindowUtil", WindowUtil);
 		set("Manager", Manager);
