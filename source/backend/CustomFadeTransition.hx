@@ -22,6 +22,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
 
 	override function create()
 	{
+		if(Type.getClassName(Type.getClass(FlxG.state)) == "states.scripted.ScriptedState") return;
 		var cam = FlxG.cameras.list[FlxG.cameras.list.length-1];
 		cameras = [cam];
 
@@ -41,5 +42,6 @@ class CustomFadeTransition extends MusicBeatSubstate {
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
+		if(Type.getClassName(Type.getClass(FlxG.state)) == "states.scripted.ScriptedState") close();
 	}
 }

@@ -4729,3 +4729,6 @@ private function popUpScore(note:Note = null):Void
 			i.visible = true;
 	}
 }
+function addTextToDebug(text:String, ?color:Int = 0xFFFFFFFF, ?size:Float = 16){
+	trace(text);
+}

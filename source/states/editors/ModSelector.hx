@@ -208,7 +208,7 @@ class ModSelector extends MusicBeatState{
 				if(goto == states.scripted.ScriptedState){
 					currentMod = modArray[curSelected];
 					Mods.currentModDirectory = currentMod;
-					try MusicBeatState.switchState(new states.scripted.ScriptedState(Paths.modState("MainMenuState")));
+					try FlxG.switchState(new states.scripted.ScriptedState(Paths.modState("MainMenuState")));
 				}
 				if(goto != states.editors.ChartingState){
 					if(curSelected == 0){
