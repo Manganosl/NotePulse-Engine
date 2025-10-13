@@ -36,6 +36,10 @@ class ScriptedState extends MusicBeatState
 				initialScriptOrigin = hscript.origin;
 		}
 
+		var fix:backend.CustomFadeTransition = new backend.CustomFadeTransition(0.6, false);
+		backend.CustomFadeTransition.finishCallback = function(){
+			backend.CustomFadeTransition.dont = true;
+		}
 		if (hscript != null)
 			daCreate();
 
