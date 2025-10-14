@@ -2,11 +2,17 @@ package states.scripted;
 
 import flixel.util.FlxColor;
 import psychlua.HScript;
+import psychlua.LuaUtils;
 import tea.SScript;
+import flixel.text.FlxText;
+import flixel.FlxG;
+import sys.io.File;
+import backend.CustomFadeTransition;
 
 class ScriptedState extends MusicBeatState
 {
 	public var hscript:HScript = null;
+	public var hscriptArray:Array<HScript> = [];
 	private var initialScriptPath:String;
 	private var initialScriptIsCode:Bool = false;
 	private var initialScriptOrigin:String = null;
@@ -50,11 +56,11 @@ class ScriptedState extends MusicBeatState
 		if (FileSystem.exists(scriptToLoad))
 		{
 			initHScript(scriptToLoad, false);
-			return true;
+			return hscript != null;
 		}
 
 		softlocked = true;
-		var errorText = new flixel.text.FlxText(0, FlxG.height / 2 - 10, FlxG.width, "Error: Script does not exist:\n" + scriptToLoad + "\n\nPress SPACE to go back to Main Menu");
+		var errorText = new FlxText(0, FlxG.height / 2 - 10, FlxG.width, "Error: Script does not exist:\n" + scriptToLoad + "\n\nPress SPACE to go back to Main Menu");
 		errorText.setFormat(null, 16, FlxColor.RED, "center");
 		add(errorText);
 		return false;
@@ -64,41 +70,127 @@ class ScriptedState extends MusicBeatState
 	{
 		try
 		{
-			hscript = new HScript(null, input);
-			if (hscript.parsingException != null)
+			var newScript:HScript = null;
+
+			if (isCode)
+				newScript = new HScript(input, null);
+			else
+				newScript = new HScript(null, input);
+
+			if (newScript.parsingException != null)
 			{
-				hscript.destroy();
-				hscript = null;
+				addTextToDebug('ERROR ON LOADING: ${newScript.parsingException.message}', FlxColor.RED);
+				newScript.destroy();
 				return null;
 			}
 
-			if (hscript.exists('onCreate'))
+			hscriptArray.push(newScript);
+
+			if (newScript.exists('onCreate'))
 			{
-				var callValue = hscript.call('onCreate');
+				var callValue = newScript.call('onCreate');
 				if (!callValue.succeeded)
 				{
 					for (e in callValue.exceptions)
-					hscript.destroy();
-					hscript = null;
+					{
+						if (e != null)
+						{
+							var len:Int = e.message.indexOf('\n') + 1;
+							if (len <= 0) len = e.message.length;
+							addTextToDebug('ERROR (${callValue.calledFunction}) - ' + e.message.substr(0, len), FlxColor.RED);
+						}
+					}
+
+					newScript.destroy();
+					hscriptArray.remove(newScript);
+					addTextToDebug('failed to initialize hscript!!! (${isCode ? "code string" : input})', FlxColor.RED);
 					return null;
+				}
+				else
+				{
+					addTextToDebug('initialized hscript successfully: ${isCode ? "code string" : input}', FlxColor.GREEN);
 				}
 			}
 
-			return hscript;
+			hscript = newScript;
+			return newScript;
 		}
 		catch (e:Dynamic)
 		{
-			if (hscript != null) hscript.destroy();
-			hscript = null;
+			var msg:String = Std.is(e, String) ? (e:Dynamic) : (e.message != null ? e.message : 'Unknown HScript error');
+			addTextToDebug('HScript error: ' + msg, FlxColor.RED);
+
+			var newScript:HScript = cast (SScript.global.get(input), HScript);
+			if (newScript != null)
+			{
+				newScript.destroy();
+				hscriptArray.remove(newScript);
+			}
+
 			return null;
 		}
 	}
 
-	private function callOnHScript(funcToCall:String, ?args:Array<Dynamic> = null):Void
+	/**
+	 * callOnHScript
+	 * Mirrors PlayState implementation: returns a Dynamic result (allows scripts to return
+	 * stop/continue signals). Supports ignoreStops, exclusions and excludeValues.
+	 */
+	public function callOnHScript(funcToCall:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, ?exclusions:Array<String> = null, ?excludeValues:Array<Dynamic> = null):Dynamic
 	{
-		if (hscript == null) return;
+		var returnVal:Dynamic = LuaUtils.Function_Continue;
+		if (args == null) args = [];
+		if (exclusions == null) exclusions = [];
+		if (excludeValues == null) excludeValues = [LuaUtils.Function_Continue];
 
-		try{hscript.call(funcToCall, args);} catch(e:Dynamic){}
+		#if HSCRIPT_ALLOWED
+		var len:Int = hscriptArray.length;
+		if (len < 1)
+			return returnVal;
+
+		for (i in 0...len)
+		{
+			var script:HScript = hscriptArray[i];
+			if (script == null || !script.exists(funcToCall) || exclusions.contains(script.origin))
+				continue;
+
+			try
+			{
+				var callValue = script.call(funcToCall, args);
+				if (!callValue.succeeded)
+				{
+					var e = callValue.exceptions[0];
+					if (e != null)
+					{
+						var elen:Int = e.message.indexOf('\n') + 1;
+						if (elen <= 0) elen = e.message.length;
+						addTextToDebug('ERROR (${callValue.calledFunction}) - ' + e.message.substr(0, elen), FlxColor.RED);
+					}
+					continue;
+				}
+
+				var myValue:Dynamic = callValue.returnValue;
+
+				if ((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+				{
+					returnVal = myValue;
+					break;
+				}
+
+				if (myValue != null && !excludeValues.contains(myValue))
+					returnVal = myValue;
+			}
+			catch (err:Dynamic)
+			{
+				var msg:String = (err != null && err.message != null) ? err.message : Std.string(err);
+				var elen:Int = msg.indexOf('\n') + 1;
+				if (elen <= 0) elen = msg.length;
+				addTextToDebug('Exception calling ${funcToCall} on hscript: ' + msg.substr(0, elen), FlxColor.RED);
+			}
+		}
+		#end
+
+		return returnVal;
 	}
 
 	override public function update(elapsed:Float):Void
@@ -112,19 +204,23 @@ class ScriptedState extends MusicBeatState
 			return;
 		}
 
-		callOnHScript('onUpdate', [elapsed]);
-		callOnHScript('onUpdatePost', [elapsed]);
+		callOnHScript('onUpdate', [elapsed], false, null, null);
+		callOnHScript('onUpdatePost', [elapsed], false, null, null);
 	}
 
 	override public function destroy():Void
 	{
 		callOnHScript('onDestroy');
 
-		if (hscript != null)
+		if (hscriptArray != null)
 		{
-			hscript.destroy();
-			hscript = null;
+			for (s in hscriptArray)
+			{
+				if (s != null) s.destroy();
+			}
+			hscriptArray = [];
 		}
+		hscript = null;
 
 		super.destroy();
 	}

@@ -157,6 +157,8 @@ class HScript extends SScript
 
 		set("ScriptedState", states.scripted.ScriptedState);
 		set("ScriptedSubstate", states.scripted.ScriptedSubstate);
+		set("MusicBeatState", MusicBeatState);
+		set("MusicBeatSubstate", MusicBeatSubstate);
 
 		set("Flx3DCamera", flx3d.Flx3DCamera);
         set("Flx3DView", flx3d.Flx3DView);

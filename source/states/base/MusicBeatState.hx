@@ -19,6 +19,7 @@ import psychlua.HScript;
 
 class MusicBeatState extends FlxUIState
 {
+	public static var globalScript:HScript = null;
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
 
