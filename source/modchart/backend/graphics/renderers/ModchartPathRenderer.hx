@@ -64,6 +64,11 @@ final class ModchartPathRenderer extends ModchartRenderer<FlxSprite> {
 		final canUseLast = fn == __lastPlayer;
 
 		final pathAlpha = canUseLast ? __lastAlpha : instance.getPercent('arrowPathAlpha', fn);
+
+		if (pathAlpha <= 0) {
+		    return;
+		}
+
 		final pathThickness = canUseLast ? __lastThickness : instance.getPercent('arrowPathThickness', fn);
 
 		__lastAlpha = pathAlpha;

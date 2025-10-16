@@ -6,8 +6,8 @@ import psychlua.LuaUtils;
 import tea.SScript;
 import flixel.text.FlxText;
 import flixel.FlxG;
-import sys.io.File;
 import backend.CustomFadeTransition;
+import sys.io.File;
 
 class ScriptedState extends MusicBeatState
 {
@@ -131,11 +131,6 @@ class ScriptedState extends MusicBeatState
 		}
 	}
 
-	/**
-	 * callOnHScript
-	 * Mirrors PlayState implementation: returns a Dynamic result (allows scripts to return
-	 * stop/continue signals). Supports ignoreStops, exclusions and excludeValues.
-	 */
 	public function callOnHScript(funcToCall:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, ?exclusions:Array<String> = null, ?excludeValues:Array<Dynamic> = null):Dynamic
 	{
 		var returnVal:Dynamic = LuaUtils.Function_Continue;

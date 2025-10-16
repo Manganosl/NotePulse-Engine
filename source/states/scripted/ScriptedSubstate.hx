@@ -4,13 +4,19 @@ import flixel.util.FlxColor;
 import psychlua.HScript;
 import psychlua.LuaUtils;
 import tea.SScript;
+import flixel.text.FlxText;
+import flixel.FlxG;
+import sys.io.File;
 
 class ScriptedSubstate extends MusicBeatSubstate
 {
-	public var hscriptArray:Array<HScript> = new Array<HScript>();
+	public var hscript:HScript = null;
+	public var hscriptArray:Array<HScript> = [];
 	private var initialScriptPath:String;
 	private var initialScriptIsCode:Bool = false;
 	private var initialScriptOrigin:String = null;
+
+	private var softlocked:Bool = false;
 
 	public function new(?scriptPath:String = null, ?isCode:Bool = false)
 	{
@@ -19,36 +25,39 @@ class ScriptedSubstate extends MusicBeatSubstate
 		this.initialScriptIsCode = isCode;
 	}
 
+	public function daCreate():Void
+	{
+		callOnHScript('onCreatePost');
+	}
+
 	override public function create():Void
 	{
 		super.create();
+
 		if (initialScriptPath != null)
 		{
-			startHScriptsNamed(initialScriptPath);
-			if (hscriptArray.length > 0)
-			{
-				var s:HScript = hscriptArray[hscriptArray.length - 1];
-				if (s != null) initialScriptOrigin = s.origin;
-			}
+			startHScript(initialScriptPath);
+			if (hscript != null)
+				initialScriptOrigin = hscript.origin;
 		}
+		
+		if (hscript != null)
+			daCreate();
+
 	}
 
-	public function startHScriptsNamed(scriptFile:String)
+	public function startHScript(scriptToLoad:String):Bool
 	{
-		#if MODS_ALLOWED
-		var scriptToLoad:String = Paths.modFolders(scriptFile);
-		if(!FileSystem.exists(scriptToLoad))
-			scriptToLoad = Paths.getSharedPath(scriptFile);
-		#else
-		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
-		#end
-
-		if(FileSystem.exists(scriptToLoad))
+		if (FileSystem.exists(scriptToLoad))
 		{
-			if (SScript.global.exists(scriptToLoad)) return false;
 			initHScript(scriptToLoad, false);
-			return true;
+			return hscript != null;
 		}
+
+		softlocked = true;
+		var errorText = new FlxText(0, FlxG.height / 2 - 10, FlxG.width, "Error: Script does not exist:\n" + scriptToLoad + "\n\nPress SPACE to go back to Main Menu");
+		errorText.setFormat(null, 16, FlxColor.RED, "center");
+		add(errorText);
 		return false;
 	}
 
@@ -57,6 +66,7 @@ class ScriptedSubstate extends MusicBeatSubstate
 		try
 		{
 			var newScript:HScript = null;
+
 			if (isCode)
 				newScript = new HScript(input, null);
 			else
@@ -70,7 +80,6 @@ class ScriptedSubstate extends MusicBeatSubstate
 			}
 
 			hscriptArray.push(newScript);
-			var origin:String = newScript.origin;
 
 			if (newScript.exists('onCreate'))
 			{
@@ -83,51 +92,57 @@ class ScriptedSubstate extends MusicBeatSubstate
 						{
 							var len:Int = e.message.indexOf('\n') + 1;
 							if (len <= 0) len = e.message.length;
-							addTextToDebug('ERROR (${isCode ? "code string" : input}: onCreate) - ${e.message.substr(0, len)}', FlxColor.RED);
+							addTextToDebug('ERROR (${callValue.calledFunction}) - ' + e.message.substr(0, len), FlxColor.RED);
 						}
 					}
+
 					newScript.destroy();
 					hscriptArray.remove(newScript);
-					trace('failed to initialize hscript!!! (${isCode ? "code string" : input})');
+					addTextToDebug('failed to initialize hscript!!! (${isCode ? "code string" : input})', FlxColor.RED);
 					return null;
 				}
 				else
 				{
-					trace('initialized hscript successfully: ${isCode ? "code string" : input}');
+					addTextToDebug('initialized hscript successfully: ${isCode ? "code string" : input}', FlxColor.GREEN);
 				}
 			}
 
+			hscript = newScript;
 			return newScript;
 		}
-		catch(e)
+		catch (e:Dynamic)
 		{
-			var len:Int = e.message.indexOf('\n') + 1;
-			if(len <= 0) len = e.message.length;
-			addTextToDebug('ERROR - ' + e.message.substr(0, len), FlxColor.RED);
+			var msg:String = Std.is(e, String) ? (e:Dynamic) : (e.message != null ? e.message : 'Unknown HScript error');
+			addTextToDebug('HScript error: ' + msg, FlxColor.RED);
 
-			var existing:HScript = cast (SScript.global.get(input), HScript);
-			if (existing != null)
+			var newScript:HScript = cast (SScript.global.get(input), HScript);
+			if (newScript != null)
 			{
-				existing.destroy();
-				hscriptArray.remove(existing);
+				newScript.destroy();
+				hscriptArray.remove(newScript);
 			}
+
 			return null;
 		}
 	}
 
-	private function callOnHScriptForOrigin(origin:String, funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false):Dynamic
+	public function callOnHScript(funcToCall:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, ?exclusions:Array<String> = null, ?excludeValues:Array<Dynamic> = null):Dynamic
 	{
 		var returnVal:Dynamic = LuaUtils.Function_Continue;
+		if (args == null) args = [];
+		if (exclusions == null) exclusions = [];
+		if (excludeValues == null) excludeValues = [LuaUtils.Function_Continue];
 
 		#if HSCRIPT_ALLOWED
 		var len:Int = hscriptArray.length;
-		if (len < 1) return returnVal;
+		if (len < 1)
+			return returnVal;
 
-		for(i in 0...len)
+		for (i in 0...len)
 		{
 			var script:HScript = hscriptArray[i];
-			if (script == null || !script.exists(funcToCall)) continue;
-			if (origin != null && script.origin != origin) continue;
+			if (script == null || !script.exists(funcToCall) || exclusions.contains(script.origin))
+				continue;
 
 			try
 			{
@@ -137,27 +152,30 @@ class ScriptedSubstate extends MusicBeatSubstate
 					var e = callValue.exceptions[0];
 					if (e != null)
 					{
-						var l:Int = e.message.indexOf('\n') + 1;
-						if (l <= 0) l = e.message.length;
-						addTextToDebug('ERROR (${callValue.calledFunction}) - ' + e.message.substr(0, l), FlxColor.RED);
+						var elen:Int = e.message.indexOf('\n') + 1;
+						if (elen <= 0) elen = e.message.length;
+						addTextToDebug('ERROR (${callValue.calledFunction}) - ' + e.message.substr(0, elen), FlxColor.RED);
 					}
+					continue;
 				}
-				else
+
+				var myValue:Dynamic = callValue.returnValue;
+
+				if ((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
 				{
-					var myValue:Dynamic = callValue.returnValue;
-					if((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !ignoreStops)
-					{
-						returnVal = myValue;
-						break;
-					}
-					if (myValue != null) returnVal = myValue;
+					returnVal = myValue;
+					break;
 				}
+
+				if (myValue != null && !excludeValues.contains(myValue))
+					returnVal = myValue;
 			}
-			catch(e)
+			catch (err:Dynamic)
 			{
-				var l:Int = e.message.indexOf('\n') + 1;
-				if (l <= 0) l = e.message.length;
-				addTextToDebug('ERROR - ' + e.message.substr(0, l), FlxColor.RED);
+				var msg:String = (err != null && err.message != null) ? err.message : Std.string(err);
+				var elen:Int = msg.indexOf('\n') + 1;
+				if (elen <= 0) elen = msg.length;
+				addTextToDebug('Exception calling ${funcToCall} on hscript: ' + msg.substr(0, elen), FlxColor.RED);
 			}
 		}
 		#end
@@ -167,31 +185,33 @@ class ScriptedSubstate extends MusicBeatSubstate
 
 	override public function update(elapsed:Float):Void
 	{
-		if (initialScriptOrigin != null)
-			callOnHScriptForOrigin(initialScriptOrigin, 'onUpdate', [elapsed]);
-
 		super.update(elapsed);
 
-		if (initialScriptOrigin != null)
-			callOnHScriptForOrigin(initialScriptOrigin, 'onUpdatePost', [elapsed]);
+		if (softlocked)
+		{
+			if (FlxG.keys.justPressed.SPACE)
+				MusicBeatState.switchState(new states.MainMenuState());
+			return;
+		}
+
+		callOnHScript('onUpdate', [elapsed], false, null, null);
+		callOnHScript('onUpdatePost', [elapsed], false, null, null);
 	}
 
 	override public function destroy():Void
 	{
-		if (initialScriptOrigin != null)
-			callOnHScriptForOrigin(initialScriptOrigin, 'onDestroy', null, true);
+		callOnHScript('onDestroy');
 
-		for (script in hscriptArray)
+		if (hscriptArray != null)
 		{
-			if (script != null) script.destroy();
+			for (s in hscriptArray)
+			{
+				if (s != null) s.destroy();
+			}
+			hscriptArray = [];
 		}
-		hscriptArray = new Array<HScript>();
+		hscript = null;
 
 		super.destroy();
-	}
-
-	private function addTextToDebug(msg:String, color:Int):Void
-	{
-		trace(msg);
 	}
 }

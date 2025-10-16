@@ -178,6 +178,7 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 	var __lastPlayer:Int = 0;
 
 	override public function prepare(item:FlxSprite):Void {
+
 		if (item.alpha <= 0)
 			return;
 
