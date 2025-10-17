@@ -22,6 +22,9 @@ class MusicBeatState extends FlxUIState
 	public static var globalScript:HScript = null;
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
+	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+	private var luaDebugGroup:FlxTypedGroup<psychlua.DebugLuaText>;
+	#end
 
 	private var curStep:Int = 0;
 	private var curBeat:Int = 0;
@@ -39,6 +42,24 @@ class MusicBeatState extends FlxUIState
 	override function destroy() {
 		super.destroy();
 	}
+
+	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+	public function addTextToDebug(text:String, color:FlxColor) {
+		var newText:psychlua.DebugLuaText = luaDebugGroup.recycle(psychlua.DebugLuaText);
+		newText.text = text;
+		newText.color = color;
+		newText.disableTime = 6;
+		newText.alpha = 1;
+		newText.setPosition(10, 8 - newText.height);
+
+		luaDebugGroup.forEachAlive(function(spr:psychlua.DebugLuaText) {
+			spr.y += newText.height + 2;
+		});
+		luaDebugGroup.add(newText);
+
+		Sys.println(text);
+	}
+	#end
 
 	override function create() {
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;

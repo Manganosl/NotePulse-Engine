@@ -28,6 +28,7 @@ This engine is a Psych 0.7.3 fork that adds and modifies some things to either m
 - Away3D (Only on HScript)
 - Psych 1.0 Stage Editor
 - Modchart Events on Charting State (Something like Zoro's Modcharting Editor)
+- Scripted States and Substates
 
 ### You can find extra LUA functions in [here](LUA.md)
 

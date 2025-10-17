@@ -5,16 +5,14 @@
 - [X] Fix audio bugs (fixed i think??)
 - [X] Add FlxEmitter
 - [X] Making a decent results screen
-- [ ] Fix Custom HScript States (I have nightmares with this one)
+- [X] Fix Custom HScript States (It wasn't THAT hard)
 - [X] Remake OptionsState
 - [X] Change the UI on editors
 - [X] Fix ChartingState bugs (I think)
-- [X] Add options for **EVERYTHING** we've been adding
+- [X] Add options for **EVERYTHING** I've been adding
 - [X] Ndll support
 - [X] 3D models support
 - [X] New crash handler (Avoid needing to reopen the game)
 - [X] Fix modchartInstance.addPlayfield() causing a black screen
 - [ ] Custom Classes
 - [X] HScript public vars
-
-### Now I need to find more things to do
