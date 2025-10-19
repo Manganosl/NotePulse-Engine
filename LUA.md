@@ -1,21 +1,27 @@
 # Extra HScript utils
 Here's a list of all utilities added this this engine.
 
-### (WIP) Scripted States
+### Scripted States
 **Debug Key 1 -> Global Loader -> Your mod**
 This will load a *Global.hx* file on the root of your mod's folder.
-Inside this *Global.hx*, you can initialize basic things for your mod and load HScript files as custom states:
+Inside this *Global.hx*, you can initialize basic things for your mod like:
+- Create global variables for all HScript files:
+```
+public var variable:String = "This variable is shared with every script!";
+```
+- Load HScript files as custom states:
 ```
 function onCreatePost(){  // Does NOT work onCreate()!
     MusicBeatState.switchState(new ScriptedState(Paths.modState("State name on states folder of your mod")))
 }
 ```
-You can also open custom substates doing the same:
+- Open custom substates doing the same:
 ```
 function onCreatePost(){  // Does NOT work onCreate()!
     openSubState(new ScriptedSubstate(Paths.modState("State name on states folder of your mod")))
 }
 ```
+**None of this is exclusive for *Global.hx* but this file will be the first one to be initialized!**
 
 ### CustomShader
 This util will help to create shaders and add them to cameras directly

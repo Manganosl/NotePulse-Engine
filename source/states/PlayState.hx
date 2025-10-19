@@ -484,7 +484,7 @@ class PlayState extends MusicBeatState
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		luaDebugGroup = new FlxTypedGroup<psychlua.DebugLuaText>();
 		luaDebugGroup.cameras = [camOther];
-		add(luaDebugGroup);
+		insert(99999999, luaDebugGroup);
 		#end
 
 		// "GLOBAL" SCRIPTS
@@ -772,6 +772,9 @@ class PlayState extends MusicBeatState
 		cachePopUpScore();
 
 		super.create();
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		luaDebugGroup.cameras = [camOther];
+		#end
 		Paths.clearUnusedMemory();
 
 		if(eventNotes.length < 1) checkEventNote();
