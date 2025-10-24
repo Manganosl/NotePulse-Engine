@@ -173,9 +173,7 @@ inline function getStrumFromInfo(lane:Int, player:Int) {
 	}
 
 	public function getArrowCamera():Array<FlxCamera>{
-		if(Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState') 
-			return [PlayState.instance.camHUD];
-		else return [EditorPlayState.instance.camHUD];
+		return Manager.instance.prefCam;
 	}
 
 	public function getCurrentScrollSpeed():Float {

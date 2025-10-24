@@ -4,6 +4,8 @@ import flixel.FlxBasic;
 import flixel.tweens.FlxEase.EaseFunction;
 import flixel.util.FlxSort;
 import haxe.ds.Vector;
+import states.PlayState;
+import states.editors.EditorPlayState;
 import modchart.backend.core.ArrowData;
 import modchart.backend.core.ModifierParameters;
 import modchart.backend.core.Node.NodeFunction;
@@ -32,9 +34,15 @@ final class Manager extends FlxBasic implements SScriptCustomBehavior {
 
     public var playfields:Vector<PlayField> = new Vector<PlayField>(16);
     private var playfieldCount:Int = 0;
+    public var prefCam:Array<FlxCamera>;
 
-    public function new() {
+    public function new(?prefCam:Array<FlxCamera>) {
         super();
+        if(prefCam == null) {
+            if(Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState') 
+		    	this.prefCam = [PlayState.instance.camHUD];
+		    else this.prefCam = [EditorPlayState.instance.camHUD];
+        } else this.prefCam = prefCam;
         instance = this;
 
         Adapter.init();

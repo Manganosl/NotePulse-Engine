@@ -145,7 +145,12 @@ class EventMetaNote extends MetaNote
 		events = eventData[1];
 		//trace('events: $events');
 		
-		loadGraphic(Paths.image('editors/eventIcon'));
+		var img;
+		if(Paths.image('editors/eventIcons/${eventData[0]}') != null)
+			img = Paths.image('editors/eventIcons/${eventData[0]}');
+		else
+			img = Paths.image("editors/eventArrow");
+		loadGraphic(img);
 		setGraphicSize(ChartingState.GRID_SIZE);
 		updateHitbox();
 

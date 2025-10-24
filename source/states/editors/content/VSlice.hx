@@ -1,6 +1,7 @@
 package states.editors.content;
 
 import backend.Song;
+import backend.Section;
 import backend.Difficulty;
 
 import flixel.math.FlxMath;
