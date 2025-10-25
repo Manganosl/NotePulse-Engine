@@ -1,6 +1,5 @@
 package states.editors;
 
-import backend.ExtraKeysHandler;
 import flixel.FlxSubState;
 import flixel.util.FlxSave;
 import flixel.util.FlxSort;
@@ -30,6 +29,11 @@ import backend.StageData;
 import backend.Highscore;
 import backend.Difficulty;
 import backend.Section;
+import backend.ExtraKeysHandler;
+
+import openfl.net.FileReference;
+import openfl.events.Event;
+import openfl.events.IOErrorEvent;
 
 import objects.Character;
 import objects.HealthIcon;
@@ -70,6 +74,8 @@ enum abstract WaveformTarget(String)
 class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
 	public static var chartPath:String = null;
+
+	var _file:FileReference;
 
 	public static var noteTypeList:Array<String> = //Used for backwards compatibility with 0.1 - 0.3.2 charts, though, you should add your hardcoded custom note types here too.
 		[
@@ -247,6 +253,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	override function create()
 	{
+		if(PlayState.SONG == null)
+		{
+			openNewChart();
+		}
+		GRID_COLUMNS_PER_PLAYER = PlayState.SONG.mania != null ? PlayState.SONG.mania+1 : 4;
+		GRID_PLAYERS = PlayState.SONG.gfStrums == true ? 3 : 2;
+		GRID_SIZE = 40;
+
 		if(Difficulty.list.length < 1) Difficulty.resetList();
 		_keysPressedBuffer.resize(keysArray.length);
 
@@ -339,11 +353,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		outputTxt.cameras = [camUI];
 		outputTxt.alpha = 0;
 		add(outputTxt);
-
-		if(PlayState.SONG == null) //Atleast try to avoid crashes
-		{
-			openNewChart();
-		}
 
 		updateJsonData();
 		
@@ -742,7 +751,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					{
 						if(!press) continue;
 
-						// Try to find a note to delete first
+						if(!PlayState.SONG.notes[curSec].mustHitSection){
+							if(num <= PlayState.SONG.mania)
+								num += GRID_COLUMNS_PER_PLAYER;
+							else if(num <= GRID_COLUMNS_PER_PLAYER+PlayState.SONG.mania)
+								num -= GRID_COLUMNS_PER_PLAYER;
+						}
 						var didDelete:Bool = false;
 						for (note in curRenderedNotes)
 						{
@@ -758,7 +772,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 						if(didDelete) continue;
 
-						// If no notes were found, add a new in its place
 						var didAdd:Bool = false;
 						var noteSetupData:Array<Dynamic> = [strumTime, num, 0];
 						if(typeSelected != null) noteSetupData.push(typeSelected);
@@ -1234,6 +1247,13 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				}
 				else if(FlxG.mouse.x >= gridBg.x && FlxG.mouse.x < gridBg.x + gridBg.width)
 				{
+					if(!PlayState.SONG.notes[curSec].mustHitSection){
+						if(noteData <= PlayState.SONG.mania && noteData != -1)
+							noteData += GRID_COLUMNS_PER_PLAYER;
+						else if(noteData <= GRID_COLUMNS_PER_PLAYER+PlayState.SONG.mania)
+							if(noteData != -1) noteData -= GRID_COLUMNS_PER_PLAYER;
+					}
+
 					var closeNotes:Array<MetaNote> = curRenderedNotes.members.filter(function(note:MetaNote)
 					{
 						var chartY:Float = FlxG.mouse.y - note.chartY;
@@ -1391,7 +1411,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 					if(vortexPlaying)
 					{
-						var strumNote:StrumNote = strumLineNotes.members[note.songData[1]];
+						var num:Int = note.songData[1];
+						if(!PlayState.SONG.notes[curSec].mustHitSection){
+							if(num <= PlayState.SONG.mania)
+								num += GRID_COLUMNS_PER_PLAYER;
+							else if(num <= GRID_COLUMNS_PER_PLAYER+PlayState.SONG.mania)
+								num -= GRID_COLUMNS_PER_PLAYER;
+						}
+						var strumNote:StrumNote = strumLineNotes.members[num];
 						if(strumNote != null)
 						{
 							strumNote.playAnim('confirm', true);
@@ -1698,7 +1725,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			add(nextGridBg);
 			add(gridBg);
 		}
-waveformSprite = new FlxSprite(gridBg.x + (SHOW_EVENT_COLUMN ? GRID_SIZE : 0), 0).makeGraphic(1, 1, 0x00FFFFFF);
+		waveformSprite = new FlxSprite(gridBg.x + (SHOW_EVENT_COLUMN ? GRID_SIZE : 0), 0).makeGraphic(1, 1, 0x00FFFFFF);
 		waveformSprite.scrollFactor.x = 0;
 		waveformSprite.visible = false;
 		add(waveformSprite);
@@ -1998,6 +2025,11 @@ waveformSprite = new FlxSprite(gridBg.x + (SHOW_EVENT_COLUMN ? GRID_SIZE : 0), 0
 		swagNote.mustPress = gottaHitNote;
 		swagNote.setSustainLength(note[2], cachedSectionCrochets[secNum] / 4, curZoom);
 		swagNote.gfNote = (section.gfSection && gottaHitNote == section.mustHitSection);
+		if(note[4] != null)
+			swagNote.gfStrum = note[4];
+		if(note[1] >= GRID_COLUMNS_PER_PLAYER * 2)	{
+			swagNote.gfStrum = true;
+		}
 		swagNote.noteType = note[3];
 		swagNote.scrollFactor.x = 0;
 		var txt:FlxText = swagNote.findNoteTypeText(swagNote.noteType != null ? noteTypes.indexOf(swagNote.noteType) : 0);
@@ -2299,19 +2331,65 @@ waveformSprite = new FlxSprite(gridBg.x + (SHOW_EVENT_COLUMN ? GRID_SIZE : 0), 0
 		return maxTime;
 	}
 
-	function positionNoteXByData(note:MetaNote, ?data:Null<Int> = null)
+	
+function positionNoteXByData(note:MetaNote, ?data:Null<Int> = null)
+{
+	if (data == null)
+		data = note.songData[1];
+
+	var noteX:Float = gridBg.x + (GRID_SIZE - note.width) / 2;
+	if (SHOW_EVENT_COLUMN)
+		noteX += GRID_SIZE;
+
+	var lane:Int = Std.int(data % GRID_COLUMNS_PER_PLAYER);
+	var groupIndex:Int = 0;
+
+	if (note.gfNote || note.gfStrum)
 	{
-		if(data == null) data = note.songData[1];
+		groupIndex = 2;
+	}
+	else
+	{
+		var sec:Int = 0;
+		for (i in 0...cachedSectionTimes.length)
+		{
+			if (i == cachedSectionTimes.length - 1 ||
+				(note.strumTime >= cachedSectionTimes[i] && note.strumTime < cachedSectionTimes[i + 1]))
+			{
+				sec = i;
+				break;
+			}
+		}
 
-		var noteX:Float = gridBg.x + (GRID_SIZE - note.width) / 2;
-		if(SHOW_EVENT_COLUMN) noteX += GRID_SIZE;
+		if (sec < 0) sec = 0;
+		if (sec >= PlayState.SONG.notes.length) sec = PlayState.SONG.notes.length - 1;
 
-		noteX += GRID_SIZE * data;
-		note.x = noteX;
-		//trace(gridBg.x, noteX);
+		var section = PlayState.SONG.notes[sec];
+		if (section != null && section.mustHitSection)
+		{
+			groupIndex = note.mustPress ? 0 : 1;
+		}
+		else
+		{
+			groupIndex = note.mustPress ? 1 : 0;
+		}
 	}
 
-	function positionNoteYOnTime(note:MetaNote, section:Int)
+	if (groupIndex == 2)
+		note.gfStrum = true;
+
+	if (groupIndex >= GRID_PLAYERS) groupIndex = GRID_PLAYERS - 1;
+	if (groupIndex < 0) groupIndex = 0;
+	if (note.gfStrum)
+		groupIndex = 2;
+
+	noteX += GRID_SIZE * (groupIndex * GRID_COLUMNS_PER_PLAYER + lane);
+
+	note.x = noteX;
+}
+
+
+function positionNoteYOnTime(note:MetaNote, section:Int)
 	{
 		var time:Float = note.strumTime - cachedSectionTimes[section];
 		var noteY:Float = (time / cachedSectionCrochets[section]) * GRID_SIZE * 4 * curZoom;
@@ -3295,8 +3373,8 @@ waveformSprite = new FlxSprite(gridBg.x + (SHOW_EVENT_COLUMN ? GRID_SIZE : 0), 0
 			PlayState.SONG.mania = Std.int(stepperMania.value);
 			GRID_COLUMNS_PER_PLAYER = PlayState.SONG.mania+1;
 			createGrids();
-			loadSection();
 			reloadNotes();
+			loadSection();
 		};
 
 		gfGridChkBox = new PsychUICheckBox(objX + 160, objY+40, 'GF has strums', 100, function(){
@@ -4664,31 +4742,125 @@ waveformSprite = new FlxSprite(gridBg.x + (SHOW_EVENT_COLUMN ? GRID_SIZE : 0), 0
 			PlayState.SONG.events.push(event.songData);
 	}
 
-	function saveChart(canQuickSave:Bool = true)
-	{
-		updateChartData();
-		var chartData:String = PsychJsonPrinter.print(PlayState.SONG, ['sectionNotes', 'events']);
-		if(canQuickSave && ChartingState.chartPath != null)
-		{
-			File.saveContent(ChartingState.chartPath, chartData);
-			showOutput('Chart saved successfully to: ${ChartingState.chartPath}');
-		}
-		else
-		{
-			var chartName:String = Paths.formatToSongPath(PlayState.SONG.song) + '.json';
-			if(ChartingState.chartPath != null) chartName = ChartingState.chartPath.substr(ChartingState.chartPath.lastIndexOf('/')).trim();
-			fileDialog.save(chartName, chartData,
-				function()
-				{
-					var newPath:String = fileDialog.path;
-					ChartingState.chartPath = newPath.replace('\\', '/');
-					reloadNotesDropdowns();
-					showOutput('Chart saved successfully to: $newPath');
-
-				}, null, function() showOutput('Error on saving chart!', true));
-		}
+	private function ensureDirectory(path:String) {
+	    var parent = haxe.io.Path.directory(path);
+	    if (parent != "" && !sys.FileSystem.exists(parent)) ensureDirectory(parent);
+	    if (!sys.FileSystem.exists(path)) sys.FileSystem.createDirectory(path);
 	}
-	
+
+	function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
+	{
+		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
+	}
+
+	public function saveChart(auto:Bool = true, dif:String = null)
+	{
+	    for (section in PlayState.SONG.notes)
+	    {
+	        for (note in section.sectionNotes)
+	        {
+	            var lane:Int = note[1];
+	            var gfStrum:Bool = false;
+	            if (PlayState.SONG.gfStrums && lane >= (PlayState.SONG.mania + 1) * 2 && lane < (PlayState.SONG.mania + 1) * 3)
+	                gfStrum = true;
+	            else
+	                gfStrum = false;
+	            note[4] = gfStrum;
+	        }
+	    }
+
+	    if(PlayState.SONG.events != null && PlayState.SONG.events.length > 1) PlayState.SONG.events.sort(sortByTime);
+	    var json = {
+	        "song": PlayState.SONG
+	    };
+
+	    var data:String = haxe.Json.stringify(json, "\t");
+
+	    if ((data != null) && (data.length > 0))
+	    {
+	        if (auto)
+	        {
+			    var songName = Paths.formatToSongPath(PlayState.SONG.song);
+				var diff = null;
+			    if(dif == null) diff = Difficulty.getString(); else diff = dif;
+			    var diffSuffix = (diff != null && diff != '' && diff != Difficulty.getDefault()) ? '-' + diff : '';
+			    var fileName = songName + diffSuffix;
+
+			    #if MODS_ALLOWED
+			    var folder = songName;
+			    var chartFile = fileName;
+			    var chartPath = Mods.currentModDirectory != null ? Paths.modsJson(folder + '/' + chartFile) : 'assets/shared/data/' + songName + '/';
+
+			    var chartDir = haxe.io.Path.directory(chartPath);
+			    if (!sys.FileSystem.exists(chartDir)) {
+			        var ensureDirectory = function(path:String) {
+			            var parent = haxe.io.Path.directory(path);
+			            if (parent != "" && !sys.FileSystem.exists(parent)) ensureDirectory(parent);
+			            if (!sys.FileSystem.exists(path)) sys.FileSystem.createDirectory(path);
+			        }
+			        ensureDirectory(chartDir);
+			    }
+
+			    try {
+			        sys.io.File.saveContent(chartPath, data.trim());
+			        trace("Saved to: " + chartPath);
+			        showOutput('Saved to: $chartPath');
+			    } catch (e:Dynamic) {
+			        trace("Failed to save chart: " + e);
+			        showOutput('Failed to save chart: $e', true);
+			    }
+			    #else
+			    // Fallback for base assets
+			    var chartDir = 'assets/shared/data/' + songName + '/';
+			    if (!sys.FileSystem.exists(chartDir)) sys.FileSystem.createDirectory(chartDir);
+			    var chartPath = chartDir + fileName;
+			    try {
+			        sys.io.File.saveContent(chartPath, data.trim());
+			        trace("Saved to: " + chartPath);
+			        showOutput('Saved to: $chartPath');
+			    } catch (e:Dynamic) {
+			        trace("Failed to save chart: " + e);
+			        showOutput('Failed to save chart: $e', true);
+			    }
+			    #end
+	        }
+	        else
+	        {
+	            _file = new FileReference();
+	            _file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
+	            _file.addEventListener(Event.CANCEL, onSaveCancel);
+	            _file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+	            _file.save(data.trim(), Paths.formatToSongPath(PlayState.SONG.song));
+	        }
+	    }
+	}
+
+	function onSaveComplete(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+		FlxG.log.notice("Successfully saved LEVEL DATA.");
+	}
+
+	function onSaveCancel(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+	}
+
+	function onSaveError(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+		FlxG.log.error("Problem saving Level data");
+	}
+
 	inline function getCurChartSection()
 	{
 		return PlayState.SONG.notes != null ? PlayState.SONG.notes[curSec] : null;
@@ -4874,7 +5046,7 @@ waveformSprite = new FlxSprite(gridBg.x + (SHOW_EVENT_COLUMN ? GRID_SIZE : 0), 0
 		setSongPlaying(false);
 		chartEditorSave.flush(); //just in case a random crash happens before loading
 
-		//openSubState(new EditorPlayState(playbackSpeed));
+		openSubState(new EditorPlayState(playbackRate));
 		upperBox.isMinimized = true;
 		upperBox.visible = mainBox.visible = infoBox.visible = false;
 	}
@@ -5139,18 +5311,19 @@ waveformSprite = new FlxSprite(gridBg.x + (SHOW_EVENT_COLUMN ? GRID_SIZE : 0), 0
 		{
 			for (note in dataNotes)
 			{
-				if(note != null)
-				{
-					notes.remove(note);
-					selectedNotes.remove(note);
-
-					if(note.exists)
-					{
-						note.colorTransform.redMultiplier = note.colorTransform.greenMultiplier = note.colorTransform.blueMultiplier = 1;
-						if(note.animation.curAnim != null) note.animation.curAnim.curFrame = 0;
-					}
-				}
-
+			    if(note == null) continue;
+			
+			    var idx:Int = notes.indexOf(note);
+			    if(idx >= 0) notes.splice(idx, 1);
+			
+			    var selIdx:Int = selectedNotes.indexOf(note);
+			    if(selIdx >= 0) selectedNotes.splice(selIdx, 1);
+			
+			    if(note.exists)
+			    {
+			        note.colorTransform.redMultiplier = note.colorTransform.greenMultiplier = note.colorTransform.blueMultiplier = 1;
+			        if(note.animation.curAnim != null) note.animation.curAnim.curFrame = 0;
+			    }
 			}
 		}
 		if(dataEvents != null && dataEvents.length > 0)
