@@ -9,6 +9,7 @@ class OurLittleFriend extends FlxSprite
     var _dances:Array<String> = ['left', 'down', 'up', 'right', 'idle'];
 
 	var _offsetPath:String = '';
+	public var resetAnim:Float = 0;
 
 	public var offsets:IntMap<Array<Float>> = new IntMap();
 
@@ -46,6 +47,7 @@ class OurLittleFriend extends FlxSprite
 		_offsetPath = path;
 	}
 
+	var idleTimer:FlxTimer;
 	public function sing(shit:String, ?note:Note)
 	{
         var anim = shit.toLowerCase();
@@ -62,7 +64,7 @@ class OurLittleFriend extends FlxSprite
             case "idle":
                 dir = 4;
         }
-		animation.play(anim);
+		animation.play(anim, true);
 
 		color = note == null ? FlxColor.WHITE : note.rgbShader.r;
 
@@ -73,6 +75,16 @@ class OurLittleFriend extends FlxSprite
 			offset.x += offsets.get(dir)[0] * scale.x;
 			offset.y += offsets.get(dir)[1] * scale.y;
 		}
-		// else offset.set();
+	}
+
+	override public function update(elapsed:Float){
+		if(resetAnim > 0) {
+			resetAnim -= elapsed;
+			if(resetAnim <= 0) {
+				sing("idle");
+				resetAnim = 0;
+			}
+		}
+		super.update(elapsed);
 	}
 }

@@ -39,6 +39,7 @@ import objects.Character;
 import objects.HealthIcon;
 import objects.Note;
 import objects.StrumNote;
+import objects.OurLittleFriend;
 
 using DateTools;
 
@@ -309,7 +310,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		selectionBox.visible = false;
 		add(selectionBox);
 
-		infoBox = new PsychUIBox(infoBoxPosition.x, infoBoxPosition.y, 220, 220, ['Information']);
+		infoBox = new PsychUIBox(infoBoxPosition.x, infoBoxPosition.y, 220, 220, ['Information', 'Friends']);
 		infoBox.scrollFactor.set();
 		infoBox.cameras = [camUI];
 		infoText = new FlxText(15, 15, 230, '', 16);
@@ -364,6 +365,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		addNoteTab();
 		addSectionTab();
 		addSongTab();
+		createFriends();
 		
 		////// for upper box
 		addFileTab();
@@ -460,6 +462,39 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		fullTipText.screenCenter();
 		add(fullTipText);
 		super.create();
+	}
+
+	var littleBF:OurLittleFriend;
+	var littleDad:OurLittleFriend;
+	var littleDad2:OurLittleFriend;
+	var littleStage:FlxSprite;
+
+	function createFriends(){
+		littleBF = new OurLittleFriend('dingalingdemon');
+		littleBF.setPosition(250, -100+200);
+		littleBF.scrollFactor.set();
+
+		littleDad2 = new OurLittleFriend("opp");
+		littleDad2.setPosition(85, -85+150);
+		littleDad2.scrollFactor.set();
+
+		littleDad = new OurLittleFriend('fella');
+		littleDad.setPosition(25, -100+150);
+		littleDad.scrollFactor.set();
+
+		littleStage = new FlxSprite().loadGraphic(Paths.image('editors/friends/stage'));
+		littleStage.scrollFactor.set();
+		littleStage.scale.set(littleDad.scale.x, littleDad.scale.x);
+		littleStage.updateHitbox();
+		littleStage.x = littleDad.x;
+		littleStage.y = littleDad.y + littleDad.height + (-10);
+
+		littleDad.cameras = littleDad2.cameras = littleBF.cameras = littleStage.cameras = [camUI];
+
+		infoBox.getTab("Friends").menu.add(littleStage);
+		infoBox.getTab("Friends").menu.add(littleDad2);
+		infoBox.getTab("Friends").menu.add(littleDad);
+		infoBox.getTab("Friends").menu.add(littleBF);
 	}
 
 	var gridColors:Array<FlxColor>;
@@ -603,6 +638,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var lastBeatHit:Int = 0;
 	override function update(elapsed:Float)
 	{
+		if(infoBox.selectedName == "Information"){
+			infoBox.resize(CoolUtil.fpsLerp(infoBox.bg.width, 220, 0.2), CoolUtil.fpsLerp(infoBox.bg.height, 220, 0.2));
+		}
+		if(infoBox.selectedName == "Friends"){
+			infoBox.resize(CoolUtil.fpsLerp(infoBox.bg.width, 400, 0.2), CoolUtil.fpsLerp(infoBox.bg.height, 280, 0.2));
+		}
 		if(!fileDialog.completed)
 		{
 			lastFocus = PsychUIInputText.focusOn;
@@ -1417,6 +1458,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 								num += GRID_COLUMNS_PER_PLAYER;
 							else if(num <= GRID_COLUMNS_PER_PLAYER+PlayState.SONG.mania)
 								num -= GRID_COLUMNS_PER_PLAYER;
+						}
+						var char:OurLittleFriend = note.mustPress ? (PlayState.SONG.notes[curSec].mustHitSection ? littleBF : littleDad) : (PlayState.SONG.notes[curSec].mustHitSection ? littleDad : littleBF);
+						if(note.gfNote || note.gfStrum) char = littleDad2;
+						if (note.noteType != "No Animation"){
+							char.sing(ExtraKeysHandler.instance.data.animations[ExtraKeysHandler.instance.data.keys[PlayState.SONG.mania].notes[note.noteData]].sing, note);
+							char.resetAnim = Math.max(Conductor.stepCrochet * 1.25, note.sustainLength+500) / 1000 / playbackRate;
 						}
 						var strumNote:StrumNote = strumLineNotes.members[num];
 						if(strumNote != null)
@@ -5044,7 +5091,7 @@ function positionNoteYOnTime(note:MetaNote, section:Int)
 			return;
 		}
 		setSongPlaying(false);
-		chartEditorSave.flush(); //just in case a random crash happens before loading
+		chartEditorSave.flush();
 
 		openSubState(new EditorPlayState(playbackRate));
 		upperBox.isMinimized = true;
