@@ -144,20 +144,23 @@ class EventMetaNote extends MetaNote
 		this.isEvent = true;
 		events = eventData[1];
 		//trace('events: $events');
-		
-		var img;
-		if(Paths.image('editors/eventIcons/${eventData[0]}') != null)
-			img = Paths.image('editors/eventIcons/${eventData[0]}');
-		else
-			img = Paths.image("editors/eventArrow");
-		loadGraphic(img);
-		setGraphicSize(ChartingState.GRID_SIZE);
-		updateHitbox();
 
 		eventText = new FlxText(0, 0, 400, '', 12);
 		eventText.setFormat(Paths.font('vcr.ttf'), 12, FlxColor.WHITE, RIGHT);
 		eventText.scrollFactor.x = 0;
 		updateEventText();
+	}
+
+	function loadIcon(){
+		if(events.length>1){
+			loadGraphic(Paths.image('editors/eventIcon-many'));
+		}
+		else if(Paths.fileExists('images/editors/events/${events[0][0]}.png',IMAGE)){
+			loadGraphic(Paths.image('editors/events/${events[0][0]}'));
+		}
+		else loadGraphic(Paths.image('editors/eventArrow'));
+		setGraphicSize(ChartingState.GRID_SIZE);
+		updateHitbox();
 	}
 	
 	override function draw()
@@ -176,11 +179,16 @@ class EventMetaNote extends MetaNote
 	public var events:Array<Array<String>>;
 	public function updateEventText()
 	{
+		loadIcon();
 		var myTime:Float = Math.floor(this.strumTime);
 		if(events.length == 1)
 		{
 			var event = events[0];
-			eventText.text = 'Event: ${event[0]} ($myTime ms)\nValue 1: ${event[1]}\nValue 2: ${event[2]}';
+			if(event[0] == "Modchart Event"){
+				var vals = event[1].split(",");
+				eventText.text = 'Modchart Event ($myTime ms)\n${vals[0]}\nModifier: ${vals[1]}';
+			} else 
+				eventText.text = 'Event: ${event[0]} ($myTime ms)\nValue 1: ${event[1]}\nValue 2: ${event[2]}';
 		}
 		else if(events.length > 1)
 		{
