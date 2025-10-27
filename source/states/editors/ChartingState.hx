@@ -172,6 +172,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	var chartEditorSave:FlxSave;
 	var eventsBox:PsychUIBox;
+	var songPosSlider:PsychUIVerticalSlider;
 	var mainBox:PsychUIBox;
 	var mainBoxPosition:FlxPoint = FlxPoint.get(920, 40);
 	var infoBox:PsychUIBox;
@@ -415,6 +416,26 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		stageDropDown.list = loadFileList('stages/', 'data/stageList.txt');
 		onChartLoaded();
+
+		songPosSlider = new PsychUIVerticalSlider(0, 0, function(v:Float)
+		{
+			var songLen:Float = (FlxG.sound.music != null ? FlxG.sound.music.length : 0.0001);
+			var t:Float = (v / FlxG.height) * songLen;
+			FlxG.sound.music.pause();
+			setSongPlaying(false);
+			FlxG.sound.music.time = t;
+			Conductor.songPosition = FlxG.sound.music.time;
+		}, (FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0, 
+		0, FlxG.height, FlxG.height, 0xFF4D4D4D, FlxColor.WHITE);
+		songPosSlider.valueText.visible = false;
+		songPosSlider.minText.visible = false;
+		songPosSlider.maxText.visible = false;
+		songPosSlider.angle = 180;
+		songPosSlider.x = FlxG.width - 20;
+		songPosSlider.bar.alpha = 0.5;
+		songPosSlider.set_value((FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0);
+		songPosSlider.scrollFactor.set(0, 0);
+		add(songPosSlider);
 
 		var tipText:FlxText = new FlxText(FlxG.width - 210, FlxG.height - 30, 200, 'Press F1 for Help', 20);
 		tipText.cameras = [camUI];
@@ -667,8 +688,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		if(autoSaveCap > 0)
 		{
 			autoSaveTime += elapsed / 60.0;
-			//trace(autoSaveTime);
-			//#if debug if(FlxG.keys.justPressed.J) autoSaveTime += 20/60.0; #end
 			if(autoSaveTime >= autoSaveCap #if debug || FlxG.keys.justPressed.NUMPADMULTIPLY #end)
 			{
 				FlxTween.cancelTweensOf(autoSaveIcon);
@@ -685,7 +704,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				var songCopy:SwagSong = Reflect.copy(PlayState.SONG);
 				Reflect.setField(songCopy, '__original_path', ChartingState.chartPath);
 				var dataToSave:String = haxe.Json.stringify(songCopy);
-				//trace(chartName, dataToSave);
 				if(!FileSystem.isDirectory('backups')) FileSystem.createDirectory('backups');
 				File.saveContent('backups/$chartName.$BACKUP_EXT', dataToSave);
 
@@ -708,7 +726,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 									var fileJoin:String = split[split.length-2] + ' ' + timeStr;
 									var date:Date = Date.fromString(fileJoin);
-									//trace(fileJoin, date.getTime());
 									map.set(file, date.getTime());
 								}
 								catch(e:Exception)
@@ -725,7 +742,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						while(files.length > backupLimit)
 						{
 							var file = files.shift();
-							//trace('removed $file');
 							try
 							{
 								FileSystem.deleteFile('backups/$file');
@@ -796,7 +812,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					strumTime -= strumTime % (Conductor.stepCrochet * 16 / curQuant);
 					strumTime += sectionStart;
 
-					trace('Vortex editor press at time: $strumTime');
 					var deletedNotes:Array<MetaNote> = [];
 					var addedNotes:Array<MetaNote> = [];
 					for (num => press in _keysPressedBuffer)
@@ -1053,9 +1068,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					selectedNotes = curRenderedNotes.members.copy();
 					addUndoAction(SELECT_NOTE, {old: sel, current: selectedNotes.copy()});
 					onSelectNote();
-					trace('Notes selected: ' + selectedNotes.length);
 				}
-				else if(FlxG.keys.justPressed.S) // Save (Ctrl + S)
 					saveChart();
 			}
 			
@@ -1072,7 +1085,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						if(note == null) continue;
 		
 						var kind:String = !note.isEvent ? 'note' : 'event';
-						trace('Removed $kind at time: ${note.strumTime}');
 						if(!note.isEvent)
 						{
 							notes.remove(note);
@@ -1334,12 +1346,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 								selectedNotes.remove(closest);
 								addUndoAction(SELECT_NOTE, {old: sel, current: selectedNotes.copy()});
 							}
-							trace('Notes selected: ' + selectedNotes.length);
 						}
-						else if(!FlxG.keys.pressed.CONTROL) // Remove Note/Event
+						else if(!FlxG.keys.pressed.CONTROL)
 						{
 							var kind:String = !closest.isEvent ? 'note' : 'event';
-							trace('Removed $kind at time: ${closest.strumTime}');
 							if(!closest.isEvent)
 								notes.remove(closest);
 							else
@@ -1357,7 +1367,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						var strumTime:Float = (diffY / GRID_SIZE * Conductor.stepCrochet / curZoom) + cachedSectionTimes[curSec];
 						if(noteData >= 0)
 						{
-							trace('Added note at time: $strumTime');
 							var didAdd:Bool = false;
 
 							var noteSetupData:Array<Dynamic> = [strumTime, noteData, 0];
@@ -1386,7 +1395,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						}
 						else if(!lockedEvents)
 						{
-							trace('Added event at time: $strumTime');
 							var didAdd:Bool = false;
 							var eventAdded:EventMetaNote;
 							if (eventsBox != null && eventsBox.selectedName == "Modchart")
@@ -1521,7 +1529,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			noteSelectionSine += elapsed;
 			var sineValue:Float = 0.75 + Math.cos(Math.PI * noteSelectionSine * (isMovingNotes ? 8 : 2)) / 4;
-			//trace(sineValue);
 
 			var qPress = FlxG.keys.justPressed.Q;
 			var ePress = FlxG.keys.justPressed.E;
@@ -1672,7 +1679,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	function showOutput(message:String, isError:Bool = false)
 	{
-		trace(message);
 		outputTxt.text = message;
 		outputTxt.y = FlxG.height - outputTxt.height - 30;
 		outputAlpha = 4;
@@ -1995,7 +2001,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			var sndsToKill:Array<String> = [];
 			for (key => snd in Paths.currentTrackedSounds)
 			{
-				//trace(key, snd);
 				if(key.contains('/songs/${Paths.formatToSongPath(PlayState.SONG.song)}/') && snd != null)
 				{
 					sndsToKill.push(key);
@@ -2061,7 +2066,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	function onSongComplete()
 	{
-		trace('song completed');
 		setSongPlaying(false);
 		Conductor.songPosition = FlxG.sound.music.time = vocals.time = opponentVocals.time = FlxG.sound.music.length - 1;
 		curSec = PlayState.SONG.notes.length - 1;
@@ -2142,8 +2146,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		notes.sort(PlayState.sortByTime);
 		events.sort(PlayState.sortByTime);
 
-		trace('Note count: ${notes.length}');
-		trace('Events count: ${events.length}');
 		loadSection();
 	}
 
@@ -2163,7 +2165,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		if(note[4] != null)
 			swagNote.gfStrum = note[4];
 		if(note[1] >= GRID_COLUMNS_PER_PLAYER * 2)	{
-			swagNote.gfStrum = true;
+			swagNote.gfStrum = note[4] = true;
+		} else {
+			swagNote.gfStrum = note[4] = false;
 		}
 		swagNote.noteType = note[3];
 		swagNote.scrollFactor.x = 0;
@@ -2229,7 +2233,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	
 			if(section.changeBPM) bpm = section.bpm;
 			var beat:Float = Conductor.calculateCrochet(bpm);
-			//trace(secBPM, beat);
 			
 			cachedSectionRow.push(row);
 			cachedSectionTimes.push(time);
@@ -2256,14 +2259,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					{
 						PlayState.SONG.notes.pop();
 					}
-	
-					trace('breaking at section $secNum');
 					reachedLimit = true;
 					break;
 				}
 				else if(secNum == lastSectionNum)
 				{
-					trace('reached limit at section $secNum');
 					reachedLimit = true;
 				}
 			}
@@ -2304,7 +2304,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 				if(time >= FlxG.sound.music.length)
 				{
-					trace('created sections until ${PlayState.SONG.notes.length-1}');
 					reachedLimit = true;
 				}
 			}
@@ -2525,7 +2524,6 @@ function positionNoteXByData(note:MetaNote, ?data:Null<Int> = null)
 	note.x = noteX;
 }
 
-
 function positionNoteYOnTime(note:MetaNote, section:Int)
 	{
 		var time:Float = note.strumTime - cachedSectionTimes[section];
@@ -2534,7 +2532,6 @@ function positionNoteYOnTime(note:MetaNote, section:Int)
 		noteY = Math.max(noteY, -150);
 		note.y = noteY + (GRID_SIZE/2 - note.height/2);
 		note.chartY = noteY;
-		//trace(gridBg.y, noteY);
 	}
 
 	var characterData:Dynamic = {};
@@ -2542,7 +2539,6 @@ function positionNoteYOnTime(note:MetaNote, section:Int)
 	{
 		for (i in 1...GRID_PLAYERS+1)
 		{
-			//trace('adding iconP$i');
 			var data:CharacterFile = loadCharacterFile(Reflect.field(PlayState.SONG, 'player$i'));
 			Reflect.setField(characterData, 'iconP$i', data != null && data.healthicon != null ? data.healthicon : 'face');
 			Reflect.setField(characterData, 'vocalsP$i', data != null && data.vocals_file != null ? data.vocals_file : '');
@@ -2565,7 +2561,6 @@ function positionNoteYOnTime(note:MetaNote, section:Int)
 		for (i in 0...iconNum)
 		{
 			var icon:HealthIcon = icons[i];
-			//trace('changing iconP${icon.ID}');
 			var iconName:String = Reflect.field(characterData, 'iconP${icon.ID}');
 			icon.changeIcon(iconName);
 		}
@@ -2683,7 +2678,6 @@ function positionNoteYOnTime(note:MetaNote, section:Int)
 		{
 			PlayState.SONG.gameOverChar = character;
 			if(character.length < 1) Reflect.deleteField(PlayState.SONG, 'gameOverChar');
-			trace('selected $character');
 		});
 
 		objY += 40;
@@ -3065,7 +3059,6 @@ function updateModEvV1():Void {
 		susLengthStepper.onValueChange = function()
 		{
 			var halfStep:Float = (Conductor.stepCrochet / 2);
-			trace(halfStep, susLengthStepper.value);
 			var val:Float = Math.round(susLengthStepper.value / halfStep) * halfStep;
 			susLengthStepper.value = val;
 			if(susLengthLastVal != susLengthStepper.value)
@@ -3688,7 +3681,6 @@ function updateModEvV1():Void {
 			updateJsonData();
 			updateHeads(true);
 			loadMusic();
-			trace('selected $character');
 		});
 		
 		opponentDropDown = new PsychUIDropDownMenu(objX, objY + 40, [''], function(id:Int, character:String)
@@ -3697,20 +3689,17 @@ function updateModEvV1():Void {
 			updateJsonData();
 			updateHeads(true);
 			loadMusic();
-			trace('selected $character');
 		});
 		
 		girlfriendDropDown = new PsychUIDropDownMenu(objX, objY + 80, [''], function(id:Int, character:String)
 		{
 			PlayState.SONG.gfVersion = character;
-			trace('selected $character');
 		});
 
 		stageDropDown = new PsychUIDropDownMenu(objX + 140, objY + 80, [''], function(id:Int, stage:String)
 		{
 			PlayState.SONG.stage = stage;
 			StageData.loadDirectory(PlayState.SONG);
-			trace('selected $stage');
 		});
 		
 		tab_group.add(new FlxText(stepperMania.x, stepperMania.y - 15, 80, 'Mania:'));
@@ -3792,7 +3781,6 @@ function updateModEvV1():Void {
 				catch(e:Exception)
 				{
 					showOutput('Error: ${e.message}', true);
-					trace(e.stack);
 				}
 			});
 		}, btnWid);
@@ -3972,7 +3960,6 @@ function updateModEvV1():Void {
 					catch(e:Exception)
 					{
 						showOutput('Error: ${e.message}', true);
-						trace(e.stack);
 					}
 				});
 			}, btnWid);
@@ -4047,7 +4034,6 @@ function updateModEvV1():Void {
 					catch(e:Exception)
 					{
 						showOutput('Error: ${e.message}', true);
-						trace(e.stack);
 					}
 				}
 				else showOutput('You must save/load a Chart first to Reload it!', true);
@@ -4429,7 +4415,6 @@ function updateModEvV1():Void {
 				catch(e:Exception)
 				{
 					showOutput('Error: ${e.message}', true);
-					trace(e.stack);
 				}
 			});
 		}, btnWid);
@@ -4452,9 +4437,8 @@ function updateModEvV1():Void {
 		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Exit', function()
 		{
 			PlayState.chartingMode = false;
-			// MasterEditorMenu not present - skipping state switch.
+			MusicBeatState.switchState(new MainMenuState());
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
-			FlxG.mouse.visible = false;
 		}, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
@@ -4485,7 +4469,6 @@ function updateModEvV1():Void {
 			selectedNotes = curRenderedNotes.members.copy();
 			addUndoAction(SELECT_NOTE, {old: sel, current: selectedNotes.copy()});
 			onSelectNote();
-			trace('Notes selected: ' + selectedNotes.length);
 		}, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
@@ -5000,7 +4983,6 @@ function updateModEvV1():Void {
 			}
 
 			var arr:Array<Dynamic> = PlayState.SONG.notes[noteSec].sectionNotes;
-			//trace('Added note with time ${note.songData[0]} at section $noteSec');
 			arr.push(note.songData);
 		}
 
@@ -5071,10 +5053,8 @@ function updateModEvV1():Void {
 
 			    try {
 			        sys.io.File.saveContent(chartPath, data.trim());
-			        trace("Saved to: " + chartPath);
 			        showOutput('Saved to: $chartPath');
 			    } catch (e:Dynamic) {
-			        trace("Failed to save chart: " + e);
 			        showOutput('Failed to save chart: $e', true);
 			    }
 			    #else
@@ -5084,10 +5064,8 @@ function updateModEvV1():Void {
 			    var chartPath = chartDir + fileName;
 			    try {
 			        sys.io.File.saveContent(chartPath, data.trim());
-			        trace("Saved to: " + chartPath);
 			        showOutput('Saved to: $chartPath');
 			    } catch (e:Dynamic) {
-			        trace("Failed to save chart: " + e);
 			        showOutput('Failed to save chart: $e', true);
 			    }
 			    #end
@@ -5203,7 +5181,6 @@ function updateModEvV1():Void {
 
 				if(noteSec + 1 >= cachedSectionTimes.length)
 				{
-					trace('failsafe, cancel early and delete notes after this');
 					var changedSelected:Bool = false;
 					for(i in num...notes.length)
 					{
@@ -5223,7 +5200,6 @@ function updateModEvV1():Void {
 					loadSection();
 					return;
 				}
-				//trace('changed section: $noteSec, $oldNextSectionTime, $oldCurSectionTime, $nextSectionTime, $curSectionTime');
 			}
 
 			var shouldBound:Bool = (note.strumTime >= oldCurSectionTime && note.strumTime < oldNextSectionTime);
@@ -5270,7 +5246,6 @@ function updateModEvV1():Void {
 
 	public function UIEvent(id:String, sender:Dynamic)
 	{
-		//trace(id, sender);
 		switch(id)
 		{
 			case PsychUIButton.CLICK_EVENT, PsychUIDropDownMenu.CLICK_EVENT:
@@ -5452,7 +5427,6 @@ function updateModEvV1():Void {
 					note.destroy();
 		}
 
-		//trace('pushed action: $action');
 		if(currentUndo > 0) undoActions = undoActions.slice(currentUndo);
 		currentUndo = 0;
 		undoActions.insert(0, {action: action, data: data});
@@ -5600,7 +5574,6 @@ function updateModEvV1():Void {
 			{
 				if(event != null)
 				{
-					trace(events.remove(event));
 					selectedNotes.remove(event);
 
 					if(event.exists)
