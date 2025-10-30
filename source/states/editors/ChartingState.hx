@@ -422,7 +422,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			var songLen:Float = (FlxG.sound.music != null ? FlxG.sound.music.length : 0.0001);
 			var t:Float = (v / FlxG.height) * songLen;
 			FlxG.sound.music.pause();
-			setSongPlaying(false);
+			if(FlxG.sound.music.playing) setSongPlaying(false);
 			FlxG.sound.music.time = t;
 			Conductor.songPosition = FlxG.sound.music.time;
 		}, (FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0, 
@@ -670,6 +670,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var lastBeatHit:Int = 0;
 	override function update(elapsed:Float)
 	{
+		if(FlxG.sound.music.playing) songPosSlider.set_value((FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0);
+
 		if(infoBox.selectedName == "Information"){
 			infoBox.resize(CoolUtil.fpsLerp(infoBox.bg.width, 220, 0.2), CoolUtil.fpsLerp(infoBox.bg.height, 220, 0.2));
 		}
@@ -4998,13 +5000,12 @@ function updateModEvV1():Void {
 	    if (!sys.FileSystem.exists(path)) sys.FileSystem.createDirectory(path);
 	}
 
-	function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
-	{
+	function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int {
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
 	}
 
-	public function saveChart(auto:Bool = true, dif:String = null)
-	{
+	public function saveChart(auto:Bool = true, dif:String = null) {
+		updateChartData();
 	    for (section in PlayState.SONG.notes)
 	    {
 	        for (note in section.sectionNotes)
@@ -5039,7 +5040,7 @@ function updateModEvV1():Void {
 			    #if MODS_ALLOWED
 			    var folder = songName;
 			    var chartFile = fileName;
-			    var chartPath = Mods.currentModDirectory != null ? Paths.modsJson(folder + '/' + chartFile) : 'assets/shared/data/' + songName + '/';
+			    var chartPath = Mods.currentModDirectory != null ? Paths.modJson(folder + '/' + chartFile) : 'assets/shared/data/' + songName + '/';
 
 			    var chartDir = haxe.io.Path.directory(chartPath);
 			    if (!sys.FileSystem.exists(chartDir)) {
@@ -5288,6 +5289,7 @@ function updateModEvV1():Void {
 		}
 		setSongPlaying(false);
 		chartEditorSave.flush();
+		updateChartData();
 
 		openSubState(new EditorPlayState(playbackRate));
 		upperBox.isMinimized = true;

@@ -329,10 +329,6 @@ class PlayState extends MusicBeatState
 	override public function create()
 	{
 		var pack:Dynamic = Mods.getPack();
-		if(pack != null && pack.buildField != null)
-		{
-			debug.CodenameBuildField.engineName = pack.buildField;
-		}
 		Paths.clearStoredMemory();
 
 		fModchart = false;

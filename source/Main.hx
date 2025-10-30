@@ -4,7 +4,7 @@ package;
 import android.content.Context;
 #end
 
-import debug.*;
+import debug.FPSCounter;
 
 import objects.VolumeTray;
 
@@ -58,9 +58,7 @@ class Main extends Sprite
 		skipSplash: true, // if the default flixel splash screen should be skipped
 		startFullscreen: false // if the game should start at fullscreen mode
 	};
-	#if !mobile
-		public static var framerateSprite:debug.Framerate;
-	#end
+	public static var fpsVar:FPSCounter;
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -128,10 +126,14 @@ class Main extends Sprite
 		#if desktop @:privateAccess mainGame._customSoundTray = VolumeTray; #end
 		addChild(mainGame);
 
-		#if (!mobile && !web)
-		    var framerateSprite = new debug.Framerate();
-			addChild(framerateSprite);
-			SystemInfo.init();
+		#if !mobile
+		fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
+		addChild(fpsVar);
+		Lib.current.stage.align = "tl";
+		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
+		if(fpsVar != null) {
+			fpsVar.visible = ClientPrefs.data.showFPS;
+		}
 		#end
 
 		#if linux

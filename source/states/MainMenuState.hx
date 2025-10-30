@@ -5,7 +5,6 @@ import flixel.effects.FlxFlicker;
 import lime.app.Application;
 import states.options.OptionsState;
 import backend.Discord;
-import debug.CodenameBuildField;
 
 enum MainMenuColumn {
 	LEFT;
@@ -48,8 +47,6 @@ class MainMenuState extends MusicBeatState
 		Mods.pushGlobalMods();
 		#end
 		Mods.loadTopMod();
-
-		CodenameBuildField.engineName = "NotePulse Engine "+states.MainMenuState.npeVersion;
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence

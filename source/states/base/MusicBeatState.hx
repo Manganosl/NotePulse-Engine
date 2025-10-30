@@ -14,7 +14,6 @@ import psychlua.LuaUtils;
 import psychlua.FunkinLua;
 import backend.Paths;
 import tea.SScript;
-import debug.CodenameBuildField;
 import psychlua.HScript;
 
 class MusicBeatState extends FlxUIState
@@ -266,18 +265,6 @@ class MusicBeatState extends FlxUIState
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
-
-		if (debug.Framerate != null){
-			if (Type.getClassName(Type.getClass(FlxG.state)) == "states.MainMenuState"){
-				if (debug.Framerate.offset.y != 110)
-					FlxTween.tween(debug.Framerate.offset, {y: 110}, 1, {ease: FlxEase.cubeInOut});
-			} else if (Type.getClassName(Type.getClass(FlxG.state)) == "options.OptionsState" || Type.getClassName(Type.getClass(FlxG.state)) == "states.FreeplayState"){
-				if (debug.Framerate.offset.y != 90)
-					FlxTween.tween(debug.Framerate.offset, {y: 90}, 1, {ease: FlxEase.cubeInOut});
-			} else if (debug.Framerate.offset.y != 2){
-				FlxTween.tween(debug.Framerate.offset, {y: 2}, 1, {ease: FlxEase.cubeInOut});
-			}
-		}
 	}
 
 	public function initPsychCamera():PsychCamera

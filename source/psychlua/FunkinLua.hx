@@ -769,10 +769,6 @@ class FunkinLua {
 			return game.songHits;
 		});
 
-		Lua_helper.add_callback(lua, "changeBuildField", function(newBuildField:String) {
-			debug.CodenameBuildField.engineName = newBuildField;
-		});
-
 		Lua_helper.add_callback(lua, "setHealth", function(value:Float = 0) {
 			game.health = value;
 		});

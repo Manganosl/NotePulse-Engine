@@ -4,8 +4,6 @@ import backend.WeekData;
 import backend.Highscore;
 import backend.Song;
 
-import debug.CodenameBuildField;
-
 import objects.HealthIcon;
 import objects.MusicPlayer;
 
@@ -141,8 +139,6 @@ class FreeplayState extends MusicBeatState
 			Mods.currentModDirectory = songs[i].folder;
 			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
 			icon.sprTracker = songText;
-
-			CodenameBuildField.engineName = "NotePulse Engine "+states.MainMenuState.npeVersion;
 
 			// too laggy with a lot of songs, so i had to recode the logic for it
 			songText.visible = songText.active = songText.isMenuItem = false;

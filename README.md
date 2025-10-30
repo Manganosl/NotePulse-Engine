@@ -20,7 +20,6 @@ This engine is a Psych 0.7.3 fork that adds and modifies some things to either m
 - Sustain splashes
 - Compatibility with Psych 1.0 charts
 - Possibility to force the camera to look at Girlfriend without being a gf section
-- CNE ahh FPS counter (To change build field, add "engineName" to your mod's JSON with a string containing the name you want)
 - Results screen
 - Play as opponent
 - Camera movement on note hit
@@ -35,7 +34,7 @@ This engine is a Psych 0.7.3 fork that adds and modifies some things to either m
 ## Thanks
 This engine uses code from:
 - **tposejank**: Extra Keys
-- **CNE Crew**: Fps Counter, NdllUtils, away3d and debug menu
+- **CNE Crew**: NdllUtils, away3d and debug menu
 - **Nightmare Vision Engine**: WindowUtils
 - **Shadow Mario**: Psych Engine
 - **FunkinModchart**: Modchart libraries
