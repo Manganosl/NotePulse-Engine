@@ -692,70 +692,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			autoSaveTime += elapsed / 60.0;
 			if(autoSaveTime >= autoSaveCap #if debug || FlxG.keys.justPressed.NUMPADMULTIPLY #end)
 			{
-				FlxTween.cancelTweensOf(autoSaveIcon);
-				autoSaveTime = 0;
-				autoSaveIcon.alpha = 0;
-				updateChartData();
-				var chartName:String = 'unknown';
-				if(ChartingState.chartPath != null)
-				{
-					chartName = ChartingState.chartPath.replace('\\', '/');
-					chartName = chartName.substring(chartName.lastIndexOf('/')+1, chartName.lastIndexOf('.'));
-				}
-				chartName += DateTools.format(Date.now(), '_%Y-%m-%d_%H-%M-%S');
-				var songCopy:SwagSong = Reflect.copy(PlayState.SONG);
-				Reflect.setField(songCopy, '__original_path', ChartingState.chartPath);
-				var dataToSave:String = haxe.Json.stringify(songCopy);
-				if(!FileSystem.isDirectory('backups')) FileSystem.createDirectory('backups');
-				File.saveContent('backups/$chartName.$BACKUP_EXT', dataToSave);
-
-				if(backupLimit > 0)
-				{
-					var files:Array<String> = FileSystem.readDirectory('backups/').filter((file:String) -> file.endsWith('.$BACKUP_EXT'));
-					if(files.length > backupLimit)
-					{
-						var incorrect:Array<String> = [];
-						var map:Map<String, Float> = [];
-						for(file in files)
-						{
-							var split:Array<String> = file.split('_');
-							if(split.length > 2) //is properly formatted
-							{
-								try
-								{
-									var timeStr:String = split[split.length-1].replace('-', ':');
-									timeStr = timeStr.substr(0, timeStr.indexOf('.'));
-
-									var fileJoin:String = split[split.length-2] + ' ' + timeStr;
-									var date:Date = Date.fromString(fileJoin);
-									map.set(file, date.getTime());
-								}
-								catch(e:Exception)
-								{
-									incorrect.push(file);
-								}
-							}
-							else incorrect.push(file);
-						}
-
-						if(incorrect.length > 0) files = files.filter((file:String) -> !incorrect.contains(file));
-						files.sort(function(a:String, b:String) return map.get(a) > map.get(b) ? 1 : -1);
-
-						while(files.length > backupLimit)
-						{
-							var file = files.shift();
-							try
-							{
-								FileSystem.deleteFile('backups/$file');
-							}
-							catch(e:Exception) {}
-						}
-					}
-				}
-
-				FlxTween.tween(autoSaveIcon, {alpha: 1}, 0.5, {onComplete: function(_)
-					FlxTween.tween(autoSaveIcon, {alpha: 0}, 0.5, {startDelay: 2})
-				});
+			var box:NPUICountdown = new NPUICountdown(100, 100, 200, 80, "AutoSaving in...", 5, function() {
+            	saveChart();
+        	}, null);
 			}
 		}
 
@@ -962,6 +901,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 			if(!songFinished) Conductor.songPosition = FlxMath.bound(FlxG.sound.music.time + Conductor.offset, 0, FlxG.sound.music.length - 1);
 			updateScrollY();
+			songPosSlider.set_value((FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0);
 		}
 
 		super.update(elapsed);
@@ -4379,7 +4319,7 @@ function updateModEvV1():Void {
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
 */		
-		btnY += 20;
+		//btnY += 20;
 		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Update (Legacy)...', function()
 		{
 			if(!fileDialog.completed) return;
@@ -4421,7 +4361,7 @@ function updateModEvV1():Void {
 			});
 		}, btnWid);
 		btn.text.alignment = LEFT;
-		tab_group.add(btn);
+		//tab_group.add(btn);
 
 		btnY++;
 		btnY += 20;
