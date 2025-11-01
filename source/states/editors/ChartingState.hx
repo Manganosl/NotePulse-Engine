@@ -692,9 +692,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			autoSaveTime += elapsed / 60.0;
 			if(autoSaveTime >= autoSaveCap #if debug || FlxG.keys.justPressed.NUMPADMULTIPLY #end)
 			{
-			var box:NPUICountdown = new NPUICountdown(100, 100, 200, 80, "AutoSaving in...", 5, function() {
-            	saveChart();
-        	}, null);
+			var box:NPUICountdown = new NPUICountdown(100, 100, 200, 80, "AutoSaving in...", 5, function() {saveChart();}, function() {showOutput("Autosave cancelled!", true);});
+			box.cameras = [camUI];
+			add(box);
+			autoSaveTime = 0;
 			}
 		}
 

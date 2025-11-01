@@ -71,7 +71,7 @@ class NPUICountdown extends FlxSpriteGroup
         {
             cancelled = true;
             finish(false);
-            onCancel();
+            if(onCancel != null) onCancel();
         }
 
         if (!finished && !cancelled && remainingTime > 0)

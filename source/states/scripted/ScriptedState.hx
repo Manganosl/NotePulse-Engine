@@ -49,6 +49,12 @@ class ScriptedState extends MusicBeatState
 		if (FileSystem.exists(scriptToLoad))
 		{
 			hscript = initSScript(scriptToLoad, false);
+			if (hscript == null){
+				softlocked = true;
+				var errorText = new FlxText(0, FlxG.height / 2 - 10, FlxG.width, "Error while loading Script:\n" + scriptToLoad + "\n\nPress SPACE to go back to Main Menu");
+				errorText.setFormat(null, 16, FlxColor.RED, "center");
+				add(errorText);
+			}
 			return hscript != null;
 		}
 

@@ -3,6 +3,7 @@ package backend.utils;
 import backend.ExtraKeysHandler.EKNoteColor;
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
+import states.menus.FreeplayState.SongMetadata;
 
 class CoolUtil
 {
@@ -60,6 +61,87 @@ class CoolUtil
 		//trace(snap);
 		return (m / snap);
 	}
+
+public static function getSongsForCurrentMod():Array<SongMetadata> {
+    var result:Array<SongMetadata> = [];
+
+    var selectedDir:String = Mods.currentModDirectory;
+    var restoreDir:String = Mods.currentModDirectory;
+
+    if (selectedDir == null) return result;
+
+    for (i in 0...WeekData.weeksList.length) {
+        var weekName:String = WeekData.weeksList[i];
+        var leWeek:WeekData = WeekData.weeksLoaded.get(weekName);
+
+        WeekData.setDirectoryFromWeek(leWeek);
+
+        if (Mods.currentModDirectory == selectedDir) {
+            for (j in 0...leWeek.songs.length) {
+                // <-- IMPORTANT: force dynamic so Haxe/C++ doesn't infer wrong compile-time types
+                var songEntry:Dynamic = leWeek.songs[j];
+
+                // cast the expected string positions explicitly
+                var songName:String = cast songEntry[0];
+                var songCharacter:String = cast songEntry[1];
+
+                // default fallback color
+                var color:Int = -7179779;
+
+                // pull the 3rd element dynamically (if present)
+                var c:Dynamic = null;
+                if (songEntry != null && Reflect.hasField(songEntry, "length") && songEntry.length > 2) {
+                    c = songEntry[2];
+                }
+
+                if (c != null) {
+                    // if it's an array (RGB)
+                    if (Std.is(c, Array)) {
+                        var arr:Array<Dynamic> = cast c;
+                        if (arr != null && arr.length >= 3) {
+                            // ensure elements are Ints before using them
+                            var r:Int = cast arr[0];
+                            var g:Int = cast arr[1];
+                            var b:Int = cast arr[2];
+                            color = FlxColor.fromRGB(r, g, b);
+                        }
+                    }
+                    // if it's already an Int color
+                    else if (Std.is(c, Int)) {
+                        color = cast c;
+                    }
+                    // if it's a String (e.g. "0xFF33AA" or "1234567"), try parse
+                    else if (Std.is(c, String)) {
+                        var s:String = cast c;
+                        // try parse decimal first
+                        var parsed:Null<Int> = Std.parseInt(s);
+                        if (parsed != null) {
+                            color = parsed;
+                        } else {
+                            // try hex like "0xFF33AA" or "#FF33AA"
+                            var hex = s.replace("#", "");
+                            if (hex.indexOf("0x") == 0) hex = hex.substr(2);
+                            // attempt parse base 16
+                            try {
+                                color = Std.parseInt("0x" + hex);
+                            } catch (e:Dynamic) {
+                                // leave default
+                            }
+                        }
+                    }
+                }
+
+                var meta:SongMetadata = new SongMetadata(songName, i, songCharacter, color);
+                result.push(meta);
+            }
+        }
+    }
+
+    // restore global state
+    Mods.currentModDirectory = restoreDir;
+    return result;
+}
+
 
 	inline public static function capitalize(text:String)
 		return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
