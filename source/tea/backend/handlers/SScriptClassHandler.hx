@@ -37,53 +37,25 @@ class SScriptClassHandler {
         this.extend = extend;
     }
 
-    /**
-     * Create an instance of this scripted class.
-     * Steps:
-     *  - create a fresh interpreter (instInterp) for the instance
-     *  - prepare instInterp.locals and instInterp.variables (capture parent's scope)
-     *  - if extending scripted ancestors, evaluate ancestor fields into instInterp (oldest first)
-     *  - evaluate this class' fields into instInterp
-     *  - attach all instance variables / methods to the host object
-     *  - call ancestor constructors (oldest -> newest), then this class' constructor 'new' if present
-     */
     public function hnew(args:Array<Dynamic>):Dynamic {
-        // create instance interpreter
         var instInterp = new Interp();
-        // try to preserve parent's error handler if present
-        try {
-            // no shared errorHandler available on this Interp implementation
-        } catch(e:Dynamic) {}
-
-        // duplicate parent's locals/variables so instance can see outer scope but keep its own map
-        // keep instInterp.locals private (do not duplicate parent's locals)
-        // Variables (globals) are duplicated to avoid accidental mutation of parent's map
-        // duplicate parent variables manually if needed
         instInterp.variables = new Map<String, Dynamic>();
-        // copy parent's variables (shallow)
         try {
             for(k in parentInterp.variables.keys()) instInterp.variables.set(k, parentInterp.variables.get(k));
         } catch(e:Dynamic) {}
 
-
-        // Prepare host object
         var host:Dynamic = null;
-
-        // resolve 'extend' if present
         var extendName:String = null;
         if (extend != null && extend.length > 0) {
             extendName = extend.join(".");
         }
 
-        // If extend refers to a Haxe class, create instance using Type.createInstance first
         var extendedHandler:Dynamic = null;
         if (extendName != null) {
-            // Try to resolve a scripted class handler from global customClasses or parent's variables
             try {
                 if (Interp.customClasses.exists(extendName)) extendedHandler = Interp.customClasses.get(extendName);
             } catch(e:Dynamic) {}
             if (extendedHandler == null) {
-                // try to resolve by last identifier
                 var last = extend[extend.length - 1];
                 try {
                     if (Interp.customClasses.exists(last)) extendedHandler = Interp.customClasses.get(last);
@@ -91,44 +63,86 @@ class SScriptClassHandler {
             }
         }
 
-        // If extend resolves to a Haxe class (native), instantiate now (constructor will run on host)
         if (extendedHandler == null && extendName != null) {
             try {
                 var hxClass = Type.resolveClass(extendName);
                 if (hxClass == null && extend.length > 0) {
-                    // try last segment
                     hxClass = Type.resolveClass(extend[extend.length - 1]);
                 }
                 if (hxClass != null) {
                     host = Type.createInstance(hxClass, args);
                 }
-            } catch(e:Dynamic) {
-                // ignore, we'll fallback to TemplateInstance below
-            }
+            } catch(e:Dynamic) {}
         }
 
-        // If no Haxe host created, use a TemplateInstance
         if (host == null) host = new TemplateInstance();
-
-        // attach interpreter reference and ensure get/set helpers exist
+        if (extendName != null) {
+            var resolved = this.parentInterp.resolve(extendName);
+            if (resolved != null) {
+                var hnewFn = Reflect.field(resolved, "hnew");
+                if (hnewFn != null) {
+                    try {
+                        var superInst = Reflect.callMethod(resolved, hnewFn, [[]]);
+                        if (superInst != null) {
+                            Reflect.setField(host, "__super", superInst);
+                            var supInterp = Reflect.field(superInst, "__interp");
+                            if (supInterp != null && instInterp != null) {
+                                Reflect.setField(instInterp, "__parentInterp", supInterp);
+                            }
+                        }
+                    } catch (e:Dynamic) {}
+                }
+                else {
+                    try {
+                        var hxClass = Type.resolveClass(extendName);
+                        if (hxClass != null) {
+                            var nativeSuper = Type.createInstance(hxClass, []);
+                            var wrapper = {
+                                __orig: nativeSuper,
+                                getField: function(n:String) {
+                                    var fn = Reflect.field(nativeSuper, n);
+                                    if (fn != null && Reflect.isFunction(fn)) return Reflect.callMethod(nativeSuper, fn, []);
+                                    return Reflect.getProperty(nativeSuper, n);
+                                },
+                                setField: function(n:String, v:Dynamic) {
+                                    Reflect.setProperty(nativeSuper, n, v);
+                                    return v;
+                                }
+                            };
+                            Reflect.setField(host, "__super", wrapper);
+                        }
+                    } catch (e:Dynamic) {}
+                }
+            } else {
+                try {
+                    var hxClass2 = Type.resolveClass(extendName);
+                    if (hxClass2 != null) {
+                        var nativeSuper2 = Type.createInstance(hxClass2, []);
+                        var wrapper2 = {
+                            __orig: nativeSuper2,
+                            getField: function(n:String) {
+                                var fn = Reflect.field(nativeSuper2, n);
+                                if (fn != null && Reflect.isFunction(fn)) return Reflect.callMethod(nativeSuper2, fn, []);
+                                return Reflect.getProperty(nativeSuper2, n);
+                            },
+                            setField: function(n:String, v:Dynamic) {
+                                Reflect.setProperty(nativeSuper2, n, v);
+                                return v;
+                            }
+                        };
+                        Reflect.setField(host, "__super", wrapper2);
+                    }
+                } catch (e:Dynamic) {}
+            }
+        }
         host.__interp = instInterp;
-
-        // Ensure instInterp locals contain a 'this' binding so functions capture it
-        // set "this" in instance variables so functions can access via variables map
         try { instInterp.variables.set("this", host); } catch(e:Dynamic) {}
-
-
-        // instInterp.variables will be the per-instance storage for functions/fields
         instInterp.variables = new Map<String, Dynamic>();
-
-        // Helper: collect scripted ancestor handlers (oldest first)
         var ancestorHandlers:Array<Dynamic> = [];
         if (extendedHandler != null) {
-            // walk ancestor chain
             var cur = extendedHandler;
             var seen = new Map<String,Bool>();
             while (cur != null) {
-                // avoid infinite loops
                 var cname:String = null;
                 try {
                     cname = Reflect.field(cur, "name");
@@ -139,8 +153,7 @@ class SScriptClassHandler {
                     if (seen.exists(cname)) break;
                     seen.set(cname, true);
                 }
-                ancestorHandlers.unshift(cur); // insert at beginning so oldest ends up first
-                // try to follow cur.extend if present
+                ancestorHandlers.unshift(cur);
                 var nextExtend:Dynamic = null;
                 try {
                     nextExtend = Reflect.field(cur, "extend");
@@ -157,30 +170,25 @@ class SScriptClassHandler {
                 }
 
                 if (nextName == null) break;
-                // find next handler by name in Interp.customClasses
                 if (Interp.customClasses.exists(nextName)) {
                     cur = Interp.customClasses.get(nextName);
                 } else {
-                    // stop if we cannot find further scripted parent
                     break;
                 }
             }
         }
 
-        // Evaluate ancestor fields in order (oldest -> nearest parent)
         var ancestorCtors:Array<Dynamic> = [];
         for (ah in ancestorHandlers) {
             var aFields:Array<Expr> = Reflect.field(ah, "fields");
             if (aFields == null) continue;
             for (f in aFields) {
-                // evaluate field in instance interpreter
                 try {
                     instInterp.expr(f);
                 } catch(e:Dynamic) {
                     Log.trace("SScript: ancestor field init failed in class '" + name + "': " + Std.string(e));
                     throw e;
                 }
-                // if this evaluation just created a 'new' function, capture it as ancestor ctor
                 if (instInterp.variables.exists("new")) {
                     var cand = instInterp.variables.get("new");
                     if (cand != null) ancestorCtors.push(cand);
@@ -188,7 +196,6 @@ class SScriptClassHandler {
             }
         }
 
-        // Evaluate this class' own fields (child overrides ancestor names here)
         for (f in fields) {
             try {
                 instInterp.expr(f);
@@ -198,27 +205,22 @@ class SScriptClassHandler {
             }
         }
 
-        // Attach instance variables (from instInterp.variables) to host object so Reflect.field works
         for (k in instInterp.variables.keys()) {
             try {
                 var val = instInterp.variables.get(k);
                 Reflect.setField(host, k, val);
             } catch(e:Dynamic) {
-                // ignore single field attach errors
             }
         }
 
-        // Call ancestor constructors in order
         for (ctor in ancestorCtors) {
             try {
-                // call with the same args used for instance creation
                 Reflect.callMethod(ctor, ctor, args == null ? [] : args);
             } catch (e:Dynamic) {
                 Log.trace("SScript: ancestor ctor threw: " + Std.string(e));
             }
         }
 
-        // Call this class constructor if present
         if (instInterp.variables.exists("new")) {
             var myctor = instInterp.variables.get("new");
             if (myctor != null) {
@@ -231,17 +233,12 @@ class SScriptClassHandler {
             }
         }
 
-        // Attach helper getField/setField to host so external accessors can route to instInterp
         Reflect.setField(host, "getField", Reflect.field(this, "getField"));
         Reflect.setField(host, "setField", Reflect.field(this, "setField"));
 
         return host;
     }
 
-    /**
-     * Getter hook used for property lookup routing.
-     * Prefers instance getter 'get_<name>', then instance variable, then host property.
-     */
     public function hGet(o:Dynamic, f:String):Dynamic {
         if (o == null) return null;
         var inst:Interp = null;
@@ -257,16 +254,11 @@ class SScriptClassHandler {
             }
             if (inst.variables.exists(f)) return inst.variables.get(f);
         }
-        // fallback to host's resolve/getField if available
         var resolver = Reflect.field(o, "resolve");
         if (resolver != null) return Reflect.callMethod(o, resolver, [f]);
         return Reflect.field(o, f);
     }
 
-    /**
-     * Setter hook used for property assignments.
-     * Prefers instance setter 'set_<name>', otherwise writes into instance variables and host field.
-     */
     public function hSet(o:Dynamic, f:String, v:Dynamic):Dynamic {
         if (o == null) return v;
         var inst:Interp = null;
@@ -280,7 +272,6 @@ class SScriptClassHandler {
                 var s = inst.variables.get("set_" + f);
                 return Reflect.callMethod(s, s, [v]);
             }
-            // write into instance variables map and host field for reflect
             inst.variables.set(f, v);
             Reflect.setField(o, f, v);
             return v;
@@ -290,7 +281,6 @@ class SScriptClassHandler {
         return v;
     }
 
-    // Simple wrappers for attaching to host objects
     public function getField(f:String):Dynamic {
         return hGet(this, f);
     }
@@ -299,10 +289,7 @@ class SScriptClassHandler {
     }
 }
 
-/**
- * TemplateInstance: default plain host when no Haxe host class is extended.
- */
-class TemplateInstance {
+class TemplateInstance implements SScriptCustomBehavior {
     public var __interp:Interp;
 
     public function new() {}
@@ -331,5 +318,13 @@ class TemplateInstance {
         inst.variables.set(name, v);
         Reflect.setField(this, name, v);
         return v;
+    }
+
+    public function hGet(o:Dynamic, f:String):Dynamic {
+        return getField(f);
+    }
+
+    public function hSet(o:Dynamic, f:String, v:Dynamic):Dynamic {
+        return setField(f, v);
     }
 }

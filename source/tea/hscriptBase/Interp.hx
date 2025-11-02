@@ -461,7 +461,7 @@ case EField(e,f):
 		#end
 	}
 
-	function resolve( id : String ) : Dynamic {
+	public function resolve( id : String ) : Dynamic {
 		var l = locals.get(id);
 		if( l != null )
 			return l.r;

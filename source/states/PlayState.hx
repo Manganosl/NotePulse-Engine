@@ -4101,7 +4101,7 @@ private function popUpScore(note:Note = null):Void
 		else strumPlayAnim(1, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
 		vocals.volume = 1;
 
-		if (!note.isSustainNote)
+		if (!note.isSustainNote && !cpuControlled)
 		{
 			combo++;
 			if(combo > 9999) combo = 9999;
