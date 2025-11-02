@@ -6,13 +6,22 @@ import openfl.filters.ShaderFilter;
 import tea.backend.handlers.SScriptCustomBehavior;
 import flixel.graphics.FlxGraphic;
 import openfl.display.BitmapData;
+import states.scripted.ScriptedState;
 
 class CustomShader implements SScriptCustomBehavior {
     public var shader:FlxRuntimeShader;
 
     public function new(shaderName:String) {
-        PlayState.instance.initLuaShader(shaderName);
-        shader = PlayState.instance.createRuntimeShader(shaderName);
+        if (Type.getClassName(Type.getClass(FlxG.state)) == "states.PlayState"){
+            PlayState.instance.initLuaShader(shaderName);
+            shader = PlayState.instance.createRuntimeShader(shaderName);
+        } else if (Type.getClassName(Type.getClass(FlxG.state)) == "states.scripted.ScriptedState"){
+            ScriptedState.instance.initLuaShader(shaderName);
+            shader = ScriptedState.instance.createRuntimeShader(shaderName);
+        } else {
+            trace("CustomShader: Unsupported state for shader creation!");
+            shader = null;
+        }
     }
 
     public function addToCameras(cameras:Array<FlxCamera>) {
