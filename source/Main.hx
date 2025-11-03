@@ -6,7 +6,7 @@ import android.content.Context;
 
 import debug.FPSCounter;
 
-import objects.VolumeTray;
+import objects.FunkinSoundTray;
 
 import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
@@ -123,7 +123,7 @@ class Main extends Sprite
 
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 		var mainGame:FridayGame = new FridayGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen,);
-		#if desktop @:privateAccess mainGame._customSoundTray = VolumeTray; #end
+		#if desktop @:privateAccess mainGame._customSoundTray = FunkinSoundTray; #end
 		addChild(mainGame);
 
 		#if !mobile

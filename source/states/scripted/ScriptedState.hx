@@ -79,6 +79,9 @@ class ScriptedState extends MusicBeatState
 				MusicBeatState.switchState(new states.MainMenuState());
 			return;
 		}
+
+		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5)
+			MusicBeatState.switchState(new states.MainMenuState());
 	}
 
 	#if (!flash && sys)

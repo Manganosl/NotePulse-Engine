@@ -1467,21 +1467,18 @@ class PlayState extends MusicBeatState
         {
             if (songData.needsVoices)
             {
-                // Player vocals
                 var playerVocals = Paths.voices(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
                 var loadedPlayerVocals = (playerVocals != null && playerVocals.length > 0) ? playerVocals : Paths.voices(songData.song);
                 if (loadedPlayerVocals != null)
                 {
                     vocals.loadEmbedded(loadedPlayerVocals);
                     FlxG.sound.list.add(vocals);
-                    // Pre-allocate channel to avoid pops on first resume
                     vocals.persist = vocals.looped = true;
                     vocals.volume = 0.8;
                     vocals.play();
                     vocals.pause();
                 }
 
-                // Opponent vocals
                 var oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
                 if (oppVocals != null && oppVocals.length > 0)
                 {
