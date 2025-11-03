@@ -1338,31 +1338,43 @@ class PlayState extends MusicBeatState
 		});
 	}
 
-	public function setSongTime(time:Float)
-	{
-		if(time < 0) time = 0;
+    public function setSongTime(time:Float)
+    {
+        // Pause music while we reposition
+        FlxG.sound.music.pause();
 
-		FlxG.sound.music.pause();
-		vocals.pause();
-		opponentVocals.pause();
+        // Set music time (account for Conductor offset) and restart
+        FlxG.sound.music.time = time - Conductor.offset;
+        #if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
+        FlxG.sound.music.play();
 
-		FlxG.sound.music.time = time;
-		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
-		FlxG.sound.music.play();
+        // Sync vocals by setting their playback position only. If they should be audible, resume them
+        if (vocals != null)
+        {
+            if (vocals.length > FlxG.sound.music.time)
+            {
+                vocals.time = FlxG.sound.music.time;
+                #if FLX_PITCH vocals.pitch = playbackRate; #end
+                if (!vocals.playing) vocals.resume();
+            }
+            else
+                vocals.pause();
+        }
 
-		if (Conductor.songPosition <= vocals.length)
-		{
-			vocals.time = time;
-			opponentVocals.time = time;
-			#if FLX_PITCH
-			vocals.pitch = playbackRate;
-			opponentVocals.pitch = playbackRate;
-			#end
-		}
-		vocals.play();
-		opponentVocals.play();
-		Conductor.songPosition = time;
-	}
+        if (opponentVocals != null)
+        {
+            if (opponentVocals.length > FlxG.sound.music.time)
+            {
+                opponentVocals.time = FlxG.sound.music.time;
+                #if FLX_PITCH opponentVocals.pitch = playbackRate; #end
+                if (!opponentVocals.playing) opponentVocals.resume();
+            }
+            else
+                opponentVocals.pause();
+        }
+
+        Conductor.songPosition = time;
+    }
 
 	public function startNextDialogue() {
 		dialogueCount++;
@@ -1382,8 +1394,8 @@ class PlayState extends MusicBeatState
 		FlxG.sound.playMusic(inst._sound, 1, false);
 		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
 		FlxG.sound.music.onComplete = finishSong.bind();
-		vocals.play();
-		opponentVocals.play();
+        if (vocals != null && !vocals.playing) vocals.resume();
+        if (opponentVocals != null && !opponentVocals.playing) opponentVocals.resume();
 
 		if(startOnTime > 0) setSongTime(startOnTime - 500);
 		startOnTime = 0;
@@ -1449,27 +1461,45 @@ class PlayState extends MusicBeatState
 
 		curSong = songData.song;
 
-		vocals = new FlxSound();
-		opponentVocals = new FlxSound();
-		try
-		{
-			if (songData.needsVoices)
-			{
-				var playerVocals = Paths.voices(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
-				vocals.loadEmbedded(playerVocals != null ? playerVocals : Paths.voices(songData.song));
-				
-				var oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
-				if(oppVocals != null) opponentVocals.loadEmbedded(oppVocals);
-			}
-		}
-		catch(e:Dynamic) {}
+        vocals = new FlxSound();
+        opponentVocals = new FlxSound();
+        try
+        {
+            if (songData.needsVoices)
+            {
+                // Player vocals
+                var playerVocals = Paths.voices(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
+                var loadedPlayerVocals = (playerVocals != null && playerVocals.length > 0) ? playerVocals : Paths.voices(songData.song);
+                if (loadedPlayerVocals != null)
+                {
+                    vocals.loadEmbedded(loadedPlayerVocals);
+                    FlxG.sound.list.add(vocals);
+                    // Pre-allocate channel to avoid pops on first resume
+                    vocals.persist = vocals.looped = true;
+                    vocals.volume = 0.8;
+                    vocals.play();
+                    vocals.pause();
+                }
 
-		#if FLX_PITCH
-		vocals.pitch = playbackRate;
-		opponentVocals.pitch = playbackRate;
-		#end
-		FlxG.sound.list.add(vocals);
-		FlxG.sound.list.add(opponentVocals);
+                // Opponent vocals
+                var oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
+                if (oppVocals != null && oppVocals.length > 0)
+                {
+                    opponentVocals.loadEmbedded(oppVocals);
+                    FlxG.sound.list.add(opponentVocals);
+                    opponentVocals.persist = opponentVocals.looped = true;
+                    opponentVocals.volume = 0.8;
+                    opponentVocals.play();
+                    opponentVocals.pause();
+                }
+            }
+        }
+        catch (e:Dynamic) {}
+ 
+        #if FLX_PITCH
+        vocals.pitch = playbackRate;
+        opponentVocals.pitch = playbackRate;
+        #end
 
 		inst = new FlxSound();
 		try {
@@ -1871,8 +1901,8 @@ class PlayState extends MusicBeatState
 			opponentVocals.time = Conductor.songPosition;
 			#if FLX_PITCH opponentVocals.pitch = playbackRate; #end
 		}
-		vocals.play();
-		opponentVocals.play();
+		if(!vocals.playing) vocals.resume();
+		if(!opponentVocals.playing) opponentVocals.resume();
 	}
 
 	public var paused:Bool = false;

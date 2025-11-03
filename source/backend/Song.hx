@@ -151,10 +151,10 @@ class Song
 		                var col:Int = Std.parseInt('' + note[1]);
 		                if (Math.isNaN(col)) continue;
 					
-		                if (col >= 0 && col <= songJson.mania) {
-		                    note[1] = col + songJson.mania+1;
-		                } else if (col >= songJson.mania+1 && col <= songJson.mania+(songJson.mania+1)) {
-		                    note[1] = col - songJson.mania+1;
+		                if (col >= 0 && col <= 3) {
+		                    note[1] = col + 4;
+		                } else if (col >= 4 && col <= 7) {
+		                    note[1] = col - 4;
 		                }
 		            }
 		        }

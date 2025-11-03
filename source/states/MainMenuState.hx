@@ -159,7 +159,7 @@ class MainMenuState extends MusicBeatState
 		menuItem.updateHitbox();
 		
 		menuItem.antialiasing = ClientPrefs.data.antialiasing;
-		menuItem.scrollFactor.set();
+		menuItem.scrollFactor.set(0, 0.15);
 		menuItems.add(menuItem);
 		return menuItem;
 	}
