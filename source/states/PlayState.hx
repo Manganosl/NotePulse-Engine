@@ -2339,10 +2339,7 @@ public function changeMania(newMania:Int):Void {
 										strum.sustainSplash.hide(!daNote.mustPress);
 									}
 								} else {
-									strum.sustainSplash.show();
-									strum.sustainSplash.rgbShader.r = daNote.rgbShader.r;
-									strum.sustainSplash.rgbShader.g = daNote.rgbShader.g;
-									strum.sustainSplash.rgbShader.b = daNote.rgbShader.b;
+									strum.sustainSplash.show(daNote);
 								}
 							}
 
@@ -4200,6 +4197,9 @@ private function popUpScore(note:Note = null):Void
 			videoCutscene = null;
 		}
 		#end
+
+		if(vocals != null) vocals.stop();
+		if(opponentVocals != null) opponentVocals.stop();
 
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);

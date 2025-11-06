@@ -1,26 +1,29 @@
 package objects;
 
+import objects.NoteSplash.PixelSplashShaderRef;
 import shaders.RGBPalette;
-import shaders.RGBPalette.RGBShaderReference;
 
 class SustainSplash extends FlxSkewedSprite {
-	public var rgbShader:RGBShaderReference;
+	public var rgbShader:PixelSplashShaderRef;
 	public var strum:StrumNote;
 	public var shouldVisible:Bool = false;
 	public var modchart:Bool = PlayState.fModchart;
 	public var firstTime:Bool = true;
+	public var updatedThisFrame:Bool = false;
+
 	override public function new(strum:StrumNote) {
 		super();
 		this.strum = strum;
 
-		@:privateAccess
-		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(strum.noteData));
+		rgbShader = new PixelSplashShaderRef();
+		shader = rgbShader.shader;
 
 		frames = Paths.getSparrowAtlas('noteSplashes/holdSplashes/sustain_cover');
 		animation.addByPrefix('cover', 'sustain cover pre0', 24, false);
 		animation.addByPrefix('splash', 'sustain cover end0', 24, false);
-		animation.addByPrefix('loop', 'sustain cover0', 24);
+		animation.addByPrefix('loop', 'sustain cover0', 24, true);
 		animation.play("loop");
+
 		updateHitbox();
 		visible = true;
 		shouldVisible = false;
@@ -30,25 +33,55 @@ class SustainSplash extends FlxSkewedSprite {
 		updateHitbox();
 	}
 
-	public var updatedThisFrame:Bool = false;
-
-	public inline function show() {
+	public inline function show(note:Note) {
 		updatedThisFrame = true;
-		if(!modchart) visible = true;
+
+		var tempShader:RGBPalette = null;
+
+		if (note != null && (PlayState.SONG == null || !PlayState.SONG.disableNoteRGB)) {
+			if (!note.noteSplashData.useGlobalShader) {
+				if (note.noteSplashData.r != -1) note.rgbShader.r = note.noteSplashData.r;
+				if (note.noteSplashData.g != -1) note.rgbShader.g = note.noteSplashData.g;
+				if (note.noteSplashData.b != -1) note.rgbShader.b = note.noteSplashData.b;
+				tempShader = note.rgbShader.parent;
+			} else {
+				tempShader = Note.globalRgbShaders[note.noteData % Note.globalRgbShaders.length];
+			}
+		} else {
+			tempShader = Note.globalRgbShaders[0];
+		}
+
+		alpha = ClientPrefs.data.splashAlpha;
+		if (note != null) alpha = note.noteSplashData.a;
+
+		rgbShader.copyValues(tempShader);
+
+		if (!modchart) visible = true;
 		shouldVisible = true;
-		if (animation.curAnim.name != "loop") {
+
+		if (animation.curAnim == null || animation.curAnim.name != "loop") {
 			animation.play("cover");
 			center();
 		}
 	}
+
 	public inline function hide(miss:Bool = false) {
-		if (animation.curAnim.name == "splash") return;
+		if (animation.curAnim != null && animation.curAnim.name == "splash") return;
 
 		updatedThisFrame = true;
-		if (miss) {if(!modchart) visible = false; shouldVisible = false;}
-		if (animation.curAnim.name != "splash") {
+
+		if (miss) {
+			if (!modchart) visible = false;
+			shouldVisible = false;
+		}
+
+		if (animation.curAnim == null || animation.curAnim.name != "splash") {
 			animation.play("splash");
-			if (!firstTime) strum.playAnim("pressed", true); else firstTime = false;
+			if (!firstTime) {
+				strum.playAnim("pressed", true);
+			} else {
+				firstTime = false;
+			}
 			center();
 		}
 	}
@@ -58,19 +91,25 @@ class SustainSplash extends FlxSkewedSprite {
 		updatedThisFrame = false;
 		modchart = PlayState.fModchart;	
 
-		if (animation.curAnim.finished) {
-			if (animation.curAnim.name == "cover") animation.play("loop");
-			if (animation.curAnim.name == "splash") {if(!modchart) visible = false; shouldVisible = false;}
+		if (animation.curAnim != null && animation.curAnim.finished) {
+			switch (animation.curAnim.name) {
+				case "cover":
+					animation.play("loop");
+				case "splash":
+					if (!modchart) visible = false;
+					shouldVisible = false;
+			}
 		}
+
 		center();
 	}
 
 	public function center() {
 		centerOffsets();
-		scale.x = strum.scale.x*1/(!PlayState.isPixelStage ? 0.7 : 6);
-		scale.y = strum.scale.y*1/(!PlayState.isPixelStage ? 0.7 : 6);
+		scale.x = strum.scale.x * (1 / (!PlayState.isPixelStage ? 0.7 : 6));
+		scale.y = strum.scale.y * (1 / (!PlayState.isPixelStage ? 0.7 : 6));
 		alpha = strum.alpha;
-		x = strum.x + (strum.width/2) - (width/2);
-		y = strum.y + (strum.height/2) - (height/2);
+		x = strum.x + (strum.width / 2) - (width / 2);
+		y = strum.y + (strum.height / 2) - (height / 2);
 	}
 }
