@@ -318,9 +318,7 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		if (instruction == null)
 			return;
 		final item:FlxSprite = instruction.item;
-
-		@:privateAccess
-		final cameras = #if (flixel >= "5.7.0") item.getCamerasLegacy() #else item.get_cameras() #end;
+		final cameras = item._cameras != null ? item._cameras : Adapter.instance.getArrowCamera();
 
 		@:privateAccess for (camera in cameras) {
 			var cTransforms = instruction.colorData.copy();

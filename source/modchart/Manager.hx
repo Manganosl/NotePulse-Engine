@@ -34,15 +34,9 @@ final class Manager extends FlxBasic implements SScriptCustomBehavior {
 
     public var playfields:Vector<PlayField> = new Vector<PlayField>(16);
     private var playfieldCount:Int = 0;
-    public var prefCam:Array<FlxCamera>;
 
-    public function new(?prefCam:Array<FlxCamera>) {
+    public function new() {
         super();
-        if(prefCam == null) {
-            if(Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState') 
-		    	this.prefCam = [PlayState.instance.camHUD];
-		    else this.prefCam = [EditorPlayState.instance.camHUD];
-        } else this.prefCam = prefCam;
         instance = this;
 
         Adapter.init();
