@@ -226,7 +226,8 @@ if (arrow.extraData != null && arrow.extraData["linkStrum"] != null) {
 			return;
 
 		final item = instruction.item;
-		final cameras = item._cameras != null ? item._cameras : Adapter.instance.getArrowCamera();
+		@:privateAccess
+		final cameras = #if (flixel >= "5.7.0") item.getCamerasLegacy() #else item.get_cameras() #end;
 
 		@:privateAccess
 		for (camera in cameras) {

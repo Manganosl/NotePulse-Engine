@@ -54,9 +54,16 @@ class Macro {
 			kind: FieldType.FVar(macro :Null<Bool>, macro true),
 			pos: pos
 		};
+		final extraField:Field = {
+			name: "_fmExtra",
+			access: [APublic],
+			kind: FieldType.FVar(macro :Dynamic, macro {}),
+			pos: pos
+		};
 
 		fields.push(zField);
 		fields.push(visField);
+		fields.push(extraField);
 
 		return fields;
 	}

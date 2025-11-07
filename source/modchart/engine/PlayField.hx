@@ -170,8 +170,6 @@ final class PlayField extends FlxSprite {
 			final h = it.hasNext;
 			do {
 				final node = n();
-				if (node == null)
-					continue;
 
 				if (node == null)
 					continue;
@@ -279,6 +277,27 @@ final class PlayField extends FlxSprite {
 		// i is player index
 		for (i in 0...playerItems.length) {
 			var curItems:Array<Array<FlxSprite>> = playerItems[i];
+
+			if (curItems == null || curItems.length == 0) continue;
+
+			final drawHolds = () -> {
+				if (holdLength > 0) {
+					for (hold in curItems[2]) {
+						if (!getVisibility(hold))
+							continue;
+
+						holdRenderer.prepare(hold);
+						queue({
+							callback: holdRenderer.shift,
+							z: hold._z
+						});
+					}
+				}
+			};
+
+			//holds (behind strums)
+			if (Config.HOLDS_BEHIND_STRUM)
+				drawHolds();
 
 			// receptors
 			if (receptorLength > 0) {
