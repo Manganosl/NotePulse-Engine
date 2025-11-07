@@ -654,14 +654,15 @@ class Character extends FlxSkewedSprite
 
 	public override function destroy()
 	{
-		for (t in ghostTweenGrp)
-		{
-			t?.cancel();
-		}
+		if(ghostTweenGrp != null){
+			for (t in ghostTweenGrp)
+			{
+				t?.cancel();
+			}
 
-		// destroy tween array and active ghosts
 		ghostTweenGrp = FlxDestroyUtil.destroyArray(ghostTweenGrp);
 		doubleGhosts = FlxDestroyUtil.destroyArray(doubleGhosts);
+		}
 
 		super.destroy();
 		destroyAtlas();

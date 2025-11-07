@@ -38,4 +38,4 @@ This engine uses code from:
 - **Nightmare Vision Engine**: WindowUtils
 - **Shadow Mario**: Psych Engine
 - **FunkinModchart**: Modchart libraries
-- **Sonic Legacy**: Crash handler
+- **Funkin Crew**: Obvious, right?

@@ -122,7 +122,7 @@ class Main extends Sprite
 		ClientPrefs.loadDefaultKeys();
 
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
-		var mainGame:FridayGame = new FridayGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen,);
+		var mainGame:FlxGame = new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen,);
 		#if desktop @:privateAccess mainGame._customSoundTray = FunkinSoundTray; #end
 		addChild(mainGame);
 
@@ -151,7 +151,7 @@ class Main extends Sprite
 		#end
 		FlxG.mouse.useSystemCursor = true;
 		
-		#if !CRASH_HANDLER
+		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 		#end
 
@@ -182,7 +182,7 @@ class Main extends Sprite
 
 	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
 	// very cool person for real they don't get enough credit for their work
-	#if !CRASH_HANDLER
+	#if CRASH_HANDLER
 	function onCrash(e:UncaughtErrorEvent):Void
 	{
 		var errMsg:String = "";
@@ -193,7 +193,7 @@ class Main extends Sprite
 		dateNow = dateNow.replace(" ", "_");
 		dateNow = dateNow.replace(":", "'");
 
-		path = "./crash/" + "PsychEngine_" + dateNow + ".txt";
+		path = "./crash/" + "NotepulseEngine_" + dateNow + ".txt";
 
 		for (stackItem in callStack)
 		{
@@ -206,7 +206,7 @@ class Main extends Sprite
 			}
 		}
 
-		errMsg += "\nUncaught Error: " + e.error + "\nIf this is related to EK, report it here: https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK\nIf not, report this error to Psych Engine: https://github.com/ShadowMario/FNF-PsychEngine\n\n> Crash Handler written by: sqirra-rng";
+		errMsg += "\nUncaught Error: " + e.error + "\nIn case this wasn't caused by any modifications, report this error to NotePulse Engine: https://github.com/Manganosl/NotePulse-Engine\n\n> Crash Handler written by: sqirra-rng";
 
 		if (!FileSystem.exists("./crash/"))
 			FileSystem.createDirectory("./crash/");
@@ -223,97 +223,4 @@ class Main extends Sprite
 		Sys.exit(1);
 	}
 	#end
-}
-
-class FridayGame extends FlxGame
-{
-	public static var onGameCrash:(errMsg:String, crashDump:String) -> Void;
-
-	/**
-	* Used to instantiate the guts of the flixel game object once we have a valid reference to the root.
-	*/
-	override function create(_):Void {
-		try super.create(_)
-		catch (e) onCrash(e);
-	}
-
-	override function onFocus(_):Void {
-		try super.onFocus(_)
-		catch (e) onCrash(e);
-	}
-
-	override function onFocusLost(_):Void {
-		try super.onFocusLost(_)
-		catch (e) onCrash(e);
-	}
-
-	/**
-	* Handles the `onEnterFrame` call and figures out how many updates and draw calls to do.
-	*/
-	override function onEnterFrame(_):Void {
-		try super.onEnterFrame(_)
-		catch (e) onCrash(e);
-	}
-
-	/**
-	* This function is called by `step()` and updates the actual game state.
-	* May be called multiple times per "frame" or draw call.
-	*/
-	override function update():Void {
-		try super.update()
-		catch (e) onCrash(e);
-	}
-
-	/**
-	* Goes through the game state and draws all the game objects and special effects.
-	*/
-	override function draw():Void {
-		try super.draw()
-		catch (e) onCrash(e);
-	}
-
-	private final function onCrash(e:haxe.Exception):Void {
-    	var errMsg:String = "";
-    	var path:String;
-    	var callStack:Array<StackItem> = haxe.CallStack.exceptionStack(true);
-    	var dateNow:String = Date.now().toString();
-
-    	dateNow = dateNow.replace(" ", "_");
-    	dateNow = dateNow.replace(":", "'");
-
-    	path = "./crash/" + "PsychEngine_" + dateNow + ".txt";
-
-    	for (stackItem in callStack)
-    	{
-    	    switch (stackItem)
-    	    {
-    	        case FilePos(s, file, line, column):
-    	            errMsg += file + " (line " + line + ")\n";
-    	        default:
-    	            Sys.println(stackItem);
-    	            trace(stackItem);
-    	    	}
-    		}
-
-    	errMsg += "\nUncaught Error: " + e.message + "\nIn case this wasn't caused by any modifications, report this error to NotePulse Engine: https://github.com/Manganosl/NotePulse-Engine\n\n> Crash Handler written by: sqirra-rng";
-
-    	if (!sys.FileSystem.exists("./crash/"))
-        	sys.FileSystem.createDirectory("./crash/");
-
-    	sys.io.File.saveContent(path, errMsg + "\n");
-
-    	Sys.println(errMsg);
-    	Sys.println("Crash dump saved in " + haxe.io.Path.normalize(path));
-
-    	#if (!mobile && !web)
-    	try {
-    	    openfl.Lib.application.window.alert(errMsg, "Error!");
-    	} catch(e:Dynamic) {}
-    	#end
-
-    	if(onGameCrash != null) onGameCrash(errMsg, e.message);
-
-   		flixel.addons.transition.FlxTransitionableState.skipNextTransOut = true;
-    	FlxG.switchState(new states.handlers.CrashHandlerState(FlxG.state, errMsg, e.message));
-	}
 }

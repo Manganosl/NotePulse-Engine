@@ -72,16 +72,6 @@ class Bumpy extends Modifier {
 	}
 
 	override public function render(curPos:Vector3, params:ModifierParameters) {
-		// var player = params.player;
-		// var distance = params.distance;
-		// var bumpyX = (40 * sin((distance + (100.0 * getPercent('bumpyXOffset', player))) / ((getPercent('bumpyXPeriod', player) * 24.0) + 24.0)));
-		// var bumpyY = (40 * sin((distance + (100.0 * getPercent('bumpyYOffset', player))) / ((getPercent('bumpyYPeriod', player) * 24.0) + 24.0)));
-		// var bumpyZ = (40 * sin((distance + (100.0 * getPercent('bumpyZOffset', player))) / ((getPercent('bumpyZPeriod', player) * 24.0) + 24.0)));
-
-		// curPos.x += bumpyX * getPercent('bumpyX', player);
-		// curPos.y += bumpyY * getPercent('bumpyY', player);
-		// curPos.z += bumpyZ * (getPercent('bumpy', player) + getPercent('bumpyZ', player));
-
 		applyBumpy(curPos, params, '', 'z');
 		applyBumpy(curPos, params, 'x', 'x');
 		applyBumpy(curPos, params, 'y', 'y');
