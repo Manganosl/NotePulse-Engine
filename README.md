@@ -1,40 +1,35 @@
-## warning
-This engine is very WIP and will tend to have lots of error including lots of crashes.
-If you notice softcoded things in here, don't worry, I'm working on hardcoding them
-
 # NotePulse Engine
 ### What a shitty name
 ![NotePulse Engine](docs/img/logo.png)
 
-This engine is a Psych 0.7.3 fork that adds and modifies some things to either make life easier or just add functionalities. Some of them are:
+This engine is a fork of Psych 0.7.3, made with the purpose of being easier to mod and add features that either standard Psych did not have, or were available in versions higher than its 0.7.3.
 
-- Replace hxCodec for hxVlc
-- makeVideoSprite function
-- FlxEmitter on HScript
-- Judgement Counter
-- Marvelous Rating
-- Extra keys
-- Modcharting tools (Thanks to FunkinModchart)
-- Extra pair of strums for GF
-- FlxUI replaced for PsychUI (WIP)
-- Sustain splashes
-- Compatibility with Psych 1.0 charts
-- Possibility to force the camera to look at Girlfriend without being a gf section
-- Results screen
-- Play as opponent
-- Camera movement on note hit
-- Ndll support
+## What does it add?
+
+- Replace hxCodec for hxVlc. (Preventing crashes)
+- Judgement Counter.
+- Marvelous Rating.
+- Key count changes.
+- Modcharting libraries ([FunkinModchart](https://github.com/theoo-h/FunkinModchart))
+- Extra pair of strums for GF.
+- Sustain splashes.
+- Compatibility with Psych 1.0 charts.
+- Possibility to force the camera to look at Girlfriend without being a gf section.
+- Results screen.
+- Play as opponent.
+- Camera movement on note hit.
+- Ndll support.
 - Away3D (Only on HScript)
-- Psych 1.0 Stage Editor
-- Modchart Events on Charting State (Something like Zoro's Modcharting Editor)
-- Scripted States and Substates
+- Psych 1.0 Stage and Charting Editors.
+- Modchart Events on Charting State (Inspired by [Zoro's Modcharting Tools](https://github.com/TheZoroForce240/FNF-Modcharting-Tools))
+- Scripted States and Substates.
+- CNE-like CustomShader utility.
 
-### You can find extra LUA functions in [here](LUA.md)
+###  [here](LUA.md)
 
 ## Thanks
-This engine uses code from:
 - **tposejank**: Extra Keys
-- **CNE Crew**: NdllUtils, away3d and debug menu
+- **Codename Engine**: NdllUtils, away3d and debug menu
 - **Nightmare Vision Engine**: WindowUtils
 - **Shadow Mario**: Psych Engine
 - **FunkinModchart**: Modchart libraries
