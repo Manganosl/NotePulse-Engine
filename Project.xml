@@ -98,7 +98,7 @@
 	<haxelib name="away3d"/>
 	<haxelib name="hscript-improved-dev" if="HSCRIPT_ALLOWED"/>
 	<define name="hscriptPos" />
-	<define name="CUSTOM_CLASSES" />
+	<!--define name="CUSTOM_CLASSES" /   For some reason, this crashes the compiler!! -->
 
 	<!--FunkinModchart-->
 	<haxedef name="funkin-modchart" />

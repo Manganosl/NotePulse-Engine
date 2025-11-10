@@ -256,4 +256,17 @@ class MusicBeatState extends FlxUIState
 		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
 		return val == null ? 4 : val;
 	}
+
+	#if HSCRIPT_ALLOWED
+	public function importScript(path:String, absolute:Bool = false) {
+		var scriptPath = ((Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0) ? Paths.mods(Mods.currentModDirectory + '/' + path) : Paths.mods(path));
+		try {
+			this.hscriptArray.push(new HScript((absolute ? path : scriptPath)));
+			return true;
+		} catch(e) {
+			FunkinLua.luaTrace('importScript: Path "${(absolute ? path : scriptPath)}" does not exist!', true, false, 0xFFFF0000);
+		}
+		return false;
+	}
+	#end
 }
