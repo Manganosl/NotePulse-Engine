@@ -16,7 +16,6 @@ import modchart.engine.modifiers.list.*;
 import modchart.events.*;
 import modchart.events.types.*;
 
-import tea.backend.handlers.SScriptCustomBehavior;
 import Type;
 import Reflect;
 import Std;
@@ -26,7 +25,7 @@ import Std;
 #if !openfl_debug
 @:fileXml('tags="haxe,release"') @:noDebug
 #end
-final class Manager extends FlxBasic implements SScriptCustomBehavior {
+final class Manager extends FlxBasic {
     public static var instance:Manager;
 
     @:deprecated("Use `Config.RENDER_ARROW_PATHS` instead.")
@@ -166,25 +165,6 @@ final class Manager extends FlxBasic implements SScriptCustomBehavior {
     public static var ARROW_SIZE:Float = 160 * 0.7;
     public static var ARROW_SIZEDIV2:Float = (160 * 0.7) * 0.5;
 
-    public function hGet(o:Dynamic, name:String):Dynamic {
-        var fields = Type.getInstanceFields(Type.getClass(this));
-        if (fields != null && (fields.indexOf(name) != -1 || fields.indexOf('get_${name}') != -1)) {
-            return Reflect.getProperty(this, name);
-        }
-        return new ModifierCallProxy(this, name);
-    }
-
-    public function hSet(o:Dynamic, name:String, val:Dynamic):Dynamic {
-        var fields = Type.getInstanceFields(Type.getClass(this));
-        if (fields != null && (fields.indexOf(name) != -1 || fields.indexOf('set_${name}') != -1)) {
-            Reflect.setProperty(this, name, val);
-            return val;
-        }
-        var f = asFloat(val);
-        setPercent(name, f, -1, -1);
-        return val;
-    }
-
     static public function parseIndex(v:Dynamic):Int {
         if (v == null) return -1;
         var s = Std.string(v).toLowerCase();
@@ -208,32 +188,3 @@ final class Manager extends FlxBasic implements SScriptCustomBehavior {
 }
 
 typedef Funny = {callback:Void->Void, z:Float};
-
-class ModifierCallProxy implements SScriptCustomBehavior {
-    public var manager:Manager;
-    public var modName:String;
-    public var player:Int = -1;
-    public var field:Int = -1;
-
-    public function new(manager:Manager, modName:String) {
-        this.manager = manager;
-        this.modName = modName;
-    }
-
-    public function hCall(o:Dynamic, args:Array<Dynamic>):Dynamic {
-        var proxy = new ModifierCallProxy(manager, modName);
-        if (args.length > 0) proxy.player = Manager.parseIndex(args[0]);
-        if (args.length > 1) proxy.field = Manager.parseIndex(args[1]);
-        return proxy;
-    }
-
-    public function hSet(o:Dynamic, name:String, val:Dynamic):Dynamic {
-        var f = Manager.asFloat(val);
-        manager.setPercent(modName, f, player, field);
-        return val;
-    }
-
-    public function hGet(o:Dynamic, name:String):Dynamic {
-        return manager.getPercent(modName, player, field);
-    }
-}

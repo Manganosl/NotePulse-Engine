@@ -23,13 +23,6 @@ import sys.thread.Mutex;
 import objects.Note;
 import objects.NoteSplash;
 
-#if HSCRIPT_ALLOWED
-import psychlua.HScript;
-//import crowplexus.iris.Iris;
-//import crowplexus.hscript.Expr.Error as IrisError;
-//import crowplexus.hscript.Printer;
-#end
-
 #if cpp
 @:headerCode('
 #include <iostream>
@@ -80,9 +73,6 @@ class LoadingState extends MusicBeatState
 	var spawnedPessy:Bool = false;
 	var pressedTimes:Int = 0;
 
-	#if HSCRIPT_ALLOWED
-	var hscript:HScript;
-	#end
 	override function create()
 	{
 		persistentUpdate = true;
@@ -165,14 +155,6 @@ class LoadingState extends MusicBeatState
 			bar.scale.x = barWidth * curPercent;
 			bar.updateHitbox();
 		}
-		
-		#if HSCRIPT_ALLOWED
-		if(hscript != null)
-		{
-			if(hscript.exists('onUpdate')) hscript.call('onUpdate', [elapsed]);
-			return;
-		}
-		#end
 
 		timePassed += elapsed;
 		shakeFl += elapsed * 3000;
@@ -243,19 +225,6 @@ class LoadingState extends MusicBeatState
 			FlxTween.tween(pessy, {y: 10}, 0.65, {ease: FlxEase.quadOut});
 		}
 	}
-
-	#if HSCRIPT_ALLOWED
-	override function destroy()
-	{
-		if(hscript != null)
-		{
-			if(hscript.exists('onDestroy')) hscript.call('onDestroy');
-			hscript.destroy();
-		}
-		hscript = null;
-		super.destroy();
-	}
-	#end
 	
 	var finishedLoading:Bool = false;
 	function onLoad()

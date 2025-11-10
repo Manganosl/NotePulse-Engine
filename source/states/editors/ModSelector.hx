@@ -205,12 +205,12 @@ class ModSelector extends MusicBeatState{
 			}
 
             if (controls.ACCEPT){
-				if(goto == states.scripted.ScriptedState){
-					currentMod = modArray[curSelected];
-					Mods.currentModDirectory = currentMod;
-					startGlobalScript();
-					return;
-				}
+				//if(goto == states.scripted.ScriptedState){
+				//	currentMod = modArray[curSelected];
+				//	Mods.currentModDirectory = currentMod;
+				//	startGlobalScript();
+				//	return;
+				//}
 				if(goto != states.editors.ChartingState){
 					if(curSelected == 0){
 						currentMod = null;

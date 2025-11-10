@@ -3,12 +3,11 @@ package backend.utils;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.FlxCamera;
 import openfl.filters.ShaderFilter;
-import tea.backend.handlers.SScriptCustomBehavior;
 import flixel.graphics.FlxGraphic;
 import openfl.display.BitmapData;
-import states.scripted.ScriptedState;
+//import states.scripted.ScriptedState;
 
-class CustomShader implements SScriptCustomBehavior {
+class CustomShader {
     public var shader:FlxRuntimeShader;
 
     public function new(shaderName:String) {
@@ -16,8 +15,8 @@ class CustomShader implements SScriptCustomBehavior {
             PlayState.instance.initLuaShader(shaderName);
             shader = PlayState.instance.createRuntimeShader(shaderName);
         } else if (Type.getClassName(Type.getClass(FlxG.state)) == "states.scripted.ScriptedState"){
-            ScriptedState.instance.initLuaShader(shaderName);
-            shader = ScriptedState.instance.createRuntimeShader(shaderName);
+            //ScriptedState.instance.initLuaShader(shaderName);
+            //shader = ScriptedState.instance.createRuntimeShader(shaderName);
         } else {
             trace("CustomShader: Unsupported state for shader creation!");
             shader = null;
@@ -42,26 +41,6 @@ class CustomShader implements SScriptCustomBehavior {
             cam.filters = [for (f in cam.filters) if (!(f is ShaderFilter && cast(f, ShaderFilter).shader == shader)) f];
             if (cam.filters.length == 0) cam.filters = null;
         }
-    }
-
-    public function hGet(o:Dynamic, name:String):Dynamic {
-        var fields = Type.getInstanceFields(Type.getClass(this));
-        if (fields != null && (fields.indexOf(name) != -1 || fields.indexOf('get_${name}') != -1)) {
-            return Reflect.getProperty(this, name);
-        }
-
-        return getUniform(name);
-    }
-
-    public function hSet(o:Dynamic, name:String, val:Dynamic):Dynamic {
-        var fields = Type.getInstanceFields(Type.getClass(this));
-        if (fields != null && (fields.indexOf(name) != -1 || fields.indexOf('set_${name}') != -1)) {
-            Reflect.setProperty(this, name, val);
-            return val;
-        }
-
-        setUniform(name, val);
-        return val;
     }
 
     private inline function isNumber(x:Dynamic):Bool {

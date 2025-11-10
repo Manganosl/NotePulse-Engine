@@ -58,7 +58,7 @@ class FunkinLua {
 	public var closed:Bool = false;
 
 	#if HSCRIPT_ALLOWED
-	public var hscript:HScript = null;
+	public var hscript:HaxeCode = null;
 	#end
 
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
@@ -408,7 +408,7 @@ class FunkinLua {
 			{
 				if(!ignoreAlreadyRunning)
 					for (script in game.hscriptArray)
-						if(script.origin == foundScript)
+						if(script.scriptName == foundScript)
 						{
 							luaTrace('addHScript: The script "' + foundScript + '" is already running!');
 							return;
@@ -445,10 +445,10 @@ class FunkinLua {
 			{
 				if(!ignoreAlreadyRunning)
 					for (script in game.hscriptArray)	
-						if(script.origin == foundScript)
+						if(script.scriptName == foundScript)
 						{
-							trace('Closing script ' + (script.origin != null ? script.origin : luaFile));
-							script.destroy();
+							trace('Closing script ' + (script.scriptName != null ? script.scriptName : luaFile));
+							script.stop();
 							return true;
 						}
 			}
@@ -1763,7 +1763,7 @@ class FunkinLua {
 		});
 
 		#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(lua); #end
-		#if HSCRIPT_ALLOWED HScript.implement(this); #end
+		#if HSCRIPT_ALLOWED HaxeCode.implement(this); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
 		#if flxanimate FlxAnimateFunctions.implement(this); #end
 		ReflectionFunctions.implement(this);
@@ -1866,8 +1866,7 @@ class FunkinLua {
 		Lua.close(lua);
 		lua = null;
 		#if HSCRIPT_ALLOWED
-		if(hscript != null)
-		{
+		if(hscript != null) {
 			hscript.destroy();
 			hscript = null;
 		}

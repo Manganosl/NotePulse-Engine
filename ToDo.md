@@ -12,7 +12,6 @@
 - [X] Add options for **EVERYTHING** I've been adding
 - [X] Ndll support
 - [X] 3D models support
-- [X] New crash handler (Avoid needing to reopen the game)
 - [X] Fix modchartInstance.addPlayfield() causing a black screen
-- [ ] Custom Classes
-- [X] HScript public vars
+- [ ] Replace SScript => HScript Improved
+  - [ ] Make sure (almost) all old scripts work after the change

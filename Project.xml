@@ -96,6 +96,9 @@
 	<haxelib name="tjson" />
 	<haxelib name="json2object" />
 	<haxelib name="away3d"/>
+	<haxelib name="hscript-improved-dev" if="HSCRIPT_ALLOWED"/>
+	<define name="hscriptPos" />
+	<define name="CUSTOM_CLASSES" />
 
 	<!--FunkinModchart-->
 	<haxedef name="funkin-modchart" />
@@ -173,6 +176,7 @@
 	<!--Macro fixes-->
 	<haxeflag name="--macro" value="allowPackage('flash')" />
 	<haxeflag name="--macro" value="include('my.pack')" />
+	<haxeflag name="--macro" value="backend.Macro.compileMacros()" />
 
 	<!-- _________________________________ Custom _______________________________ -->
 

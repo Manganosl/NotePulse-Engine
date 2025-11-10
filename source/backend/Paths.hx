@@ -270,6 +270,22 @@ class Paths
 		return null;
 	}
 
+	#if HSCRIPT_ALLOWED
+	static public function getScriptPath(scriptName:String, ?modFolder:Null<String> = null):String {
+		#if MODS_ALLOWED
+		if((modFolder == null || modFolder.length == 0) && (Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0))
+			modFolder = Mods.currentModDirectory;
+
+		var scriptPath = Paths.mods(((modFolder != null && modFolder.length > 0) ? modFolder + "/" : "") + scriptName);
+		#else
+		var scriptPath = "assets/" + scriptName;
+		#end
+
+		return scriptPath;
+	}
+	#end
+
+
 	static public function cacheBitmap(file:String, ?bitmap:BitmapData = null, ?allowGPU:Bool = true)
 	{
 		if(bitmap == null)

@@ -49,13 +49,13 @@ import psychlua.LuaUtils;
 import psychlua.HScript;
 #end
 
-#if SScript
-import tea.SScript;
+#if HSCRIPT_ALLOWED
 import flixel.FlxSprite;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
-import shaders.CircleShader;
 #end
+
+import shaders.CircleShader;
 
 /**
  * This is where all the Gameplay stuff happens and is managed
@@ -101,11 +101,6 @@ class PlayState extends MusicBeatState
 	public var dadMap:Map<String, Character> = new Map<String, Character>();
 	public var gfMap:Map<String, Character> = new Map<String, Character>();
 	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
-
-	#if HSCRIPT_ALLOWED
-	public var hscriptArray:Array<HScript> = [];
-	public var instancesExclude:Array<String> = [];
-	#end
 
 	#if LUA_ALLOWED
 	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
@@ -919,8 +914,12 @@ class PlayState extends MusicBeatState
 
 		if(doPush)
 		{
-			if(SScript.global.exists(scriptFile))
-				doPush = false;
+			for (script in hscriptArray) {
+				if(script.scriptName == scriptFile) {
+					doPush = false;
+					break;
+				}
+			}
 
 			if(doPush) initHScript(scriptFile);
 		}
@@ -4183,7 +4182,8 @@ private function popUpScore(note:Note = null):Void
 			if(script != null)
 			{
 				script.call('onDestroy');
-				script.destroy();
+				script.stop();
+				script = null;
 			}
 
 		while (hscriptArray.length > 0)
@@ -4354,9 +4354,9 @@ private function popUpScore(note:Note = null):Void
 		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
 		#end
 
-		if(FileSystem.exists(scriptToLoad))
-		{
-			if (SScript.global.exists(scriptToLoad)) return false;
+		if(FileSystem.exists(scriptToLoad)) {
+			for (script in hscriptArray)
+				if(script.scriptName == scriptToLoad) return false;
 
 			initHScript(scriptToLoad);
 			return true;
@@ -4364,65 +4364,10 @@ private function popUpScore(note:Note = null):Void
 		return false;
 	}
 
-	public function initHScript(input:String, ?isCode:Bool = false)
-{
-	try
-	{
-		var newScript:HScript = null;
-
-		if (isCode)
-			newScript = new HScript(input, null); // code string passed directly
-		else
-			newScript = new HScript(null, input); // load from file
-
-		if (newScript.parsingException != null)
-		{
-			addTextToDebug('ERROR ON LOADING: ${newScript.parsingException.message}', FlxColor.RED);
-			newScript.destroy();
-			return;
-		}
-
-		hscriptArray.push(newScript);
-
-		if (newScript.exists('onCreate'))
-		{
-			var callValue = newScript.call('onCreate');
-			if (!callValue.succeeded)
-			{
-				for (e in callValue.exceptions)
-				{
-					if (e != null)
-					{
-						var len:Int = e.message.indexOf('\n') + 1;
-						if (len <= 0) len = e.message.length;
-						addTextToDebug('ERROR (${isCode ? "code string" : input}: onCreate) - ${e.message.substr(0, len)}', FlxColor.RED);
-					}
-				}
-
-				newScript.destroy();
-				hscriptArray.remove(newScript);
-				trace('failed to initialize hscript!!! (${isCode ? "code string" : input})');
-			}
-			else
-			{
-				trace('initialized hscript successfully: ${isCode ? "code string" : input}');
-			}
-		}
+	public function initHScript(file:String) {
+		var newScript = new HScript(file);
+		if(newScript != null) hscriptArray.push(newScript);
 	}
-	catch(e)
-	{
-		var len:Int = e.message.indexOf('\n') + 1;
-		if(len <= 0) len = e.message.length;
-		addTextToDebug('ERROR - ' + e.message.substr(0, len), FlxColor.RED);
-
-		var newScript:HScript = cast (SScript.global.get(input), HScript);
-		if (newScript != null)
-		{
-			newScript.destroy();
-			hscriptArray.remove(newScript);
-		}
-	}
-}
 	#end
 
 	public function callOnScripts(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
@@ -4484,38 +4429,21 @@ private function popUpScore(note:Note = null):Void
 		excludeValues.push(LuaUtils.Function_Continue);
 
 		var len:Int = hscriptArray.length;
-		if (len < 1)
-			return returnVal;
+		if (len < 1) return returnVal;
 		for(i in 0...len) {
 			var script:HScript = hscriptArray[i];
-			if(script == null || !script.exists(funcToCall) || exclusions.contains(script.origin))
-				continue;
+			if(script == null || exclusions.contains(script.scriptName)) continue;
 
 			var myValue:Dynamic = null;
 			try {
 				var callValue = script.call(funcToCall, args);
-				if(!callValue.succeeded)
-				{
-					var e = callValue.exceptions[0];
-					if(e != null)
-					{
-						var len:Int = e.message.indexOf('\n') + 1;
-						if(len <= 0) len = e.message.length;
-						addTextToDebug('ERROR (${callValue.calledFunction}) - ' + e.message.substr(0, len), FlxColor.RED);
-					}
+				myValue = callValue;
+				if((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops) {
+					returnVal = myValue;
+					break;
 				}
-				else
-				{
-					myValue = callValue.returnValue;
-					if((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
-					{
-						returnVal = myValue;
-						break;
-					}
 
-					if(myValue != null && !excludeValues.contains(myValue))
-						returnVal = myValue;
-				}
+				if(myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
 			}
 		}
 		#end
@@ -4545,11 +4473,9 @@ private function popUpScore(note:Note = null):Void
 		#if HSCRIPT_ALLOWED
 		if(exclusions == null) exclusions = [];
 		for (script in hscriptArray) {
-			if(exclusions.contains(script.origin))
-				continue;
+			if(exclusions.contains(script.scriptName)) continue;
+			if(!instancesExclude.contains(variable)) instancesExclude.push(variable);
 
-			if(!instancesExclude.contains(variable))
-				instancesExclude.push(variable);
 			script.set(variable, arg);
 		}
 		#end

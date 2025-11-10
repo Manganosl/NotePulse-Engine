@@ -512,4 +512,32 @@ class LuaUtils
 		}
 		return PlayState.instance.camGame;
 	}
+
+	// https://github.com/ShadowMario/FNF-PsychEngine/commit/cf674627b40fa8f06a0a7b74ddc6b403ebfcf138
+	public static function isLuaSupported(value:Any):Bool {
+		return (value == null || isOfTypes(value, [Bool, Int, Float, String, Array]) || Type.typeof(value) == ValueType.TObject);
+	}
+
+	#if HSCRIPT_ALLOWED
+	public static var preprocessors(get, never):Map<String, Dynamic>;
+	public static function get_preprocessors() {
+		var _preprocessors:Map<String, Dynamic> = backend.Macro.compilerDefines;
+
+		_preprocessors.set("NOTEPULSE_ENGINE", true);
+		_preprocessors.set("NOTEPULSE_ENGINE_VER", states.MainMenuState.npeVersion);
+		_preprocessors.set("BUILD_TARGET", LuaUtils.getBuildTarget());
+
+		return _preprocessors;
+	}
+
+	public static function getHScriptParent():Dynamic {
+		return (FlxG.state.subState == null ? FlxG.state : FlxG.state.subState);
+	}
+
+	public static function isPlayStateScript(obj:Dynamic):Bool {
+		return (obj is PlayState && !(obj is flixel.FlxSubState));
+	}
+
+	@:noUsing public static inline function getMacroAbstractClass(className:String) return Type.resolveClass('${className}_HSC');
+	#end
 }

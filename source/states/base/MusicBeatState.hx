@@ -5,15 +5,12 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.FlxState;
 import backend.PsychCamera;
 import flixel.FlxState;
-import hscript.Parser;
-import hscript.Interp;
 import sys.io.File;
 import haxe.io.Path;
 import psychlua.HScript;
 import psychlua.LuaUtils;
 import psychlua.FunkinLua;
 import backend.Paths;
-import tea.SScript;
 import psychlua.HScript;
 
 class MusicBeatState extends FlxUIState
@@ -27,7 +24,10 @@ class MusicBeatState extends FlxUIState
 
 	private var curStep:Int = 0;
 	private var curBeat:Int = 0;
-	public var sscriptArray:Array<HScript> = [];
+	#if HSCRIPT_ALLOWED
+	public var hscriptArray:Array<HScript> = [];
+	public var instancesExclude:Array<String> = [];
+	#end
 
 	private var curDecStep:Float = 0;
 	private var curDecBeat:Float = 0;
@@ -35,188 +35,6 @@ class MusicBeatState extends FlxUIState
 	private function get_controls()
 	{
 		return Controls.instance;
-	}
-
-	function startGlobalScript(){
-		try
-		{
-			var isCode:Bool = false;
-			var input:String = Paths.mods('${Mods.currentModDirectory}/Global.hx');
-			var newScript:HScript = new HScript(null, Paths.mods('${Mods.currentModDirectory}/Global.hx'));
-
-			if (newScript.parsingException != null)
-			{
-				trace('ERROR ON LOADING: ${newScript.parsingException.message}', FlxColor.RED);
-				newScript.destroy();
-				return null;
-			}
-
-			sscriptArray.push(newScript);
-
-			if (newScript.exists('onGlobal'))
-			{
-				var callValue = newScript.call('onGlobal');
-				if (!callValue.succeeded)
-				{
-					for (e in callValue.exceptions)
-					{
-						if (e != null)
-						{
-							var len:Int = e.message.indexOf('\n') + 1;
-							if (len <= 0) len = e.message.length;
-							trace('ERROR (${callValue.calledFunction}) - ' + e.message.substr(0, len), FlxColor.RED);
-						}
-					}
-
-					newScript.destroy();
-					sscriptArray.remove(newScript);
-					trace('failed to initialize hscript!!! (${isCode ? "code string" : input})', FlxColor.RED);
-					return null;
-				}
-				else
-				{
-					trace('initialized hscript successfully: ${isCode ? "code string" : input}', FlxColor.GREEN);
-				}
-			}
-			globalScript = newScript;
-			return newScript;
-		}
-		catch (e:Dynamic)
-		{
-			var msg:String = Std.is(e, String) ? (e:Dynamic) : (e.message != null ? e.message : 'Unknown HScript error');
-			trace('HScript error: ' + msg, FlxColor.RED);
-
-			var input:String = Paths.mods('${Mods.currentModDirectory}/Global.hx');
-			var newScript:HScript = cast (SScript.global.get(input), HScript);
-			if (newScript != null)
-			{
-				newScript.destroy();
-				sscriptArray.remove(newScript);
-			}
-
-			return null;
-		}
-	}
-
-	public function initSScript(input:String, ?isCode:Bool = false):HScript
-	{
-		try
-		{
-			var newScript:HScript = null;
-
-			if (isCode)
-				newScript = new HScript(input, null);
-			else
-				newScript = new HScript(null, input);
-
-			if (newScript.parsingException != null)
-			{
-				addTextToDebug('ERROR ON LOADING: ${newScript.parsingException.message}', FlxColor.RED);
-				newScript.destroy();
-				return null;
-			}
-
-			sscriptArray.push(newScript);
-
-			if (newScript.exists('onCreate'))
-			{
-				var callValue = newScript.call('onCreate');
-				if (!callValue.succeeded)
-				{
-					for (e in callValue.exceptions)
-					{
-						if (e != null)
-						{
-							var len:Int = e.message.indexOf('\n') + 1;
-							if (len <= 0) len = e.message.length;
-							addTextToDebug('ERROR (${callValue.calledFunction}) - ' + e.message.substr(0, len), FlxColor.RED);
-						}
-					}
-
-					newScript.destroy();
-					sscriptArray.remove(newScript);
-					addTextToDebug('failed to initialize hscript!!! (${isCode ? "code string" : input})', FlxColor.RED);
-					return null;
-				}
-				else
-				{
-					addTextToDebug('initialized hscript successfully: ${isCode ? "code string" : input}', FlxColor.GREEN);
-				}
-			}
-
-			return newScript;
-		}
-		catch (e:Dynamic)
-		{
-			var msg:String = Std.is(e, String) ? (e:Dynamic) : (e.message != null ? e.message : 'Unknown HScript error');
-			addTextToDebug('HScript error: ' + msg, FlxColor.RED);
-
-			var newScript:HScript = cast (SScript.global.get(input), HScript);
-			if (newScript != null)
-			{
-				newScript.destroy();
-				sscriptArray.remove(newScript);
-			}
-
-			return null;
-		}
-	}
-
-	public function callOnSScript(funcToCall:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, ?exclusions:Array<String> = null, ?excludeValues:Array<Dynamic> = null):Dynamic
-	{
-		var returnVal:Dynamic = LuaUtils.Function_Continue;
-		if (args == null) args = [];
-		if (exclusions == null) exclusions = [];
-		if (excludeValues == null) excludeValues = [LuaUtils.Function_Continue];
-
-		#if HSCRIPT_ALLOWED
-		var len:Int = sscriptArray.length;
-		if (len < 1)
-			return returnVal;
-
-		for (i in 0...len)
-		{
-			var script:HScript = sscriptArray[i];
-			if (script == null || !script.exists(funcToCall) || exclusions.contains(script.origin))
-				continue;
-
-			try
-			{
-				var callValue = script.call(funcToCall, args);
-				if (!callValue.succeeded)
-				{
-					var e = callValue.exceptions[0];
-					if (e != null)
-					{
-						var elen:Int = e.message.indexOf('\n') + 1;
-						if (elen <= 0) elen = e.message.length;
-						addTextToDebug('ERROR (${callValue.calledFunction}) - ' + e.message.substr(0, elen), FlxColor.RED);
-					}
-					continue;
-				}
-
-				var myValue:Dynamic = callValue.returnValue;
-
-				if ((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
-				{
-					returnVal = myValue;
-					break;
-				}
-
-				if (myValue != null && !excludeValues.contains(myValue))
-					returnVal = myValue;
-			}
-			catch (err:Dynamic)
-			{
-				var msg:String = (err != null && err.message != null) ? err.message : Std.string(err);
-				var elen:Int = msg.indexOf('\n') + 1;
-				if (elen <= 0) elen = msg.length;
-				addTextToDebug('Exception calling ${funcToCall} on hscript: ' + msg.substr(0, elen), FlxColor.RED);
-			}
-		}
-		#end
-
-		return returnVal;
 	}
 
 	var _psychCameraInitialized:Bool = false;
@@ -280,10 +98,6 @@ class MusicBeatState extends FlxUIState
 	public static var timePassedOnState:Float = 0;
 	override function update(elapsed:Float)
 	{
-		if(globalScript != null){
-			if(!sscriptArray.contains(globalScript))
-				sscriptArray.push(globalScript);
-		}
 		var oldStep:Int = curStep;
 		timePassedOnState += elapsed;
 
@@ -306,13 +120,10 @@ class MusicBeatState extends FlxUIState
 
 		if(FlxG.save.data != null) FlxG.save.data.fullscreen = FlxG.fullscreen;
 
-		callOnSScript('onUpdate', [elapsed], false, null, null);
 
 		stagesFunc(function(stage:BaseStage) {
 			stage.update(elapsed);
 		});
-
-		callOnSScript('onUpdatePost', [elapsed], false, null, null);
 
 		super.update(elapsed);
 	}
