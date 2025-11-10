@@ -67,6 +67,9 @@ class HScript implements HscriptInterface {
 		"Conductor" => backend.Conductor,
 		"Character" => objects.Character,
 		"CoolUtil"	=> backend.utils.CoolUtil,
+		"Manager" => modchart.Manager,
+		"WindowUtil" => backend.utils.WindowUtil,
+		"CustomShader" => backend.utils.CustomShader,
 		"Paths" => backend.Paths,
 		#if PRETTY_TRACE
 		"Log" => backend.Log,

@@ -75,4 +75,13 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.addons.util.FlxSimplex;
 
 using StringTools;
+
+#if PRETTY_TRACE
+import backend.Log;
+import backend.Log.error;
+import backend.Log.warn;
+import backend.Log.info;
+#else
+import haxe.Log;
+#end
 #end
