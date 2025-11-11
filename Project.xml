@@ -99,7 +99,7 @@
 	<haxelib name="hscript-improved-dev" if="HSCRIPT_ALLOWED"/>
 	<define name="hscriptPos" />
 	<define name="PRETTY_TRACE" />
-	<!--define name="CUSTOM_CLASSES" /   For some reason, this crashes the compiler!! -->
+	<define name="CUSTOM_CLASSES"/>
 
 	<!--FunkinModchart-->
 	<haxedef name="funkin-modchart" />

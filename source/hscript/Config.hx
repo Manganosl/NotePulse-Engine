@@ -6,9 +6,10 @@ class Config {
 		"backend",
 		"shaders",
 		"psychlua",
-		"options",
 		"objects",
-		"cutscenes"
+		"cutscenes",
+		"states",
+		"substates"
 	];
 	public static final ALLOWED_ABSTRACT_AND_ENUM = [
 		"backend",

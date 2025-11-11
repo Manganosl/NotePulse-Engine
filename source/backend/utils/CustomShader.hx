@@ -9,7 +9,6 @@ import hscript.IHScriptCustomBehaviour;
 
 class CustomShader implements IHScriptCustomBehaviour {
     public var shader:FlxRuntimeShader;
-    public var __allowSetGet:Bool = true;
 
     public function hget(name:String):Dynamic {
         var fields = Type.getInstanceFields(Type.getClass(this));
