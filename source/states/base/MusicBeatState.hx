@@ -44,7 +44,7 @@ class MusicBeatState extends FlxUIState
 	}
 
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	public function addTextToDebug(text:String, color:FlxColor) {
+	public function addTextToDebug(text:String, color:FlxColor, ?trace:Bool = false, ?type:String) {
 		var newText:psychlua.DebugLuaText = luaDebugGroup.recycle(psychlua.DebugLuaText);
 		newText.text = text;
 		newText.color = color;
@@ -57,7 +57,13 @@ class MusicBeatState extends FlxUIState
 		});
 		luaDebugGroup.add(newText);
 
-		Sys.println(text);
+		if(trace){
+			if(type == "trace" || type == null) Log.hxTrace(text);
+			if(type == "error") error(text);
+			if(type == "warn") warn(text);
+			if(type == "info") info(text);
+		}
+
 	}
 	#end
 

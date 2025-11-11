@@ -33,7 +33,7 @@ class Log
 	@:keep public static function ansi(color:Int):String
 		return '\033[30;${color}m';
 
-	static function hxTrace(value:Dynamic, ?pos:PosInfos):Void
+	public static function hxTrace(value:Dynamic, ?pos:PosInfos):Void
 		print(value, 'TRACE', 105, pos);
 
 	public static function error(value:Dynamic, ?pos:PosInfos):Void

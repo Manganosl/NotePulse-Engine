@@ -5,10 +5,31 @@ import flixel.FlxCamera;
 import openfl.filters.ShaderFilter;
 import flixel.graphics.FlxGraphic;
 import openfl.display.BitmapData;
-//import states.scripted.ScriptedState;
+import hscript.IHScriptCustomBehaviour;
 
-class CustomShader {
+class CustomShader implements IHScriptCustomBehaviour {
     public var shader:FlxRuntimeShader;
+    public var __allowSetGet:Bool = true;
+
+    public function hget(name:String):Dynamic {
+        var fields = Type.getInstanceFields(Type.getClass(this));
+        if (fields != null && (fields.indexOf(name) != -1 || fields.indexOf('get_${name}') != -1)) {
+            return Reflect.getProperty(this, name);
+        }
+
+        return getUniform(name);
+    }
+
+    public function hset(name:String, val:Dynamic):Dynamic {
+        var fields = Type.getInstanceFields(Type.getClass(this));
+        if (fields != null && (fields.indexOf(name) != -1 || fields.indexOf('set_${name}') != -1)) {
+            Reflect.setProperty(this, name, val);
+            return val;
+        }
+
+        setUniform(name, val);
+        return val;
+    }
 
     public function new(shaderName:String) {
         if (Type.getClassName(Type.getClass(FlxG.state)) == "states.PlayState"){
@@ -18,7 +39,7 @@ class CustomShader {
             //ScriptedState.instance.initLuaShader(shaderName);
             //shader = ScriptedState.instance.createRuntimeShader(shaderName);
         } else {
-            trace("CustomShader: Unsupported state for shader creation!");
+            Log.hxTrace("CustomShader: Unsupported state for shader creation!");
             shader = null;
         }
     }

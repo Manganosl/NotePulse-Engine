@@ -386,9 +386,11 @@ class HScript implements HscriptInterface {
 		switch(level.toLowerCase()) {
 			case "error":
 				error(v, {fileName: posInfos.fileName, lineNumber: posInfos.lineNumber, className: null, methodName: null});
+				MusicBeatState.getState().addTextToDebug(v, FlxColor.RED, false);
 				return;
 			case "warn":
 				warn(v, {fileName: posInfos.fileName, lineNumber: posInfos.lineNumber, className: null, methodName: null});
+				MusicBeatState.getState().addTextToDebug(v, FlxColor.YELLOW, false);
 				return;
 		}
 		#end
@@ -398,7 +400,7 @@ class HScript implements HscriptInterface {
 
     function onError(e:Error) {
 		#if PRETTY_TRACE
-		error(Printer.errorToString(e));
+		MusicBeatState.getState().addTextToDebug(Printer.errorToString(e), FlxColor.RED, true, "error");
 		#else
 		trace(e);
 		#end
