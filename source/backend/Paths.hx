@@ -4,6 +4,7 @@ import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.FlxGraphic;
 import flixel.math.FlxRect;
+import flixel.system.FlxAssets;
 
 import openfl.display.BitmapData;
 import openfl.display3D.textures.RectangleTexture;
@@ -97,7 +98,7 @@ class Paths
 		currentLevel = name.toLowerCase();
 	}
 
-	public static function getPath(file:String, ?type:AssetType = TEXT, ?library:Null<String> = null, ?modsAllowed:Bool = false):String
+	public static function getPath(file:String, ?type:AssetType = TEXT, ?library:Null<String> = null, ?modsAllowed:Bool = true):String
 	{
 		#if MODS_ALLOWED
 		if(modsAllowed)
@@ -183,37 +184,24 @@ class Paths
 		return 'assets/videos/$key.$VIDEO_EXT';
 	}
 
-	static public function sound(key:String, ?library:String):Sound
-	{
-		var sound:Sound = returnSound('sounds', key, library);
-		return sound;
-	}
+	inline static public function sound(key:String, ?modsAllowed:Bool = true):Sound
+		return returnSound('sounds/$key', modsAllowed);
 
-	inline static public function soundRandom(key:String, min:Int, max:Int, ?library:String)
-	{
-		return sound(key + FlxG.random.int(min, max), library);
-	}
+	inline static public function music(key:String, ?modsAllowed:Bool = true):Sound
+		return returnSound('music/$key', modsAllowed);
 
-	inline static public function music(key:String, ?library:String):Sound
-	{
-		var file:Sound = returnSound('music', key, library);
-		return file;
-	}
+	inline static public function soundRandom(key:String, min:Int, max:Int, ?modsAllowed:Bool = true)
+		return sound(key + FlxG.random.int(min, max), modsAllowed);
 
 	inline static public function voices(song:String, postfix:String = null, ?modsAllowed:Bool = true):Sound
 	{
 		var songKey:String = '${formatToSongPath(song)}/Voices';
 		if(postfix != null) songKey += '-' + postfix;
-		//trace('songKey test: $songKey');
-		return returnSound(null, songKey, 'songs');
+		return returnSound(songKey, 'songs', modsAllowed, false);
 	}
 
-	inline static public function inst(song:String):Any
-	{
-		var songKey:String = '${formatToSongPath(song)}/Inst';
-		var inst = returnSound(null, songKey, 'songs');
-		return inst;
-	}
+	inline static public function inst(song:String, ?modsAllowed:Bool = true):Sound
+		return returnSound('${formatToSongPath(song)}/Inst', 'songs', modsAllowed);
 
 	inline static public function modState(key:String)
 		return modFolders('states/$key.hx');
@@ -503,50 +491,37 @@ class Paths
 	}
 
 	inline static public function formatToSongPath(path:String) {
-		var invalidChars = ~/[~&\\;:<>#]/;
-		var hideChars = ~/[.,'"%?!]/;
+		final invalidChars = ~/[~&;:<>#\s]/g;
+		final hideChars = ~/[.,'"%?!]/g;
 
-		var path = invalidChars.split(path.replace(' ', '-')).join("-");
-		return hideChars.split(path).join("").toLowerCase();
+		return hideChars.replace(invalidChars.replace(path, '-'), '').trim().toLowerCase();
 	}
 
+
 	public static var currentTrackedSounds:Map<String, Sound> = [];
-	public static function returnSound(path:Null<String>, key:String, ?library:String) {
-		#if MODS_ALLOWED
-		var modLibPath:String = '';
-		if (library != null) modLibPath = '$library/';
-		if (path != null) modLibPath += '$path';
+	public static function returnSound(key:String, ?path:String, ?modsAllowed:Bool = true, ?beepOnNull:Bool = true)
+	{
+		var file:String = getPath(key + '.$SOUND_EXT', SOUND, path, modsAllowed);
 
-		var file:String = modsSounds(modLibPath, key);
-		if(FileSystem.exists(file)) {
-			if(!currentTrackedSounds.exists(file))
-			{
-				currentTrackedSounds.set(file, Sound.fromFile(file));
-				//trace('precached mod sound: $file');
-			}
-			localTrackedAssets.push(file);
-			return currentTrackedSounds.get(file);
-		}
-		#end
-
-		// I hate this so god damn much
-		var gottenPath:String = '$key.$SOUND_EXT';
-		if(path != null) gottenPath = '$path/$gottenPath';
-		gottenPath = getPath(gottenPath, SOUND, library);
-		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
-		// trace(gottenPath);
-		if(!currentTrackedSounds.exists(gottenPath))
+		//trace('precaching sound: $file');
+		if(!currentTrackedSounds.exists(file))
 		{
-			var retKey:String = (path != null) ? '$path/$key' : key;
-			retKey = ((path == 'songs') ? 'songs:' : '') + getPath('$retKey.$SOUND_EXT', SOUND, library);
-			if(OpenFlAssets.exists(retKey, SOUND))
+			#if sys
+			if(FileSystem.exists(file))
+				currentTrackedSounds.set(file, Sound.fromFile(file));
+			#else
+			if(OpenFlAssets.exists(file, SOUND))
+				currentTrackedSounds.set(file, OpenFlAssets.getSound(file));
+			#end
+			else if(beepOnNull)
 			{
-				currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(retKey));
-				//trace('precached vanilla sound: $retKey');
+				trace('SOUND NOT FOUND: $key, PATH: $path');
+				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
+				return FlxAssets.getSound('flixel/sounds/beep');
 			}
 		}
-		localTrackedAssets.push(gottenPath);
-		return currentTrackedSounds.get(gottenPath);
+		localTrackedAssets.push(file);
+		return currentTrackedSounds.get(file);
 	}
 
 	#if MODS_ALLOWED

@@ -557,7 +557,6 @@ class LoadingState extends MusicBeatState
 			var myKey = '$prefix/$member$ext';
 			if(parentFolder == 'songs') myKey = '$member$ext';
 
-			//trace('attempting on $prefix: $myKey');
 			var doTrace:Bool = false;
 			if(member.endsWith('/') || (!Paths.fileExists(myKey, type, false, parentFolder) && (doTrace = true)))
 			{
@@ -656,7 +655,6 @@ class LoadingState extends MusicBeatState
 	
 					if(Paths.fileExists('images/$img/spritemap$st.png', IMAGE))
 					{
-						//trace('found Sprite PNG');
 						imagesToPrepare.push('$img/spritemap$st');
 						break;
 					}
