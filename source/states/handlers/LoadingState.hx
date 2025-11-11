@@ -258,7 +258,7 @@ class LoadingState extends MusicBeatState
 		for (key => bitmap in requestedBitmaps)
 		{
 			if (bitmap != null && Paths.cacheBitmap(originalBitmapKeys.get(key), bitmap) != null) {} //trace('finished preloading image $key');
-			else trace('failed to cache image $key');
+			else Log.error('failed to cache image $key');
 		}
 		requestedBitmaps.clear();
 		originalBitmapKeys.clear();
@@ -274,7 +274,7 @@ class LoadingState extends MusicBeatState
 		if (weekDir != null && weekDir.length > 0 && weekDir != '') directory = weekDir;
 
 		Paths.setCurrentLevel(directory);
-		trace('Setting asset folder to ' + directory);
+		Log.info('Setting asset folder to ' + directory);
 	}
 
 	static var isIntrusive:Bool = false;
@@ -510,7 +510,7 @@ class LoadingState extends MusicBeatState
 			return true;
 		}, isIntrusive))
 		.onError((err:Dynamic) -> {
-			trace('ERROR! while preparing song: $err');
+			Log.error('While preparing song: $err');
 		});
 	}
 
@@ -562,7 +562,7 @@ class LoadingState extends MusicBeatState
 			if(member.endsWith('/') || (!Paths.fileExists(myKey, type, false, parentFolder) && (doTrace = true)))
 			{
 				arr.remove(member);
-				if(doTrace) trace('Removed invalid $prefix: $member');
+				if(doTrace) Log.info('Removed invalid $prefix: $member');
 			}
 			else i++;
 		}
@@ -598,19 +598,19 @@ class LoadingState extends MusicBeatState
 		threadPool.run(() -> {
 			#if debug
 			var threadStart = Sys.time();
-			trace('$traceData took ${threadStart - threadSchedule}s to start preloading');
+			Log.hxTrace('$traceData took ${threadStart - threadSchedule}s to start preloading');
 			#end
 
 			try {
 				if (func() != null) {
 					#if debug
 					var diff = Sys.time() - threadStart;
-					trace('finished preloading $traceData in ${diff}s');
+					Log.info('finished preloading $traceData in ${diff}s');
 					#end
-				} else trace('ERROR! fail on preloading $traceData ');
+				} else Log.error('Fail on preloading $traceData ');
 			}
 			catch(e:Dynamic) {
-				trace('ERROR! fail on preloading $traceData: $e');
+				Log.error('Fail on preloading $traceData: $e');
 			}
 			// mutex.acquire();
 			loaded++;
@@ -672,7 +672,7 @@ class LoadingState extends MusicBeatState
 		}
 		catch(e:haxe.Exception)
 		{
-			trace(e.details());
+			Log.error(e.details());
 		}
 	}
 
@@ -693,8 +693,7 @@ class LoadingState extends MusicBeatState
 			}
 			else if (beepOnNull)
 			{
-				trace('SOUND NOT FOUND: $key, PATH: $path');
-				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
+				Log.error('SOUND NOT FOUND: $key, PATH: $path');
 				return FlxAssets.getSound('flixel/sounds/beep');
 			}
 		}
@@ -729,14 +728,14 @@ class LoadingState extends MusicBeatState
 					mutex.release();
 					return bitmap;
 				}
-				else trace('no such image $key exists');
+				else Log.error('no such image $key exists');
 			}
 
 			return Paths.currentTrackedAssets.get(requestKey).bitmap;
 		}
 		catch(e:haxe.Exception)
 		{
-			trace('ERROR! fail on preloading image $key');
+			Log.error('Fail on preloading image $key');
 		}
 
 		return null;

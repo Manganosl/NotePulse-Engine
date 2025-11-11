@@ -58,6 +58,9 @@ class HScript implements HscriptInterface {
 		"FlxTween" => flixel.tweens.FlxTween,
 		"FlxEase" => flixel.tweens.FlxEase,
 		"FlxText" => flixel.text.FlxText,
+		"FlxEmitter" => flixel.effects.particles.FlxEmitter,
+		"FlxParticle" => flixel.effects.particles.FlxParticle,
+		"FlxEmitterMode" => flixel.effects.particles.FlxEmitter.FlxEmitterMode,
 
 		//Friday Night Funkin' Classes
 		"MusicBeatState" => states.base.MusicBeatState,

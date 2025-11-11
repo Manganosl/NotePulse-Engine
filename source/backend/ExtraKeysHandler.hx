@@ -12,7 +12,7 @@ class ExtraKeysHandler {
     }
 
     public function reloadExtraKeys() {
-        trace('Loading Extra Keys data...');
+        Log.hxTrace('Loading Extra Keys data...');
 
         var parser = new json2object.JsonParser<ExtraKeysData>();
         var dataPath:String = 'data/extrakeys.json';
@@ -20,7 +20,7 @@ class ExtraKeysHandler {
 		parser.fromJson(dataText);
 		data = parser.value;
 
-        trace('Load complete.');
+        Log.info('Load complete.');
     }
 }
 

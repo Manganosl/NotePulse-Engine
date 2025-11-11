@@ -371,9 +371,6 @@ class PlayState extends MusicBeatState
 		Conductor.mapBPMChanges(SONG);
 		Conductor.bpm = SONG.bpm;
 
-
-		trace("Player Opponent? " + isPlayerOpponent);
-
 		#if DISCORD_ALLOWED
 		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
 		storyDifficultyText = Difficulty.getString();
@@ -1795,7 +1792,7 @@ class PlayState extends MusicBeatState
 				note.retryBound();
 				strumLineWidth += note.width;
 			}
-			trace('Strumline is too big! Shrinking and retrying.');
+			Log.warn('Strumline is too big! Shrinking and retrying.');
 			strumLineIsBig = strumLineWidth > StrumBoundaries.getBoundaryWidth().x;
 		}
 	}
@@ -2266,7 +2263,6 @@ public function changeMania(newMania:Int):Void {
 		if (!ClientPrefs.data.noReset && controls.RESET && canReset && !inCutscene && startedCountdown && !endingSong)
 		{
 			health = 0;
-			trace("RESET = True");
 		}
 		doDeathCheck();
 
@@ -2564,7 +2560,7 @@ public function changeMania(newMania:Int):Void {
 
 	public function makeVideoSprite(tag:String, videoName:String, ?x:Float, ?y:Float, ?camera:String, ?looped:Bool){
 		if(variables.exists(tag)){
-			trace('Video sprite with tag "' + tag + '" already exists!');
+			Log.error('Video sprite with tag "' + tag + '" already exists!');
 			return;
 		}
 
@@ -2589,7 +2585,7 @@ public function changeMania(newMania:Int):Void {
     	variables.set(tag, video);
 
     	if (!variables.exists(tag)) {
-    	    trace('Video sprite with tag "'+tag+'" doesn\'t exist!');
+    	    Log.error('Video sprite with tag "'+tag+'" doesn\'t exist!');
     	    return;
    		}
 
@@ -2618,7 +2614,7 @@ public function changeMania(newMania:Int):Void {
 case 'Change Mania':
     var parsed = Std.parseInt(value1);
     if (Math.isNaN(parsed)) {
-        trace('Change Mania event: value1 not a number => "' + value1 + '"');
+        Log.error('Change Mania event: value1 not a number => "' + value1 + '"');
         return;
     }
 
@@ -3261,8 +3257,8 @@ case 'Change Mania':
 				{
 					var difficulty:String = Difficulty.getFilePath();
 
-					trace('LOADING NEXT SONG');
-					trace(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
+					Log.info('LOADING NEXT SONG');
+					Log.info(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
 
 					FlxTransitionableState.skipNextTransIn = true;
 					FlxTransitionableState.skipNextTransOut = true;
@@ -3277,7 +3273,7 @@ case 'Change Mania':
 			}
 			else
 			{
-				trace('WENT BACK TO FREEPLAY??');
+				Log.hxTrace('WENT BACK TO FREEPLAY??');
 				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
 					rsMarvelous = ratingsData[0].hits;

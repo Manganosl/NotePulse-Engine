@@ -232,7 +232,7 @@ class ClientPrefs {
 		var writer = new json2object.JsonWriter<EKKeybindSavedData>();
 		var content = writer.write(saveKeybindData, '  ');
 		#if sys
-		trace('Saved ekkeybinds.json');
+		Log.hxTrace('Saved ekkeybinds.json');
 		File.saveContent('ekkeybinds.json', content);
 		#end
 
@@ -265,7 +265,7 @@ class ClientPrefs {
 		var content = writer.write(saveArrowRGB, '    ');
 		File.saveContent(path, content);
 
-		trace('Wrote to $path');
+		Log.hxTrace('Wrote to $path');
 	}
 	#end
 

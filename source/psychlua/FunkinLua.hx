@@ -68,11 +68,6 @@ class FunkinLua {
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
 
-		//trace('Lua version: ' + Lua.version());
-		//trace("LuaJIT version: " + Lua.versionJIT());
-
-		//LuaL.dostring(lua, CLENSE);
-
 		this.scriptName = scriptName.trim();
 		var game:PlayState = PlayState.instance;
 		game.luaArray.push(this);
@@ -431,7 +426,7 @@ class FunkinLua {
 						if(luaInstance.scriptName == foundScript)
 						{
 							luaInstance.stop();
-							trace('Closing script ' + luaInstance.scriptName);
+							Log.hxTrace('Closing script ' + luaInstance.scriptName);
 							return true;
 						}
 			}
@@ -447,7 +442,7 @@ class FunkinLua {
 					for (script in game.hscriptArray)	
 						if(script.scriptName == foundScript)
 						{
-							trace('Closing script ' + (script.scriptName != null ? script.scriptName : luaFile));
+							Log.hxTrace('Closing script ' + (script.scriptName != null ? script.scriptName : luaFile));
 							script.stop();
 							return true;
 						}
@@ -1758,7 +1753,7 @@ class FunkinLua {
 
 		addLocalCallback("close", function() {
 			closed = true;
-			trace('Closing script $scriptName');
+			Log.hxTrace('Closing script $scriptName');
 			return closed;
 		});
 
@@ -1783,7 +1778,7 @@ class FunkinLua {
 
 			var resultStr:String = Lua.tostring(lua, result);
 			if(resultStr != null && result != 0) {
-				trace(resultStr);
+				Log.hxTrace(resultStr);
 				#if windows
 				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
 				#else
@@ -1794,10 +1789,10 @@ class FunkinLua {
 			}
 			if(isString) scriptName = 'unknown';
 		} catch(e:Dynamic) {
-			trace(e);
+			Log.error(e);
 			return;
 		}
-		trace('lua file loaded succesfully:' + scriptName);
+		Log.info('lua file loaded succesfully:' + scriptName);
 
 		call('onCreate', []);
 	}
@@ -1843,7 +1838,7 @@ class FunkinLua {
 			return result;
 		}
 		catch (e:Dynamic) {
-			trace(e);
+			Log.error(e);
 		}
 		return LuaUtils.Function_Continue;
 	}

@@ -28,7 +28,7 @@ class Macro {
 		"lime.system", "lime.text", "lime.ui", "lime.util",
 
 		//Openfl library
-		"openfl"
+		"openfl",
 	];
 
 	@:unreflective public static function compileMacros() {
