@@ -12,32 +12,8 @@ class MusicBeatSubstate extends FlxSubState
 		super();
 	}
 
-	private var curSection:Int = 0;
-	private var stepsToDo:Int = 0;
-
-	private var lastBeat:Float = 0;
-	private var lastStep:Float = 0;
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	private var luaDebugGroup:FlxTypedGroup<psychlua.DebugLuaText>;
-	#end
-
-	private var curStep:Int = 0;
-	private var curBeat:Int = 0;
-
-	private var curDecStep:Float = 0;
-	private var curDecBeat:Float = 0;
-	private var controls(get, never):Controls;
-
-	override function destroy() {
-		super.destroy();
-	}
-
-	override function create() {
-		super.create();
-	}
-
-	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	public function addTextToDebug(text:String, color:FlxColor) {
+	public function addTextToDebug(text:String, color:FlxColor, ?trace:Bool = false, ?type:String) {
 		var newText:psychlua.DebugLuaText = luaDebugGroup.recycle(psychlua.DebugLuaText);
 		newText.text = text;
 		newText.color = color;
@@ -50,9 +26,114 @@ class MusicBeatSubstate extends FlxSubState
 		});
 		luaDebugGroup.add(newText);
 
-		Sys.println(text);
+		if(trace){
+			if(type == "trace" || type == null) Log.hxTrace(text);
+			if(type == "error") error(text);
+			if(type == "warn") warn(text);
+			if(type == "info") info(text);
+		}
+
 	}
 	#end
+
+	#if HSCRIPT_ALLOWED
+	public function startHScriptsNamed(scriptFile:String)
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if(FileSystem.exists(scriptToLoad)) {
+			for (script in hscriptArray)
+				if(script.scriptName == scriptToLoad) return false;
+
+			initHScript(scriptToLoad);
+			return true;
+		}
+		return false;
+	}
+
+	public function initHScript(file:String) {
+		var newScript = new HScript(file);
+		if(newScript != null) hscriptArray.push(newScript);
+		return newScript;
+	}
+	#end
+
+	public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
+		var returnVal:Dynamic = LuaUtils.Function_Continue;
+
+		#if HSCRIPT_ALLOWED
+		if(exclusions == null) exclusions = new Array();
+		if(excludeValues == null) excludeValues = new Array();
+		excludeValues.push(LuaUtils.Function_Continue);
+
+		var len:Int = hscriptArray.length;
+		if (len < 1) return returnVal;
+		for(i in 0...len) {
+			var script:HScript = hscriptArray[i];
+			if(script == null || exclusions.contains(script.scriptName)) continue;
+
+			var myValue:Dynamic = null;
+			try {
+				var callValue = script.call(funcToCall, args);
+				myValue = callValue;
+				if((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops) {
+					returnVal = myValue;
+					break;
+				}
+
+				if(myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
+			}
+		}
+		#end
+
+		return returnVal;
+	}
+
+	public function setOnHScript(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
+		#if HSCRIPT_ALLOWED
+		if(exclusions == null) exclusions = [];
+		for (script in hscriptArray) {
+			if(exclusions.contains(script.scriptName)) continue;
+			if(!instancesExclude.contains(variable)) instancesExclude.push(variable);
+
+			script.set(variable, arg);
+		}
+		#end
+	}
+
+	private var curSection:Int = 0;
+	private var stepsToDo:Int = 0;
+
+	private var lastBeat:Float = 0;
+	private var lastStep:Float = 0;
+	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+	private var luaDebugGroup:FlxTypedGroup<psychlua.DebugLuaText>;
+	#end
+
+	private var curStep:Int = 0;
+	private var curBeat:Int = 0;
+	#if HSCRIPT_ALLOWED
+	public var hscriptArray:Array<HScript> = [];
+	public var instancesExclude:Array<String> = [];
+	#end
+
+	private var curDecStep:Float = 0;
+	private var curDecBeat:Float = 0;
+	private var controls(get, never):Controls;
+
+	override function destroy() {
+		super.destroy();
+	}
+
+	override function create() {
+		super.create();
+	}
 
 	inline function get_controls():Controls
 		return Controls.instance;

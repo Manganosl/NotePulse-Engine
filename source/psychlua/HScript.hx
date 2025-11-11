@@ -1,5 +1,6 @@
 package psychlua;
 
+import states.scripted.ScriptedState;
 #if HSCRIPT_ALLOWED
 import hscript.Expr.Error;
 import hscript.Expr;
@@ -65,6 +66,8 @@ class HScript implements HscriptInterface {
 		//Friday Night Funkin' Classes
 		"MusicBeatState" => states.base.MusicBeatState,
 		"MusicBeatSubstate" => states.base.MusicBeatSubstate,
+		"ScriptedState" => states.scripted.ScriptedState,
+		"ScriptedSubstate" => states.scripted.ScriptedSubstate,
 		"ClientPrefs" => backend.ClientPrefs,
 		"PlayState" => states.PlayState,
 		"Conductor" => backend.Conductor,

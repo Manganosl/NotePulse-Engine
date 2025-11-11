@@ -6,6 +6,7 @@ import openfl.filters.ShaderFilter;
 import flixel.graphics.FlxGraphic;
 import openfl.display.BitmapData;
 import hscript.IHScriptCustomBehaviour;
+import states.scripted.*;
 
 class CustomShader implements IHScriptCustomBehaviour {
     public var shader:FlxRuntimeShader;
@@ -35,8 +36,8 @@ class CustomShader implements IHScriptCustomBehaviour {
             PlayState.instance.initLuaShader(shaderName);
             shader = PlayState.instance.createRuntimeShader(shaderName);
         } else if (Type.getClassName(Type.getClass(FlxG.state)) == "states.scripted.ScriptedState"){
-            //ScriptedState.instance.initLuaShader(shaderName);
-            //shader = ScriptedState.instance.createRuntimeShader(shaderName);
+            ScriptedState.instance.initLuaShader(shaderName);
+            shader = ScriptedState.instance.createRuntimeShader(shaderName);
         } else {
             Log.hxTrace("CustomShader: Unsupported state for shader creation!");
             shader = null;

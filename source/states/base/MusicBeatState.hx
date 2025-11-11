@@ -67,6 +67,87 @@ class MusicBeatState extends FlxUIState
 	}
 	#end
 
+	#if HSCRIPT_ALLOWED
+	public function startHScriptsNamed(scriptFile:String)
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if(FileSystem.exists(scriptToLoad)) {
+			for (script in hscriptArray)
+				if(script.scriptName == scriptToLoad) return false;
+
+			initHScript(scriptToLoad);
+			return true;
+		}
+		return false;
+	}
+
+	public function initHScript(file:String) {
+		var newScript = new HScript(file);
+		if(newScript != null) hscriptArray.push(newScript);
+		return newScript;
+	}
+	#end
+
+	public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
+		var returnVal:Dynamic = LuaUtils.Function_Continue;
+
+		#if HSCRIPT_ALLOWED
+		if(exclusions == null) exclusions = new Array();
+		if(excludeValues == null) excludeValues = new Array();
+		excludeValues.push(LuaUtils.Function_Continue);
+
+		var len:Int = hscriptArray.length;
+		if (len < 1) return returnVal;
+		for(i in 0...len) {
+			var script:HScript = hscriptArray[i];
+			if(script == null || exclusions.contains(script.scriptName)) continue;
+
+			var myValue:Dynamic = null;
+			try {
+				var callValue = script.call(funcToCall, args);
+				myValue = callValue;
+				if((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops) {
+					returnVal = myValue;
+					break;
+				}
+
+				if(myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
+			}
+		}
+		#end
+
+		return returnVal;
+	}
+
+	public function setOnHScript(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
+		#if HSCRIPT_ALLOWED
+		if(exclusions == null) exclusions = [];
+		for (script in hscriptArray) {
+			if(exclusions.contains(script.scriptName)) continue;
+			if(!instancesExclude.contains(variable)) instancesExclude.push(variable);
+
+			script.set(variable, arg);
+		}
+		#end
+	}
+
+	public function startGlobalScript(){
+		var input:String = Paths.mods('${Mods.currentModDirectory}/Global.hx');
+		var global = initHScript(input);
+		if(global != null){
+			callOnHScript("onGlobal");
+			Log.hxTrace("onGlobal called for "+input);
+		} else
+			Log.error('$input does not exist!');
+	}
+
 	override function create() {
 
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)

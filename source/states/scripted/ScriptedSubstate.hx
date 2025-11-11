@@ -2,21 +2,16 @@ package states.scripted;
 
 import flixel.util.FlxColor;
 import psychlua.HScript;
-import psychlua.LuaUtils;
-import tea.SScript;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.text.FlxText;
 import flixel.FlxG;
-import backend.CustomFadeTransition;
 import sys.io.File;
 
-class ScriptedState extends MusicBeatState
+class ScriptedSubstate extends MusicBeatSubstate
 {
 	public var hscript:HScript = null;
 	private var initialScriptPath:String;
-	private var initialScriptIsCode:Bool = false;
-	private var initialScriptOrigin:String = null;
-	public static var instance:ScriptedState;
+	public static var instance:ScriptedSubstate;
 
 	private var softlocked:Bool = false;
 
@@ -25,34 +20,26 @@ class ScriptedState extends MusicBeatState
 		instance = this;
 		super();
 		this.initialScriptPath = scriptPath;
-		this.initialScriptIsCode = isCode;
 	}
 
 	override public function create():Void
 	{
-		stagesFunc(function(stage:BaseStage) stage.createPost());
 		super.create();
 
 		if (initialScriptPath != null)
 		{
 			startHScript(initialScriptPath);
-			if (hscript != null)
-				initialScriptOrigin = hscript.origin;
 		}
 
-		var fix:backend.CustomFadeTransition = new backend.CustomFadeTransition(0.6, false);
-		backend.CustomFadeTransition.finishCallback = function(){
-			backend.CustomFadeTransition.dont = true;
-		}
 		if (hscript != null)
-			callOnSScript('onCreatePost');
+			callOnHScript('onCreatePost');
 	}
 
 	public function startHScript(scriptToLoad:String):Bool
 	{
 		if (FileSystem.exists(scriptToLoad))
 		{
-			hscript = initSScript(scriptToLoad, false);
+			hscript = initHScript(scriptToLoad);
 			if (hscript == null){
 				softlocked = true;
 				var errorText = new FlxText(0, FlxG.height / 2 - 10, FlxG.width, "Error while loading Script:\n" + scriptToLoad + "\n\nPress SPACE to go back to Main Menu");
@@ -71,6 +58,8 @@ class ScriptedState extends MusicBeatState
 
 	override public function update(elapsed:Float):Void
 	{
+		callOnHScript("onUpdate", [elapsed]);
+
 		super.update(elapsed);
 
 		if (softlocked)
@@ -82,6 +71,8 @@ class ScriptedState extends MusicBeatState
 
 		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5)
 			MusicBeatState.switchState(new states.MainMenuState());
+
+		callOnHScript("onUpdatePost", [elapsed]);
 	}
 
 	#if (!flash && sys)
@@ -93,7 +84,7 @@ class ScriptedState extends MusicBeatState
 		#if (!flash && MODS_ALLOWED && sys)
 		if(!runtimeShaders.exists(name) && !initLuaShader(name))
 		{
-			trace('Shader $name is missing!');
+			Log.error('Shader $name is missing!');
 			return new FlxRuntimeShader();
 		}
 
@@ -101,7 +92,7 @@ class ScriptedState extends MusicBeatState
 		var daShader:FlxRuntimeShader = new FlxRuntimeShader(arr[0], arr[1]);
 		return daShader;
 		#else
-		trace("Platform unsupported for Runtime Shaders!");
+		Log.error("Platform unsupported for Runtime Shaders!");
 		return null;
 		#end
 	}
@@ -113,7 +104,7 @@ class ScriptedState extends MusicBeatState
 		#if (MODS_ALLOWED && !flash && sys)
 		if(runtimeShaders.exists(name))
 		{
-			trace('Shader $name was already initialized!');
+			Log.hxTrace('Shader $name was already initialized!');
 			return true;
 		}
 
@@ -146,10 +137,10 @@ class ScriptedState extends MusicBeatState
 			#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 			addTextToDebug('Missing shader $name .frag AND .vert files!', FlxColor.RED);
 			#else
-			trace('Missing shader $name .frag AND .vert files!');
+			Log.error('Missing shader $name .frag AND .vert files!');
 			#end
 		#else
-		trace('This platform doesn\'t support Runtime Shaders!');
+		Log.error('This platform doesn\'t support Runtime Shaders!');
 		#end
 		return false;
 	}
@@ -157,15 +148,15 @@ class ScriptedState extends MusicBeatState
 
 	override public function destroy():Void
 	{
-		callOnSScript('onDestroy');
+		callOnHScript('onDestroy');
 
-		if (sscriptArray != null)
+		if (hscriptArray != null)
 		{
-			for (s in sscriptArray)
+			for (s in hscriptArray)
 			{
-				if (s != null) s.destroy();
+				if (s != null) s.stop();
 			}
-			sscriptArray = [];
+			hscriptArray = [];
 		}
 		hscript = null;
 
