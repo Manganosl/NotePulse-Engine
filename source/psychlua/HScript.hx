@@ -400,11 +400,7 @@ class HScript implements HscriptInterface {
 			case EInvalidClass(cla): "Invalid class: " + cla + " was not found.";
 			case EAlreadyExistingClass(cla): 'Custom Class named $cla already exists.';
 		};
-		#if hscriptPos
-		return e.origin + ":" + message;
-		#else
 		return message;
-		#end
 	}
 
     public static function onHaxeTrace(v:Dynamic, ?interpreter:Interp, ?level:String = "trace") {
