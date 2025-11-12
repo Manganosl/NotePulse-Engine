@@ -385,6 +385,28 @@ class HScript implements HscriptInterface {
 		return false;
 	}
 
+	public static function errorToString( e : Expr.Error ):String {
+		var message = switch( #if hscriptPos e.e #else e #end ) {
+			case EInvalidChar(c): "Invalid character: '"+(StringTools.isEof(c) ? "EOF (End Of File)" : String.fromCharCode(c))+"' ("+c+")";
+			case EUnexpected(s): "Unexpected token: \""+s+"\"";
+			case EUnterminatedString: "Unterminated string";
+			case EUnterminatedComment: "Unterminated comment";
+			case EInvalidPreprocessor(str): "Invalid preprocessor (" + str + ")";
+			case EUnknownVariable(v): "Unknown variable: "+v;
+			case EInvalidIterator(v): "Invalid iterator: "+v;
+			case EInvalidOp(op): "Invalid operator: "+op;
+			case EInvalidAccess(f): "Invalid access to field " + f;
+			case ECustom(msg): msg;
+			case EInvalidClass(cla): "Invalid class: " + cla + " was not found.";
+			case EAlreadyExistingClass(cla): 'Custom Class named $cla already exists.';
+		};
+		#if hscriptPos
+		return e.origin + ":" + message;
+		#else
+		return message;
+		#end
+	}
+
     public static function onHaxeTrace(v:Dynamic, ?interpreter:Interp, ?level:String = "trace") {
 		var posInfos = (interpreter != null ? interpreter.posInfos() : {fileName: "hscript", lineNumber: 0, className: null, methodName: null});
 
@@ -406,7 +428,7 @@ class HScript implements HscriptInterface {
 
     function onError(e:Error) {
 		#if PRETTY_TRACE
-		MusicBeatState.getState().addTextToDebug(Printer.errorToString(e), FlxColor.RED, true, "error");
+		MusicBeatState.getState().addTextToDebug(errorToString(e), FlxColor.RED, true, "error");
 		#else
 		trace(e);
 		#end
@@ -416,9 +438,9 @@ class HScript implements HscriptInterface {
 		var posInfos = interp.posInfos();
 
 		#if PRETTY_TRACE
-		warn(Printer.errorToString(e), {fileName: posInfos.fileName, lineNumber: posInfos.lineNumber, className: null, methodName: null});
+		MusicBeatState.getState().addTextToDebug(errorToString(e), FlxColor.YELLOW, true, "warn");
 		#else
-		trace(Printer.errorToString(e), {fileName: posInfos.fileName, lineNumber: posInfos.lineNumber, className: null, methodName: null});
+		trace(errorToString(e), {fileName: posInfos.fileName, lineNumber: posInfos.lineNumber, className: null, methodName: null});
 		#end
 	}
 

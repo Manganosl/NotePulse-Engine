@@ -37,10 +37,10 @@ class Log
 		print(value, 'TRACE', 105, pos);
 
 	public static function error(value:Dynamic, ?pos:PosInfos):Void
-		print(value, 'ERROR', 101, pos);
+		print(value, 'ERROR', 88, pos);
 
 	public static function warn(value:Dynamic, ?pos:PosInfos):Void
-		print(value, 'WARN', 103, pos);
+		print(value, 'WARN', 150, pos);
 	
 	public static function info(value:Dynamic, ?pos:PosInfos):Void
 		print(value, 'INFO', 106, pos);

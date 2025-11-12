@@ -31,7 +31,7 @@ class CppBackend
 	")
 	#elseif linux
 	@:functionCode('
-		FILE *meminfo = fopen("/proc/meminfo", "r");
+		FILE *meminfo = fopen(\"/proc/meminfo\", \"r\");
 
     	if(meminfo == NULL)
 			return -1;
@@ -40,7 +40,7 @@ class CppBackend
     	while(fgets(line, sizeof(line), meminfo))
     	{
         	int ram;
-        	if(sscanf(line, "MemTotal: %d kB", &ram) == 1)
+        	if(sscanf(line, \"MemTotal: %d kB\", &ram) == 1)
         	{
             	fclose(meminfo);
             	return (ram / 1024);
@@ -110,5 +110,39 @@ class CppBackend
 	public static function makeMessageBox(title:String, text:String, icon:MessageBoxIcon, msgType:MessageBoxType) {
 		return 0;
 	}
+
+	@:functionCode('
+	// https://stackoverflow.com/questions/15543571/allocconsole-not-displaying-cout
+
+	if (!AllocConsole())
+		return;
+
+	freopen(\"CONIN$\", \"r\", stdin);
+	freopen(\"CONOUT$\", \"w\", stdout);
+	freopen(\"CONOUT$\", \"w\", stderr);
+
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hOut != INVALID_HANDLE_VALUE) {
+		DWORD outMode = 0;
+		if (GetConsoleMode(hOut, &outMode)) {
+			// ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
+			// ENABLE_PROCESSED_OUTPUT = 0x0001 (leave as-is)
+			outMode |= 0x0004;
+			SetConsoleMode(hOut, outMode);
+		}
+	}
+
+	HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
+	if (hIn != INVALID_HANDLE_VALUE) {
+		DWORD inMode = 0;
+		if (GetConsoleMode(hIn, &inMode)) {
+			inMode |= 0x0200;
+			SetConsoleMode(hIn, inMode);
+		}
+	}
+	')
+	public static function allocConsole() {
+	}
 	#end
 }
+

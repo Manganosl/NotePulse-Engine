@@ -157,6 +157,12 @@ class WindowUtil
 		}
 		#end
 	}
+
+	public static function showConsole(){
+		#if (cpp && windows)
+		CppBackend.allocConsole();
+		#end
+	}
 }
 
 enum abstract MessageBoxIcon(Int) {

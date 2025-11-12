@@ -422,7 +422,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			var songLen:Float = (FlxG.sound.music != null ? FlxG.sound.music.length : 0.0001);
 			var t:Float = (v / FlxG.height) * songLen;
 			FlxG.sound.music.pause();
-			if(FlxG.sound.music.playing) setSongPlaying(false);
+			setSongPlaying(false);
 			FlxG.sound.music.time = t;
 			Conductor.songPosition = FlxG.sound.music.time;
 		}, (FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0, 

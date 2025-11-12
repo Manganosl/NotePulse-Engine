@@ -212,6 +212,9 @@ class MusicBeatState extends FlxUIState
 			stage.update(elapsed);
 		});
 
+		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F2)
+			backend.utils.WindowUtil.showConsole();
+
 		super.update(elapsed);
 	}
 
@@ -346,7 +349,7 @@ class MusicBeatState extends FlxUIState
 
 	#if HSCRIPT_ALLOWED
 	public function importScript(path:String, absolute:Bool = false) {
-		var scriptPath = ((Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0) ? Paths.mods(Mods.currentModDirectory + '/' + path) : Paths.mods(path));
+		var scriptPath = ((Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0) ? Paths.mods(Mods.currentModDirectory + '/' + path + (path.endsWith(".hx") ? "" : ".hx")) : Paths.mods(path));
 		try {
 			this.hscriptArray.push(new HScript((absolute ? path : scriptPath)));
 			return true;
