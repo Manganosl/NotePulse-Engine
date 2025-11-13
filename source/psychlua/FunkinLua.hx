@@ -1757,12 +1757,11 @@ class FunkinLua {
 			return closed;
 		});
 
-		#if HSCRIPT_ALLOWED
-		this.initHaxeModule();
-		#end
-
 		#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(lua); #end
-		#if HSCRIPT_ALLOWED HaxeCode.implement(this); #end
+		#if HSCRIPT_ALLOWED 
+		if(this != null) this.hscript = new HaxeCode(this);
+		HaxeCode.implement(this);
+		#end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
 		#if flxanimate FlxAnimateFunctions.implement(this); #end
 		ReflectionFunctions.implement(this);
@@ -1959,14 +1958,6 @@ class FunkinLua {
 		return v;
 		return null;
 	}
-
-	#if HSCRIPT_ALLOWED
-	public function initHaxeModule() {
-		if(this != null) {
-			this.hscript = new HaxeCode(this);
-		}
-	}
-	#end
 
 	public function addLocalCallback(name:String, myFunction:Dynamic)
 	{

@@ -25,6 +25,7 @@ import openfl.Vector;
 import openfl.display.BlendMode;
 import openfl.filters.BitmapFilter;
 import openfl.filters.ShaderFilter;
+import flixel.addons.display.FlxRuntimeShader;
 
 using flixel.util.FlxColorTransformUtil;
 
@@ -972,19 +973,23 @@ class FlxCamera extends FlxBasic
 	 * @param shader Shader to add
 	 * @return ShaderFilter
 	 */
-	public function addShader(shader)
+	public function addShader(shader:Dynamic)
 	{
-		var filter:Dynamic;
+		var filter:FlxRuntimeShader;
 		if(shader is backend.utils.CustomShader)
 			filter = shader.shader;
-		else
+		else if(shader is FlxRuntimeShader)
 			filter = shader;
+		else {
+			Log.error(Type.getClassName(Type.getClass(shader)) + ' should be a Runtime Shader!');
+			return false;
+		}
 
 		try {
-			if (filters == null) filters = [];
-			filters.push(filter);
+			if (this.filters == null) this.filters = [];
+			this.filters.push(new ShaderFilter(filter));
 		} catch(_) {};
-		return filter;
+		return false;
 	}
 
 	/**
@@ -992,13 +997,17 @@ class FlxCamera extends FlxBasic
 	 * @param shader Shader to remove
 	 * @return Whenever the shader has been successfully removed or not.
 	 */
-	public function removeShader(shaderInput):Bool
+	public function removeShader(shaderInput:Dynamic):Bool
 	{
-		var shader:Dynamic;
+		var shader:FlxRuntimeShader;
 		if(shaderInput is backend.utils.CustomShader)
 			shader = shaderInput.shader;
-		else
+		else if(shaderInput is FlxRuntimeShader)
 			shader = shaderInput;
+		else {
+			Log.error(Type.getClassName(Type.getClass(shaderInput)) + ' should be a Runtime Shader!');
+			return false;
+		}
 
 		if (filters == null) filters = [];
 		for (f in filters) {
