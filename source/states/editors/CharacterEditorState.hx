@@ -504,8 +504,19 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		{
 			if(intended == null || intended.length < 1) return;
 
+			var isJSON:Bool = true;
 			var characterPath:String = 'characters/$intended.json';
 			var path:String = Paths.getPath(characterPath, TEXT, null, true);
+			#if MODS_ALLOWED
+			if (!FileSystem.exists(path))
+			#else
+			if (!Assets.exists(path))
+			#end
+			{
+				characterPath = 'characters/$intended.xml';
+				path = Paths.getPath(characterPath, TEXT);
+				isJSON = false;
+			}
 			#if MODS_ALLOWED
 			if (FileSystem.exists(path))
 			#else
@@ -1176,9 +1187,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		var foldersToCheck:Array<String> = Mods.directoriesWithFile(Paths.getSharedPath(), 'characters/');
 		for (folder in foldersToCheck)
 			for (file in FileSystem.readDirectory(folder))
-				if(file.toLowerCase().endsWith('.json'))
+				if(file.toLowerCase().endsWith('.json') || file.toLowerCase().endsWith('.xml'))
 				{
-					var charToCheck:String = file.substr(0, file.length - 5);
+					var charToCheck:String = file.substr(0, file.length - (file.toLowerCase().endsWith('.json') ? 5 : 4));
 					if(!characterList.contains(charToCheck))
 						characterList.push(charToCheck);
 				}

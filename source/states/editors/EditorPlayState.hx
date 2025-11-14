@@ -1090,10 +1090,15 @@ class EditorPlayState extends MusicBeatSubstate
 	
 	function loadCharacterFile(char:String):CharacterFile {
 		var characterPath:String = 'characters/' + char + '.json';
+		var isJSON:Bool = true;
 		#if MODS_ALLOWED
 		var path:String = Paths.modFolders(characterPath);
 		if (!FileSystem.exists(path)) {
-			path = Paths.getSharedPath(characterPath);
+			characterPath = 'characters/' + char + '.xml';
+			path = Paths.modFolders(characterPath);
+			if (!FileSystem.exists(path)) {
+				path = Paths.getSharedPath(characterPath);
+			}
 		}
 
 		if (!FileSystem.exists(path))
@@ -1102,6 +1107,7 @@ class EditorPlayState extends MusicBeatSubstate
 		if (!OpenFlAssets.exists(path))
 		#end
 		{
+			isJSON = true;
 			path = Paths.getSharedPath('characters/' + Character.DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
 		}
 

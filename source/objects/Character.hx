@@ -244,58 +244,120 @@ class Character extends FlxSkewedSprite
 		return animOffsets.exists(anim);
 	}
 
-	function xmlToJsonString(xmlText:String):String {
-	    var find = (tag:String, txt:String) -> {
-	        var reTag = new EReg("<" + tag + ">([^<]+)<\\/" + tag + ">", "i");
-	        if (reTag.match(txt)) return reTag.matched(1);
-	        var reAttr = new EReg(tag + '\\s*=\\s*"([^"]+)"', 'i');
-	        if (reAttr.match(txt)) return reAttr.matched(1);
-	        var reAttr2 = new EReg(tag + "\\s*=\\s*'([^']+)'", 'i');
-	        if (reAttr2.match(txt)) return reAttr2.matched(1);
-	        return null;
-	    };
-
-	    var image = find('sprite', xmlText) != null ? find('sprite', xmlText) : (find('image', xmlText) != null ? find('image', xmlText) : '');
-	    var scale = find('scale', xmlText);
-	    var posx = find('x', xmlText);
-	    var posy = find('y', xmlText);
-	    var camx = find('camx', xmlText);
-	    var camy = find('camy', xmlText);
-	    var icon = find('icon', xmlText);
-	    var color = find('color', xmlText);
-	    var holdTime = find('holdTime', xmlText);
-	    var flipX = find('flipX', xmlText);
-	    var antialiasing = find('antialiasing', xmlText);
-
-	    var healthbar = find('healthbar_colors', xmlText);
-	    if (healthbar == null) healthbar = find('healthbar', xmlText);
-
-	    var hcolors = [255,0,0];
-	    if (healthbar != null) {
-	        var parts = healthbar.split(',');
-	        if (parts.length >= 3) {
-	            hcolors = [Std.parseInt(parts[0]), Std.parseInt(parts[1]), Std.parseInt(parts[2])];
-	        }
-	    }
-
-	    var obj = '{';
-	    obj += '"image":"' + StringTools.replace(image, '"', '\\"') + '"';
-	    if (scale != null) obj += ',"scale":' + scale;
-	    if (posx != null || posy != null) {
-	        obj += ',"position":[' + (posx != null ? posx : '0') + ',' + (posy != null ? posy : '0') + ']';
-	    }
-	    if (camx != null || camy != null) obj += ',"camera_position":[' + (camx != null ? camx : '0') + ',' + (camy != null ? camy : '0') + ']';
-	    if (icon != null) obj += ',"healthicon":"' + StringTools.replace(icon, '"', '\\"') + '"';
-	    if (holdTime != null) obj += ',"sing_duration":' + holdTime;
-	    if (flipX != null) obj += ',"flip_x":' + (flipX == 'true' ? 'true' : 'false');
-	    if (antialiasing != null) obj += ',"no_antialiasing":' + (antialiasing == 'true' ? 'false' : 'true');
-	    if (hcolors != null) obj += ',"healthbar_colors":[' + hcolors[0] + ',' + hcolors[1] + ',' + hcolors[2] + ']';
-	    obj += ',"vocals_file":""';
-	    obj += ',"_editor_isPlayer":false';
-	    obj += ',"animations":[]';
-	    obj += '}';
-	    return obj;
+public static function xmlToJsonString(xmlText:String):String {
+	#if MODS_ALLOWED
+	if (FileSystem.exists(xmlText))
+	#else
+	if (Assets.exists(xmlText))
+	#end
+	{
+		#if MODS_ALLOWED
+		xmlText = File.getContent(xmlText);
+		#else
+		xmlText = OpenFlAssets.getText(xmlText);
+		#end
 	}
+    var find = (tag:String, txt:String) -> {
+        var reTag = new EReg("<" + tag + ">([\\s\\S]*?)<\\/" + tag + ">", "i");
+        if (reTag.match(txt)) return reTag.matched(1);
+        var reAttr = new EReg(tag + '\\s*=\\s*"([^"]+)"', 'i');
+        if (reAttr.match(txt)) return reAttr.matched(1);
+        var reAttr2 = new EReg(tag + "\\s*=\\s*'([^']+)'", 'i');
+        if (reAttr2.match(txt)) return reAttr2.matched(1);
+        return null;
+    };
+
+    var esc = (s:String) -> if (s == null) "" else StringTools.replace(s, "\"", "\\\"");
+
+    var image = null;
+    if (find('sprite', xmlText) != null) image = find('sprite', xmlText);
+    else if (find('image', xmlText) != null) image = find('image', xmlText);
+    else image = '';
+
+    var scale = find('scale', xmlText);
+    var posx = find('x', xmlText);
+    var posy = find('y', xmlText);
+    var camx = find('camx', xmlText);
+    var camy = find('camy', xmlText);
+    var icon = find('icon', xmlText) != null ? find('icon', xmlText) : find('healthicon', xmlText);
+    var holdTime = find('hold', xmlText) != null ? find('hold', xmlText) : find('holdtime', xmlText);
+    var flipX = find('flip_x', xmlText);
+    var antialiasing = find('antialiasing', xmlText);
+    var healthbar = find('healthbar', xmlText);
+    var vocals = find('vocals', xmlText) != null ? find('vocals', xmlText) : find('vocals_file', xmlText);
+    var editorPlayer = find('_editor_isPlayer', xmlText);
+
+    var hcolors:Array<Int> = null;
+    if (healthbar != null) {
+        var parts = StringTools.replace(healthbar, " ", "").split(',');
+        if (parts.length >= 3) {
+            try {
+                hcolors = [ Std.parseInt(parts[0]), Std.parseInt(parts[1]), Std.parseInt(parts[2]) ];
+            } catch (e:Dynamic) {
+                hcolors = null;
+            }
+        }
+    }
+
+    var obj = new StringBuf();
+    obj.add("{");
+    obj.add('\"image\":\"characters/' + esc(image) + '\"');
+
+    if (scale != null) {
+        obj.add(',\"scale\":' + scale);
+    }
+
+    if (posx != null || posy != null) {
+        var px = posx != null ? posx : "0";
+        var py = posy != null ? posy : "0";
+        obj.add(',\"position\":[' + px + ',' + py + ']');
+    }
+
+    if (camx != null || camy != null) {
+        var cx = camx != null ? camx : "0";
+        var cy = camy != null ? camy : "0";
+        obj.add(',\"camera_position\":[' + cx + ',' + cy + ']');
+    }
+
+    if (icon != null) {
+        obj.add(',\"healthicon\":\"' + esc(icon) + '\"');
+    }
+
+    if (holdTime != null) {
+        obj.add(',\"sing_duration\":' + holdTime);
+    }
+
+    if (flipX != null) {
+        var flipVal = (StringTools.ltrim(flipX).toLowerCase() == "true" || flipX == "1") ? "true" : "false";
+        obj.add(',\"flip_x\":' + flipVal);
+    }
+
+    if (antialiasing != null) {
+        var aaVal = (StringTools.ltrim(antialiasing).toLowerCase() == "true" || antialiasing == "1") ? "false" : "true";
+        obj.add(',\"no_antialiasing\":' + aaVal);
+    }
+
+    if (hcolors != null) {
+        obj.add(',\"healthbar_colors\":[' + hcolors[0] + ',' + hcolors[1] + ',' + hcolors[2] + ']');
+    }
+
+    if (vocals != null) obj.add(',\"vocals_file\":\"' + esc(vocals) + '\"');
+    else obj.add(',\"vocals_file\":\"\"');
+
+    if (editorPlayer != null) {
+        var edVal = (StringTools.ltrim(editorPlayer).toLowerCase() == "true" || editorPlayer == "1") ? "true" : "false";
+        obj.add(',\"_editor_isPlayer\":' + edVal);
+    } else {
+        obj.add(',\"_editor_isPlayer\":false');
+    }
+
+    obj.add(',\"animations\":[]');
+
+    obj.add("}");
+	trace(xmlText);
+	trace(obj.toString());
+    return obj.toString();
+}
 
 	public function loadCharacterFile(json:Dynamic)
 	{

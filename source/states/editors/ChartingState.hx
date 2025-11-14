@@ -5322,11 +5322,21 @@ function updateModEvV1():Void {
 		{
 			try
 			{
+				var isJSON:Bool = true;
 				var path:String = Paths.getPath('characters/' + char + '.json', TEXT);
 				#if MODS_ALLOWED
-				var unparsedJson = File.getContent(path);
+				if (!FileSystem.exists(path))
 				#else
-				var unparsedJson = Assets.getText(path);
+				if (!Assets.exists(path))
+				#end
+				{
+					path = Paths.getPath('characters/' + char + '.xml', TEXT);
+					isJSON = false;
+				}
+				#if MODS_ALLOWED
+				var unparsedJson = File.getContent(isJSON ? path : Character.xmlToJsonString(path));
+				#else
+				var unparsedJson = Assets.getText(isJSON ? path : Character.xmlToJsonString(path));
 				#end
 				return cast Json.parse(unparsedJson);
 			}

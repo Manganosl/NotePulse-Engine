@@ -621,11 +621,22 @@ class LoadingState extends MusicBeatState
 	{
 		try
 		{
+			var isJSON:Bool = true;
 			var path:String = Paths.getPath('characters/$char.json', TEXT);
 			#if MODS_ALLOWED
-			var character:Dynamic = Json.parse(File.getContent(path));
+			if (!FileSystem.exists(path))
 			#else
-			var character:Dynamic = Json.parse(Assets.getText(path));
+			if (!Assets.exists(path))
+			#end
+			{
+				path = Paths.getPath('characters/$char.xml', TEXT);
+				isJSON = false;
+			}
+
+			#if MODS_ALLOWED
+			var character:Dynamic = Json.parse(File.getContent(isJSON ? path : Character.xmlToJsonString(path)));
+			#else
+			var character:Dynamic = Json.parse(Assets.getText(isJSON ? path : Character.xmlToJsonString(path)));
 			#end
 
 			var isAnimateAtlas:Bool = false;
