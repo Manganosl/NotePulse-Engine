@@ -202,7 +202,7 @@ class Main extends Sprite
 				case FilePos(s, file, line, column):
 					errMsg += file + " (line " + line + ")\n";
 				default:
-					Sys.println(stackItem);
+					Log.error(stackItem);
 			}
 		}
 
@@ -213,8 +213,8 @@ class Main extends Sprite
 
 		File.saveContent(path, errMsg + "\n");
 
-		Sys.println(errMsg);
-		Sys.println("Crash dump saved in " + Path.normalize(path));
+		Log.error(errMsg);
+		Log.warn("Crash dump saved in " + Path.normalize(path));
 
 		Application.current.window.alert(errMsg, "Error!");
 		#if DISCORD_ALLOWED

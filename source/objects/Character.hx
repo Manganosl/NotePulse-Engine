@@ -126,7 +126,7 @@ class Character extends FlxSkewedSprite
 
 			default:
 				var characterPath:String = 'characters/$curCharacter.json';
-
+				var isJSON:Bool = true;
 				var path:String = Paths.getPath(characterPath, TEXT, null, true);
 				#if MODS_ALLOWED
 				if (!FileSystem.exists(path))
@@ -134,18 +134,36 @@ class Character extends FlxSkewedSprite
 				if (!Assets.exists(path))
 				#end
 				{
-					path = Paths.getSharedPath('characters/' + DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
-					color = FlxColor.BLACK;
-					alpha = 0.6;
+					characterPath = 'characters/$curCharacter.xml';
+					isJSON = false;
+					path = Paths.getPath(characterPath, TEXT, null, true);
+					#if MODS_ALLOWED
+					if (!FileSystem.exists(path))
+					#else
+					if (!Assets.exists(path))
+					#end
+					{
+						path = Paths.getSharedPath('characters/' + DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
+						color = FlxColor.BLACK;
+						alpha = 0.6;
+					}
 				}
 
 				try
 				{
-					#if MODS_ALLOWED
-					loadCharacterFile(Json.parse(File.getContent(path)));
-					#else
-					loadCharacterFile(Json.parse(Assets.getText(path)));
-					#end
+					if(isJSON){
+						#if MODS_ALLOWED
+						loadCharacterFile(Json.parse(File.getContent(path)));
+						#else
+						loadCharacterFile(Json.parse(Assets.getText(path)));
+						#end
+					} else {
+						#if MODS_ALLOWED
+						loadCharacterFile(Json.parse(File.getContent(xmlToJsonString(path))));
+						#else
+						loadCharacterFile(Json.parse(Assets.getText(xmlToJsonString(path))));
+						#end
+					}
 				}
 				catch(e:Dynamic)
 				{
@@ -173,7 +191,7 @@ class Character extends FlxSkewedSprite
 		animOffsets = [];
 		curCharacter = character;
 		var characterPath:String = 'characters/$character.json';
-
+		var isJSON:Bool = true;
 		var path:String = Paths.getPath(characterPath, TEXT);
 		#if MODS_ALLOWED
 		if (!FileSystem.exists(path))
@@ -181,19 +199,34 @@ class Character extends FlxSkewedSprite
 		if (!Assets.exists(path))
 		#end
 		{
-			path = Paths.getSharedPath('characters/' + DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
-			//missingCharacter = true;
-			//missingText = new FlxText(0, 0, 300, 'ERROR:\n$character.json', 16);
-			//missingText.alignment = CENTER;
+			characterPath = 'characters/$character.xml';
+			isJSON = false;
+			path = Paths.getPath(characterPath, TEXT);
+			#if MODS_ALLOWED
+			if (!FileSystem.exists(path))
+			#else
+			if (!Assets.exists(path))
+			#end
+			{
+				path = Paths.getSharedPath('characters/' + DEFAULT_CHARACTER + '.json');
+			}
 		}
 
 		try
 		{
-			#if MODS_ALLOWED
-			loadCharacterFile(Json.parse(File.getContent(path)));
-			#else
-			loadCharacterFile(Json.parse(Assets.getText(path)));
-			#end
+			if(isJSON){
+				#if MODS_ALLOWED
+				loadCharacterFile(Json.parse(File.getContent(path)));
+				#else
+				loadCharacterFile(Json.parse(Assets.getText(path)));
+				#end
+			} else {
+				#if MODS_ALLOWED
+				loadCharacterFile(Json.parse(File.getContent(xmlToJsonString(path))));
+				#else
+				loadCharacterFile(Json.parse(Assets.getText(xmlToJsonString(path))));
+				#end
+			}
 		}
 		catch(e:Dynamic)
 		{
@@ -211,9 +244,57 @@ class Character extends FlxSkewedSprite
 		return animOffsets.exists(anim);
 	}
 
-	// buildGhosts removed (no pre-created ghosts). Keep a no-op in case anything references it.
-	function buildGhosts() {
-		// ghosts are created on demand in playGhostAnim()
+	function xmlToJsonString(xmlText:String):String {
+	    var find = (tag:String, txt:String) -> {
+	        var reTag = new EReg("<" + tag + ">([^<]+)<\\/" + tag + ">", "i");
+	        if (reTag.match(txt)) return reTag.matched(1);
+	        var reAttr = new EReg(tag + '\\s*=\\s*"([^"]+)"', 'i');
+	        if (reAttr.match(txt)) return reAttr.matched(1);
+	        var reAttr2 = new EReg(tag + "\\s*=\\s*'([^']+)'", 'i');
+	        if (reAttr2.match(txt)) return reAttr2.matched(1);
+	        return null;
+	    };
+
+	    var image = find('sprite', xmlText) != null ? find('sprite', xmlText) : (find('image', xmlText) != null ? find('image', xmlText) : '');
+	    var scale = find('scale', xmlText);
+	    var posx = find('x', xmlText);
+	    var posy = find('y', xmlText);
+	    var camx = find('camx', xmlText);
+	    var camy = find('camy', xmlText);
+	    var icon = find('icon', xmlText);
+	    var color = find('color', xmlText);
+	    var holdTime = find('holdTime', xmlText);
+	    var flipX = find('flipX', xmlText);
+	    var antialiasing = find('antialiasing', xmlText);
+
+	    var healthbar = find('healthbar_colors', xmlText);
+	    if (healthbar == null) healthbar = find('healthbar', xmlText);
+
+	    var hcolors = [255,0,0];
+	    if (healthbar != null) {
+	        var parts = healthbar.split(',');
+	        if (parts.length >= 3) {
+	            hcolors = [Std.parseInt(parts[0]), Std.parseInt(parts[1]), Std.parseInt(parts[2])];
+	        }
+	    }
+
+	    var obj = '{';
+	    obj += '"image":"' + StringTools.replace(image, '"', '\\"') + '"';
+	    if (scale != null) obj += ',"scale":' + scale;
+	    if (posx != null || posy != null) {
+	        obj += ',"position":[' + (posx != null ? posx : '0') + ',' + (posy != null ? posy : '0') + ']';
+	    }
+	    if (camx != null || camy != null) obj += ',"camera_position":[' + (camx != null ? camx : '0') + ',' + (camy != null ? camy : '0') + ']';
+	    if (icon != null) obj += ',"healthicon":"' + StringTools.replace(icon, '"', '\\"') + '"';
+	    if (holdTime != null) obj += ',"sing_duration":' + holdTime;
+	    if (flipX != null) obj += ',"flip_x":' + (flipX == 'true' ? 'true' : 'false');
+	    if (antialiasing != null) obj += ',"no_antialiasing":' + (antialiasing == 'true' ? 'false' : 'true');
+	    if (hcolors != null) obj += ',"healthbar_colors":[' + hcolors[0] + ',' + hcolors[1] + ',' + hcolors[2] + ']';
+	    obj += ',"vocals_file":""';
+	    obj += ',"_editor_isPlayer":false';
+	    obj += ',"animations":[]';
+	    obj += '}';
+	    return obj;
 	}
 
 	public function loadCharacterFile(json:Dynamic)
