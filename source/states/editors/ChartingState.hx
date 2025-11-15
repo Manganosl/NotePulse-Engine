@@ -5281,7 +5281,7 @@ function updateModEvV1():Void {
 
 	function loadFileList(mainFolder:String, ?optionalList:String = null, ?fileTypes:Array<String> = null)
 	{
-		if(fileTypes == null) fileTypes = ['.json'];
+		if(fileTypes == null) fileTypes = ['.json', '.xml'];
 
 		var fileList:Array<String> = [];
 		if(optionalList != null)

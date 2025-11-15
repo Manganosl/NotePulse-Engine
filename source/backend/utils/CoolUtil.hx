@@ -7,6 +7,22 @@ import states.menus.FreeplayState.SongMetadata;
 
 class CoolUtil
 {
+	public static inline function expandRange(s:String):Array<Int> {
+	    var parts = s.split("..");
+	    if (parts.length != 2) return [];
+
+	    var start = Std.parseInt(parts[0]);
+	    var end   = Std.parseInt(parts[1]);
+
+ 	    if (start == null || end == null) return [];
+
+	    var result = [];
+	    for (i in start...end + 1) {
+	        result.push(i);
+	    }
+	    return result;
+	}
+
 	public static inline function addZeros(str:String, num:Int) {
 		while(str.length < num) str = '0${str}';
 		return str;

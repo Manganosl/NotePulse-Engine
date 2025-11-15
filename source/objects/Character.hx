@@ -865,9 +865,13 @@ class Character extends FlxSkewedSprite
 			}
 
 	    	if (indicesAttr != null && indicesAttr != "") {
-	    	    var norm = StringTools.replace(indicesAttr, "\"", "");
+	    	    var norm:String = StringTools.replace(indicesAttr, "\"", "");
 	    	    norm = StringTools.replace(norm, "'", "");
 	    	    norm = StringTools.trim(norm);
+				if(norm.contains("..")){
+					var temp = CoolUtil.expandRange(norm);
+					norm = temp.join(",");
+				}
 	    	    animObj.add(',"indices":[' + norm + ']');
 	    	} else {
 				animObj.add(',"indices":[]');

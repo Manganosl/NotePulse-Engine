@@ -1094,11 +1094,7 @@ class EditorPlayState extends MusicBeatSubstate
 		#if MODS_ALLOWED
 		var path:String = Paths.modFolders(characterPath);
 		if (!FileSystem.exists(path)) {
-			characterPath = 'characters/' + char + '.xml';
-			path = Paths.modFolders(characterPath);
-			if (!FileSystem.exists(path)) {
-				path = Paths.getSharedPath(characterPath);
-			}
+			path = Paths.getSharedPath(characterPath);
 		}
 
 		if (!FileSystem.exists(path))
