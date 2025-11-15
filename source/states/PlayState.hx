@@ -1656,17 +1656,20 @@ class PlayState extends MusicBeatState
 	function eventPushedUnique(event:EventNote) {
 		switch(event.event) {
 			case "Change Character":
-				var charType:Character = boyfriend;
+				var charType:Int = 0;
 				switch(event.value1.toLowerCase()) {
-					case 'gf' | 'girlfriend' | '1':
-						charType = gf;
-					case 'dad' | 'opponent' | '0':
-						charType = dad;
+					case 'gf' | 'girlfriend':
+						charType = 2;
+					case 'dad' | 'opponent':
+						charType = 1;
 					default:
-						charType = boyfriend;
+						var val1:Int = Std.parseInt(event.value1);
+						if(Math.isNaN(val1)) val1 = 0;
+						charType = val1;
 				}
 
-				charType.changeCharacter(event.value2);
+				var newCharacter:String = event.value2;
+				addCharacterToList(newCharacter, charType);
 
 			case 'Play Sound':
 				Paths.sound(event.value1); //Precache sound

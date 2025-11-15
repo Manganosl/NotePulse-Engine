@@ -167,7 +167,7 @@ class Character extends FlxSkewedSprite
 				}
 				catch(e:Dynamic)
 				{
-					trace('Error loading character file of "$character": $e');
+					Log.error('Error loading character file of "$character": $e');
 				}
 		}
 
@@ -230,7 +230,7 @@ class Character extends FlxSkewedSprite
 		}
 		catch(e:Dynamic)
 		{
-			trace('Error loading character file of "$character": $e');
+			Log.error('Error loading character file of "$character": $e');
 		}
 
 		skipDance = false;
@@ -258,7 +258,9 @@ class Character extends FlxSkewedSprite
 		updateHitbox();
 
 		if(!isAnimateAtlas)
-			frames = Paths.getAtlas(json.image);
+		{
+			frames = Paths.getMultiAtlas(json.image.split(','));
+		}
 		#if flxanimate
 		else
 		{
@@ -270,7 +272,7 @@ class Character extends FlxSkewedSprite
 			}
 			catch(e:Dynamic)
 			{
-				FlxG.log.warn('Could not load atlas ${json.image}: $e');
+				Log.warn('Could not load atlas ${json.image}: $e');
 			}
 		}
 		#end
