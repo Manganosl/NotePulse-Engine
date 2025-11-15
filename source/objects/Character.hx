@@ -159,9 +159,9 @@ class Character extends FlxSkewedSprite
 						#end
 					} else {
 						#if MODS_ALLOWED
-						loadCharacterFile(Json.parse(File.getContent(xmlToJsonString(path))));
+						loadCharacterFile(Json.parse(xmlToJsonString(File.getContent(path))));
 						#else
-						loadCharacterFile(Json.parse(Assets.getText(xmlToJsonString(path))));
+						loadCharacterFile(Json.parse(xmlToJsonString(Assets.getText(path))));
 						#end
 					}
 				}
@@ -222,9 +222,9 @@ class Character extends FlxSkewedSprite
 				#end
 			} else {
 				#if MODS_ALLOWED
-				loadCharacterFile(Json.parse(File.getContent(xmlToJsonString(path))));
+				loadCharacterFile(Json.parse(xmlToJsonString(File.getContent(path))));
 				#else
-				loadCharacterFile(Json.parse(Assets.getText(xmlToJsonString(path))));
+				loadCharacterFile(Json.parse(xmlToJsonString(Assets.getText(path))));
 				#end
 			}
 		}
@@ -245,18 +245,6 @@ class Character extends FlxSkewedSprite
 	}
 
 public static function xmlToJsonString(xmlText:String):String {
-	#if MODS_ALLOWED
-	if (FileSystem.exists(xmlText))
-	#else
-	if (Assets.exists(xmlText))
-	#end
-	{
-		#if MODS_ALLOWED
-		xmlText = File.getContent(xmlText);
-		#else
-		xmlText = OpenFlAssets.getText(xmlText);
-		#end
-	}
     var find = (tag:String, txt:String) -> {
         var reTag = new EReg("<" + tag + ">([\\s\\S]*?)<\\/" + tag + ">", "i");
         if (reTag.match(txt)) return reTag.matched(1);
@@ -350,8 +338,99 @@ public static function xmlToJsonString(xmlText:String):String {
     } else {
         obj.add(',\"_editor_isPlayer\":false');
     }
+var animsArr = new Array<String>();
 
-    obj.add(',\"animations\":[]');
+// preferimos el bloque <animations>...</animations> si existe
+var animBlock = find("animations", xmlText);
+var scanText = if (animBlock != null) animBlock else xmlText;
+
+// recorrer buscando cada "<anim"
+var idx = 0;
+while (true) {
+    var start = scanText.indexOf("<anim", idx);
+    if (start == -1) break;
+
+    // encontrar cierre del tag de apertura
+    var openEnd = scanText.indexOf(">", start);
+    if (openEnd == -1) break;
+
+    var openTag = scanText.substring(start, openEnd + 1);
+    // si es un tag con cierre separado, buscar contenido entre <anim ...>...</anim>
+    var closeTagIdx = -1;
+    var contentInside = "";
+    if (!StringTools.endsWith(openTag, "/>")) {
+        var closeTag = "</anim>";
+        var searchFrom = openEnd + 1;
+        closeTagIdx = scanText.indexOf(closeTag, searchFrom);
+        if (closeTagIdx != -1) {
+            contentInside = scanText.substring(searchFrom, closeTagIdx);
+            idx = closeTagIdx + closeTag.length;
+        } else {
+            // no encontramos cierre, continuar desde after open tag
+            idx = openEnd + 1;
+        }
+    } else {
+        // self-closing
+        idx = openEnd + 1;
+    }
+
+    // helper para extraer atributo value
+    var getAttr = (tag:String, attr:String) -> {
+        var re = new EReg(attr + '\\s*=\\s*"(.*?)"', 'i');
+        if (re.match(tag)) return re.matched(1);
+        var re2 = new EReg(attr + "\\s*=\\s*'(.*?)'", 'i');
+        if (re2.match(tag)) return re2.matched(1);
+        return null;
+    };
+
+    var nameAttr    = getAttr(openTag, "name");
+    var animAttr    = getAttr(openTag, "anim");
+    var loopAttr    = getAttr(openTag, "loop");
+    var fpsAttr     = getAttr(openTag, "fps");
+    var xAttr       = getAttr(openTag, "x");
+    var yAttr       = getAttr(openTag, "y");
+    var indicesAttr = getAttr(openTag, "indices");
+
+    // si indices no está en atributos, tal vez esté dentro del contenido (ej. <anim>0,1,2</anim>)
+    if ((indicesAttr == null || indicesAttr == "") && contentInside != null && contentInside != "") {
+        var inner = StringTools.trim(contentInside);
+        // usar EReg.match sobre inner (String no tiene .match)
+        var digitsRe = new EReg("^[0-9,\\s\\-]+$", "");
+        if (inner != "" && digitsRe.match(inner)) {
+            indicesAttr = inner;
+        }
+    }
+
+    // escape básico para comillas en strings
+    var esc = (s:String) -> if (s == null) "" else StringTools.replace(s, "\"", "\\\"");
+
+    var animObj = new StringBuf();
+    animObj.add("{");
+    animObj.add('"name":"' + esc(nameAttr) + '",');
+    animObj.add('"anim":"' + esc(animAttr) + '"');
+
+    if (loopAttr != null) animObj.add(',"loop":' + (loopAttr.toLowerCase() == "true" ? "true" : "false"));
+    if (fpsAttr != null && fpsAttr != "") animObj.add(',"fps":' + fpsAttr);
+
+    if (xAttr != null || yAttr != null) {
+        var ox = if (xAttr != null && xAttr != "") xAttr else "0";
+        var oy = if (yAttr != null && yAttr != "") yAttr else "0";
+        animObj.add(',"offsets":[' + ox + ',' + oy + ']');
+    }
+
+    if (indicesAttr != null && indicesAttr != "") {
+        // normalizar espacios, quitar comillas y dejar lista numérica
+        var norm = StringTools.replace(indicesAttr, "\"", "");
+        norm = StringTools.replace(norm, "'", "");
+        norm = StringTools.trim(norm);
+        animObj.add(',"indices":[' + norm + ']');
+    }
+
+    animObj.add("}");
+    animsArr.push(animObj.toString());
+}
+
+obj.add(',"animations":[' + animsArr.join(",") + ']');
 
     obj.add("}");
 	trace(xmlText);

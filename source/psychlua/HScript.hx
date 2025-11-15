@@ -59,6 +59,9 @@ class HScript implements HscriptInterface {
 		"FlxTween" => flixel.tweens.FlxTween,
 		"FlxEase" => flixel.tweens.FlxEase,
 		"FlxText" => flixel.text.FlxText,
+		"FlxTextBorderStyle" => flixel.text.FlxTextBorderStyle,
+		'FlxTextFormatMarkerPair' => flixel.text.FlxTextFormatMarkerPair,
+		'FlxTextFormat' => flixel.text.FlxTextFormat,
 		"FlxEmitter" => flixel.effects.particles.FlxEmitter,
 		"FlxParticle" => flixel.effects.particles.FlxParticle,
 		"FlxEmitterMode" => flixel.effects.particles.FlxEmitter.FlxEmitterMode,
@@ -76,6 +79,7 @@ class HScript implements HscriptInterface {
 		"Manager" => modchart.Manager,
 		"WindowUtil" => backend.utils.WindowUtil,
 		"CustomShader" => backend.utils.CustomShader,
+		"NdllUtil" => backend.utils.NdllUtil,
 		"Paths" => backend.Paths,
 		#if PRETTY_TRACE
 		"Log" => backend.Log,
