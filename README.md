@@ -25,7 +25,7 @@ This engine is a fork of Psych 0.7.3, made with the purpose of being easier to m
 - Scripted States and Substates.
 - CNE-like CustomShader utility.
 
-###  [here](LUA.md)
+###  You can find some help [here](LUA.md)
 
 ## Thanks
 - **tposejank**: Extra Keys

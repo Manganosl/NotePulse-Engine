@@ -21,6 +21,12 @@ function onCreatePost(){  // Does NOT work onCreate()!
     openSubState(new ScriptedSubstate(Paths.modState("State name on states folder of your mod")))
 }
 ```
+
+**For Global.hx, there's a call only made when it's loaded for the first time**
+```
+function onGlobal(){}
+```
+
 **None of this is exclusive for *Global.hx* but this file will be the first one to be initialized!**
 
 ### CustomShader
@@ -63,11 +69,11 @@ From there you can just
 ndll(val)
 ```
 
-### Others
-More things added are:
-- [FunkinModchart functions](https://github.com/theoo-h/FunkinModchart/blob/main/DOC.md)
-- [FlxEmitter](https://api.haxeflixel.com/flixel/effects/particles/FlxTypedEmitter.html)
-- Away3D (I've got no idea how to use it right now)
+### Modchart on HScript
+- [FunkinModchart](https://github.com/theoo-h/FunkinModchart/blob/main/README.md)
+
+- There's an integrated instance on songs with "nativeModchart", that is activated in Charting State > Actions > Modchart.
+This instance is called "manager", can be used the same way as one that you create yourself
 
 # Extra LUA functions
 Here you'll find multiple LUA functions added to make coding easier and do some things without the need of runHaxeCode() or a separate HScript file
@@ -154,7 +160,7 @@ initNdll(tag, path, name, args)
 setNdllBool(tag, bool)
 ```
 
-### Modcharting functions
+### Modchart on LUA
 - **You can use a special call specific for modcharting as alternative to onCreatePost()**
 ```
 function initModchart()
