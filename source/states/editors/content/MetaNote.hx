@@ -306,6 +306,16 @@ class EventMetaNote extends MetaNote
 		}
 		else if(Paths.fileExists('images/editors/events/${events[0][0]}.png',IMAGE)){
 			loadGraphic(Paths.image('editors/events/${events[0][0]}'));
+            if(events[0][0] == "Modchart Event"){
+                var name = events[0][1].split(",")[0].toLowerCase();
+                if(name == "set"){
+                    color = FlxColor.BLUE;
+                } else if(name == "ease"){
+                    color = FlxColor.YELLOW;
+                } else if(name == "add modifier"){
+                    color = FlxColor.RED;
+                }
+            }
 		}
 		else loadGraphic(Paths.image('editors/eventArrow'));
 		setGraphicSize(ChartingState.GRID_SIZE);
