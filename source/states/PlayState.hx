@@ -2608,24 +2608,44 @@ public function changeMania(newMania:Int):Void {
 		if(Math.isNaN(flValue2)) flValue2 = null;
 
 		switch(eventName) {
-case 'Change Mania':
-    var parsed = Std.parseInt(value1);
-    if (Math.isNaN(parsed)) {
-        Log.error('Change Mania event: value1 not a number => "' + value1 + '"');
-        return;
-    }
+			case "HScript Call":
+				var args:Array<Dynamic> = [];
+				if(value2 != null && value2 != '') {
+					args = value2.split(',');
+				}
+				for (hscript in hscriptArray) {
+					hscript.call(value1, args);
 
-    var newMania:Int = parsed - 1;
+					if (hscript.variables.exists(value1)) {
+						var func = hscript.variables.get(value1);
+						if (func != null && Reflect.isFunction(func))
+							Reflect.callMethod(null, func, args);
+					}
+				}
 
-    if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
-        var minMania = ExtraKeysHandler.instance.data.minKeys - 1;
-        var maxMania = ExtraKeysHandler.instance.data.maxKeys - 1;
-        if (newMania < minMania) newMania = minMania;
-        if (newMania > maxMania) newMania = maxMania;
-    }
+				if (HScript.staticVariables.exists(value1)) {
+					var func = HScript.staticVariables.get(value1);
+					if (func != null && Reflect.isFunction(func))
+						Reflect.callMethod(null, func, args);
+				}
+			case 'Change Mania':
+				var parsed = Std.parseInt(value1);
+				if (Math.isNaN(parsed)) {
+					Log.error('Change Mania event: value1 not a number => "' + value1 + '"');
+					return;
+				}
 
-    changeMania(newMania);
-    return;
+				var newMania:Int = parsed - 1;
+
+				if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+					var minMania = ExtraKeysHandler.instance.data.minKeys - 1;
+					var maxMania = ExtraKeysHandler.instance.data.maxKeys - 1;
+					if (newMania < minMania) newMania = minMania;
+					if (newMania > maxMania) newMania = maxMania;
+				}
+
+				changeMania(newMania);
+				return;
 			case 'Hey!':
 				var value:Int = 2;
 				switch(value1.toLowerCase().trim()) {

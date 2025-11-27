@@ -108,7 +108,7 @@ class TitleState extends MusicBeatState
 				var curVersion:String = MainMenuState.npeVersion.trim();
 				Log.info('version online: ' + updateVersion + ', your version: ' + curVersion);
 				if(updateVersion != curVersion) {
-					Log.error('versions arent matching!');
+					Log.warn('versions arent matching!');
 					mustUpdate = true;
 				}
 			}
