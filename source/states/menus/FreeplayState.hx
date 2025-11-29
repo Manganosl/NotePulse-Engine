@@ -449,7 +449,7 @@ class FreeplayState extends MusicBeatState
 
 			iconArray[curSelected].angle = 30;
 			FlxTween.tween(iconArray[curSelected], {alpha: 1}, 0.6, {ease: FlxEase.sineInOut});
-			FlxTween.tween(iconArray[curSelected], {angle: 0}, 0.6, {ease: FlxEase.backOut});
+			FlxTween.tween(iconArray[curSelected], {angle: 0}, 0.45, {ease: FlxEase.backOut});
 			iconArray[curSelected].animation.curAnim.curFrame = 1;
 
 			for (item in grpSongs.members)

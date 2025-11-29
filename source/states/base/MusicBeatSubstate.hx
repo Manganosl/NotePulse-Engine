@@ -264,7 +264,7 @@ class MusicBeatSubstate extends FlxSubState
 		#if (MODS_ALLOWED && !flash && sys)
 		if(runtimeShaders.exists(name))
 		{
-			Log.hxTrace('Shader $name was already initialized!');
+			Log.warn('Shader $name was already initialized!');
 			return true;
 		}
 

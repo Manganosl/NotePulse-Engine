@@ -4022,7 +4022,7 @@ private function popUpScore(note:Note = null):Void
 		strumPlayAnim(note.gfStrum ? 2 : 0, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
 		note.hitByOpponent = true;
 		
-		var result:Dynamic = !isPlayerOpponent ? callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]) : callOnLuas('goodNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
+		var result:Dynamic = (!isPlayerOpponent && !note.gfStrum) ? callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]) : callOnLuas('goodNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) (!isPlayerOpponent ? callOnHScript('opponentNoteHit', [note]) : callOnHScript('goodNoteHit', [note]));
 
 		if (!note.isSustainNote) invalidateNote(note);
@@ -4037,7 +4037,7 @@ private function popUpScore(note:Note = null):Void
 		var leData:Int = Math.round(Math.abs(note.noteData));
 		var leType:String = note.noteType;
 
-		var result:Dynamic = !isPlayerOpponent ? callOnLuas('goodNoteHitPre', [notes.members.indexOf(note), leData, leType, isSus]) : callOnLuas('opponentNoteHitPre', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
+		var result:Dynamic = (!isPlayerOpponent && !note.gfStrum) ? callOnLuas('goodNoteHitPre', [notes.members.indexOf(note), leData, leType, isSus]) : callOnLuas('opponentNoteHitPre', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) (!isPlayerOpponent ? callOnHScript('goodNoteHitPre', [note]) : callOnHScript('opponentNoteHitPre', [note]));
 
 		note.wasGoodHit = true;
@@ -4158,7 +4158,7 @@ private function popUpScore(note:Note = null):Void
 		if (gainHealth && !isPlayerOpponent) health += note.hitHealth * healthGain;
 		if (gainHealth && isPlayerOpponent) health -= note.hitHealth * healthGain;
 
-		var result:Dynamic = !isPlayerOpponent ? callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]) : callOnLuas('opponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
+		var result:Dynamic = (!isPlayerOpponent && !note.gfStrum) ? callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]) : callOnLuas('opponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) (!isPlayerOpponent ? callOnHScript('goodNoteHit', [note]) : callOnHScript('opponentNoteHit', [note]));
 
 		if(!note.isSustainNote) invalidateNote(note);
