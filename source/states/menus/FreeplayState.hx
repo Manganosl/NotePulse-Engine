@@ -447,13 +447,17 @@ class FreeplayState extends MusicBeatState
 				FlxTween.tween(iconArray[i], {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
 			}
 
+			iconArray[curSelected].angle = 30;
 			FlxTween.tween(iconArray[curSelected], {alpha: 1}, 0.6, {ease: FlxEase.sineInOut});
+			FlxTween.tween(iconArray[curSelected], {angle: 0}, 0.6, {ease: FlxEase.backOut});
+			iconArray[curSelected].animation.curAnim.curFrame = 1;
 
 			for (item in grpSongs.members)
 			{
 				FlxTween.tween(item, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
-				if (item.targetY == curSelected)
+				if (item.targetY == curSelected){
 					FlxTween.tween(item, {alpha: 1}, 0.6, {ease: FlxEase.sineInOut});
+				}
 			}
 			new FlxTimer().start(0.75, function(tmr:FlxTimer) {
 				if (FlxG.keys.pressed.SHIFT) {

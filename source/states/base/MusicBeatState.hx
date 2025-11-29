@@ -149,7 +149,6 @@ class MusicBeatState extends FlxUIState
 		var global = initHScript(input);
 		if(global != null){
 			callOnHScript("onGlobal");
-			Log.hxTrace("onGlobal called for "+input);
 		} else
 			Log.error('$input does not exist!');
 	}

@@ -51,9 +51,6 @@ class SustainSplash extends FlxSkewedSprite {
 			tempShader = Note.globalRgbShaders[0];
 		}
 
-		alpha = ClientPrefs.data.splashAlpha;
-		if (note != null) alpha = note.noteSplashData.a;
-
 		rgbShader.copyValues(tempShader);
 
 		if (!modchart) visible = true;

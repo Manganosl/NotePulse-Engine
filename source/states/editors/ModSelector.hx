@@ -9,7 +9,7 @@ import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import flixel.util.FlxSort;
 
-class ModSelector extends MusicBeatState{
+class ModSelector extends MusicBeatState {
 	var exclusions:Array<String> = ["assets", "data", "fonts", "images", "music", "sounds", "videos", "ndlls", "scripts", "shaders", "characters", "songs", "stages", "weeks", "states", "custom_events", "custom_notetypes"];
 
     private var modArray:Array<String> = [];
@@ -544,7 +544,7 @@ class ImIcon extends FlxSprite {
 	}
 }
 
-class NewJson extends MusicBeatSubstate{
+class NewJson extends MusicBeatSubstate {
 	var txt:String;
 	var callback:String->Void;
 	public function new(txt:String, callback:String->Void){
@@ -582,7 +582,7 @@ class NewJson extends MusicBeatSubstate{
 	}
 }
 
-class GoodBye extends MusicBeatSubstate{
+class GoodBye extends MusicBeatSubstate {
 	override public function create(){
 		var warningText:FlxText = new FlxText(0, 0, 1000, "Song File Created!\nNow you'll be redirected to the Week Editor so you can add this song\nThen, you'll be able to access this song directly from here!");
 		warningText.setFormat(Paths.font("default.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);

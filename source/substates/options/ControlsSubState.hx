@@ -5,7 +5,7 @@ import backend.InputFormatter;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
 import objects.AttachedSprite;
-import objects.Alphabe;
+import objects.ControlsAlph;
 
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepad;
@@ -26,10 +26,10 @@ class ControlsSubState extends MusicBeatSubstate
 	var curOptionsValid:Array<Int>;
 
 	var bg:FlxSprite;
-	var grpDisplay:FlxTypedGroup<Alphabe>;
+	var grpDisplay:FlxTypedGroup<ControlsAlph>;
 	var grpBlacks:FlxTypedGroup<AttachedSprite>;
-	var grpOptions:FlxTypedGroup<Alphabe>;
-	var grpBinds:FlxTypedGroup<Alphabe>;
+	var grpOptions:FlxTypedGroup<ControlsAlph>;
+	var grpBinds:FlxTypedGroup<ControlsAlph>;
 	var selectSpr:AttachedSprite;
 
 	var descText:FlxText;
@@ -60,9 +60,9 @@ class ControlsSubState extends MusicBeatSubstate
 		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
 		add(grid);
 
-		grpDisplay = new FlxTypedGroup<Alphabe>();
+		grpDisplay = new FlxTypedGroup<ControlsAlph>();
 		add(grpDisplay);
-		grpOptions = new FlxTypedGroup<Alphabe>();
+		grpOptions = new FlxTypedGroup<ControlsAlph>();
 		add(grpOptions);
 		grpBlacks = new FlxTypedGroup<AttachedSprite>();
 		add(grpBlacks);
@@ -71,7 +71,7 @@ class ControlsSubState extends MusicBeatSubstate
 		selectSpr.copyAlpha = false;
 		selectSpr.alpha = 0.75;
 		add(selectSpr);
-		grpBinds = new FlxTypedGroup<Alphabe>();
+		grpBinds = new FlxTypedGroup<ControlsAlph>();
 		add(grpBinds);
 
 		controllerSpr = new FlxSprite(50, 140).loadGraphic(Paths.image('controllertype'), true, 82, 60);
@@ -80,7 +80,7 @@ class ControlsSubState extends MusicBeatSubstate
 		controllerSpr.animation.add('gamepad', [1], 1, false);
 		add(controllerSpr);
 
-		var text:Alphabe = new Alphabe(60, 90, 'CTRL', false);
+		var text:ControlsAlph = new ControlsAlph(60, 90, 'CTRL', false);
 		text.alignment = CENTERED;
 		text.setScale(0.4);
 		add(text);
@@ -92,7 +92,7 @@ class ControlsSubState extends MusicBeatSubstate
 		cosanegra.y = -210;
 		add(cosanegra);
 
-		var titleText:FlxText = new FlxText(0, 10, 1145, "Options > Controls", 32); //Alphabe(75, 45, title, true);
+		var titleText:FlxText = new FlxText(0, 10, 1145, "Options > Controls", 32); //ControlsAlph(75, 45, title, true);
 		titleText.alpha = 1;
 		titleText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		titleText.scrollFactor.set();
@@ -111,10 +111,10 @@ class ControlsSubState extends MusicBeatSubstate
 	{
 		curOptions = [];
 		curOptionsValid = [];
-		grpDisplay.forEachAlive(function(text:Alphabe) text.destroy());
+		grpDisplay.forEachAlive(function(text:ControlsAlph) text.destroy());
 		grpBlacks.forEachAlive(function(black:AttachedSprite) black.destroy());
-		grpOptions.forEachAlive(function(text:Alphabe) text.destroy());
-		grpBinds.forEachAlive(function(text:Alphabe) text.destroy());
+		grpOptions.forEachAlive(function(text:ControlsAlph) text.destroy());
+		grpBinds.forEachAlive(function(text:ControlsAlph) text.destroy());
 		grpDisplay.clear();
 		grpBlacks.clear();
 		grpOptions.clear();
@@ -186,7 +186,7 @@ class ControlsSubState extends MusicBeatSubstate
 					var isDefaultKey:Bool = (option[1] == defaultKey);
 					var isDisplayKey:Bool = (isCentered && !isDefaultKey);
 
-					var text:Alphabe = new Alphabe(200, 300, option[1], !isDisplayKey);
+					var text:ControlsAlph = new ControlsAlph(200, 300, option[1], !isDisplayKey);
 					text.isMenuItem = true;
 					text.changeX = false;
 					text.distancePerItem.y = 60;
@@ -213,13 +213,13 @@ class ControlsSubState extends MusicBeatSubstate
 		updateText();
 	}
 
-	function addCenteredText(text:Alphabe, option:Array<Dynamic>, id:Int)
+	function addCenteredText(text:ControlsAlph, option:Array<Dynamic>, id:Int)
 	{
 		text.screenCenter(X);
 		text.y -= 55;
 		text.startPosition.y -= 55;
 	}
-	function addKeyText(text:Alphabe, option:Array<Dynamic>, id:Int)
+	function addKeyText(text:ControlsAlph, option:Array<Dynamic>, id:Int)
 	{
 		for (n in 0...2)
 		{
@@ -237,7 +237,7 @@ class ControlsSubState extends MusicBeatSubstate
 				key = InputFormatter.getGamepadName((savKey[n] != null) ? savKey[n] : NONE);
 			}
 
-			var attach:Alphabe = new Alphabe(textX + 210, 248, key, false);
+			var attach:ControlsAlph = new ControlsAlph(textX + 210, 248, key, false);
 			attach.isMenuItem = true;
 			attach.changeX = false;
 			attach.distancePerItem.y = 60;
@@ -262,7 +262,7 @@ class ControlsSubState extends MusicBeatSubstate
 		}
 	}
 
-	function playstationCheck(alpha:Alphabe)
+	function playstationCheck(alpha:ControlsAlph)
 	{
 		if(onKeyboardMode) return;
 
@@ -274,7 +274,7 @@ class ControlsSubState extends MusicBeatSubstate
 			switch(alpha.text)
 			{
 				case '[', ']': //Square and Triangle respectively
-					letter.image = 'alphabet_playstation';
+					letter.image = 'ControlsAlpht_playstation';
 					letter.updateHitbox();
 					
 					letter.offset.x += 4;
@@ -285,8 +285,8 @@ class ControlsSubState extends MusicBeatSubstate
 
 	function updateBind(num:Int, text:String)
 	{
-		var bind:Alphabe = grpBinds.members[num];
-		var attach:Alphabe = new Alphabe(350 + (num % 2) * 300, 248, text, false);
+		var bind:ControlsAlph = grpBinds.members[num];
+		var attach:ControlsAlph = new ControlsAlph(350 + (num % 2) * 300, 248, text, false);
 		attach.isMenuItem = true;
 		attach.changeX = false;
 		attach.distancePerItem.y = 60;
@@ -308,8 +308,8 @@ class ControlsSubState extends MusicBeatSubstate
 	var binding:Bool = false;
 	var holdingEsc:Float = 0;
 	var bindingBlack:FlxSprite;
-	var bindingText:Alphabe;
-	var bindingText2:Alphabe;
+	var bindingText:ControlsAlph;
+	var bindingText2:ControlsAlph;
 
 	var timeForMoving:Float = 0.1;
 	override function update(elapsed:Float)
@@ -354,11 +354,11 @@ class ControlsSubState extends MusicBeatSubstate
 					FlxTween.tween(bindingBlack, {alpha: 0.6}, 0.35, {ease: FlxEase.linear});
 					add(bindingBlack);
 
-					bindingText = new Alphabe(FlxG.width / 2, 160, "Rebinding " + options[curOptions[curSelected]][3], false);
+					bindingText = new ControlsAlph(FlxG.width / 2, 160, "Rebinding " + options[curOptions[curSelected]][3], false);
 					bindingText.alignment = CENTERED;
 					add(bindingText);
 					
-					bindingText2 = new Alphabe(FlxG.width / 2, 340, "Hold ESC to Cancel\nHold Backspace to Delete", true);
+					bindingText2 = new ControlsAlph(FlxG.width / 2, 340, "Hold ESC to Cancel\nHold Backspace to Delete", true);
 					bindingText2.alignment = CENTERED;
 					add(bindingText2);
 
@@ -535,18 +535,18 @@ class ControlsSubState extends MusicBeatSubstate
 		if(num < 3) addNum = 3 - num;
 		else if(num > lastID - 4) addNum = (lastID - 4) - num;
 
-		grpDisplay.forEachAlive(function(item:Alphabe) {
+		grpDisplay.forEachAlive(function(item:ControlsAlph) {
 			item.targetY = item.ID - num - addNum;
 		});
 
-		grpOptions.forEachAlive(function(item:Alphabe)
+		grpOptions.forEachAlive(function(item:ControlsAlph)
 		{
 			item.targetY = item.ID - num - addNum;
 			item.alpha = (item.ID - num == 0) ? 1 : 0.6;
 		});
-		grpBinds.forEachAlive(function(item:Alphabe)
+		grpBinds.forEachAlive(function(item:ControlsAlph)
 		{
-			var parent:Alphabe = grpOptions.members[item.ID];
+			var parent:ControlsAlph = grpOptions.members[item.ID];
 			item.targetY = parent.targetY;
 			item.alpha = parent.alpha;
 		});
