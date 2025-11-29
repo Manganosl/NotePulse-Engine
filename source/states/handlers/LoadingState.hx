@@ -168,7 +168,7 @@ class LoadingState extends MusicBeatState
 			case 2:
 				dots = '...';
 		}
-		loadingText.text = "Now Loading"+[dots];
+		loadingText.text = 'Now Loading$dots';
 
 		if(!spawnedPessy)
 		{
@@ -634,9 +634,9 @@ class LoadingState extends MusicBeatState
 			}
 
 			#if MODS_ALLOWED
-			var character:Dynamic = Json.parse(File.getContent(isJSON ? path : Character.xmlToJsonString(path)));
+			var character:Dynamic = Json.parse(isJSON ? File.getContent(path) : Character.xmlToJsonString(File.getContent(path)));
 			#else
-			var character:Dynamic = Json.parse(Assets.getText(isJSON ? path : Character.xmlToJsonString(path)));
+			var character:Dynamic = Json.parse(isJSON ? Assets.getText(path) : Character.xmlToJsonString(Assets.getText(path)));
 			#end
 
 			var isAnimateAtlas:Bool = false;

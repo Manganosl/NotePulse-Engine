@@ -393,27 +393,23 @@ class Paths
 		return 'assets/fonts/$key';
 	}
 
-	public static function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String = null)
+	public static function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?parentFolder:String = null)
 	{
 		#if MODS_ALLOWED
 		if(!ignoreMods)
 		{
+			var modKey:String = key;
+			if(parentFolder == 'songs') modKey = 'songs/$key';
+
 			for(mod in Mods.getGlobalMods())
-				if (FileSystem.exists(mods('$mod/$key')))
+				if (FileSystem.exists(mods('$mod/$modKey')))
 					return true;
 
-			if (FileSystem.exists(mods(Mods.currentModDirectory + '/' + key)) || FileSystem.exists(mods(key)))
-				return true;
-			
-			if (FileSystem.exists(mods('$key')))
+			if (FileSystem.exists(mods(Mods.currentModDirectory + '/' + modKey)) || FileSystem.exists(mods(modKey)))
 				return true;
 		}
 		#end
-
-		if(OpenFlAssets.exists(getPath(key, type, library, false))) {
-			return true;
-		}
-		return false;
+		return (OpenFlAssets.exists(getPath(key, type, parentFolder, false)));
 	}
 
 	static public function getAtlas(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
