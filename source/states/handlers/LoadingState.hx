@@ -23,6 +23,8 @@ import sys.thread.Mutex;
 import objects.Note;
 import objects.NoteSplash;
 
+import psychlua.LoadingLua;
+
 #if cpp
 @:headerCode('
 #include <iostream>
@@ -33,6 +35,9 @@ class LoadingState extends MusicBeatState
 {
 	public static var loaded:Int = 0;
 	public static var loadMax:Int = 0;
+
+	public static var instance:LoadingState; // fuck LUA
+	#if LUA_ALLOWED public static var stageLua:LoadingLua; #end
 
 	static var originalBitmapKeys:Map<String, String> = [];
 	static var requestedBitmaps:Map<String, BitmapData> = [];
@@ -75,6 +80,7 @@ class LoadingState extends MusicBeatState
 
 	override function create()
 	{
+		instance = this;
 		persistentUpdate = true;
 		barGroup = new FlxSpriteGroup();
 		add(barGroup);
@@ -306,10 +312,10 @@ class LoadingState extends MusicBeatState
 		return target;
 	}
 
-	static var imagesToPrepare:Array<String> = [];
-	static var soundsToPrepare:Array<String> = [];
-	static var musicToPrepare:Array<String> = [];
-	static var songsToPrepare:Array<String> = [];
+	static public var imagesToPrepare:Array<String> = [];
+	static public var soundsToPrepare:Array<String> = [];
+	static public var musicToPrepare:Array<String> = [];
+	static public var songsToPrepare:Array<String> = [];
 	public static function prepare(images:Array<String> = null, sounds:Array<String> = null, music:Array<String> = null)
 	{
 		if (images != null) imagesToPrepare = imagesToPrepare.concat(images);
@@ -376,6 +382,27 @@ class LoadingState extends MusicBeatState
 			if(Paths.fileExists('images/$customSkin.png', IMAGE)) noteSkin = customSkin;
 			imagesToPrepare.push(noteSkin);
 			//
+
+			#if MODS_ALLOWED
+			var luaFile:String = 'stages/'+song.stage+'.lua';
+			var luaToLoad:String = Paths.modFolders(luaFile);
+			if(!FileSystem.exists(luaToLoad))
+				luaToLoad = Paths.getSharedPath(luaFile);
+
+			if(FileSystem.exists(luaToLoad))
+			#elseif sys
+			var luaToLoad:String = Paths.getSharedPath(luaFile);
+			if(OpenFlAssets.exists(luaToLoad))
+			#end
+			{
+				stageLua = new LoadingLua(luaToLoad);
+				return true;
+			}
+			return false;
+
+			#if LUA_ALLOWED
+			stageLua.stop();
+			#end
 
 			// LOAD NOTE SPLASH IMAGE
 			var noteSplash:String = NoteSplash.defaultNoteSplash;

@@ -1387,7 +1387,6 @@ class PlayState extends MusicBeatState
 
 	function startSong():Void
 	{
-		//if (!fModchart && ClientPrefs.data.unholy == "Unholywanderer") new FunkinLua(functions.UnnamedRatings.script, true); else new FunkinLua(functions.NormalRatings.script, true);
 		startingSong = false;
 
 		@:privateAccess
