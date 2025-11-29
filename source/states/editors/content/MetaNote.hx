@@ -300,24 +300,29 @@ class EventMetaNote extends MetaNote
 		updateEventText();
 	}
 
-	function loadIcon(){
+	public function loadIcon(){
 		if(events.length>1){
 			loadGraphic(Paths.image('editors/eventIcon-many'));
 		}
-		else if(Paths.fileExists('images/editors/events/${events[0][0]}.png',IMAGE)){
-			loadGraphic(Paths.image('editors/events/${events[0][0]}'));
-            if(events[0][0] == "Modchart Event"){
-                var name = events[0][1].split(",")[0].toLowerCase();
-                if(name == "set"){
-                    color = FlxColor.BLUE;
-                } else if(name == "ease"){
-                    color = FlxColor.YELLOW;
-                } else if(name == "add modifier"){
-                    color = FlxColor.RED;
-                }
+        if(Paths.fileExists('images/editors/events/${events[0][0]}.png',IMAGE)) {
+            loadGraphic(Paths.image('editors/events/${events[0][0]}'));
+        } else loadGraphic(Paths.image('editors/eventArrow'));
+        if(events[0][0] == "Modchart Event"){
+            var name = events[0][1].split(",")[0].toLowerCase();
+            if(name == "set"){
+                loadGraphic(Paths.image('editors/events/Modcharting/set'));
+            } else if(name == "ease"){
+                loadGraphic(Paths.image('editors/events/Modcharting/ease'));
+            } else if(name == "add modifier"){
+                loadGraphic(Paths.image('editors/events/Modcharting/addMod'));
+            } else if(name == "easeadd"){
+                loadGraphic(Paths.image('editors/events/Modcharting/easeAdd'));
+            } else if(name == "setadd"){
+                loadGraphic(Paths.image('editors/events/Modcharting/setAdd'));
+            } else { // Failsafe
+                loadGraphic(Paths.image('editors/eventArrow'));
             }
-		}
-		else loadGraphic(Paths.image('editors/eventArrow'));
+        }
 		setGraphicSize(ChartingState.GRID_SIZE);
 		updateHitbox();
 	}

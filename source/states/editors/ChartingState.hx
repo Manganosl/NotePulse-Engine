@@ -2717,36 +2717,35 @@ function positionNoteYOnTime(note:MetaNote, section:Int)
 	var playerStepper:PsychUINumericStepper;
 	var playfieldModStepper:PsychUINumericStepper;
 
-function updateModEvV1():Void {
-    if (selectedNotes.length != 1 || !selectedNotes[0].isEvent) return;
+	function updateModEvV1():Void {
+		if (selectedNotes.length != 1 || !selectedNotes[0].isEvent) return;
 
-    var eventNote:EventMetaNote = cast(selectedNotes[0], EventMetaNote);
+		var eventNote:EventMetaNote = cast(selectedNotes[0], EventMetaNote);
 
-    if (eventNote.events == null || eventNote.events.length == 0) return;
-    curEventSelected = Std.int(FlxMath.bound(curEventSelected, 0, eventNote.events.length - 1));
+		if (eventNote.events == null || eventNote.events.length == 0) return;
+		curEventSelected = Std.int(FlxMath.bound(curEventSelected, 0, eventNote.events.length - 1));
 
-    var myEvent:Array<String> = eventNote.events[curEventSelected];
-    if (myEvent == null) return;
+		var myEvent:Array<String> = eventNote.events[curEventSelected];
+		if (myEvent == null) return;
 
-    var eventName:String = (myEvent[0] != null) ? myEvent[0] : '';
-    if (eventName != "Modchart Event") return;
+		var eventName:String = (myEvent[0] != null) ? myEvent[0] : '';
+		if (eventName != "Modchart Event") return;
 
-    var action:String = (actionsDropdown != null) ? actionsDropdown.selectedLabel : '';
-    var modifier:String = (modifierInput != null) ? modifierInput.text : '';
-    var timeStr:String = (timeStepper != null) ? Std.string(timeStepper.value) : '';
-    var valueStr:String = (valueStepper != null) ? Std.string(valueStepper.value) : '';
-    var easeStr:String = (easeInput != null) ? easeInput.text : '';
-    var playerStr:String = (playerStepper != null) ? Std.string(playerStepper.value) : '';
-    var playfieldStr:String = (playfieldModStepper != null) ? Std.string(playfieldModStepper.value) : '';
+		var action:String = (actionsDropdown != null) ? actionsDropdown.selectedLabel : '';
+		var modifier:String = (modifierInput != null) ? modifierInput.text : '';
+		var timeStr:String = (timeStepper != null) ? Std.string(timeStepper.value) : '';
+		var valueStr:String = (valueStepper != null) ? Std.string(valueStepper.value) : '';
+		var easeStr:String = (easeInput != null) ? easeInput.text : '';
+		var playerStr:String = (playerStepper != null) ? Std.string(playerStepper.value) : '';
+		var playfieldStr:String = (playfieldModStepper != null) ? Std.string(playfieldModStepper.value) : '';
 
-    var combined:String = action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + "," + playfieldStr;
+		var combined:String = action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + "," + playfieldStr;
 
-    eventNote.events[curEventSelected][1] = combined;
+		eventNote.events[curEventSelected][1] = combined;
 
-    eventNote.updateEventText();
-    //updateGrid();
-}
-
+		eventNote.updateEventText();
+		eventNote.loadIcon();
+	}
 
 	function addModchartTab():Void {
 		var tabGroupModchart = eventsBox.getTab('Modchart').menu;
@@ -2775,7 +2774,7 @@ function updateModEvV1():Void {
 
 		var modifierLabelText = new FlxText(modifierInput.x, modifierInput.y - 15, 80, 'Modifier:');
 
-		actionsDropdown = new PsychUIDropDownMenu(posX, posY, ["Add Modifier", "Set", "Ease"], function(index:Int, name:String){
+		actionsDropdown = new PsychUIDropDownMenu(posX, posY, ["Add Modifier", "Set", "Ease", "EaseAdd", "SetAdd"], function(index:Int, name:String){
 			updateModEvV1();
 		});
 

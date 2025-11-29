@@ -96,16 +96,6 @@ final class PlayField extends FlxSprite {
 		addEvent(new EaseEvent(name, beat, length, value, easeFunc, player, events));
 	}
 
-	public function doEase(name:String, value:Float = 1, length:Float, easeFunc:EaseFunction, player:Int = -1):Void {
-		if (player == -1) {
-			for (curField in 0...Adapter.instance.getPlayerCount())
-				doEase(name, value, length, easeFunc, curField);
-			return;
-		}
-
-		addEvent(new DoEaseEvent(name, value, length, easeFunc, player, events));
-	}
-
 	public inline function add(name:String, beat:Float, length:Float, addition:Float = 1, easeFunc:EaseFunction, player:Int = -1):Void {
 		if (player == -1) {
 			for (curField in 0...Adapter.instance.getPlayerCount())

@@ -695,6 +695,13 @@ class PlayState extends MusicBeatState
 					}
 					if(info[0] == "Set")
 						manager.set(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+					if(info[0] == "EaseAdd"){
+						var ease = FlxEase.linear;
+						if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
+						manager.add(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+					}
+					if(info[0] == "SetAdd")
+						manager.setAdd(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
 				}
 			}
 		}
