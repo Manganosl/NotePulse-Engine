@@ -40,10 +40,10 @@ class Log
 		print(value, 'ERROR', 88, pos);
 
 	public static function warn(value:Dynamic, ?pos:PosInfos):Void
-		print(value, 'WARN', 150, pos);
+		print(value, 'WARN', 226, pos);
 	
 	public static function info(value:Dynamic, ?pos:PosInfos):Void
-		print(value, 'INFO', 106, pos);
+		print(value, 'INFO', 40, pos);
 
 	static public function print(value:Dynamic, ?level:String = 'TRACE', ?color:Int = 201, ?pos:PosInfos):Void
 	{

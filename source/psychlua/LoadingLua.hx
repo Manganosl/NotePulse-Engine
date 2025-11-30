@@ -175,38 +175,30 @@ class LoadingLua {
 		});
 
 		// Empty callbacks to prevent code stopping
-		Lua_helper.add_callback(lua, "setProperty", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {
-		});
-
-		Lua_helper.add_callback(lua, "setScrollFactor", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {
-		});
-
-		Lua_helper.add_callback(lua, "scaleObject", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {
-		});
-
-		Lua_helper.add_callback(lua, "addLuaSprite", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {
-		});
-
-		Lua_helper.add_callback(lua, "addAnimationByPrefix", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {
-		});
-
-		Lua_helper.add_callback(lua, "playAnim", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {
-		});
-
-		Lua_helper.add_callback(lua, "initLuaShader", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {
-		});
-
-		Lua_helper.add_callback(lua, "setSpriteShader", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {
-		});
-
-		Lua_helper.add_callback(lua, "setShaderFloat", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {
-		});
-
-		Lua_helper.add_callback(lua, "runHaxeCode", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {
-		});
-
-		Lua_helper.add_callback(lua, "runTimer", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {
-		});
+		Lua_helper.add_callback(lua, "setProperty", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "setScrollFactor", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "scaleObject", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "addLuaSprite", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "addAnimationByPrefix", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "playAnim", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "initLuaShader", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "setSpriteShader", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "setShaderFloat", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "runHaxeCode", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "runTimer", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "setObjectCamera", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "scaleLuaSprite", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "callMethod", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "callMethodFromClass", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "cameraFlash", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "getRandomBool", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "getRandomInt", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "getRandomFloat", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "setHealth", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "setBlendMode", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "setLuaSpriteCamera", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "addHealth", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "getHealth", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
 
 		try{
 			if (!isString) isString = !FileSystem.exists(scriptName);

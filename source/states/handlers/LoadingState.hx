@@ -356,7 +356,7 @@ class LoadingState extends MusicBeatState
 			}
 
 			#if LUA_ALLOWED
-			stageLua.stop();
+			if(stageLua != null) stageLua.stop();
 			#end
 
 			// LOAD NOTE SPLASH IMAGE
