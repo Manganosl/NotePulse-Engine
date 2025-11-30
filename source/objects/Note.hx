@@ -515,7 +515,10 @@ class Note extends FlxSkewedSprite
 
 		var angleDir = strumDirection * Math.PI / 180;
 		if (copyAngle)
+			angle = strumAngle + offsetAngle;
+		else if(isSustainNote){
 			angle = strumDirection - 90 + strumAngle + offsetAngle;
+		}
 
 		if(copyAlpha)
 			alpha = strumAlpha * multAlpha;

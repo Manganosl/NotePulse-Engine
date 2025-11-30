@@ -2363,7 +2363,8 @@ public function changeMania(newMania:Int):Void {
 				}
 				for (strum in strumLineNotes.members) {
 					if (!strum.sustainSplash.updatedThisFrame) {
-						strum.sustainSplash.hide(true);
+						if(!PlayState.instance.cpuControlled) strum.sustainSplash.hide(true);
+						else strum.sustainSplash.hide(false);
 					}
 				}
 			}

@@ -57,7 +57,7 @@ class SustainSplash extends FlxSkewedSprite {
 		shouldVisible = true;
 
 		if (animation.curAnim == null || animation.curAnim.name != "loop") {
-			animation.play("cover");
+			animation.play("loop");
 			center();
 		}
 	}

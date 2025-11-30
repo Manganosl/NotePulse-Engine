@@ -87,7 +87,6 @@ class StrumNote extends FlxSkewedSprite
 			antialiasing = false;
 
 			initialWidth = width;
-			//trace(initialWidth);
 
 			setGraphicSize(width * PlayState.daPixelZoom);
 
@@ -139,7 +138,6 @@ class StrumNote extends FlxSkewedSprite
 	public function retryBound() {
 		trackedScale = trackedScale * 0.85;
 		setGraphicSize(initialWidth * (trackedScale * (PlayState.isPixelStage ? PlayState.daPixelZoom /** (1/ExtraKeysHandler.instance.data.pixelScales[PlayState.SONG.mania])) */: 1)));
-		trace(trackedScale);
 		updateHitbox();
 		postAddedToGroup();
 	}
