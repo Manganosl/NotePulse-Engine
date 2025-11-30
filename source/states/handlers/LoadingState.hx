@@ -353,9 +353,7 @@ class LoadingState extends MusicBeatState
 			#end
 			{
 				stageLua = new LoadingLua(luaToLoad);
-				return true;
 			}
-			return false;
 
 			#if LUA_ALLOWED
 			stageLua.stop();
