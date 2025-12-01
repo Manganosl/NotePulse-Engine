@@ -46,6 +46,8 @@ import backend.Conductor;
 import backend.BaseStage;
 import backend.Difficulty;
 import backend.Mods;
+import backend.camera.PsychCamera;
+import backend.camera.NPCamera;
 
 import objects.Alphabet;
 import objects.BGSprite;

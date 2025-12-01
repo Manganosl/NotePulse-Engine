@@ -422,7 +422,7 @@ class Note extends FlxSkewedSprite
 		offset.set();
 		flipX = myStrum.downScroll;
 		y += myStrum.height/20;
-		x -= myStrum.width/20;
+		x -= (myStrum.width*7/106.4);
 		if (myStrum.downScroll)
 			angle = 180 - angle;
 	}

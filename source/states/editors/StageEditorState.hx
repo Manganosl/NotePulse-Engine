@@ -1,7 +1,6 @@
 package states.editors;
 
 import backend.StageData;
-import backend.PsychCamera;
 import objects.Character;
 import psychlua.LuaUtils;
 

@@ -3,7 +3,6 @@ package states.base;
 import flixel.addons.ui.FlxUIState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.FlxState;
-import backend.PsychCamera;
 import flixel.FlxState;
 import sys.io.File;
 import haxe.io.Path;
