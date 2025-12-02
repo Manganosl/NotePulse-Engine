@@ -16,6 +16,7 @@ import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
+import flixel.math.FlxAngle;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxAxes;
 import flixel.util.FlxColor;
@@ -368,6 +369,11 @@ class FlxCamera extends FlxBasic
 	public var angle(default, set):Float = 0;
 
 	/**
+	 * Whenever the sprite should be rotated.
+	 */
+	public var rotateSprite(default, set):Bool = false;
+
+	/**
 	 * The color tint of the camera display.
 	 */
 	public var color(default, set):FlxColor = FlxColor.WHITE;
@@ -604,6 +610,12 @@ class FlxCamera extends FlxBasic
 	static var renderRect:FlxRect = FlxRect.get();
 
 	@:noCompletion
+	var _sinAngle:Float = 0;
+
+	@:noCompletion
+	var _cosAngle:Float = 1;
+
+	@:noCompletion
 	public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false, ?blend:BlendMode, smooth:Bool = false, ?shader:FlxShader)
 	{
 		#if FLX_RENDER_TRIANGLE
@@ -776,8 +788,7 @@ class FlxCamera extends FlxBasic
 		}
 	}
 
-	public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool = false,
-			?shader:FlxShader):Void
+	public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool = false, ?shader:FlxShader):Void 
 	{
 		if (FlxG.renderBlit)
 		{
@@ -786,11 +797,29 @@ class FlxCamera extends FlxBasic
 			if (_useBlitMatrix)
 			{
 				_helperMatrix.concat(_blitMatrix);
+
+				if (!rotateSprite && angle != 0)
+				{
+					var radians = angle * FlxAngle.TO_RAD;
+					_helperMatrix.translate(-width * 0.5, -height * 0.5);
+					_helperMatrix.rotate(radians);
+					_helperMatrix.translate(width * 0.5, height * 0.5);
+				}
+
 				buffer.draw(pixels, _helperMatrix, null, null, null, (smoothing || antialiasing));
 			}
 			else
 			{
 				_helperMatrix.translate(-viewMarginLeft, -viewMarginTop);
+
+				if (!rotateSprite && angle != 0)
+				{
+					var radians = angle * FlxAngle.TO_RAD;
+					_helperMatrix.translate(-width * 0.5, -height * 0.5);
+					_helperMatrix.rotate(radians);
+					_helperMatrix.translate(width * 0.5, height * 0.5);
+				}
+
 				buffer.draw(pixels, _helperMatrix, null, blend, null, (smoothing || antialiasing));
 			}
 		}
@@ -799,11 +828,20 @@ class FlxCamera extends FlxBasic
 			var isColored = (transform != null && transform.hasRGBMultipliers());
 			var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
 
+			if (!rotateSprite && angle != 0)
+			{
+				matrix.translate(-width * 0.5, -height * 0.5);
+				var radians = angle * FlxAngle.TO_RAD;
+				matrix.rotate(radians);
+				matrix.translate(width * 0.5, height * 0.5);
+			}
+
 			#if FLX_RENDER_TRIANGLE
-			var drawItem:FlxDrawTrianglesItem = startTrianglesBatch(frame.parent, smoothing, isColored, blend);
+			var drawItem = startTrianglesBatch(frame.parent, smoothing, isColored, blend);
 			#else
 			var drawItem = startQuadBatch(frame.parent, isColored, hasColorOffsets, blend, smoothing, shader);
 			#end
+
 			drawItem.addQuad(frame, matrix, transform);
 		}
 	}
@@ -2037,10 +2075,21 @@ class FlxCamera extends FlxBasic
 		return Alpha;
 	}
 
+	function set_rotateSprite(rotate:Bool):Bool
+	{
+		rotateSprite = rotate;
+		set_angle(angle);
+		return rotateSprite;
+	}
+
 	function set_angle(Angle:Float):Float
 	{
 		angle = Angle;
-		flashSprite.rotation = Angle;
+		flashSprite.rotation = rotateSprite ? Angle : 0;
+
+		var radians:Float = angle * FlxAngle.TO_RAD;
+		_sinAngle = Math.sin(radians);
+		_cosAngle = Math.cos(radians);
 		return Angle;
 	}
 

@@ -349,13 +349,14 @@ class PlayState extends MusicBeatState
 		guitarHeroSustains = ClientPrefs.data.guitarHeroSustains;
 
 		camGame = initPsychCamera();
-		camHUD = new NPCamera();
-		camOther = new NPCamera();
+		camHUD = new FlxCamera();
+		camOther = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
 
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
+		
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		grpSustainSplashes = new FlxTypedGroup<SustainSplash>();
 
