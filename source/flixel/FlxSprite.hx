@@ -1,5 +1,6 @@
 package flixel;
 
+import flixel.addons.display.FlxRuntimeShader;
 import flixel.FlxBasic.IFlxBasic;
 import flixel.animation.FlxAnimationController;
 import flixel.graphics.FlxGraphic;
@@ -22,6 +23,8 @@ import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
+
+import backend.utils.CustomShader;
 
 using flixel.util.FlxColorTransformUtil;
 
@@ -817,6 +820,9 @@ class FlxSprite extends FlxObject
 			drawDebug();
 		#end
 	}
+	
+	private inline function __shouldDoZoomFactor()
+		return zoomFactor != 1;
 
 	@:noCompletion
 	function drawSimple(camera:FlxCamera):Void
@@ -854,7 +860,24 @@ class FlxSprite extends FlxObject
 			_matrix.ty = Math.floor(_matrix.ty);
 		}
 
-		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader is backend.utils.CustomShader ? shader.shader : shader);
+		if(__shouldDoZoomFactor()) {
+			_matrix.translate(-camera.width / 2, -camera.height / 2);
+
+			var requestedZoom = (camera.zoom >= 0 ? Math.max : Math.min)(FlxMath.lerp(1, camera.zoom, zoomFactor), 0);
+			var diff = requestedZoom / camera.zoom;
+			_matrix.scale(diff, diff);
+			_matrix.translate(camera.width / 2, camera.height / 2);
+		}
+
+		var realShader:Dynamic;
+		if(shader != null){
+			if(shader is CustomShader){
+				realShader = shader.shader;
+			} else {
+				realShader = shader;
+			}
+		}
+		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, realShader);
 	}
 
 	/**
@@ -1281,9 +1304,6 @@ class FlxSprite extends FlxObject
 		newRect.set(x, y, width, height);
 		return newRect.getRotatedBounds(angle, origin, newRect);
 	}
-	
-	private inline function __shouldDoZoomFactor()
-		return zoomFactor != 1;
 
 	/**
 	 * Calculates the smallest globally aligned bounding box that encompasses this sprite's graphic as it
