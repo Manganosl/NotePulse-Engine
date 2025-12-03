@@ -507,27 +507,15 @@ class Note extends FlxSkewedSprite
 		if (PlayState.isPixelStage) Mscale = ExtraKeysHandler.instance.data.pixelScales[mania];
 		var sWidth = Note.swagWidthUnscaled * Mscale;
 		var center:Float = myStrum.y + offsetY + sWidth / 2;
-		if(isSustainNote && (mustPress || !ignoreNote) &&
-			(!mustPress || (wasGoodHit || (prevNote.wasGoodHit && !canBeHit))))
+
+		if (isSustainNote && (mustPress || !ignoreNote) && wasGoodHit)
 		{
-			var swagRect:FlxRect = clipRect;
-			if(swagRect == null) swagRect = new FlxRect(0, 0, frameWidth, frameHeight);
-			if (myStrum.downScroll)
-			{
-				if(y - offset.y * scale.y + height >= center)
-				{
-					swagRect.width = frameWidth;
-					swagRect.height = (center - y) / scale.y;
-					swagRect.y = frameHeight - swagRect.height;
-				}
-			}
-			else if (y + offset.y * scale.y <= center)
-			{
-				swagRect.y = (center - y) / scale.y;
-				swagRect.width = width / scale.x;
-				swagRect.height = (height / scale.y) - swagRect.y;
-			}
-			clipRect = swagRect;
+			var clipDistance:Float = Math.max(-distance, 0);
+			clipRect ??= new FlxRect(0, 0, frameWidth);
+			clipRect.y = clipDistance / scale.y;
+			clipRect.height = frameHeight - clipRect.y;
+
+			clipRect = clipRect;
 		}
 	}
 
