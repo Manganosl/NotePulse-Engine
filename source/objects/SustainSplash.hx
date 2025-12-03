@@ -34,6 +34,7 @@ class SustainSplash extends FlxSkewedSprite {
 	}
 
 	public inline function show(note:Note) {
+		if(!modchart && !strum.visible) return;
 		updatedThisFrame = true;
 
 		var tempShader:RGBPalette = null;
