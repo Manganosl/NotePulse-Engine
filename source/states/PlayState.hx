@@ -1547,7 +1547,10 @@ class PlayState extends MusicBeatState
 
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 				swagNote.row = Conductor.secsToRow(daStrumTime);
-				var rowArray = noteRows[gottaHitNote ? 0 : 1];
+				var realGotta:Bool;
+				if(isPlayerOpponent) realGotta = !gottaHitNote;
+				else realGotta = gottaHitNote;
+				var rowArray = noteRows[realGotta ? 0 : 1];
 				if (rowArray[swagNote.row] == null) rowArray[swagNote.row] = [];
 				rowArray[swagNote.row].push(swagNote);
 				swagNote.mustPress = gottaHitNote;

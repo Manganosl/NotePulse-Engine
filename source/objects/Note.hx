@@ -100,6 +100,7 @@ class Note extends FlxSkewedSprite
 	};
 
 	public var offsetX:Float = 0;
+	private var susOffset:Float = 0;
 	public var offsetY:Float = 0;
 	public var offsetAngle:Float = 0;
 	public var multAlpha:Float = 1;
@@ -241,8 +242,8 @@ class Note extends FlxSkewedSprite
 			alpha = 0.6;
 			multAlpha = 0.6;
 			hitsoundDisabled = true;
-			if(ClientPrefs.data.downScroll) flipY = true;
 			offsetX += width / 2;
+			susOffset += width / 2;
 			copyAngle = false;
 			var mania = 3;
 			if (PlayState.SONG != null) mania = PlayState.SONG.mania;
@@ -250,8 +251,11 @@ class Note extends FlxSkewedSprite
 			animation.play(animToPlay + 'holdend');
 			updateHitbox();
 			offsetX -= width / 2;
-			if (PlayState.isPixelStage)
+			susOffset -= width / 2;
+			if (PlayState.isPixelStage){
 				offsetX += 30;
+				susOffset += 30;
+			}
 			if (prevNote.isSustainNote)
 			{
 				prevNote.animation.play(animToPlay + 'hold');
@@ -343,8 +347,10 @@ class Note extends FlxSkewedSprite
 			antialiasing = false;
 			if(isSustainNote) {
 				offsetX += _lastNoteOffX;
+				susOffset += _lastNoteOffX;
 				_lastNoteOffX = (width - 7) * (PlayState.daPixelZoom / 2);
 				offsetX -= _lastNoteOffX;
+				susOffset -= _lastNoteOffX;
 			}
 		} else {
 			frames = Paths.getSparrowAtlas(skin);
@@ -411,22 +417,6 @@ class Note extends FlxSkewedSprite
 		return (0.45 * time * speed);
 	}
 
-	public function updateSustain(myStrum:StrumNote, noteSpeed:Float = 1)
-	{
-		if (!isSustainEnd)
-		{
-			scale.y = getDistance(sustainLength, noteSpeed) / frameHeight;
-			updateHitbox();
-		}
-		origin.set(frameWidth * .5, 0);
-		offset.set();
-		flipX = myStrum.downScroll;
-		y += myStrum.height/20;
-		x -= (myStrum.width*7/106.4);
-		if (myStrum.downScroll)
-			angle = 180 - angle;
-	}
-
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -484,19 +474,26 @@ class Note extends FlxSkewedSprite
 		if(copyX)
 			x = strumX + offsetX + Math.cos(angleDir) * distance;
 		if(copyY)
-		{
 			y = strumY + offsetY + correctionOffset + Math.sin(angleDir) * distance;
-			if(myStrum.downScroll && isSustainNote)
-			{
-				if(PlayState.isPixelStage)
-				{
-					y -= PlayState.daPixelZoom * 9.5;
-				}
-				y -= (frameHeight * scale.y) - (sWidth / 2);
-			}
-		}
 		if (isSustainNote)
 			updateSustain(myStrum, songSpeed * multSpeed);
+	}
+
+	public function updateSustain(myStrum:StrumNote, noteSpeed:Float = 1)
+	{
+		if (!isSustainEnd)
+		{
+			scale.y = getDistance(sustainLength, noteSpeed) / frameHeight;
+			updateHitbox();
+		}
+		origin.set(frameWidth * .5, 0);
+		offset.set();
+		flipX = myStrum.downScroll;
+		var angleDir = myStrum.direction * Math.PI / 180;
+		x = myStrum.x + offsetX - (susOffset/4.25) + Math.cos(angleDir) * distance;
+		if (myStrum.downScroll){
+			angle = 180 - angle;
+		}
 	}
 
 	public function clipToStrumNote(myStrum:StrumNote)
