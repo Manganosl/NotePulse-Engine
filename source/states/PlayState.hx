@@ -2338,7 +2338,8 @@ public function changeMania(newMania:Int):Void {
 							if (daNote.isSustainNote && daNote.wasGoodHit && !strum.sustainSplash.updatedThisFrame) {
 								if (daNote.animation.curAnim.name.endsWith("holdend")) {
 									if (Conductor.songPosition >= daNote.strumTime) {
-										strum.sustainSplash.hide(!daNote.mustPress);
+										if(!cpuControlled) strum.sustainSplash.hide(!daNote.mustPress);
+										else strum.sustainSplash.hide(true);
 									}
 								} else {
 									strum.sustainSplash.show(daNote);
@@ -2367,8 +2368,7 @@ public function changeMania(newMania:Int):Void {
 				}
 				for (strum in strumLineNotes.members) {
 					if (!strum.sustainSplash.updatedThisFrame) {
-						if(!PlayState.instance.cpuControlled) strum.sustainSplash.hide(true);
-						else strum.sustainSplash.hide(false);
+						strum.sustainSplash.hide(true);
 					}
 				}
 			}
