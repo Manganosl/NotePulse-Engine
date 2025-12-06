@@ -707,7 +707,7 @@ class Character extends FlxSkewedSprite
 	    var camy = find('camy', xmlText);
 	    var icon = find('icon', xmlText) != null ? find('icon', xmlText) : find('healthicon', xmlText);
 	    var holdTime = find('hold', xmlText) != null ? find('hold', xmlText) : find('holdtime', xmlText);
-	    var flipX = find('flip_x', xmlText);
+	    var flipX = find('flipX', xmlText);
 	    var antialiasing = find('antialiasing', xmlText);
 	    var healthbar = find('healthbar', xmlText);
 	    var vocals = find('vocals', xmlText) != null ? find('vocals', xmlText) : find('vocals_file', xmlText);
@@ -886,6 +886,7 @@ class Character extends FlxSkewedSprite
 		obj.add(',"animations":[' + animsArr.join(",") + ']');
 
 	    obj.add("}");
+		trace(obj.toString());
 	    return obj.toString();
 	}
 
