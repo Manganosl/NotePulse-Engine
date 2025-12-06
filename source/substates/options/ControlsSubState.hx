@@ -229,7 +229,11 @@ class ControlsSubState extends MusicBeatSubstate
 			if(onKeyboardMode)
 			{
 				var savKey:Array<Null<FlxKey>> = ClientPrefs.keyBinds.get(option[2]);
-				key = InputFormatter.getKeyName((savKey[n] != null) ? savKey[n] : NONE);
+				var fuckDaCrash:Dynamic = null;
+				try{
+					fuckDaCrash = InputFormatter.getKeyName((savKey[n] != null) ? savKey[n] : NONE);
+				} catch(_){}
+				if(fuckDaCrash != null) key = fuckDaCrash;
 			}
 			else
 			{

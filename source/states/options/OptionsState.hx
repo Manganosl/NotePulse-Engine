@@ -9,7 +9,7 @@ class OptionsState extends MusicBeatState
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private var descText:FlxText;
 	private var cosanegra:FlxSprite;
-	private var controlesActivos:Bool = true;
+	private var doControls:Bool = true;
 	private var titleText:FlxText;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
@@ -126,7 +126,7 @@ class OptionsState extends MusicBeatState
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Options Menu", null);
 		#end
-		controlesActivos = true;
+		doControls = true;
 	}
 
 	override function update(elapsed:Float) {
@@ -137,16 +137,17 @@ class OptionsState extends MusicBeatState
 		selectorLeft.y = CoolUtil.fpsLerp(selectorLeft.y, intendedSelY, 0.25);
 		selectorRight.y = CoolUtil.fpsLerp(selectorRight.y, intendedSelY, 0.25);
 
-		if (controls.UI_UP_P && controlesActivos) {
+		if(!doControls) return;
+		if (controls.UI_UP_P) {
 			changeSelection(-1);
 			descriptionchange(options[curSelected]);
 		}
-		if (controls.UI_DOWN_P && controlesActivos) {
+		if (controls.UI_DOWN_P) {
 			changeSelection(1);
 			descriptionchange(options[curSelected]);
 		}
 
-		if (controls.BACK && controlesActivos) {
+		if (controls.BACK) {
 			for (item in grpOptions.members) {
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				if(onPlayState)
@@ -158,8 +159,8 @@ class OptionsState extends MusicBeatState
 				else MusicBeatState.switchState(new MainMenuState());
 			}
 		}
-		else if (controls.ACCEPT && controlesActivos) {
-			controlesActivos = false;
+		else if (controls.ACCEPT) {
+			doControls = false;
 			for (item in grpOptions.members) {
 				FlxTween.tween(item, {alpha: 0}, 0.1, {ease: FlxEase.quadOut});
 				FlxTween.tween(selectorLeft, {alpha: 0}, 0.1, {ease: FlxEase.quadOut});
