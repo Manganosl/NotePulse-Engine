@@ -709,20 +709,14 @@ class Character extends FlxSkewedSprite
 	    var holdTime = find('hold', xmlText) != null ? find('hold', xmlText) : find('holdtime', xmlText);
 	    var flipX = find('flipX', xmlText);
 	    var antialiasing = find('antialiasing', xmlText);
-	    var healthbar = find('healthbar', xmlText);
+	    var healthbar = find('color', xmlText);
 	    var vocals = find('vocals', xmlText) != null ? find('vocals', xmlText) : find('vocals_file', xmlText);
 	    var editorPlayer = find('_editor_isPlayer', xmlText);
 
 	    var hcolors:Array<Int> = null;
 	    if (healthbar != null) {
-	        var parts = StringTools.replace(healthbar, " ", "").split(',');
-	        if (parts.length >= 3) {
-	            try {
-	                hcolors = [ Std.parseInt(parts[0]), Std.parseInt(parts[1]), Std.parseInt(parts[2]) ];
-	            } catch (e:Dynamic) {
-	                hcolors = null;
-	            }
-	        }
+			var tempColor = FlxColor.fromString(healthbar);
+	        hcolors = [tempColor.red, tempColor.green, tempColor.blue];
 	    }
 
 	    var obj = new StringBuf();
@@ -886,7 +880,6 @@ class Character extends FlxSkewedSprite
 		obj.add(',"animations":[' + animsArr.join(",") + ']');
 
 	    obj.add("}");
-		trace(obj.toString());
 	    return obj.toString();
 	}
 

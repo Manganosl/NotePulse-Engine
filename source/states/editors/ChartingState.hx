@@ -3076,6 +3076,21 @@ function positionNoteYOnTime(note:MetaNote, section:Int)
 		tab_group.add(noteTypeDropDown);
 	}
 
+	function swapDaSection(pAm:Int){
+		var maxData:Int = GRID_COLUMNS_PER_PLAYER * pAm;
+		for (note in curRenderedNotes)
+		{
+			if(note != null && !note.isEvent)
+			{
+				var data:Int = note.songData[1] + GRID_COLUMNS_PER_PLAYER;
+				if(data >= maxData) data -= maxData;
+				note.changeNoteData(data);
+				positionNoteXByData(note);
+			}
+		}
+		softReloadNotes(true);
+	}
+
 	var mustHitCheckBox:PsychUICheckBox;
 	var gfSectionCheckBox:PsychUICheckBox;
 	var altAnimSectionCheckBox:PsychUICheckBox;
@@ -3161,6 +3176,7 @@ function positionNoteYOnTime(note:MetaNote, section:Int)
 		{
 			var sec = getCurChartSection();
 			if(sec != null) sec.mustHitSection = mustHitCheckBox.checked;
+			swapDaSection(2);
 			updateHeads(true);
 		});
 		gfSectionCheckBox = new PsychUICheckBox(objX + 100, objY, 'GF Section', 70, function()
@@ -3270,18 +3286,7 @@ function positionNoteYOnTime(note:MetaNote, section:Int)
 		objY += 40;
 		var swapSectionButton:PsychUIButton = new PsychUIButton(objX, objY, 'Swap Section', function()
 		{
-			var maxData:Int = GRID_COLUMNS_PER_PLAYER * GRID_PLAYERS;
-			for (note in curRenderedNotes)
-			{
-				if(note != null && !note.isEvent)
-				{
-					var data:Int = note.songData[1] + GRID_COLUMNS_PER_PLAYER;
-					if(data >= maxData) data -= maxData;
-					note.changeNoteData(data);
-					positionNoteXByData(note);
-				}
-			}
-			softReloadNotes(true);
+			swapDaSection(PlayState.SONG.gfStrums ? 3 : 2);
 		});
 		var duetSectionButton:PsychUIButton = new PsychUIButton(objX + 100, objY, 'Duet Section', function()
 		{
