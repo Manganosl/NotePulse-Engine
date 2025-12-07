@@ -225,22 +225,10 @@ class PlayState extends MusicBeatState
 	public static var changedDifficulty:Bool = false;
 	public static var chartingMode:Bool = false;
 
-	public static var rsNoteMs:Array<Float> = [];
-    public static var rsNoteTime:Array<Float> = [];
-	public static var rsMarvelous:Int = 0;
-    public static var rsSicks:Int = 0;
-	public static var rsGoods:Int = 0;
-	public static var rsBads:Int = 0;
-	public static var rsShits:Int = 0;
-	public static var rsMisses:Int = 0;
-	
-	public static var rsACC:Float = 0;
-    public static var rsScore:Int = 0;
-	public static var rsHits:Int = 0;
+	public var noteMs:Array<Float> = [];
+    public var noteTime:Array<Float> = [];
+
 	var rsCheck:Bool = false;
-	
-	public static var rsRatingFC:String = '';
-    public static var rsRatingName:String = '';
 
 	//Gameplay settings
 	public var healthGain:Float = 1;
@@ -282,7 +270,7 @@ class PlayState extends MusicBeatState
 	public var inCutscene:Bool = false;
 	public var skipCountdown:Bool = false;
 	var songLength:Float = 0;
-	public static var rsSongLength:Float = 0;
+	public var realSongLength:Float = 0;
 
 	public var boyfriendCameraOffset:Array<Float> = null;
 	public var opponentCameraOffset:Array<Float> = null;
@@ -413,8 +401,8 @@ class PlayState extends MusicBeatState
 		DAD_X = stageData.opponent[0];
 		DAD_Y = stageData.opponent[1];
 
-		rsNoteMs = [];
-		rsNoteTime = [];
+		noteMs = [];
+		noteTime = [];
 
 		if(stageData.camera_speed != null)
 			cameraSpeed = stageData.camera_speed;
@@ -1409,7 +1397,7 @@ class PlayState extends MusicBeatState
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
-		rsSongLength = FlxG.sound.music.length;
+		realSongLength = FlxG.sound.music.length;
 		FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 		FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 
@@ -3303,26 +3291,14 @@ public function changeMania(newMania:Int):Void {
 			{
 				Log.hxTrace('WENT BACK TO FREEPLAY??');
 				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
-
-					rsMarvelous = ratingsData[0].hits;
-				    rsSicks = ratingsData[1].hits;
-	                rsGoods = ratingsData[2].hits;
-	                rsBads = ratingsData[3].hits;
-	                rsShits = ratingsData[4].hits;
-	                
-	                rsACC = ratingPercent;
-	                rsScore = songScore;
-	                rsHits = songHits;
-	                rsMisses = songMisses;
-	                
-	                rsRatingFC = ratingFC;
-                    rsRatingName = ratingName;
                     rsCheck = true;
-					openSubState(new substates.ResultsScreen(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
-					//Mods.loadTopMod();
-					//MusicBeatState.switchState(new FreeplayState());
-					//FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);
-					//FlxG.sound.music.fadeIn(4, 0, 0.7);
+					if(!cpuControlled) openSubState(new substates.ResultsScreen(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+					else {
+						Mods.loadTopMod();
+						MusicBeatState.switchState(new states.menus.FreeplayState());
+						FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);
+						FlxG.sound.music.fadeIn(4, 0, 0.7);
+					}
 				changedDifficulty = false;
 			}
 			transitioning = true;
@@ -3909,8 +3885,8 @@ private function popUpScore(note:Note = null):Void
 		}
 
         if (!note.isSustainNote){
-		    rsNoteMs.push(167);
-		    rsNoteTime.push(note.strumTime);
+		    noteMs.push(167);
+		    noteTime.push(note.strumTime);
 		}
 
 		var lastCombo:Int = combo;
@@ -4155,8 +4131,8 @@ private function popUpScore(note:Note = null):Void
 			popUpScore(note);
 
 			var noteDiff:Float = (Conductor.songPosition - note.strumTime + ClientPrefs.data.ratingOffset) / playbackRate;
-			rsNoteMs.push((noteDiff));
-			rsNoteTime.push(note.strumTime);
+			noteMs.push((noteDiff));
+			noteTime.push(note.strumTime);
 		}
 		var gainHealth:Bool = true; // prevent health gain, *if* sustains are treated as a singular note
 		if (guitarHeroSustains && note.isSustainNote) gainHealth = false;

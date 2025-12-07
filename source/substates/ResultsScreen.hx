@@ -19,6 +19,8 @@ typedef NoteTypeColorData =
 
 class ResultsScreen extends MusicBeatSubstate
 {
+	public var parent:PlayState = PlayState.instance;
+
 	public var background:FlxSprite;	
     public var graphBG:FlxSprite;
     public var graphSizeUp:FlxSprite;
@@ -80,19 +82,19 @@ class ResultsScreen extends MusicBeatSubstate
 	    
 	    var noteSize = 2.3;
 	    var MoveSize = 0.6;
-		for (i in 0...PlayState.rsNoteTime.length){
-		    if (Math.abs(PlayState.rsNoteMs[i]) <= 200) color = ColorArray[5];
-		    if (Math.abs(PlayState.rsNoteMs[i]) <= 166) color = ColorArray[4];
-		    if (Math.abs(PlayState.rsNoteMs[i]) <= 135) color = ColorArray[3];
-		    if (Math.abs(PlayState.rsNoteMs[i]) <= 90) color = ColorArray[2];
-		    if (Math.abs(PlayState.rsNoteMs[i]) <= 45) color = ColorArray[1];
-			if (Math.abs(PlayState.rsNoteMs[i]) <= 20) color = ColorArray[0];
+		for (i in 0...parent.noteTime.length){
+		    if (Math.abs(parent.noteMs[i]) <= 200) color = ColorArray[5];
+		    if (Math.abs(parent.noteMs[i]) <= 166) color = ColorArray[4];
+		    if (Math.abs(parent.noteMs[i]) <= 135) color = ColorArray[3];
+		    if (Math.abs(parent.noteMs[i]) <= 90) color = ColorArray[2];
+		    if (Math.abs(parent.noteMs[i]) <= 45) color = ColorArray[1];
+			if (Math.abs(parent.noteMs[i]) <= 20) color = ColorArray[0];
 		    FlxSpriteUtil.beginDraw(color);
-		    if (Math.abs(PlayState.rsNoteMs[i]) <= 166){
-    		noteSpr.drawCircle(graphWidth * (PlayState.rsNoteTime[i] / PlayState.rsSongLength) - noteSize / 2 , graphHeight * 0.5 + graphHeight * 0.5 * MoveSize * (PlayState.rsNoteMs[i] / 166.6) /*- noteSize / 2*/, noteSize);
+		    if (Math.abs(parent.noteMs[i]) <= 166){
+    		noteSpr.drawCircle(graphWidth * (parent.noteTime[i] / parent.realSongLength) - noteSize / 2 , graphHeight * 0.5 + graphHeight * 0.5 * MoveSize * (parent.noteMs[i] / 166.6) /*- noteSize / 2*/, noteSize);
     		}
     		else{
-    		noteSpr.drawCircle(graphWidth * (PlayState.rsNoteTime[i] / PlayState.rsSongLength) - noteSize / 2 , graphHeight * 0.5 + graphHeight * 0.5 * 0.8 /*- noteSize / 2*/, noteSize);		
+    		noteSpr.drawCircle(graphWidth * (parent.noteTime[i] / parent.realSongLength) - noteSize / 2 , graphHeight * 0.5 + graphHeight * 0.5 * 0.8 /*- noteSize / 2*/, noteSize);		
     		}
     		
 		    graphBG.pixels.draw(FlxSpriteUtil.flashGfxSprite);
@@ -202,18 +204,16 @@ class ResultsScreen extends MusicBeatSubstate
 		clearText.antialiasing = ClientPrefs.data.antialiasing;
 		add(clearText);		
 	    
-	    var ACC = Math.ceil(PlayState.rsACC * 10000) / 100;
+	    var ACC = Math.ceil(parent.ratingPercent * 10000) / 100;
 		judgeText = new FlxText(-400, 200, 0, 
-		'Judgements:\nMarvelous: ' + PlayState.rsMarvelous
-		+ '\nSicks: ' + PlayState.rsSicks
-		+ '\nGoods: ' + PlayState.rsGoods
-		+ '\nBads: ' + PlayState.rsBads
-		+ '\nShits: ' + PlayState.rsShits
-		+ '\n\nMisses: ' + PlayState.rsMisses
-		//+ '\nHighest Combo: ' + PlayState.highestCombo 
-		+ '\nScore: ' + PlayState.rsScore
+		'Judgements:\nMarvelous: ' + parent.ratingsData[0].hits
+		+ '\nSicks: ' + parent.ratingsData[1].hits
+		+ '\nGoods: ' + parent.ratingsData[2].hits
+		+ '\nBads: ' + parent.ratingsData[3].hits
+		+ '\nShits: ' + parent.ratingsData[4].hits
+		+ '\n\nMisses: ' + parent.songMisses
+		+ '\nScore: ' + parent.songScore
 		+ '\nAccuracy: ' + ACC + '%'
-		//+ '\nRank: ' + PlayState.rsRatingName + '(' + PlayState.rsRatingFC + ')\n'
 		);
 		judgeText.size = 25;
 		judgeText.font = Paths.font('vcr.ttf');
@@ -250,10 +250,10 @@ class ResultsScreen extends MusicBeatSubstate
 		add(setGameText);
 		
 		var Main:Float = 0;
-		for (i in 0...PlayState.rsNoteTime.length){
-		Main = Main + Math.abs(PlayState.rsNoteMs[i]);
+		for (i in 0...parent.noteTime.length){
+		Main = Main + Math.abs(parent.noteMs[i]);
 		}
-		Main = Math.ceil(Main / PlayState.rsNoteTime.length * 100) / 100;
+		Main = Math.ceil(Main / parent.noteTime.length * 100) / 100;
 
 		setMsText = new FlxText(20, FlxG.height + 150, 0, 
 		'Main: ' + Main + 'ms'
