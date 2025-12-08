@@ -2410,65 +2410,64 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			maxTime = cachedSectionTimes[sec + 1];
 		return maxTime;
 	}
-
 	
-function positionNoteXByData(note:MetaNote, ?data:Null<Int> = null)
-{
-	if (data == null)
-		data = note.songData[1];
-
-	var noteX:Float = gridBg.x + (GRID_SIZE - note.width) / 2;
-	if (SHOW_EVENT_COLUMN)
-		noteX += GRID_SIZE;
-
-	var lane:Int = Std.int(data % GRID_COLUMNS_PER_PLAYER);
-	var groupIndex:Int = 0;
-
-	if (note.gfNote || note.gfStrum)
+	function positionNoteXByData(note:MetaNote, ?data:Null<Int> = null)
 	{
-		groupIndex = 2;
-	}
-	else
-	{
-		var sec:Int = 0;
-		for (i in 0...cachedSectionTimes.length)
-		{
-			if (i == cachedSectionTimes.length - 1 ||
-				(note.strumTime >= cachedSectionTimes[i] && note.strumTime < cachedSectionTimes[i + 1]))
-			{
-				sec = i;
-				break;
-			}
-		}
+		if (data == null)
+			data = note.songData[1];
 
-		if (sec < 0) sec = 0;
-		if (sec >= PlayState.SONG.notes.length) sec = PlayState.SONG.notes.length - 1;
+		var noteX:Float = gridBg.x + (GRID_SIZE - note.width) / 2;
+		if (SHOW_EVENT_COLUMN)
+			noteX += GRID_SIZE;
 
-		var section = PlayState.SONG.notes[sec];
-		if (section != null && section.mustHitSection)
+		var lane:Int = Std.int(data % GRID_COLUMNS_PER_PLAYER);
+		var groupIndex:Int = 0;
+
+		if (note.gfStrum)
 		{
-			groupIndex = note.mustPress ? 0 : 1;
+			groupIndex = 2;
 		}
 		else
 		{
-			groupIndex = note.mustPress ? 1 : 0;
+			var sec:Int = 0;
+			for (i in 0...cachedSectionTimes.length)
+			{
+				if (i == cachedSectionTimes.length - 1 ||
+					(note.strumTime >= cachedSectionTimes[i] && note.strumTime < cachedSectionTimes[i + 1]))
+				{
+					sec = i;
+					break;
+				}
+			}
+
+			if (sec < 0) sec = 0;
+			if (sec >= PlayState.SONG.notes.length) sec = PlayState.SONG.notes.length - 1;
+
+			var section = PlayState.SONG.notes[sec];
+			if (section != null && section.mustHitSection)
+			{
+				groupIndex = note.mustPress ? 0 : 1;
+			}
+			else
+			{
+				groupIndex = note.mustPress ? 1 : 0;
+			}
 		}
+
+		if (groupIndex == 2)
+			note.gfStrum = true;
+
+		if (groupIndex >= GRID_PLAYERS) groupIndex = GRID_PLAYERS - 1;
+		if (groupIndex < 0) groupIndex = 0;
+		if (note.gfStrum)
+			groupIndex = 2;
+
+		noteX += GRID_SIZE * (groupIndex * GRID_COLUMNS_PER_PLAYER + lane);
+
+		note.x = noteX;
 	}
 
-	if (groupIndex == 2)
-		note.gfStrum = true;
-
-	if (groupIndex >= GRID_PLAYERS) groupIndex = GRID_PLAYERS - 1;
-	if (groupIndex < 0) groupIndex = 0;
-	if (note.gfStrum)
-		groupIndex = 2;
-
-	noteX += GRID_SIZE * (groupIndex * GRID_COLUMNS_PER_PLAYER + lane);
-
-	note.x = noteX;
-}
-
-function positionNoteYOnTime(note:MetaNote, section:Int)
+	function positionNoteYOnTime(note:MetaNote, section:Int)
 	{
 		var time:Float = note.strumTime - cachedSectionTimes[section];
 		var noteY:Float = (time / cachedSectionCrochets[section]) * GRID_SIZE * 4 * curZoom;
@@ -3078,6 +3077,7 @@ function positionNoteYOnTime(note:MetaNote, section:Int)
 
 	function swapDaSection(pAm:Int){
 		var maxData:Int = GRID_COLUMNS_PER_PLAYER * pAm;
+		var gfStrumLimit = GRID_COLUMNS_PER_PLAYER * 2;
 		for (note in curRenderedNotes)
 		{
 			if(note != null && !note.isEvent)
@@ -3085,6 +3085,8 @@ function positionNoteYOnTime(note:MetaNote, section:Int)
 				var data:Int = note.songData[1] + GRID_COLUMNS_PER_PLAYER;
 				if(data >= maxData) data -= maxData;
 				note.changeNoteData(data);
+				if(data >= gfStrumLimit) note.gfStrum = true;
+				else note.gfStrum = false;
 				positionNoteXByData(note);
 			}
 		}
