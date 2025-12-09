@@ -1184,20 +1184,18 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				if(FlxG.mouse.y >= gridBg.y) t *= curZoom;
 				dummyArrow.y = gridBg.y + t;
 			}
-
 			if(isMovingNotes)
 			{
-				// Move note data
 				var nData:Int = Std.int(Math.max(0, noteData));
 				if(movingNotesLastData != nData)
 				{
 					var isFirst:Bool = true;
 					var movingNotesMinData:Int = 0;
 					var movingNotesMaxData:Int = 0;
-					for (note in selectedNotes) //Find boundaries first
+					for (note in selectedNotes)
 					{
 						if(note == null || note.isEvent) continue;
-	
+
 						var data:Int = note.songData[1];
 						if(isFirst || data < movingNotesMinData) movingNotesMinData = data;
 						if(data > movingNotesMaxData) movingNotesMaxData = data;
@@ -1215,20 +1213,27 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 					for (note in movingNotes)
 					{
-						if(note == null || note.isEvent) continue; //Events shouldn't change note data as they don't have one
+						if(note == null || note.isEvent) continue;
+
+						var sec = getCurChartSection();
+						var lane:Int = note.songData[1];
 
 						note.changeNoteData(note.songData[1] + diff);
+
+						lane = note.songData[1];
+						if(PlayState.SONG.gfStrums && lane >= (GRID_COLUMNS_PER_PLAYER*2)) note.gfStrum = true;
+						else note.gfStrum = false;
+						
 						positionNoteXByData(note);
 					}
 				}
 				movingNotesLastData = nData;
 
-				// Move note strum time
 				if(dummyArrow.y != movingNotesLastY)
 				{
 					var diff:Float = dummyArrow.y - movingNotesLastY;
 					var curSecRow:Int = 0;
-					for (note in movingNotes) //Try to figure out new strum time for the notes, DEFINITELY INACCURATE WITH BPM CHANGING, ALTHOUGH UNTESTED
+					for (note in movingNotes)
 					{
 						if(note == null) continue;
 
@@ -1241,6 +1246,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 						note.setStrumTime(Math.max(-5000, note.strumTime + (diff * cachedSectionCrochets[curSecRow] / 4) / GRID_SIZE * curZoom));
 						positionNoteYOnTime(note, curSecRow);
+						
+						if(!note.isEvent && note.hasSustain)
+							note.updateSustainToZoom(cachedSectionCrochets[curSecRow] / 4, curZoom);
+						
 						if(note.isEvent) cast (note, EventMetaNote).updateEventText();
 					}
 					movingNotesLastY = dummyArrow.y;
@@ -1511,7 +1520,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		lastFocus = PsychUIInputText.focusOn;
 	}
 
-	function moveSelectedNotes(noteData:Int = 0, lastY:Float) //This turns selected notes into moving notes
+	function moveSelectedNotes(noteData:Int = 0, lastY:Float)
 	{
 		var originalNotes:Array<MetaNote> = [];
 		var originalEvents:Array<EventMetaNote> = [];
@@ -1532,6 +1541,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				}
 				originalNotes.push(note);
 				var mov:MetaNote = createNote(note.songData, secNum);
+				mov.rgbShader.enabled = note.rgbShader.enabled;
 				movingNotes.add(mov);
 				movedNotes.push(mov);
 			}

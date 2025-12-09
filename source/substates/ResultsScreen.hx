@@ -44,8 +44,7 @@ class ResultsScreen extends MusicBeatSubstate
     public var clearText:FlxText;
 	public var judgeText:FlxText;
 	public var setGameText:FlxText;
-	public var setMsText:FlxText;
-	public var backText:FlxText;
+	public var nextText:FlxText;
     
     public var NoteTypeColor:NoteTypeColorData;
     
@@ -206,7 +205,7 @@ class ResultsScreen extends MusicBeatSubstate
 	    
 	    var ACC = Math.ceil(parent.ratingPercent * 10000) / 100;
 		judgeText = new FlxText(-400, 200, 0, 
-		'Judgements:\nMarvelous: ' + parent.ratingsData[0].hits
+		'Marvelous: ' + parent.ratingsData[0].hits
 		+ '\nSicks: ' + parent.ratingsData[1].hits
 		+ '\nGoods: ' + parent.ratingsData[2].hits
 		+ '\nBads: ' + parent.ratingsData[3].hits
@@ -221,25 +220,13 @@ class ResultsScreen extends MusicBeatSubstate
 		judgeText.scrollFactor.set();
 		judgeText.antialiasing = ClientPrefs.data.antialiasing;
 		add(judgeText);
-		
-		var botplay:String = 'Close';
-		if (ClientPrefs.getGameplaySetting('botplay')) botplay = 'Open';
-		var practice:String = 'Close';
-
-		if (ClientPrefs.getGameplaySetting('practice')) practice = 'Open';
 
 		setGameText = new FlxText(FlxG.width + 400, 420, 0, 
-		'healthGain: X' + ClientPrefs.getGameplaySetting('healthgain')
-		+ '  healthLoss: X' + ClientPrefs.getGameplaySetting('healthloss')
-		+ '\n'
-		+ 'SongSpeed: X' + ClientPrefs.getGameplaySetting('scrollspeed')
-		+ '  PlaybackRate: X' + ClientPrefs.getGameplaySetting('songspeed')
-		+ '\n'
-		+ 'BotPlay: ' + botplay
-		+ '  PracticeMode: ' + practice
-		+ '\n'
-		+ 'Finished time: ' + Date.now().toString()
-		+ '\n'
+		'Health Gain: X' + ClientPrefs.getGameplaySetting('healthgain')
+		+'\nHealth Loss: X' + ClientPrefs.getGameplaySetting('healthloss')
+		+'\nScroll Speed: X' + ClientPrefs.getGameplaySetting('scrollspeed')
+		+'\nPlayback Rate: X' + ClientPrefs.getGameplaySetting('songspeed')
+		+(ClientPrefs.getGameplaySetting('practice')?'\n\nPractice Mode':'')
 		);
 		setGameText.size = 25;
 		setGameText.alignment = RIGHT;
@@ -253,48 +240,23 @@ class ResultsScreen extends MusicBeatSubstate
 		for (i in 0...parent.noteTime.length){
 		Main = Main + Math.abs(parent.noteMs[i]);
 		}
-		Main = Math.ceil(Main / parent.noteTime.length * 100) / 100;
+		Main = Math.ceil(Main / parent.noteTime.length * 100) / 100;	
+		
+		nextText = new FlxText(0, FlxG.height - 45, 0, 'Press Accept to continue.');
+		nextText.size = 28;
+		nextText.font = Paths.font('vcr.ttf');
+		nextText.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1, 1);
+		nextText.scrollFactor.set();
+		nextText.antialiasing = ClientPrefs.data.antialiasing;
+	    nextText.alignment = RIGHT;
+		add(nextText);		
+		nextText.alpha = 0;
+		nextText.x = FlxG.width - nextText.width - 20;
 
-		setMsText = new FlxText(20, FlxG.height + 150, 0, 
-		'Main: ' + Main + 'ms'
-		+ '\n'
-		+ '('
-		+ 'SICK:' + ClientPrefs.data.sickWindow + 'ms,'
-		+ 'GOOD:' + ClientPrefs.data.goodWindow + 'ms,'
-		+ 'BAD:' + ClientPrefs.data.badWindow + 'ms,'
-		+ 'SHIT:' + '166.6' + 'ms'
-		+ ')'		
-		+ '\n'
-		);
-		setMsText.size = 16;
-		setMsText.font = Paths.font('vcr.ttf');
-		setMsText.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1, 1);
-		setMsText.scrollFactor.set();
-		setMsText.antialiasing = ClientPrefs.data.antialiasing;
-		add(setMsText);		
-		
-		backText = new FlxText(0, FlxG.height - 45, 0, 'Press Back to continue.');
-		backText.size = 28;
-		backText.font = Paths.font('vcr.ttf');
-		backText.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1, 1);
-		backText.scrollFactor.set();
-		backText.antialiasing = ClientPrefs.data.antialiasing;
-	    backText.alignment = RIGHT;
-		add(backText);		
-		backText.alpha = 0;
-		backText.x = FlxG.width - backText.width - 20;
-		//--------------text
-		
-		//time = 0
 		FlxTween.tween(background, {alpha: 0.5}, 0.5);		
 		
 		new FlxTimer().start(0.5, function(tmr:FlxTimer){
 			FlxTween.tween(clearText, {y: ClientPrefs.data.showFPS ? 60 : 5}, 0.5, {ease: FlxEase.backInOut});
-		});
-		
-		
-		new FlxTimer().start(1, function(tmr:FlxTimer){
-			FlxTween.tween(setMsText, {y: FlxG.height - 30 * 2}, 0.5, {ease: FlxEase.backInOut});			
 		});
 		
 		new FlxTimer().start(1.5, function(tmr:FlxTimer){
@@ -323,38 +285,16 @@ class ResultsScreen extends MusicBeatSubstate
 		});
 		
 		new FlxTimer().start(2.5, function(tmr:FlxTimer){
-			FlxTween.tween(backText, {alpha: 1}, 1);	
+			FlxTween.tween(nextText, {alpha: 1}, 1);	
 		});
 		
-		
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-		
-		
-		
 	}
 	
     
 	override function update(elapsed:Float)
 	{   
-	    var botplay:String = 'Close';
-		if (ClientPrefs.getGameplaySetting('botplay')) botplay = 'Open';
-		var practice:String = 'Close';
-		if (ClientPrefs.getGameplaySetting('practice')) practice = 'Open';
-
-		setGameText.text = 'healthGain: X' + ClientPrefs.getGameplaySetting('healthgain')
-		+ '  healthLoss: X' + ClientPrefs.getGameplaySetting('healthloss')
-		+ '\n'
-		+ 'SongSpeed: X' + ClientPrefs.getGameplaySetting('scrollspeed')
-		+ '  PlaybackRate: X' + ClientPrefs.getGameplaySetting('songspeed')
-		+ '\n'
-		+ 'BotPlay: ' + botplay
-		+ '  PracticeMode: ' + practice
-		+ '\n'
-		+ 'Finished time: ' + Date.now().toString()
-		+ '\n';
-		
-	
-		if(FlxG.keys.justPressed.ESCAPE)
+		if(FlxG.keys.justPressed.ESCAPE && controls.ACCEPT)
 		{
 			MusicBeatState.switchState(new FreeplayState());
 			FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);

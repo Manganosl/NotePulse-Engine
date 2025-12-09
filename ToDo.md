@@ -11,7 +11,7 @@
 - [X] Fix ChartingState bugs (I think)
 - [X] Add options for **EVERYTHING** I've been adding
 - [X] Ndll support
-- [X] 3D models support
 - [X] Fix modchartInstance.addPlayfield() causing a black screen
-- [ ] Replace SScript => HScript Improved
-  - [ ] Make sure (almost) all old scripts work after the change
+- [X] Replace SScript => HScript Improved
+  - [X] Make sure (almost) all old scripts work after the change
+- [ ] Find more things to add

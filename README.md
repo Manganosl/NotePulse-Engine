@@ -19,7 +19,6 @@ This engine is a fork of Psych 0.7.3, made with the purpose of being easier to m
 - Play as opponent.
 - Camera movement on note hit.
 - Ndll support.
-- Away3D (Only on HScript)
 - Psych 1.0 Stage and Charting Editors.
 - Modchart Events on Charting State (Inspired by [Zoro's Modcharting Tools](https://github.com/TheZoroForce240/FNF-Modcharting-Tools))
 - Scripted States and Substates.
@@ -29,7 +28,7 @@ This engine is a fork of Psych 0.7.3, made with the purpose of being easier to m
 
 ## Thanks
 - **tposejank**: Extra Keys
-- **Codename Engine**: NdllUtils, away3d and debug menu
+- **Codename Engine**: NdllUtils and debug menu
 - **Nightmare Vision Engine**: WindowUtils
 - **Shadow Mario**: Psych Engine
 - **FunkinModchart**: Modchart libraries
