@@ -199,6 +199,7 @@ class LoadingLua {
 		Lua_helper.add_callback(lua, "setLuaSpriteCamera", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
 		Lua_helper.add_callback(lua, "addHealth", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
 		Lua_helper.add_callback(lua, "getHealth", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
+		Lua_helper.add_callback(lua, "makeLuaCharacter", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
 
 		try{
 			if (!isString) isString = !FileSystem.exists(scriptName);

@@ -39,7 +39,7 @@ import substates.GameOverSubstate;
 
 import psychlua.LuaUtils;
 import psychlua.LuaUtils.LuaTweenOptions;
-#if SScript
+#if HSCRIPT_ALLOWED
 import psychlua.HScript;
 #end
 import psychlua.DebugLuaText;
@@ -1077,6 +1077,13 @@ class FunkinLua {
 
 			LuaUtils.loadFrames(leSprite, image, spriteType);
 			game.modchartSprites.set(tag, leSprite);
+		});
+
+		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, ?x:Float = 0, ?y:Float = 0, ?isPlayer:Bool = false) {
+			tag = tag.replace(".", "");
+			LuaUtils.resetSpriteTag(tag);
+			var daCharacter:Character = new Character(x, y, character, isPlayer);
+			game.modchartCharacters.set(tag, daCharacter);
 		});
 
 		Lua_helper.add_callback(lua, "makeGraphic", function(obj:String, width:Int = 256, height:Int = 256, color:String = 'FFFFFF') {
