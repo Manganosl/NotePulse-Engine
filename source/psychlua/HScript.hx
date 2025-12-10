@@ -389,24 +389,6 @@ class HScript implements HscriptInterface {
 		return false;
 	}
 
-	public static function errorToString( e : Expr.Error ):String {
-		var message = switch( #if hscriptPos e.e #else e #end ) {
-			case EInvalidChar(c): "Invalid character: '"+(StringTools.isEof(c) ? "EOF (End Of File)" : String.fromCharCode(c))+"' ("+c+")";
-			case EUnexpected(s): "Unexpected token: \""+s+"\"";
-			case EUnterminatedString: "Unterminated string";
-			case EUnterminatedComment: "Unterminated comment";
-			case EInvalidPreprocessor(str): "Invalid preprocessor (" + str + ")";
-			case EUnknownVariable(v): "Unknown variable: "+v;
-			case EInvalidIterator(v): "Invalid iterator: "+v;
-			case EInvalidOp(op): "Invalid operator: "+op;
-			case EInvalidAccess(f): "Invalid access to field " + f;
-			case ECustom(msg): msg;
-			case EInvalidClass(cla): "Invalid class: " + cla + " was not found.";
-			case EAlreadyExistingClass(cla): 'Custom Class named $cla already exists.';
-		};
-		return message;
-	}
-
     public static function onHaxeTrace(v:Dynamic, ?interpreter:Interp, ?level:String = "trace") {
 		var posInfos = (interpreter != null ? interpreter.posInfos() : {fileName: "hscript", lineNumber: 0, className: null, methodName: null});
 
@@ -428,7 +410,7 @@ class HScript implements HscriptInterface {
 
     function onError(e:Error) {
 		#if PRETTY_TRACE
-		MusicBeatState.getState().addTextToDebug(errorToString(e), FlxColor.RED, true, "error");
+		MusicBeatState.getState().addTextToDebug(Printer.errorToString(e), FlxColor.RED, true, "error");
 		#else
 		trace(e);
 		#end
@@ -438,9 +420,9 @@ class HScript implements HscriptInterface {
 		var posInfos = interp.posInfos();
 
 		#if PRETTY_TRACE
-		MusicBeatState.getState().addTextToDebug(errorToString(e), FlxColor.YELLOW, true, "warn");
+		MusicBeatState.getState().addTextToDebug(Printer.errorToString(e), FlxColor.YELLOW, true, "warn");
 		#else
-		trace(errorToString(e), {fileName: posInfos.fileName, lineNumber: posInfos.lineNumber, className: null, methodName: null});
+		trace(Printer.errorToString(e), {fileName: posInfos.fileName, lineNumber: posInfos.lineNumber, className: null, methodName: null});
 		#end
 	}
 
@@ -534,11 +516,19 @@ class HScript implements HscriptInterface {
 		if(interp != null) interp.variables.set(variable, data);
 
 	public function call(func:String, ?args:Array<Dynamic>):Dynamic {
-		if(interp == null) return null;
+		try {
+			if (interp == null) return null;
 
-		var functionVar = interp.variables.get(func);
-		if(functionVar == null || !Reflect.isFunction(functionVar)) return null;
-		return (args != null && args.length > 0) ? Reflect.callMethod(null, functionVar, args) : functionVar();
+			var functionVar = interp.variables.get(func);
+			if (functionVar == null || !Reflect.isFunction(functionVar)) return null;
+
+			return (args != null && args.length > 0)
+				? Reflect.callMethod(null, functionVar, args)
+				: functionVar();
+		} catch (e:Dynamic) {
+			MusicBeatState.getState().addTextToDebug(Printer.errorToString(e), FlxColor.RED, true, "error");
+			return null;
+		}
 	}
 }
 

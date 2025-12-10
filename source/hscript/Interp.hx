@@ -594,14 +594,21 @@ class Interp {
 		}
 	}
 
-	public inline function error(e:#if hscriptPos ErrorDef #else Error #end, rethrow = false):Dynamic {
-		#if hscriptPos var e = new Error(e, curExpr.pmin, curExpr.pmax, curExpr.origin, curExpr.line); #end
+	public inline function error(e:#if hscriptPos ErrorDef #else Error #end, rethrow:Bool = false):Dynamic {
+		#if hscriptPos
+		var e = new Error(e, curExpr.pmin, curExpr.pmax, curExpr.origin, curExpr.line);
+		#end
+
+		if (errorHandler != null) {
+			errorHandler(e);
+			return null;
+		}
 
 		if (rethrow)
 			this.rethrow(e);
 		else
 			throw e;
-		
+
 		return null;
 	}
 
