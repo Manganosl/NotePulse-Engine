@@ -129,7 +129,7 @@ class Note extends FlxSkewedSprite
 	public var hitsoundChartEditor:Bool = true;
 	public var hitsound:String = 'hitsound';
 
-	public var characters:Array<Character> = [];
+	public var characters:Array<Character> = null;
 
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
