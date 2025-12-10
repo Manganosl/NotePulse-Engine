@@ -294,7 +294,7 @@ class ResultsScreen extends MusicBeatSubstate
     
 	override function update(elapsed:Float)
 	{   
-		if(FlxG.keys.justPressed.ESCAPE && controls.ACCEPT)
+		if(controls.BACK || controls.ACCEPT)
 		{
 			MusicBeatState.switchState(new FreeplayState());
 			FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);

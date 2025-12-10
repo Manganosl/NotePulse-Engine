@@ -1215,15 +1215,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					{
 						if(note == null || note.isEvent) continue;
 
-						var sec = getCurChartSection();
 						var lane:Int = note.songData[1];
 
-						note.changeNoteData(note.songData[1] + diff);
+						note.changeNoteData(lane+diff);
 
 						lane = note.songData[1];
 						if(PlayState.SONG.gfStrums && lane >= (GRID_COLUMNS_PER_PLAYER*2)) note.gfStrum = true;
 						else note.gfStrum = false;
-						
+
 						positionNoteXByData(note);
 					}
 				}

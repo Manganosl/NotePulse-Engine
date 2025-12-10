@@ -886,15 +886,7 @@ class FlxSprite extends FlxObject
 			_matrix.translate(camera.width / 2, camera.height / 2);
 		}
 
-		var realShader:Dynamic = null;
-		if(shader != null){
-			if(shader is CustomShader){
-				realShader = shader.shader;
-			} else {
-				realShader = shader;
-			}
-		}
-		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, realShader);
+		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, ((shader is CustomShader) ? shader.shader : shader));
 	}
 
 	/**
