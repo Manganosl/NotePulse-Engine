@@ -1412,7 +1412,7 @@ class PlayState extends MusicBeatState
 
 		cc_upcoming = [];
 		for (note in unspawnNotes) {
-			if (!isPlayerOpponent ? note.mustPress : !note.mustPress) cc_upcoming.push(note.strumTime);
+			if ((!isPlayerOpponent ? note.mustPress : !note.mustPress) && (!note.gfStrum)) cc_upcoming.push(note.strumTime);
 		}
 		if (cc_circle == null) {
 			cc_circle = new FlxSprite();
@@ -2207,9 +2207,9 @@ public function changeMania(newMania:Int):Void {
 
 		if(!endingSong && !inCutscene && allowDebugKeys)
 		{
-			if (controls.justPressed('debug_1'))
+			if (controls.justPressed('debug_1') && ClientPrefs.data.devMode)
 				openChartEditor();
-			else if (controls.justPressed('debug_2'))
+			else if (controls.justPressed('debug_2') && ClientPrefs.data.devMode)
 				openCharacterEditor();
 		}
 

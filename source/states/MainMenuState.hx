@@ -362,17 +362,14 @@ class MainMenuState extends MusicBeatState
 				else CoolUtil.browserLoad('https://ninja-muffin24.itch.io/funkin');
 			}
 			#if desktop
-			if (controls.justPressed('debug_1'))
-			{
-				selectedSomethin = true;
-				//FlxG.mouse.visible = false;
-				openSubState(new substates.EditorPicker());
-			}
-			if (controls.justPressed('debug_2'))
-			{
-				selectedSomethin = true;
-				FlxG.mouse.visible = false;
-				MusicBeatState.switchState(new states.menus.StoryMenuState());
+			if(ClientPrefs.data.devMode){
+				if (controls.justPressed('debug_1')){
+					selectedSomethin = true;
+					//FlxG.mouse.visible = false;
+					openSubState(new substates.EditorPicker());
+				}
+			} else {
+				if(controls.justPressed('debug_1')) FlxG.sound.play(Paths.sound('cancelMenu'));
 			}
 			if(FlxG.keys.justPressed.TAB){
 				selectedSomethin = true;

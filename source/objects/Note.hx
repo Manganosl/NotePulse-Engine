@@ -451,6 +451,7 @@ class Note extends FlxSkewedSprite
 		_lastValidChecked = '';
 	}
 
+	private var realDirection:Float = 0;
 	public function followStrumNote(myStrum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1)
 	{
 		var mania = 3;
@@ -462,14 +463,13 @@ class Note extends FlxSkewedSprite
 		var strumY:Float = myStrum.y;
 		var strumAngle:Float = myStrum.angle;
 		var strumAlpha:Float = myStrum.alpha;
-		var strumDirection:Float = myStrum.direction;
+		realDirection = myStrum.direction + (!myStrum.downScroll ? 180 : 0);
 		distance = (0.45 * (Conductor.songPosition - strumTime) * songSpeed * multSpeed);
-		if (!myStrum.downScroll) distance *= -1;
-		var angleDir = strumDirection * Math.PI / 180;
+		var angleDir = realDirection * Math.PI / 180;
 		if (copyAngle)
 			angle = strumAngle + offsetAngle;
 		else if(isSustainNote){
-			angle = strumDirection - 90 + offsetAngle;
+			angle = realDirection - 90 + offsetAngle;
 		}
 		if(copyAlpha)
 			alpha = strumAlpha * multAlpha;
@@ -490,12 +490,9 @@ class Note extends FlxSkewedSprite
 		}
 		origin.set(frameWidth * .5, 0);
 		offset.set();
-		flipX = myStrum.downScroll;
-		var angleDir = myStrum.direction * Math.PI / 180;
+		var angleDir = realDirection * Math.PI / 180;
 		x = myStrum.x + offsetX - (susOffset/4.25) + Math.cos(angleDir) * distance;
-		if (myStrum.downScroll){
-			angle = 180 - angle;
-		}
+		angle += 180;
 	}
 
 	public function clipToStrumNote(myStrum:StrumNote)
@@ -505,11 +502,10 @@ class Note extends FlxSkewedSprite
 		var Mscale = ExtraKeysHandler.instance.data.scales[mania];
 		if (PlayState.isPixelStage) Mscale = ExtraKeysHandler.instance.data.pixelScales[mania];
 		var sWidth = Note.swagWidthUnscaled * Mscale;
-		var center:Float = myStrum.y + offsetY + sWidth / 2;
 
 		if (isSustainNote && (mustPress || !ignoreNote) && wasGoodHit)
 		{
-			var clipDistance:Float = Math.max(-distance, 0);
+			var clipDistance:Float = Math.max(distance - (myStrum.downScroll ? (myStrum.height/2) : 0), 0);
 			clipRect ??= new FlxRect(0, 0, frameWidth);
 			clipRect.y = clipDistance / scale.y;
 			clipRect.height = frameHeight - clipRect.y;

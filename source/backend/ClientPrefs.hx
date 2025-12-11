@@ -28,13 +28,13 @@ import states.menus.TitleState;
 	public var cacheOnGPU:Bool = #if !switch false #else true #end; //From Stilic
 	public var framerate:Int = 60;
 	public var camZooms:Bool = true;
-	public var skipTitleVideo:Bool = false;
 	public var noteTimer:Bool = true;
 	public var ratingCam:String = "HUD";
 	public var hideHud:Bool = false;
 	public var language:Int = 0; //for english at begin
 	public var judgecounter:Bool = true;
 	public var noteOffset:Int = 0;
+	public var devMode:Bool = false;
 
 	// Warning: These aren't used!! Modify data/extrakeys.json instead!
 	public var arrowRGB:Array<Array<FlxColor>> = [

@@ -5,7 +5,7 @@ import backend.StageData;
 
 class OptionsState extends MusicBeatState
 {
-	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay'];
+	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Misc'];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private var descText:FlxText;
 	private var cosanegra:FlxSprite;
@@ -34,6 +34,8 @@ class OptionsState extends MusicBeatState
 				openSubState(new substates.options.GameplaySettingsSubState());
 			case 'Adjust Delay and Combo':
 				MusicBeatState.switchState(new states.options.NoteOffsetState());
+			case 'Misc':
+				openSubState(new substates.options.MiscSettingsSubState());
 		}
 	}
 
@@ -49,6 +51,8 @@ class OptionsState extends MusicBeatState
 				descText.text = "This won't affect your gameplay";
 			case 'Gameplay':
 				descText.text = "This WILL affect your gameplay";
+			case 'Misc':
+				descText.text = "Other options";
 			case 'Adjust Delay and Combo':
 				descText.text = "Adjust the delay of your notes and the combo text (Only if its camera is set to HUD in Visuals and UI)";
 		}
