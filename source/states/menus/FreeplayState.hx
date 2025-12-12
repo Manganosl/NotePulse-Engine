@@ -460,12 +460,12 @@ class FreeplayState extends MusicBeatState
 				}
 			}
 			new FlxTimer().start(0.75, function(tmr:FlxTimer) {
-				if (FlxG.keys.pressed.SHIFT) {
+				if (FlxG.keys.pressed.SHIFT && ClientPrefs.data.devMode) {
 					PlayState.chartingMode = true;
-					MusicBeatState.switchState(new states.handlers.LoadingState(new ChartingState(), true));
+					MusicBeatState.switchState(new LoadingState(new ChartingState(), true));
 					LoadingState.prepareToSong();
 				} else {
-					MusicBeatState.switchState(new states.handlers.LoadingState(new PlayState(), true));
+					MusicBeatState.switchState(new LoadingState(new PlayState(), true));
 					LoadingState.prepareToSong();
 				}
 			});
