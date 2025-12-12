@@ -721,7 +721,19 @@ class Character extends FlxSkewedSprite
 
 	    var obj = new StringBuf();
 	    obj.add("{");
-	    obj.add('\"image\":\"characters/' + esc(image) + '\"');
+		var charPath:String = "characters/"+esc(image);
+		var realPath:String = haxe.io.Path.withoutExtension("mods/"+Mods.currentModDirectory+"/images/"+charPath);
+		if(FileSystem.isDirectory(realPath)){
+			for (i => file in FileSystem.readDirectory(realPath)) {
+				var full = realPath + "/" + file;
+				if (file.contains(".xml") || FileSystem.isDirectory(full)) continue;
+				var noExt = haxe.io.Path.withoutExtension(file);
+				
+				if(i == 0) charPath = charPath+"/"+noExt;
+				else charPath += ", characters/"+esc(image)+"/"+noExt;
+			}
+		}
+	    obj.add('\"image\":\"' + charPath + '\"');
 
 	    if (scale != null) {
 	        obj.add(',\"scale\":' + scale);
