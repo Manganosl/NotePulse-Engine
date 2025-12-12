@@ -4523,4 +4523,9 @@ public function changeMania(newMania:Int):Void {
 		for(i in [strumLineNotes, grpNoteSplashes, grpSustainSplashes])
 			i.visible = true;
 	}
+
+	override public function insert(pos:Int, obj:flixel.FlxBasic):flixel.FlxBasic {
+		super.insert(pos, obj);
+		return obj;
+	}
 }
