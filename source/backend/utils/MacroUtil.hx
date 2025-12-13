@@ -1,6 +1,7 @@
 package backend.utils;
 
 #if macro
+import haxe.macro.Compiler;
 import haxe.macro.Expr;
 import haxe.macro.Context;
 using haxe.macro.Tools;
@@ -10,6 +11,59 @@ using Lambda;
 //data5 data 5  data 5
 class MacroUtil
 {
+	public static var compilerDefines(get, null):Map<String, Dynamic>;
+
+	private static inline function get_compilerDefines() return __getDefines();
+
+	private static macro function __getDefines() {
+		#if display
+		return macro $v{[]};
+		#else
+		return macro $v{Context.getDefines()};
+		#end
+	}
+	
+	//Adds any extra classes into the executable, no dce
+	public static final addonClasses:Array<String> = [
+		"backend",
+
+		//Lime library
+		"lime.app", "lime.graphics",
+		"lime.math", "lime.media", "lime.net",
+		"lime.system", "lime.text", "lime.ui", "lime.util",
+
+		//Openfl library
+		"openfl",
+
+        //Flixel library
+        "flixel.animation", "flixel.effects", "flixel.math",
+        "flixel.graphics", "flixel.group", "flixel.input",
+        "flixel.path", "flixel.sound", "flixel.text",
+        "flixel.tile", "flixel.tweens", "flixel.ui", "flixel.util",
+        "flixel.system.debug", "flixel.system.frontEnds",
+        "flixel.system.replay", "flixel.system.scaleModes",
+        "flixel.system.ui", "flixel.addons.display",
+        "flixel.addons.api", "flixel.addons.editors.ogmo",
+        "flixel.addons.editors.pex", "flixel.addons.editors.tiled",
+        "flixel.addons.effects", "flixel.addons.plugin",
+        "flixel.addons.text", "flixel.addons.tile",
+        "flixel.addons.transition", "flixel.addons.util",
+        "flixel.addons.weapon", "flixel.addons.nape",
+	];
+
+	@:unreflective public static function compileMacros() {
+		#if macro
+		//doing this since using `#if 32bits` throws an error
+		if(Context.defined("32bits"))
+			Compiler.define("x86_BUILD", "1");
+
+		if(Context.defined("hscript_improved_dev"))
+			Compiler.define("hscript-improved", "1");
+
+		for(classPackage in addonClasses) Compiler.include(classPackage);
+		#end
+	}
+
     /**
     * enforces the use of haxe 4.3 cuz i use alot of its null coalescents lol
     */
@@ -38,14 +92,6 @@ class MacroUtil
 		return macro $v{0};
 	}
 
-
-    /**
-    * wip???
-    * Builds a anon strcture from static uppercase inline variables in an abstract type.
-    * ripped from FlxMacroUtil but modified to fit my needs
-    * https://code.haxe.org/category/macros/combine-objects.html
-    * https://github.com/HaxeFlixel/flixel/blob/master/flixel/system/macros/FlxMacroUtil.hx
-    */
     public static macro function buildAbstract(typePath:Expr,?exclude:Array<String>) {
         var type = Context.getType(typePath.toString());
         var expressions:Array<ObjectField> = [];
@@ -82,18 +128,7 @@ class MacroUtil
         var finalResult = {expr:EObjectDecl(expressions), pos: Context.currentPos()};
         return macro $b{[macro $finalResult]};
     }
-
-    public static var defines(get, null):Map<String, Dynamic>;
-	private static inline function get_defines() return __getDefines();
-	private static macro function __getDefines() {
-		#if display
-		return macro $v{[]};
-		#else
-		return macro $v{Context.getDefines()};
-		#end
-	}
 	
-	//Thanks to the developers of codename for this function
 	macro public static function generateReflectionLike(totalArguments:Int, funcName:String, argsName:String) {
 		#if macro
 		totalArguments++;

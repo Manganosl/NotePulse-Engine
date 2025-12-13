@@ -521,7 +521,7 @@ class LuaUtils
 	#if HSCRIPT_ALLOWED
 	public static var preprocessors(get, never):Map<String, Dynamic>;
 	public static function get_preprocessors() {
-		var _preprocessors:Map<String, Dynamic> = backend.Macro.compilerDefines;
+		var _preprocessors:Map<String, Dynamic> = backend.utils.MacroUtil.compilerDefines;
 
 		_preprocessors.set("NOTEPULSE_ENGINE", true);
 		_preprocessors.set("NOTEPULSE_ENGINE_VER", states.MainMenuState.npeVersion);
