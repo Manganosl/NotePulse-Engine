@@ -527,7 +527,7 @@ class EditorPlayState extends MusicBeatSubstate
 			}
 		}
 
-		unspawnNotes.sort(PlayState.sortByTime);
+		unspawnNotes.sort(CoolUtil.sortByTime);
 	}
 	
 	private function generateStaticArrows(player:Int):Void

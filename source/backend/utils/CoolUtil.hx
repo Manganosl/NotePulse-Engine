@@ -4,9 +4,13 @@ import backend.ExtraKeysHandler.EKNoteColor;
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 import states.menus.FreeplayState.SongMetadata;
+import flixel.util.FlxSort;
 
 class CoolUtil
 {
+	public static function sortByTime(Obj1:Dynamic, Obj2:Dynamic):Int
+		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
+
 	public static inline function expandRange(s:String):Array<Int> {
 	    var parts = s.split("..");
 	    if (parts.length != 2) return [];
