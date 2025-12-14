@@ -761,39 +761,6 @@ class PlayState extends MusicBeatState
 			startHScriptsNamed('custom_events/' + event + '.hx');
 		#end
 
-		if(SONG.nativeModchart){ 
-			manager = new modchart.Manager();
-			add(manager);
-
-			var fields = 1;
-			while(fields != SONG.playfields){
-				fields += 1;
-				manager.addPlayfield();
-			}
-
-			for (event in entEventsPushed){
-				if(event.event == "Modchart Event"){
-					var info = event.value1.split(',');
-					if(info[0] == "Add Modifier")
-						manager.addModifier(info[1], Std.parseInt(info[6]));
-					if(info[0] == "Ease"){
-						var ease = FlxEase.linear;
-						if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
-						manager.ease(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-					}
-					if(info[0] == "Set")
-						manager.set(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
-					if(info[0] == "EaseAdd"){
-						var ease = FlxEase.linear;
-						if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
-						manager.add(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-					}
-					if(info[0] == "SetAdd")
-						manager.setAdd(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
-				}
-			}
-		}
-
 		noteTypes = null;
 		eventsPushed = null;
 
@@ -1143,7 +1110,6 @@ class PlayState extends MusicBeatState
 	var debugNum:Int = 0;
 	private var noteTypes:Array<String> = [];
 	private var eventsPushed:Array<String> = [];
-	private var entEventsPushed:Array<EventNote> = [];
 	private function generateSong(dataPath:String):Void
 	{
 		// FlxG.log.add(ChartParser.parse());
@@ -1256,12 +1222,14 @@ class PlayState extends MusicBeatState
 				if (rowArray[swagNote.row] == null) rowArray[swagNote.row] = [];
 				rowArray[swagNote.row].push(swagNote);
 				swagNote.mustPress = gottaHitNote;
+				swagNote.characters = (gottaHitNote ? [boyfriend] : [dad]);
 				swagNote.sustainLength = songNotes[2];
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<(SONG.mania + 1)));
 				swagNote.noteType = songNotes[3];
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 				swagNote.gfStrum = (songNotes[4] == true);
 				if(swagNote.gfStrum) swagNote.mustPress = isPlayerOpponent ? true : false;
+				if(swagNote.gfStrum) swagNote.characters = [gf];
 
 				swagNote.scrollFactor.set();
 
@@ -1277,10 +1245,12 @@ class PlayState extends MusicBeatState
 
 						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true);
 						sustainNote.mustPress = gottaHitNote;
+						sustainNote.characters = (gottaHitNote ? [boyfriend] : [dad]);
 						sustainNote.gfNote = (section.gfSection && (songNotes[1]<(SONG.mania + 1)));
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.gfStrum = swagNote.gfStrum;
 						if(sustainNote.gfStrum) sustainNote.mustPress = isPlayerOpponent ? true : false;
+						if(sustainNote.gfStrum) sustainNote.characters = [gf];
 						sustainNote.scrollFactor.set();
 						sustainNote.parent = swagNote;
 						unspawnNotes.push(sustainNote);
@@ -1686,21 +1656,12 @@ class PlayState extends MusicBeatState
 	// called only once per different event (Used for precaching)
 	function eventPushed(event:EventNote) {
 		eventPushedUnique(event);
-		entEventPushed(event);
 		if(eventsPushed.contains(event.event)) {
 			return;
 		}
 
 		stagesFunc(function(stage:BaseStage) stage.eventPushed(event));
 		eventsPushed.push(event.event);
-	}
-
-	function entEventPushed(event:EventNote) {
-		if(entEventsPushed.contains(event)) {
-			return;
-		}
-
-		entEventsPushed.push(event);
 	}
 
 	// called by every event with the same name
@@ -1724,6 +1685,36 @@ class PlayState extends MusicBeatState
 
 			case 'Play Sound':
 				Paths.sound(event.value1); //Precache sound
+
+			case "Modchart Event":
+				if(SONG.nativeModchart && manager == null){
+					manager = new modchart.Manager();
+					add(manager);
+
+					var fields = 1;
+					while(fields != SONG.playfields){
+						fields += 1;
+						manager.addPlayfield();
+					}
+				}
+				if(manager == null) return;
+				var info = event.value1.split(',');
+				if(info[0] == "Add Modifier")
+					manager.addModifier(info[1], Std.parseInt(info[6]));
+				if(info[0] == "Ease"){
+					var ease = FlxEase.linear;
+					if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
+					manager.ease(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+				}
+				if(info[0] == "Set")
+					manager.set(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+				if(info[0] == "EaseAdd"){
+					var ease = FlxEase.linear;
+					if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
+					manager.add(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+				}
+				if(info[0] == "SetAdd")
+					manager.setAdd(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventPushedUnique(event));
 	}
@@ -3221,11 +3212,13 @@ class PlayState extends MusicBeatState
 				rowArray[swagNote.row].push(swagNote);
 
 				swagNote.mustPress = gottaHitNote;
+				swagNote.characters = (gottaHitNote ? [boyfriend] : [dad]);
 				swagNote.sustainLength = (songNotes.length > 2) ? Std.parseFloat(songNotes[2]) : 0;
 				swagNote.gfNote = (section.gfSection && (rawNoteIndex < (SONG.mania + 1)));
 				swagNote.noteType = songNotes[3];
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]];
 				if (swagNote.gfStrum) swagNote.mustPress = isPlayerOpponent ? true : false;
+				if (swagNote.gfStrum) swagNote.characters = [gf];
 				swagNote.scrollFactor.set();
 
 				unspawnNotes.push(swagNote);
@@ -3237,10 +3230,12 @@ class PlayState extends MusicBeatState
 
 						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true);
 						sustainNote.mustPress = gottaHitNote;
+						sustainNote.characters = (gottaHitNote ? [boyfriend] : [dad]);
 						sustainNote.gfNote = (section.gfSection && (songNotes[1]<(SONG.mania + 1)));
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.gfStrum = swagNote.gfStrum;
 						if(sustainNote.gfStrum) sustainNote.mustPress = isPlayerOpponent ? true : false;
+						if(sustainNote.gfStrum) sustainNote.characters = [gf];
 						sustainNote.scrollFactor.set();
 						sustainNote.parent = swagNote;
 						unspawnNotes.push(sustainNote);
@@ -3507,24 +3502,35 @@ class PlayState extends MusicBeatState
 		if (songName != 'tutorial')
 			camZooming = true;
 
-		if((isPlayerOpponent ? !boyfriend.noNoteAnim : !dad.noNoteAnim) && note.noteType == 'Hey!' && (!isPlayerOpponent ? dad.animOffsets.exists('hey') : boyfriend.animOffsets.exists('hey'))) {
-			!isPlayerOpponent ? dad.playAnim('hey', true) : boyfriend.playAnim('hey', true);
-			!isPlayerOpponent ? dad.specialAnim = true : boyfriend.specialAnim = true;
-			!isPlayerOpponent ? dad.heyTimer = 0.6 : boyfriend.heyTimer = 0.6;
-		} else if(!note.noAnimation) {
-			var altAnim:String = note.animSuffix;
-
-			if (SONG.notes[curSection] != null)
-				if (SONG.notes[curSection].altAnim && !SONG.notes[curSection].gfSection)
-					altAnim = '-alt';
-
-			var chars:Array<Character> = !isPlayerOpponent ? [dad] : [boyfriend];
-			var animToPlay:String = singAnimation(note.noteData) + altAnim;
-			if(note.gfNote || note.gfStrum) chars = [gf];
-			if(note.characters != null){
-				chars = note.characters;
+		var chars:Array<Character> = note.characters;
+		for(char in note.characters){
+			if(boyfriendMap.exists(char.curCharacter)){
+				chars.remove(char);
+				chars.push(boyfriend);
 			}
-			for(char in chars){
+			if(dadMap.exists(char.curCharacter)){
+				chars.remove(char);
+				chars.push(dad);
+			}
+			if(gfMap.exists(char.curCharacter)){
+				chars.remove(char);
+				chars.push(gf);
+			}
+		}
+		for(char in chars){
+			if(char == null) continue;
+			if(!char.noNoteAnim && note.noteType == 'Hey!' && char.animOffsets.exists('hey')) {
+				char.playAnim('hey', true);
+				char.specialAnim = true;
+				char.heyTimer = 0.6;
+			} else if(!note.noAnimation) {
+				var altAnim:String = note.animSuffix;
+
+				if (SONG.notes[curSection] != null)
+					if (SONG.notes[curSection].altAnim && !SONG.notes[curSection].gfSection)
+						altAnim = '-alt';
+
+				var animToPlay:String = singAnimation(note.noteData) + altAnim;
 				if (char != null && !char.noNoteAnim)
 				{
 					char.holdTimer = 0;
@@ -3600,35 +3606,40 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.data.hitsoundVolume > 0 && !note.hitsoundDisabled)
 			FlxG.sound.play(Paths.sound(note.hitsound), ClientPrefs.data.hitsoundVolume);
 
-		if(note.hitCausesMiss) {
-			if(!note.noMissAnimation) {
-				switch(note.noteType) {
-					case 'Hurt Note': 
-						if(!isPlayerOpponent){
-							if(boyfriend.animOffsets.exists('hurt') && !boyfriend.noNoteAnim) {
-								boyfriend.playAnim('hurt', true);
-								boyfriend.specialAnim = true;
-							}
-							if(dad.animOffsets.exists('hurt') && !dad.noNoteAnim) {
-								dad.playAnim('hurt', true);
-								dad.specialAnim = true;
-							}
-						}
-				}
+		var chars:Array<Character> = note.characters;
+		for(char in note.characters){
+			if(boyfriendMap.exists(char.curCharacter)){
+				chars.remove(char);
+				chars.push(boyfriend);
 			}
-
-			noteMiss(note);
-			if(!note.noteSplashData.disabled && !note.isSustainNote) spawnNoteSplashOnNote(note);
-			if(!note.isSustainNote) invalidateNote(note);
-			return;
-		}
-
-		var chars:Array<Character> = isPlayerOpponent ? [dad] : [boyfriend];
-		if(note.characters != null){
-			chars = note.characters;
+			if(dadMap.exists(char.curCharacter)){
+				chars.remove(char);
+				chars.push(dad);
+			}
+			if(gfMap.exists(char.curCharacter)){
+				chars.remove(char);
+				chars.push(gf);
+			}
 		}
 		for(char in chars){
 			if(char != null){
+				if(note.hitCausesMiss) {
+					if(!note.noMissAnimation) {
+						switch(note.noteType) {
+							case 'Hurt Note': 
+								if(char.animOffsets.exists('hurt') && !char.noNoteAnim) {
+									char.playAnim('hurt', true);
+									char.specialAnim = true;
+								}
+						}
+					}
+
+					noteMiss(note);
+					if(!note.noteSplashData.disabled && !note.isSustainNote) spawnNoteSplashOnNote(note);
+					if(!note.isSustainNote) invalidateNote(note);
+					return;
+				}
+
 				if(!note.noAnimation && !char.noNoteAnim) {
 					var animToPlay:String = singAnimation(note.noteData);
 					var animCheck:String = 'hey';

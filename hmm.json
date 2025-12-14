@@ -10,6 +10,11 @@
       "type": "haxelib",
       "version": "9.3.3"
     },
+      {
+      "name": "nape-haxe4",
+      "type": "haxelib",
+      "version": "2.0.22"
+    },
     {
       "name": "flixel",
       "type": "haxelib",
