@@ -2852,9 +2852,9 @@ class PlayState extends MusicBeatState
 
 	//// Menus ////
 
-	override function openSubState(SubState:FlxSubState)
+	override function openSubState(subState:FlxSubState)
 	{
-		stagesFunc(function(stage:BaseStage) stage.openSubState(SubState));
+		stagesFunc(function(stage:BaseStage) stage.openSubState(subState));
 		if (paused)
 		{
 			if (FlxG.sound.music != null)
@@ -2864,10 +2864,10 @@ class PlayState extends MusicBeatState
 				opponentVocals.pause();
 			}
 			FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if(!tmr.finished) tmr.active = false);
-			FlxTween.globalManager.forEach(function(twn:FlxTween) if(!twn.finished) twn.active = false);
+			FlxTween.globalManager.forEach(function(twn:FlxTween) if(!twn.finished && twn != CustomFadeTransition.daTween) twn.active = false);
 		}
 
-		super.openSubState(SubState);
+		super.openSubState(subState);
 	}
 
 	override function closeSubState()

@@ -10,6 +10,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
 	var transBlack:FlxSprite;
 	var transGradient:FlxSprite;
 	public static var dont:Bool = false;
+	public static var daTween:FlxTween;
 
 	var duration:Float;
 	public function new(duration:Float, isTransIn:Bool)
@@ -31,10 +32,15 @@ class CustomFadeTransition extends MusicBeatSubstate {
 		if (cam.filters == null) cam.filters = [];
 		cam.filters.push(new ShaderFilter(shader));
 
-		FlxTween.tween(shader, {fade: isTransIn ? 1 : 0},duration,{onComplete: Void->{
+		if(daTween != null){
+			daTween.cancel();
+			daTween = null;
+		}
+		daTween = FlxTween.tween(shader, {fade: isTransIn ? 1 : 0},duration,{onComplete: Void->{
 			close();
 			if(finishCallback != null) finishCallback();
 			finishCallback = null;
+			daTween = null;
 		}});
 
 		super.create();
