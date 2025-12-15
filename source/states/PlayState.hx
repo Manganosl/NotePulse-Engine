@@ -1984,7 +1984,21 @@ class PlayState extends MusicBeatState
 
 							var lastAlpha:Float = boyfriend.alpha;
 							boyfriend.alpha = 0.00001;
+							var notesToChange:Array<Note> = [];
+							for(note in unspawnNotes){
+								if(note.characters.contains(boyfriend)){
+									note.characters.remove(boyfriend);
+									notesToChange.push(note);
+								}
+							}
+							for(note in notes){
+								if(note.characters.contains(boyfriend)){
+									note.characters.remove(boyfriend);
+									notesToChange.push(note);
+								}
+							}
 							boyfriend = boyfriendMap.get(value2);
+							for(note in notesToChange) note.characters.push(boyfriend);
 							boyfriend.alpha = lastAlpha;
 							iconP1.changeIcon(boyfriend.healthIcon);
 						}
@@ -1999,7 +2013,21 @@ class PlayState extends MusicBeatState
 							var wasGf:Bool = dad.curCharacter.startsWith('gf-') || dad.curCharacter == 'gf';
 							var lastAlpha:Float = dad.alpha;
 							dad.alpha = 0.00001;
+							var notesToChange:Array<Note> = [];
+							for(note in unspawnNotes){
+								if(note.characters.contains(dad)){
+									note.characters.remove(dad);
+									notesToChange.push(note);
+								}
+							}
+							for(note in notes){
+								if(note.characters.contains(dad)){
+									note.characters.remove(dad);
+									notesToChange.push(note);
+								}
+							}
 							dad = dadMap.get(value2);
+							for(note in notesToChange) note.characters.push(dad);
 							if(!dad.curCharacter.startsWith('gf-') && dad.curCharacter != 'gf') {
 								if(wasGf && gf != null) {
 									gf.visible = true;
@@ -2023,7 +2051,21 @@ class PlayState extends MusicBeatState
 
 								var lastAlpha:Float = gf.alpha;
 								gf.alpha = 0.00001;
+								var notesToChange:Array<Note> = [];
+								for(note in unspawnNotes){
+									if(note.characters.contains(gf)){
+										note.characters.remove(gf);
+										notesToChange.push(note);
+									}
+								}
+								for(note in notes){
+									if(note.characters.contains(gf)){
+										note.characters.remove(gf);
+										notesToChange.push(note);
+									}
+								}
 								gf = gfMap.get(value2);
+								for(note in notesToChange) note.characters.push(gf);
 								gf.alpha = lastAlpha;
 							}
 							setOnScripts('gfName', gf.curCharacter);
@@ -3502,22 +3544,7 @@ class PlayState extends MusicBeatState
 		if (songName != 'tutorial')
 			camZooming = true;
 
-		var chars:Array<Character> = note.characters;
 		for(char in note.characters){
-			if(boyfriendMap.exists(char.curCharacter)){
-				chars.remove(char);
-				chars.push(boyfriend);
-			}
-			if(dadMap.exists(char.curCharacter)){
-				chars.remove(char);
-				chars.push(dad);
-			}
-			if(gfMap.exists(char.curCharacter)){
-				chars.remove(char);
-				chars.push(gf);
-			}
-		}
-		for(char in chars){
 			if(char == null) continue;
 			if(!char.noNoteAnim && note.noteType == 'Hey!' && char.animOffsets.exists('hey')) {
 				char.playAnim('hey', true);
@@ -3606,22 +3633,7 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.data.hitsoundVolume > 0 && !note.hitsoundDisabled)
 			FlxG.sound.play(Paths.sound(note.hitsound), ClientPrefs.data.hitsoundVolume);
 
-		var chars:Array<Character> = note.characters;
 		for(char in note.characters){
-			if(boyfriendMap.exists(char.curCharacter)){
-				chars.remove(char);
-				chars.push(boyfriend);
-			}
-			if(dadMap.exists(char.curCharacter)){
-				chars.remove(char);
-				chars.push(dad);
-			}
-			if(gfMap.exists(char.curCharacter)){
-				chars.remove(char);
-				chars.push(gf);
-			}
-		}
-		for(char in chars){
 			if(char != null){
 				if(note.hitCausesMiss) {
 					if(!note.noMissAnimation) {

@@ -52,6 +52,7 @@ class FreeplayState extends MusicBeatState
 	var backdrop:flixel.addons.display.FlxBackdrop;
 	var titleText:FlxText;
 	var rankText:FlxText;
+	var playerText:FlxText;
 
 	private var grpSongs:FlxTypedGroup<Alphabet>;
 	private var curPlaying:Bool = false;
@@ -158,10 +159,10 @@ class FreeplayState extends MusicBeatState
 		cosanegra.antialiasing = ClientPrefs.data.antialiasing;
 		cosanegra.screenCenter();
 		cosanegra.alpha = 0.5;
-		cosanegra.y = -210;
+		cosanegra.y = -200;
 		add(cosanegra);
 
-		titleText = new FlxText(10, 10, 1145, "Freeplay", 32); //Alphabet(75, 45, title, true);
+		titleText = new FlxText(10, 10, 1145, "Freeplay", 32);
 		titleText.alpha = 1;
 		titleText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		titleText.scrollFactor.set();
@@ -178,10 +179,17 @@ class FreeplayState extends MusicBeatState
 		scoreBG.alpha = 0;
 		add(scoreBG);
 
-		diffText = new FlxText(titleText.x, titleText.y + 40, 0, "", 24);
-		diffText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		diffText = new FlxText(titleText.x, titleText.y + 35, 0, "", 24);
+		diffText.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		diffText.font = scoreText.font;
 		add(diffText);
+
+		playerText = new FlxText(titleText.x, diffText.y+37, 0, "[TAB] Player", 20);
+		playerText.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		playerText.font = scoreText.font;
+		playerText.y -= playerText.height/2;
+		playerText.text = "[TAB] " + (PlayState.isPlayerOpponent ? "Opponent" : "Player");
+		add(playerText);
 
 		add(scoreText);
 
@@ -355,6 +363,10 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
+		if(FlxG.keys.justPressed.TAB){
+			PlayState.isPlayerOpponent = !PlayState.isPlayerOpponent;
+			playerText.text = "[TAB] " + (PlayState.isPlayerOpponent ? "Opponent" : "Player");
+		}
 		if(FlxG.keys.justPressed.CONTROL && !player.playingMusic && controlsActive)
 		{
 			persistentUpdate = false;
