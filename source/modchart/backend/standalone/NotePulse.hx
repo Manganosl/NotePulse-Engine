@@ -67,7 +67,7 @@ class NotePulse implements IAdapter {
 		else if (arrow is Strum) @:privateAccess
 			return cast(arrow, Strum).noteData;
 		if (arrow is NoteSplash) @:privateAccess
-			return cast(arrow, NoteSplash).extraData["strumNote"].noteData;
+			return cast(arrow, NoteSplash).babyArrow.noteData;
 		if (arrow is SustainSplash) @:privateAccess
 			return cast(arrow, SustainSplash).strum.noteData;
 
@@ -85,7 +85,7 @@ class NotePulse implements IAdapter {
 		if (arrow is Strum) @:privateAccess
 			return cast(arrow, Strum).player;
 		if (arrow is NoteSplash) @:privateAccess
-			return cast(arrow, NoteSplash).extraData["strumNote"].player;
+			return cast(arrow, NoteSplash).babyArrow.player;
 		if (arrow is SustainSplash) @:privateAccess
 			return cast(arrow, SustainSplash).strum.player;
 		return 0;
@@ -122,47 +122,38 @@ class NotePulse implements IAdapter {
 		return ClientPrefs.data.downScroll;
 	}
 
-inline function getStrumFromInfo(lane:Int, player:Int) {
-    // robust state detection
-    var isPlayState:Bool = Std.is(FlxG.state, PlayState);
+	inline function getStrumFromInfo(lane:Int, player:Int) {
+		var isPlayState:Bool = Std.is(FlxG.state, PlayState);
 
-    // only access the instance for the active state
-    var group = if (isPlayState) {
-        if (player == 0) PlayState.instance.opponentStrums else PlayState.instance.playerStrums;
-    } else {
-        if (player == 0) EditorPlayState.instance.opponentStrums else EditorPlayState.instance.playerStrums;
-    };
+		var group = if (isPlayState) {
+			if (player == 0) PlayState.instance.opponentStrums else PlayState.instance.playerStrums;
+		} else {
+			if (player == 0) EditorPlayState.instance.opponentStrums else EditorPlayState.instance.playerStrums;
+		};
 
-    // Defensive: if group is unexpectedly null, log and return null (helps debug).
-    if (group == null) {
-        trace('[NotePulse] getStrumFromInfo() - group is null; state='
-              + Type.getClassName(Type.getClass(FlxG.state))
-              + ' lane=' + lane + ' player=' + player);
-        return null;
-    }
+		if (group == null) {
+			trace('[NotePulse] getStrumFromInfo() - group is null; state='
+				+ Type.getClassName(Type.getClass(FlxG.state))
+				+ ' lane=' + lane + ' player=' + player);
+			return null;
+		}
 
-    // Prefer forEachAlive if available (it skips dead/null entries)
-    var found:Strum = null;
-    // Use forEachAlive when possible:
-    // group.forEachAlive(s -> { @:privateAccess if (s != null && s.noteData == lane) found = s; });
+		var found:Strum = null;
+		for (i in 0...group.members.length) {
+			var s = cast(group.members[i], Strum);
+			if (s != null && s.noteData == lane) {
+				found = s;
+				break;
+			}
+		}
 
-    // Fallback safe iteration over members with null-check
-    for (i in 0...group.members.length) {
-        var s = cast(group.members[i], Strum);
-        if (s != null && s.noteData == lane) {
-            found = s;
-            break;
-        }
-    }
+		if (found == null) {
+			trace('[NotePulse] getStrumFromInfo() - no matching strum found; lane=' + lane
+				+ ' player=' + player + ' groupSize=' + Std.string(group.members.length));
+		}
 
-    if (found == null) {
-        trace('[NotePulse] getStrumFromInfo() - no matching strum found; lane=' + lane
-              + ' player=' + player + ' groupSize=' + Std.string(group.members.length));
-    }
-
-    return found;
-}
-
+		return found;
+	}
 
 	public function getDefaultReceptorX(lane:Int, player:Int):Float {
 		return getStrumFromInfo(lane, player).x;
@@ -221,8 +212,8 @@ inline function getStrumFromInfo(lane:Int, player:Int) {
 			PlayState.instance.grpNoteSplashes.forEachAlive(splash -> {
 				@:privateAccess
 				if (splash != null) {
-					if (splash.extraData["strumNote"] != null) {
-						final player = splash.extraData["strumNote"].player;
+					if (splash.babyArrow != null) {
+						final player = splash.babyArrow.player;
 						if (pspr[player] == null)
 							pspr[player] = [];
 
@@ -270,8 +261,8 @@ inline function getStrumFromInfo(lane:Int, player:Int) {
 			EditorPlayState.instance.grpNoteSplashes.forEachAlive(splash -> {
 				@:privateAccess
 				if (splash != null) {
-					if (splash.extraData["strumNote"] != null) {
-						final player = splash.extraData["strumNote"].player;
+					if (splash.babyArrow != null) {
+						final player = splash.babyArrow.player;
 						if (pspr[player] == null)
 							pspr[player] = [];
 
