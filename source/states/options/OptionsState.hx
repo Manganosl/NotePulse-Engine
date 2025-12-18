@@ -5,23 +5,38 @@ import backend.StageData;
 
 class OptionsState extends MusicBeatState
 {
-	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Misc'];
+	var options:Array<String> = [
+		'Note Colors',
+		'Controls',
+		'Adjust Delay and Combo',
+		'Graphics',
+		'Visuals and UI',
+		'Gameplay',
+		'Misc'
+	];
+
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private var descText:FlxText;
-	private var cosanegra:FlxSprite;
-	private var doControls:Bool = true;
 	private var titleText:FlxText;
+	private var topOverlay:FlxSprite;
+
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
 	public static var onPlayState:Bool = false;
-	var selectorLeft:Alphabet;
-	var selectorRight:Alphabet;
-	var intendedSelY:Float = 0;
-	var intendedSelLeftX:Float = 0;
-	var intendedSelRightX:Float = 0;
 
-	function openSelectedSubstate(label:String) {
-		switch(label) {
+	private var selectorLeft:Alphabet;
+	private var selectorRight:Alphabet;
+
+	private var intendedSelY:Float = 0;
+	private var intendedSelLeftX:Float = 0;
+	private var intendedSelRightX:Float = 0;
+
+	private var doControls:Bool = true;
+
+	function openSelectedSubstate(label:String)
+	{
+		switch(label)
+		{
 			case 'Note Colors':
 				openSubState(new substates.options.NotesSubState());
 			case 'Controls':
@@ -39,26 +54,29 @@ class OptionsState extends MusicBeatState
 		}
 	}
 
-	function descriptionchange(label:String) {
-		switch(label) {
+	function descriptionChange(label:String)
+	{
+		switch(label)
+		{
 			case 'Note Colors':
-				descText.text = "I mean, why explain it";
+				descText.text = "Change the colors of notes and splashes.";
 			case 'Controls':
-				descText.text = 'Change your controls (Use "Q" and "E" to change between EK controls)';
+				descText.text = "Rebind your keys and controller inputs.";
 			case 'Graphics':
-				descText.text = "Just a bunch of graphics related options";
+				descText.text = "Performance and visual quality settings.";
 			case 'Visuals and UI':
-				descText.text = "This won't affect your gameplay";
+				descText.text = "Purely cosmetic UI and visual options.";
 			case 'Gameplay':
-				descText.text = "This WILL affect your gameplay";
+				descText.text = "These options directly affect gameplay.";
 			case 'Misc':
-				descText.text = "Other options";
+				descText.text = "Other miscellaneous settings.";
 			case 'Adjust Delay and Combo':
-				descText.text = "Adjust the delay of your notes and the combo text (Only if its camera is set to HUD in Visuals and UI)";
+				descText.text = "Calibrate note timing and combo offset.";
 		}
 	}
 
-	override function create() {
+	override function create()
+	{
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Options Menu", null);
 		#end
@@ -67,73 +85,89 @@ class OptionsState extends MusicBeatState
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.color = 0xFFea71fd;
 		bg.updateHitbox();
-
-		cosanegra = new FlxSprite().makeGraphic(200, 500, 0xff000000);
-		cosanegra.antialiasing = ClientPrefs.data.antialiasing;
-		cosanegra.screenCenter();
-		add(cosanegra);
-
 		bg.screenCenter();
 		add(bg);
 
+		topOverlay = new FlxSprite().makeGraphic(FlxG.width, 300, 0xFF000000);
+		topOverlay.antialiasing = ClientPrefs.data.antialiasing;
+		topOverlay.alpha = 0.5;
+		topOverlay.y = -210;
+
+		titleText = new FlxText(0, 10, FlxG.width, "Options >", 32);
+		titleText.setFormat(
+			Paths.font("vcr.ttf"),
+			32,
+			FlxColor.WHITE,
+			LEFT,
+			FlxTextBorderStyle.OUTLINE,
+			FlxColor.BLACK
+		);
+		titleText.scrollFactor.set();
+
+		descText = new FlxText(0, 50, FlxG.width, "", 15);
+		descText.setFormat(
+			Paths.font("vcr.ttf"),
+			15,
+			FlxColor.WHITE,
+			LEFT,
+			FlxTextBorderStyle.OUTLINE,
+			FlxColor.BLACK
+		);
+		descText.scrollFactor.set();
+
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
+		add(topOverlay);
+		add(titleText);
+		add(descText);
 
-		for (i in 0...options.length)
+		for (num => option in options)
 		{
-			var optionText:Alphabet = new Alphabet(0, 0, options[i], true);
+			var optionText:Alphabet = new Alphabet(0, 0, option, true);
 			optionText.screenCenter();
-			optionText.y += (100 * (i - (options.length / 2))) + 50;
+			optionText.y += (100 * (num - (options.length / 2))) + 50;
 			grpOptions.add(optionText);
 		}
 
 		selectorLeft = new Alphabet(0, 0, '>', true);
 		add(selectorLeft);
+
 		selectorRight = new Alphabet(0, 0, '<', true);
 		add(selectorRight);
 
+		descriptionChange(options[curSelected]);
 		changeSelection();
+		selectorLeft.x = intendedSelLeftX;
+		selectorRight.x = intendedSelRightX;
+		selectorLeft.y = intendedSelY;
+		selectorRight.y = intendedSelY;
+
 		ClientPrefs.saveSettings();
-			
-			var cosanegra:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, 300, 0xff000000);
-			cosanegra.antialiasing = ClientPrefs.data.antialiasing;
-			cosanegra.screenCenter();
-			cosanegra.alpha = 0.5;
-			cosanegra.y = -210;
-			add(cosanegra);
-
-			titleText = new FlxText(0, 10, 1145, "Options > ", 32); //Alphabet(75, 45, title, true);
-			titleText.alpha = 1;
-			titleText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			titleText.scrollFactor.set();
-			add(titleText);
-	
-			descText = new FlxText(0, 50, 1180, "", 15);
-			descText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			descText.scrollFactor.set();
-			add(descText);
-			
-
-			descriptionchange(options[curSelected]);
-		    changeSelection(0);
-
 		super.create();
 	}
 
-	override function closeSubState() {
+	override function closeSubState()
+	{
 		super.closeSubState();
 		changeSelection(0);
-		cosanegra.alpha = 1;
+
+		topOverlay.alpha = 0.5;
 		titleText.alpha = 1;
 		descText.alpha = 1;
+		selectorLeft.alpha = 1;
+		selectorRight.alpha = 1;
+
 		ClientPrefs.saveSettings();
+
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Options Menu", null);
 		#end
+
 		doControls = true;
 	}
 
-	override function update(elapsed:Float) {
+	override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 
 		selectorLeft.x = CoolUtil.fpsLerp(selectorLeft.x, intendedSelLeftX, 0.25);
@@ -141,65 +175,68 @@ class OptionsState extends MusicBeatState
 		selectorLeft.y = CoolUtil.fpsLerp(selectorLeft.y, intendedSelY, 0.25);
 		selectorRight.y = CoolUtil.fpsLerp(selectorRight.y, intendedSelY, 0.25);
 
-		if(!doControls) return;
-		if (controls.UI_UP_P) {
+		if (!doControls) return;
+
+		if (controls.UI_UP_P)
+		{
 			changeSelection(-1);
-			descriptionchange(options[curSelected]);
-		}
-		if (controls.UI_DOWN_P) {
-			changeSelection(1);
-			descriptionchange(options[curSelected]);
+			descriptionChange(options[curSelected]);
 		}
 
-		if (controls.BACK) {
-			for (item in grpOptions.members) {
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-				if(onPlayState)
-				{
-					StageData.loadDirectory(PlayState.SONG);
-					LoadingState.loadAndSwitchState(new PlayState());
-					FlxG.sound.music.volume = 0;
-				}
-				else MusicBeatState.switchState(new MainMenuState());
-			}
+		if (controls.UI_DOWN_P)
+		{
+			changeSelection(1);
+			descriptionChange(options[curSelected]);
 		}
-		else if (controls.ACCEPT) {
-			doControls = false;
-			for (item in grpOptions.members) {
-				FlxTween.tween(item, {alpha: 0}, 0.1, {ease: FlxEase.quadOut});
-				FlxTween.tween(selectorLeft, {alpha: 0}, 0.1, {ease: FlxEase.quadOut});
-				FlxTween.tween(selectorRight, {alpha: 0}, 0.1, {ease: FlxEase.quadOut});
-				cosanegra.alpha = 0;
-				titleText.alpha = 0;
-				descText.alpha = 0;
-				openSelectedSubstate(options[curSelected]); 
+
+		if (controls.BACK)
+		{
+			FlxG.sound.play(Paths.sound('cancelMenu'));
+			if (onPlayState)
+			{
+				StageData.loadDirectory(PlayState.SONG);
+				LoadingState.loadAndSwitchState(new PlayState());
+				FlxG.sound.music.volume = 0;
 			}
+			else
+				MusicBeatState.switchState(new MainMenuState());
+		}
+		else if (controls.ACCEPT)
+		{
+			doControls = false;
+
+			for (item in grpOptions.members)
+				FlxTween.tween(item, {alpha: 0}, 0.1, {ease: FlxEase.quadOut});
+
+			FlxTween.tween(selectorLeft, {alpha: 0}, 0.1);
+			FlxTween.tween(selectorRight, {alpha: 0}, 0.1);
+
+			topOverlay.alpha = 0;
+			titleText.alpha = 0;
+			descText.alpha = 0;
+
+			openSelectedSubstate(options[curSelected]);
 		}
 	}
-	
-	function changeSelection(change:Int = 0) {
-		curSelected += change;
-		if (curSelected < 0)
-			curSelected = options.length - 1;
-		if (curSelected >= options.length)
-			curSelected = 0;
 
-		var bullShit:Int = 0;
+	function changeSelection(change:Int = 0)
+	{
+		curSelected = FlxMath.wrap(curSelected + change, 0, options.length - 1);
 
-		for (item in grpOptions.members) {
-			item.targetY = bullShit - curSelected;
-			bullShit++;
-			
+		for (num => item in grpOptions.members)
+		{
+			item.targetY = num - curSelected;
 			item.alpha = 0.6;
-			if (item.targetY == 0) {
+
+			if (item.targetY == 0)
+			{
 				item.alpha = 1;
 				intendedSelLeftX = item.x - 63;
 				intendedSelRightX = item.x + item.width + 15;
 				intendedSelY = item.y;
-				selectorLeft.alpha = 1;
-				selectorRight.alpha = 1;
 			}
 		}
+
 		FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
 

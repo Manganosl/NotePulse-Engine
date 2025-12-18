@@ -54,12 +54,11 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		checkboxGroup = new FlxTypedGroup<CheckboxThingie>();
 		add(checkboxGroup);
 
-		var cosanegra:FlxSprite = new FlxSprite().makeGraphic(5000, 300, 0xff000000);
-		cosanegra.antialiasing = ClientPrefs.data.antialiasing;
-		cosanegra.screenCenter();
-		cosanegra.alpha = 0;
-		cosanegra.y = -210;
-		add(cosanegra);
+		var topOverlay:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, 300, 0xFF000000);
+		topOverlay.antialiasing = ClientPrefs.data.antialiasing;
+		topOverlay.alpha = 0.5;
+		topOverlay.y = -210;
+		add(topOverlay);
 
 		var titleText:FlxText = new FlxText(0, 10, 1145, "Options > " + title, 32); //Alphabet(75, 45, title, true);
 		titleText.alpha = 1;

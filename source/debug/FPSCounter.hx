@@ -130,15 +130,21 @@ class FPSCounter extends Sprite
 
 	function updateDebugText():Void
 	{
-		var state = FlxG.state;
-		var subState = state.subState;
+		final state = FlxG.state;
+		final beatState = Std.isOfType(state, MusicBeatState) ? cast(state, MusicBeatState) : null;
+		final subState = state.subState;
+
+		final luaCount = PlayState.instance != null && PlayState.instance.luaArray != null ? PlayState.instance.luaArray.length : 0;
+		final hscriptCount = beatState != null && beatState.hscriptArray != null ? beatState.hscriptArray.length : 0;
 
 		debugText.text =
 			'State: ${Type.getClassName(Type.getClass(state))}\n' +
 			'SubState: ${subState != null ? Type.getClassName(Type.getClass(subState)) : "None"}\n' +
 			'State Objects: ${state.members.length}\n' +
 			'FlxG Children: ${FlxG.game.numChildren}\n' +
-			'Cameras: ${FlxG.cameras.list.length}\n';
+			'Cameras: ${FlxG.cameras.list.length}\n' +
+			'Lua Scripts: $luaCount\n' +
+			'HScript Files: $hscriptCount';
 	}
 
 	inline function get_memoryMegas():Float
