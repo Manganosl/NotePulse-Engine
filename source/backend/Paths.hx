@@ -530,7 +530,7 @@ class Paths
 			#end
 			else if(beepOnNull)
 			{
-				trace('SOUND NOT FOUND: $key, PATH: $path');
+				Log.hxTrace('SOUND NOT FOUND: $key, PATH: $path');
 				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
 				return FlxAssets.getSound('flixel/sounds/beep');
 			}

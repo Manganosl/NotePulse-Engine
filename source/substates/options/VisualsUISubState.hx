@@ -126,15 +126,6 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.decimals = 1;
 		addOption(option);
 		
-		#if !mobile
-		var option:Option = new Option('FPS Counter',
-			'If unchecked, hides FPS Counter.',
-			'showFPS',
-			'bool');
-		addOption(option);
-		//option.onChange = onChangeFPSCounter;
-		#end
-		
 		var option:Option = new Option('Pause Screen Song:',
 			"What song do you prefer for the Pause Screen?",
 			'pauseMusic',
@@ -149,22 +140,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			'string',
 			['Vanilla', 'JS']);
 		addOption(option);
-		
-		#if CHECK_FOR_UPDATES
-		var option:Option = new Option('Check for Updates',
-			'On Release builds, turn this on to check for EK updates when you start the game.',
-			'checkForUpdates',
-			'bool');
-		addOption(option);
-		#end
-
-		#if DISCORD_ALLOWED
-		var option:Option = new Option('Discord Rich Presence',
-			"Uncheck this to prevent accidental leaks, it will hide the Application from your \"Playing\" box on Discord",
-			'discordRPC',
-			'bool');
-		addOption(option);
-		#end
 
 		var option:Option = new Option('Combo Stacking',
 			"If unchecked, Ratings and Combo won't stack, saving on System Memory and making them easier to read",
@@ -230,11 +205,5 @@ class VisualsUISubState extends BaseOptionsMenu
 		super.destroy();
 	}
 
-	/*#if !mobile
-	function onChangeFPSCounter()
-	{
-		if(Main.fpsVar != null)
-			Main.fpsVar.visible = ClientPrefs.data.showFPS;
-	}
-	#end*/
+
 }

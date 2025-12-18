@@ -11,6 +11,7 @@ import backend.ui.*;
 
 import lime.utils.Assets;
 import lime.media.AudioBuffer;
+import lime.app.Application;
 
 import flash.media.Sound;
 import flash.geom.Rectangle;
@@ -494,6 +495,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		].join('\n');
 		fullTipText.screenCenter();
 		add(fullTipText);
+
+		Application.current.window.title = "* NotePulse Engine | Charting " + 
+		PlayState.SONG.song + " - " + Difficulty.getString();
+
 		super.create();
 	}
 

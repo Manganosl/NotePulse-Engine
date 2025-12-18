@@ -5,15 +5,67 @@ class MiscSettingsSubState extends BaseOptionsMenu
 	public function new()
 	{
 		title = 'Misc Settings';
-		rpcTitle = 'Misc Settings Menu'; //for Discord Rich Presence
+		rpcTitle = 'Misc Settings Menu';
 
-		//I'd suggest using "Downscroll" as an example for making your own option since it is the simplest here
-		var option:Option = new Option('Developer Mode', //Name
-			'If checked, editors will be enabled.', //Description
-			'devMode', //Save data variable name
-			'bool'); //Variable type
+		var option:Option = new Option('Developer Mode',
+			'If checked, editors will be enabled.',
+			'devMode',
+			'bool');
 		addOption(option);
+		option.onChange = onDevModeChange;
+
+		var option:Option = new Option('Auto Pause',
+			"If checked, the game automatically pauses if the screen isn't on focus.",
+			'autoPause',
+			'bool');
+		addOption(option);
+		option.onChange = onChangeAutoPause;
+
+		#if DISCORD_ALLOWED
+		var option:Option = new Option('Discord Rich Presence',
+			"Uncheck this to prevent accidental leaks, it will hide the Application from your \"Playing\" box on Discord",
+			'discordRPC',
+			'bool');
+		addOption(option);
+		#end
+
+		#if CHECK_FOR_UPDATES
+		var option:Option = new Option('Check for Updates',
+			'On Release builds, turn this on to check for NotePulse updates when you start the game.',
+			'checkForUpdates',
+			'bool');
+		addOption(option);
+		#end
+
+		#if !mobile
+		var option:Option = new Option('FPS Counter',
+			'If unchecked, hides FPS Counter.',
+			'showFPS',
+			'bool');
+		addOption(option);
+		option.onChange = onChangeFPSCounter;
+		#end
 
 		super();
 	}
+
+	#if !mobile
+	function onChangeFPSCounter()
+	{
+		if(Main.fpsVar != null){
+			Main.fpsVar.visible = ClientPrefs.data.showFPS;
+			Main.fpsVar.showDebug = false;
+		}
+	}
+	#end
+
+	function onDevModeChange()
+	{
+		if(Main.fpsVar != null){
+			Main.fpsVar.showDebug = false;
+		}
+	}
+
+	function onChangeAutoPause()
+		FlxG.autoPause = ClientPrefs.data.autoPause;
 }

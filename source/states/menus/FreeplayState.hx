@@ -452,6 +452,7 @@ class FreeplayState extends MusicBeatState
 			FlxTween.tween(scoreText, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
 			FlxTween.tween(scoreBG, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
 			FlxTween.tween(diffText, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
+			FlxTween.tween(playerText, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
 			FlxTween.tween(bottomBG, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
 			FlxTween.tween(bottomText, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
 			for (i in 0...iconArray.length)

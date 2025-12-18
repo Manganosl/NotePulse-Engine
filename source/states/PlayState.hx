@@ -459,8 +459,6 @@ class PlayState extends MusicBeatState
 		#if DISCORD_ALLOWED
 		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
 		storyDifficultyText = Difficulty.getString();
-		if (!chartingMode){Application.current.window.title = "NotePulse Engine" + " - " + "Playing " + SONG.song + " on " + Difficulty.getString() + " [x" + playbackRate + "]" + (isPlayerOpponent ? " - Playing as Opponent" : "");}
-		if (chartingMode){Application.current.window.title = "NotePulse Engine" + " - " + "Charting Mode - " + "Playing " + SONG.song + " on " + Difficulty.getString() + " [x" + playbackRate + "]" + (isPlayerOpponent ? " - Playing as Opponent" : "");}
 
 		if (isStoryMode)
 			detailsText = "Story Mode: " + WeekData.getCurrentWeek().weekName;
@@ -470,6 +468,11 @@ class PlayState extends MusicBeatState
 		// String for when the game is paused
 		detailsPausedText = "Paused - " + detailsText;
 		#end
+
+		Application.current.window.title = (chartingMode ? "* " : "") + 
+		"NotePulse Engine | " + SONG.song + " - " + Difficulty.getString() + 
+		" [x" + playbackRate + "]" + 
+		(isPlayerOpponent ? " - Playing as Opponent" : "");
 
 		GameOverSubstate.resetVariables();
 		songName = Paths.formatToSongPath(SONG.song);
