@@ -80,7 +80,7 @@ class StrumNote extends FlxSkewedSprite
 		if(PlayState.isPixelStage)
 		{
 			loadGraphic(Paths.image('pixelUI/' + texture));
-			width = width / 6;
+			width = width / Note.getPixelColumns();
 			height = height / 5;
 			loadGraphic(Paths.image('pixelUI/' + texture), true, Math.floor(width), Math.floor(height));
 
@@ -95,16 +95,21 @@ class StrumNote extends FlxSkewedSprite
 
 			var noteAnimInt = getAnimSet(getIndex(mania, noteData)).pixel;
 
-			animation.add('circle', [11]);
-			animation.add('rombus', [10]);
-			animation.add('red', [9]);
-			animation.add('green', [8]);
-			animation.add('blue', [7]);
-			animation.add('purple', [6]);
+			var cols = Note.getPixelColumns();
+
+			animation.add('purple', [cols]);
+			animation.add('blue', [cols + 1]);
+			animation.add('green', [cols + 2]);
+			animation.add('red', [cols + 3]);
+
+			if (cols >= 6) {
+				animation.add('rombus', [cols + 4]);
+				animation.add('circle', [cols + 5]);
+			}
 
 			animation.add('static', [noteAnimInt]);
-			animation.add('pressed', [noteAnimInt + 6, noteAnimInt + 12], 12, false);
-			animation.add('confirm', [noteAnimInt + 18, noteAnimInt + 24], 24, false);
+			animation.add('pressed', [noteAnimInt + cols, noteAnimInt + (cols * 2)], 12, false);
+			animation.add('confirm', [noteAnimInt + (cols * 3), noteAnimInt + (cols * 4)], 24, false);
 		}
 		else
 		{

@@ -34,6 +34,8 @@ typedef SwagSong =
 	
 	@:optional var disableNoteRGB:Bool;
 
+	@:optional var pixel4kTexture:Bool;
+
 	@:optional var arrowSkin:String;
 	@:optional var splashSkin:String;
 	@:optional var mania:Int;
@@ -126,6 +128,11 @@ class Song
 
 		if (songJson.playfields == null){
         	songJson.playfields = 1;
+    	}
+	
+		if (songJson.pixel4kTexture == null){
+        	if(songJson.mania == 3) songJson.pixel4kTexture = false;
+			else songJson.pixel4kTexture = true;
     	}
 
 		if (songJson.nativeModchart == null || songJson.nativeModchart == false){

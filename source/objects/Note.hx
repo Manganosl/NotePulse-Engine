@@ -332,11 +332,11 @@ class Note extends FlxSkewedSprite
 		if(PlayState.isPixelStage) {
 			if(isSustainNote) {
 				var graphic = Paths.image('pixelUI/' + skinPixel + 'ENDS' + skinPostfix);
-				loadGraphic(graphic, true, Math.floor(graphic.width / 6), Math.floor(graphic.height / 2));
+				loadGraphic(graphic, true, Math.floor(graphic.width / getPixelColumns()), Math.floor(graphic.height / 2));
 				originalHeight = graphic.height / 2;
 			} else {
 				var graphic = Paths.image('pixelUI/' + skinPixel + skinPostfix);
-				loadGraphic(graphic, true, Math.floor(graphic.width / 6), Math.floor(graphic.height / 5));
+				loadGraphic(graphic, true, Math.floor(graphic.width / getPixelColumns()), Math.floor(graphic.height / 5));
 			}
 			var mania = 3;
 			if (PlayState.SONG != null) mania = PlayState.SONG.mania;
@@ -393,11 +393,14 @@ class Note extends FlxSkewedSprite
 		if (PlayState.SONG != null) mania = PlayState.SONG.mania;
 		var noteAnimStr = getAnimSet(getIndex(mania, noteData)).note;
 		var noteAnimInt = getAnimSet(getIndex(mania, noteData)).pixel;
-		if(isSustainNote)
-		{
-			animation.add(noteAnimStr + 'holdend', [noteAnimInt + 6], 24, true);
+		var cols = Note.getPixelColumns();
+
+		if (isSustainNote) {
+			animation.add(noteAnimStr + 'holdend', [noteAnimInt + cols], 24, true);
 			animation.add(noteAnimStr + 'hold', [noteAnimInt], 24, true);
-		} else animation.add(noteAnimStr + 'Scroll', [noteAnimInt + 6], 24, true);
+		} else {
+			animation.add(noteAnimStr + 'Scroll', [noteAnimInt + cols], 24, true);
+		}
 	}
 
 	function attemptToAddAnimationByPrefix(name:String, prefix:String, framerate:Float = 24, doLoop:Bool = true)
@@ -522,5 +525,9 @@ class Note extends FlxSkewedSprite
 		if (frames != null)
 			frame = frames.frames[animation.frameIndex];
 		return rect;
+	}
+
+	public static inline function getPixelColumns():Int {
+		return (PlayState.SONG != null && PlayState.SONG.pixel4kTexture) ? 4 : 6;
 	}
 }

@@ -655,6 +655,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		gameOverRetryInputText.text = PlayState.SONG.gameOverEnd;
 
 		noRGBCheckBox.checked = (PlayState.SONG.disableNoteRGB == true);
+		pixel4kTextureCheckBox.checked = (PlayState.SONG.pixel4kTexture == true);
 
 		noteTextureInputText.text = PlayState.SONG.arrowSkin;
 		noteSplashesInputText.text = PlayState.SONG.splashSkin;
@@ -2624,6 +2625,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var gameOverLoopInputText:PsychUIInputText;
 	var gameOverRetryInputText:PsychUIInputText;
 	var noRGBCheckBox:PsychUICheckBox;
+	var pixel4kTextureCheckBox:PsychUICheckBox;
 	var noteTextureInputText:PsychUIInputText;
 	var noteSplashesInputText:PsychUIInputText;
 	function addDataTab()
@@ -2661,6 +2663,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		objY += 35;
 		noRGBCheckBox = new PsychUICheckBox(objX, objY, 'Disable Note RGB', 100, updateNotesRGB);
+		pixel4kTextureCheckBox = new PsychUICheckBox(objX + 140, objY, 'Pixel 4K Texture', 100, function() PlayState.SONG.pixel4kTexture = pixel4kTextureCheckBox.checked);
 		
 		objY += 40;
 		noteTextureInputText = new PsychUIInputText(objX, objY, 120, '');
@@ -2711,6 +2714,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tab_group.add(gameOverLoopInputText);
 		tab_group.add(gameOverRetryInputText);
 		tab_group.add(noRGBCheckBox);
+		tab_group.add(pixel4kTextureCheckBox);
 
 		tab_group.add(new FlxText(noteTextureInputText.x, noteTextureInputText.y - 15, 100, 'Note Texture:'));
 		tab_group.add(new FlxText(noteSplashesInputText.x, noteSplashesInputText.y - 15, 120, 'Note Splashes Texture:'));
