@@ -151,9 +151,9 @@ class VisualsUISubState extends BaseOptionsMenu
 		add(notes);
 	}
 
-	override function changeSelection(change:Int = 0)
+	override function changeSelection(change:Int = 0, ?playSound:Bool = true)
 	{
-		super.changeSelection(change);
+		super.changeSelection(change, playSound);
 		
 		if(noteOptionID < 0) return;
 

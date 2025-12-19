@@ -115,8 +115,13 @@ class OptionsState extends MusicBeatState
 		);
 		descText.scrollFactor.set();
 
+		selectorLeft = new Alphabet(0, 0, '>', true);
+		selectorRight = new Alphabet(0, 0, '<', true);
+
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
+		add(selectorLeft);
+		add(selectorRight);
 		add(topOverlay);
 		add(titleText);
 		add(descText);
@@ -129,14 +134,8 @@ class OptionsState extends MusicBeatState
 			grpOptions.add(optionText);
 		}
 
-		selectorLeft = new Alphabet(0, 0, '>', true);
-		add(selectorLeft);
-
-		selectorRight = new Alphabet(0, 0, '<', true);
-		add(selectorRight);
-
 		descriptionChange(options[curSelected]);
-		changeSelection();
+		changeSelection(0, false);
 		selectorLeft.x = intendedSelLeftX;
 		selectorRight.x = intendedSelRightX;
 		selectorLeft.y = intendedSelY;
@@ -149,7 +148,7 @@ class OptionsState extends MusicBeatState
 	override function closeSubState()
 	{
 		super.closeSubState();
-		changeSelection(0);
+		changeSelection(0, false);
 
 		topOverlay.alpha = 0.5;
 		titleText.alpha = 1;
@@ -219,7 +218,7 @@ class OptionsState extends MusicBeatState
 		}
 	}
 
-	function changeSelection(change:Int = 0)
+	function changeSelection(change:Int = 0, ?playSound:Bool = true)
 	{
 		curSelected = FlxMath.wrap(curSelected + change, 0, options.length - 1);
 
@@ -237,7 +236,7 @@ class OptionsState extends MusicBeatState
 			}
 		}
 
-		FlxG.sound.play(Paths.sound('scrollMenu'));
+		if(playSound) FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
 
 	override function destroy()

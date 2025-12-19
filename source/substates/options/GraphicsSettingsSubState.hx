@@ -89,9 +89,9 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		}
 	}
 
-	override function changeSelection(change:Int = 0)
+	override function changeSelection(change:Int = 0, ?playSound:Bool = true)
 	{
-		super.changeSelection(change);
+		super.changeSelection(change, playSound);
 		boyfriend.visible = (antialiasingOption == curSelected);
 	}
 }

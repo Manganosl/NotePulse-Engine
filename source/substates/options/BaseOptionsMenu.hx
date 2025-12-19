@@ -103,7 +103,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 			updateTextFrom(optionsArray[i]);
 		}
 
-		changeSelection();
+		changeSelection(0, false);
 		reloadCheckboxes();
 	}
 
@@ -472,7 +472,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		option.text = text.replace('%v', val).replace('%d', def);
 	}
 	
-	function changeSelection(change:Int = 0)
+	function changeSelection(change:Int = 0, ?playSound:Bool = true)
 	{
 		curSelected += change;
 		if (curSelected < 0)
@@ -499,7 +499,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		}
 
 		curOption = optionsArray[curSelected]; //shorter lol
-		FlxG.sound.play(Paths.sound('scrollMenu'));
+		if(playSound) FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
 
 	function reloadCheckboxes()

@@ -100,7 +100,6 @@ class Note extends FlxSkewedSprite
 	};
 
 	public var offsetX:Float = 0;
-	private var susOffset:Float = 0;
 	public var offsetY:Float = 0;
 	public var offsetAngle:Float = 0;
 	public var multAlpha:Float = 1;
@@ -245,7 +244,6 @@ class Note extends FlxSkewedSprite
 			multAlpha = 0.6;
 			hitsoundDisabled = true;
 			offsetX += width / 2;
-			susOffset += width / 2;
 			copyAngle = false;
 			var mania = 3;
 			if (PlayState.SONG != null) mania = PlayState.SONG.mania;
@@ -253,10 +251,8 @@ class Note extends FlxSkewedSprite
 			animation.play(animToPlay + 'holdend');
 			updateHitbox();
 			offsetX -= width / 2;
-			susOffset -= width / 2;
 			if (PlayState.isPixelStage){
 				offsetX += 30;
-				susOffset += 30;
 			}
 			if (prevNote.isSustainNote)
 			{
@@ -349,10 +345,8 @@ class Note extends FlxSkewedSprite
 			antialiasing = false;
 			if(isSustainNote) {
 				offsetX += _lastNoteOffX;
-				susOffset += _lastNoteOffX;
 				_lastNoteOffX = (width - 7) * (PlayState.daPixelZoom / 2);
 				offsetX -= _lastNoteOffX;
-				susOffset -= _lastNoteOffX;
 			}
 		} else {
 			frames = Paths.getSparrowAtlas(skin);
@@ -481,6 +475,7 @@ class Note extends FlxSkewedSprite
 			updateSustain(myStrum, songSpeed * multSpeed);
 	}
 
+	public var extraOffsetX:Float = 0;
 	public function updateSustain(myStrum:StrumNote, noteSpeed:Float = 1)
 	{
 		if (!isSustainEnd)
@@ -491,7 +486,13 @@ class Note extends FlxSkewedSprite
 		origin.set(frameWidth * .5, 0);
 		offset.set();
 		var angleDir = realDirection * Math.PI / 180;
-		x = myStrum.x + offsetX - (susOffset/4.25) + Math.cos(angleDir) * distance;
+		if(prevNote != null){
+			if(!prevNote.isSustainNote)
+				extraOffsetX = ExtraKeysHandler.calculateWidth(prevNote.width);
+			else
+				extraOffsetX = prevNote.extraOffsetX;
+		}
+		x = myStrum.x + offsetX + extraOffsetX + Math.cos(angleDir) * distance;
 		angle += 180;
 	}
 
