@@ -1086,6 +1086,35 @@ class FunkinLua {
 			game.modchartCharacters.set(tag, daCharacter);
 		});
 
+		Lua_helper.add_callback(lua, "setCharactersForNoteType", function(noteType:String, charactersString:Array<String>) {
+			var characters:Array<Character> = [];
+			for(curCharacter in charactersString){
+				if(curCharacter == "boyfriend"){
+					characters.push(game.boyfriend);
+					continue;
+				} else if(curCharacter == "dad"){
+					characters.push(game.dad);
+					continue;
+				} else if(curCharacter == "gf"){
+					characters.push(game.gf);
+					continue;
+				} else {
+					var char:Character = game.modchartCharacters.get(curCharacter);
+					if(char != null){
+						characters.push(char);
+						continue;
+					}
+				}
+			}
+			for(note in game.unspawnNotes)
+				if(note.noteType == noteType)
+					note.characters = characters;
+
+			for(note in game.notes)
+				if(note.noteType == noteType)
+					note.characters = characters;
+		});
+
 		Lua_helper.add_callback(lua, "makeGraphic", function(obj:String, width:Int = 256, height:Int = 256, color:String = 'FFFFFF') {
 			var spr:FlxSprite = LuaUtils.getObjectDirectly(obj, false);
 			if(spr != null) spr.makeGraphic(width, height, CoolUtil.colorFromString(color));
@@ -1162,6 +1191,25 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "addLuaSprite", function(tag:String, front:Bool = false) {
 			var mySprite:FlxSprite = null;
 			if(game.modchartSprites.exists(tag)) mySprite = game.modchartSprites.get(tag);
+			else if(game.variables.exists(tag)) mySprite = game.variables.get(tag);
+
+			if(mySprite == null) return false;
+
+			if(front)
+				LuaUtils.getTargetInstance().add(mySprite);
+			else
+			{
+				if(!game.isDead)
+					game.insert(game.members.indexOf(LuaUtils.getLowestCharacterGroup()), mySprite);
+				else
+					GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), mySprite);
+			}
+			return true;
+		});
+
+		Lua_helper.add_callback(lua, "addLuaCharacter", function(tag:String, front:Bool = false) {
+			var mySprite:Character = null;
+			if(game.modchartCharacters.exists(tag)) mySprite = game.modchartCharacters.get(tag);
 			else if(game.variables.exists(tag)) mySprite = game.variables.get(tag);
 
 			if(mySprite == null) return false;

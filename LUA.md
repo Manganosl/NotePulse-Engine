@@ -78,6 +78,28 @@ This instance is called "manager", can be used the same way as one that you crea
 # Extra LUA functions
 Here you'll find multiple LUA functions added to make coding easier and do some things without the need of runHaxeCode() or a separate HScript file
 
+### Sprite Functions
+- Create a Backdrop
+```
+makeLuaBackdrop(tag, image, x, y, axis = 'xy', xSpacing = 0, ySpacing = 0)
+```
+- Add a Backdrop
+```
+addLuaBackdrop(tag, front = false)
+```
+- Create a Character
+```
+makeLuaCharacter(tag, character, x = 0, y = 0, isPlayer = false)
+```
+- Add a Character
+```
+addLuaCharacter(tag, front = false)
+```
+- Set the characters for a noteType
+```
+setCharactersForNoteType(noteType, charactersArray)
+```
+
 ### Return Functions
 - Lerp that has the same speed independently from fps
 ```
