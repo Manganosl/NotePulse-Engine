@@ -253,7 +253,6 @@ class ModSelector extends MusicBeatState {
 							var weekName = WeekData.weeksList[currentSong.week];
 							WeekData.setDirectoryFromWeek(WeekData.weeksLoaded.get(weekName));
 							var formated = backend.Highscore.formatSong(currentSong.songName.toLowerCase(), curDifficulty);
-							trace(formated);
 							PlayState.SONG = backend.Song.loadFromJson(formated, currentSong.songName.toLowerCase());
 							try LoadingState.loadAndSwitchState(new ChartingState(), false);
 						}
