@@ -1723,10 +1723,6 @@ class FunkinLua {
 			return Sys.getEnv("USER");
 			#end	
 		});
-
-		Lua_helper.add_callback(lua, "getDiscordUser", function() {
-			return backend.DiscordClient.dUser;
-		});
 		 
 		Lua_helper.add_callback(lua, "doTweenNumber", function(tag:String, fromNumber:Float, toNumber:Float, duration:Float = 1, ease:String) {
 			PlayState.instance.modchartTweens.set(tag, FlxTween.num(fromNumber, toNumber, duration, {ease: LuaUtils.getTweenEaseByString(ease), onComplete:

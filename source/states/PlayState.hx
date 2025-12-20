@@ -1278,7 +1278,7 @@ class PlayState extends MusicBeatState
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 				swagNote.gfStrum = (songNotes[4] == true);
 				if(swagNote.gfStrum) swagNote.mustPress = isPlayerOpponent ? true : false;
-				if(swagNote.gfStrum) swagNote.characters = [gf];
+				if(swagNote.gfStrum || swagNote.gfNote) swagNote.characters = [gf];
 
 				swagNote.scrollFactor.set();
 
@@ -1299,7 +1299,7 @@ class PlayState extends MusicBeatState
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.gfStrum = swagNote.gfStrum;
 						if(sustainNote.gfStrum) sustainNote.mustPress = isPlayerOpponent ? true : false;
-						if(sustainNote.gfStrum) sustainNote.characters = [gf];
+						if(sustainNote.gfStrum || sustainNote.gfNote) sustainNote.characters = [gf];
 						sustainNote.scrollFactor.set();
 						sustainNote.parent = swagNote;
 						unspawnNotes.push(sustainNote);

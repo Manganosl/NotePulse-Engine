@@ -117,8 +117,8 @@ class MainMenuState extends MusicBeatState
 			titleText.scrollFactor.set();
 			add(titleText);
 	
-			if (DiscordClient.dUser != null)
-				descText = new FlxText(0, 50, 1180, "Connected to discord - " + DiscordClient.dUser + "\nNotePulse Engine v" + npeVersion + "\nPsych Engine v" + psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
+			if (DiscordClient.user != null)
+				descText = new FlxText(0, 50, 1180, "Connected to discord - " + DiscordClient.user.username + "\nNotePulse Engine v" + npeVersion + "\nPsych Engine v" + psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
 			else
 				descText = new FlxText(0, 50, 1180, "NotePulse Engine v" + npeVersion + "\nPsych Engine v" + psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
 			descText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);

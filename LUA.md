@@ -83,10 +83,6 @@ Here you'll find multiple LUA functions added to make coding easier and do some 
 ```
 fpsLerp(from, to, lerpSpeed)
 ```
-- Get Discord username, will return null if not connected
-```
-getDiscordUser()
-```
 - Get device username
 ```
 getSystemUser()

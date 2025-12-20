@@ -586,7 +586,7 @@ class EditorPlayState extends MusicBeatSubstate
 				note.retryBound();
 				strumLineWidth += note.width;
 			}
-			trace('Strumline is too big! Shrinking and retrying.');
+			Log.warn('Strumline is too big! Shrinking and retrying.');
 			strumLineIsBig = strumLineWidth > StrumBoundaries.getBoundaryWidth().x;
 		}
 	}
@@ -819,7 +819,7 @@ class EditorPlayState extends MusicBeatSubstate
 
 		if (plrInputNotes.length != 0) { // slightly faster than doing `> 0` lol
 			var funnyNote:Note = plrInputNotes[0]; // front note
-			// trace('✡⚐🕆☼ 💣⚐💣');
+
 
 			if (plrInputNotes.length > 1) {
 				var doubleNote:Note = plrInputNotes[1];
