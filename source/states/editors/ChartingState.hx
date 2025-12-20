@@ -259,6 +259,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	var lockedEvents:Bool = false;
 
+	public static var arrowPathsEnabled:Bool;
+
 	override function create()
 	{
 		if(PlayState.SONG == null)
@@ -946,7 +948,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				FlxG.keys.justPressed.C || FlxG.keys.justPressed.V || FlxG.keys.justPressed.A || FlxG.keys.justPressed.S))
 			{
 				canContinue = false;
-				if(FlxG.keys.justPressed.Z)
+				if(FlxG.keys.justPressed.S)
+					saveChart();
+				else if(FlxG.keys.justPressed.Z)
 					undo();
 				else if(FlxG.keys.justPressed.Y)
 					redo();
@@ -1019,7 +1023,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					addUndoAction(SELECT_NOTE, {old: sel, current: selectedNotes.copy()});
 					onSelectNote();
 				}
-					saveChart();
 			}
 			
 			if(doCut || FlxG.keys.justPressed.DELETE || FlxG.keys.justPressed.BACKSPACE || (isMovingNotes && (FlxG.mouse.justPressedRight || FlxG.keys.justPressed.ESCAPE))) // Delete button
@@ -3537,8 +3540,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var playerDropDown:PsychUIDropDownMenu;
 	var opponentDropDown:PsychUIDropDownMenu;
 	var girlfriendDropDown:PsychUIDropDownMenu;
-
-	var maniaStepper:PsychUINumericStepper;
 	var gfGridChkBox:PsychUICheckBox;
 	
 	function addSongTab()
@@ -3607,7 +3608,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		stepperMania.value = PlayState.SONG.mania;
 		stepperMania.onValueChange = function() 
 		{
-			//if(PlayState.SONG.gfStrums) intendedOffset += PlayState.SONG.mania > Std.int(stepperMania.value) ? -40 : 40;
 			PlayState.SONG.mania = Std.int(stepperMania.value);
 			GRID_COLUMNS_PER_PLAYER = PlayState.SONG.mania+1;
 			createGrids();
@@ -4572,6 +4572,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var showNextGridButton:PsychUIButton;
 	var noteTypeLabelsButton:PsychUIButton;
 	var vortexEditorButton:PsychUIButton;
+	var arrowPathsButton:PsychUIButton;
 	function addViewTab()
 	{
 		var tab = upperBox.getTab('View');
@@ -4586,6 +4587,18 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			waveformTarget = chartEditorSave.data.waveformTarget;
 		if(chartEditorSave.data.waveformColor != null)
 			waveformSprite.color = CoolUtil.colorFromString(chartEditorSave.data.waveformColor);
+
+		arrowPathsButton = new PsychUIButton(btnX, btnY, arrowPathsEnabled ? '  Arrow Paths ON' : '  Arrow Paths OFF', function()
+		{
+			arrowPathsEnabled = !arrowPathsEnabled;
+			chartEditorSave.data.arrowPaths = arrowPathsEnabled;
+			arrowPathsButton.text.text = arrowPathsEnabled ? '  Arrow Paths ON' : '  Arrow Paths OFF';
+		}, btnWid);
+		arrowPathsButton.text.alignment = LEFT;
+		tab_group.add(arrowPathsButton);
+
+		btnY++;
+		btnY += 20;
 
 		showLastGridButton = new PsychUIButton(btnX, btnY, '', function()
 		{
@@ -5122,6 +5135,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				note.setGraphicSize(0, GRID_SIZE);
 	
 			note.updateHitbox();
+			note.x += GRID_SIZE/2 - note.width/2;
+			note.y += GRID_SIZE/2 - note.height/2;
 		}
 	}
 

@@ -1,8 +1,5 @@
 package states.editors;
 
-import psychlua.LuaUtils;
-
-import backend.Song;
 import backend.Section;
 import backend.Rating;
 
@@ -11,14 +8,16 @@ import objects.NoteSplash;
 import objects.StrumNote;
 
 import flixel.util.FlxSort;
-import flixel.util.FlxStringUtil;
-import flixel.animation.FlxAnimationController;
 import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
 
 import haxe.Json;
 import objects.Character;
-import openfl.utils.Assets as OpenFlAssets;
+
+import modchart.Manager;
+import modchart.Config;
+
+import states.editors.ChartingState;
 
 import psychlua.LuaUtils;
 class EditorPlayState extends MusicBeatSubstate
@@ -82,7 +81,7 @@ class EditorPlayState extends MusicBeatSubstate
 
 	public static var instance:EditorPlayState;
 
-	public var manager:modchart.Manager;
+	public var manager:Manager;
 
 	public function new(playbackRate:Float)
 	{
@@ -170,10 +169,11 @@ class EditorPlayState extends MusicBeatSubstate
 		
 		generateSong(PlayState.SONG.song);
 
-		modchart.Config.RENDER_ARROW_PATHS = true;
+		if(ChartingState.arrowPathsEnabled) Config.RENDER_ARROW_PATHS = true;
+		else Config.RENDER_ARROW_PATHS = false;
 		if(PlayState.SONG.nativeModchart){ 
 			var fields = 1;
-			manager = new modchart.Manager();
+			manager = new Manager();
 			add(manager);
 
 			while(fields != PlayState.SONG.playfields){
@@ -343,7 +343,7 @@ class EditorPlayState extends MusicBeatSubstate
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		FlxG.mouse.visible = true;
-		modchart.Config.RENDER_ARROW_PATHS = false;
+		Config.RENDER_ARROW_PATHS = false;
 		if(PlayState.SONG.nativeModchart){ 
 			remove(manager);
 			manager = null;
