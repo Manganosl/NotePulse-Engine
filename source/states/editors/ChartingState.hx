@@ -2663,7 +2663,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		objY += 35;
 		noRGBCheckBox = new PsychUICheckBox(objX, objY, 'Disable Note RGB', 100, updateNotesRGB);
-		pixel4kTextureCheckBox = new PsychUICheckBox(objX + 140, objY, 'Pixel 4K Texture', 100, function() PlayState.SONG.pixel4kTexture = pixel4kTextureCheckBox.checked);
+		pixel4kTextureCheckBox = new PsychUICheckBox(objX + 140, objY, 'Pixel 4K Texture', 100, updatePixelTexture);
 		
 		objY += 40;
 		noteTextureInputText = new PsychUIInputText(objX, objY, 120, '');
@@ -5104,6 +5104,25 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		for (note in strumLineNotes)
 			note.rgbShader.enabled = !noRGBCheckBox.checked;
+	}
+
+	function updatePixelTexture(){
+		PlayState.SONG.pixel4kTexture = pixel4kTextureCheckBox.checked;
+		for (note in notes)
+		{
+			if(note == null) continue;
+			note.reloadNote();
+		}
+		for (note in strumLineNotes){
+			if(note == null) continue;
+			note.reloadNote();
+			if(note.width > note.height)
+				note.setGraphicSize(GRID_SIZE);
+			else
+				note.setGraphicSize(0, GRID_SIZE);
+	
+			note.updateHitbox();
+		}
 	}
 
 	function updateGridVisibility()

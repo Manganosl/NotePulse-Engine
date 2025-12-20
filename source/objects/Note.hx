@@ -495,7 +495,7 @@ class Note extends FlxSkewedSprite
 			else
 				extraOffsetX = prevNote.extraOffsetX;
 		}
-		x = myStrum.x + offsetX + extraOffsetX + Math.cos(angleDir) * distance;
+		x = myStrum.x + offsetX + (extraOffsetX * (PlayState.isPixelStage ? -1 : 1)) + Math.cos(angleDir) * distance;
 		angle += 180;
 	}
 

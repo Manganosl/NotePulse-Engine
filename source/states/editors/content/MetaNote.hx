@@ -190,6 +190,17 @@ class MetaNote extends Note {
         }
     }
 
+    override public function reloadNote(tex:String = "", postfix:String = "") {
+        super.reloadNote(tex, postfix);
+
+        if (width > height)
+            setGraphicSize(ChartingState.GRID_SIZE);
+        else
+            setGraphicSize(0, ChartingState.GRID_SIZE);
+
+        updateHitbox();
+    }
+
     public function setStrumTime(v:Float) {
         this.songData[0] = v;
         this.strumTime = v;
