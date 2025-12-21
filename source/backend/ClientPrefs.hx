@@ -126,29 +126,44 @@ class ClientPrefs {
 
 	//Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
 	public static var keyBinds:Map<String, Array<FlxKey>> = [
-		//Key Bind, Name for ControlsSubState
-		'note_up'		=> [W, UP],
-		'note_left'		=> [A, LEFT],
-		'note_down'		=> [S, DOWN],
-		'note_right'	=> [D, RIGHT],
-		
-		'ui_up'			=> [W, UP],
-		'ui_left'		=> [A, LEFT],
-		'ui_down'		=> [S, DOWN],
-		'ui_right'		=> [D, RIGHT],
-		
-		'accept'		=> [SPACE, ENTER],
-		'back'			=> [BACKSPACE, ESCAPE],
-		'pause'			=> [ENTER, ESCAPE],
-		'reset'			=> [R],
-		
-		'volume_mute'	=> [ZERO],
-		'volume_up'		=> [NUMPADPLUS, PLUS],
-		'volume_down'	=> [NUMPADMINUS, MINUS],
-		
-		'debug_1'		=> [SEVEN],
-		'debug_2'		=> [EIGHT]
+		'note_up'        => [W, UP],
+		'note_left'      => [A, LEFT],
+		'note_down'      => [S, DOWN],
+		'note_right'     => [D, RIGHT],
+		'ui_up'          => [W, UP],
+		'ui_left'        => [A, LEFT],
+		'ui_down'        => [S, DOWN],
+		'ui_right'       => [D, RIGHT],
+		'accept'         => [SPACE, ENTER],
+		'back'           => [BACKSPACE, ESCAPE],
+		'pause'          => [ENTER, ESCAPE],
+		'reset'          => [R],
+		'volume_mute'    => [ZERO],
+		'volume_up'      => [NUMPADPLUS, PLUS],
+		'volume_down'    => [NUMPADMINUS, MINUS],
+		'debug_1'        => [SEVEN],
+		'debug_2'        => [EIGHT],
+
+		'0_key_0'  => [SPACE],
+		'1_key_0'  => [D, LEFT], '1_key_1' => [K, RIGHT],
+		'2_key_0'  => [D, LEFT], '2_key_1' => [SPACE], '2_key_2' => [K, RIGHT],
+		'3_key_0'  => [A, LEFT], '3_key_1' => [S, DOWN], '3_key_2' => [W, UP], '3_key_3' => [D, RIGHT],
+		'4_key_0'  => [A, LEFT], '4_key_1' => [S, DOWN], '4_key_2' => [SPACE], '4_key_3' => [W, UP], '4_key_4' => [D, RIGHT],
+		'5_key_0'  => [S], '5_key_1' => [D], '5_key_2' => [F], '5_key_3' => [J], '5_key_4' => [K], '5_key_5' => [L],
+		'6_key_0'  => [S], '6_key_1' => [D], '6_key_2' => [F], '6_key_3' => [SPACE], '6_key_4' => [J], '6_key_5' => [K], '6_key_6' => [L],
+		'7_key_0'  => [A], '7_key_1' => [S], '7_key_2' => [D], '7_key_3' => [F], '7_key_4' => [H], '7_key_5' => [J], '7_key_6' => [K], '7_key_7' => [L],
+		'8_key_0'  => [A], '8_key_1' => [S], '8_key_2' => [D], '8_key_3' => [F], '8_key_4' => [SPACE], '8_key_5' => [H], '8_key_6' => [J], '8_key_7' => [K], '8_key_8' => [L],
+		'9_key_0'  => [A], '9_key_1' => [S], '9_key_2' => [D], '9_key_3' => [F], '9_key_4' => [G], '9_key_5' => [SPACE], '9_key_6' => [H], '9_key_7' => [J], '9_key_8' => [K], '9_key_9' => [L],
+		'10_key_0' => [A], '10_key_1' => [S], '10_key_2' => [D], '10_key_3' => [F], '10_key_4' => [G], '10_key_5' => [SPACE], '10_key_6' => [H], '10_key_7' => [J], '10_key_8' => [K], '10_key_9' => [L], '10_key_10' => [SEMICOLON],
+		'11_key_0' => [CAPSLOCK], '11_key_1' => [A], '11_key_2' => [S], '11_key_3' => [D], '11_key_4' => [F], '11_key_5' => [G], '11_key_6' => [SPACE], '11_key_7' => [H], '11_key_8' => [J], '11_key_9' => [K], '11_key_10' => [L], '11_key_11' => [SEMICOLON],
+		'12_key_0' => [CAPSLOCK], '12_key_1' => [A], '12_key_2' => [S], '12_key_3' => [D], '12_key_4' => [F], '12_key_5' => [G], '12_key_6' => [SPACE], '12_key_7' => [H], '12_key_8' => [J], '12_key_9' => [K], '12_key_10' => [L], '12_key_11' => [SEMICOLON], '12_key_12' => [QUOTE],
+		'13_key_0' => [CAPSLOCK], '13_key_1' => [A], '13_key_2' => [S], '13_key_3' => [D], '13_key_4' => [F], '13_key_5' => [G], '13_key_6' => [SPACE], '13_key_7' => [H], '13_key_8' => [J], '13_key_9' => [K], '13_key_10' => [L], '13_key_11' => [SEMICOLON], '13_key_12' => [QUOTE], '13_key_13' => [RBRACKET],
+		'14_key_0' => [TAB], '14_key_1' => [CAPSLOCK], '14_key_2' => [A], '14_key_3' => [S], '14_key_4' => [D], '14_key_5' => [F], '14_key_6' => [G], '14_key_7' => [SPACE], '14_key_8' => [H], '14_key_9' => [J], '14_key_10' => [K], '14_key_11' => [L], '14_key_12' => [SEMICOLON], '14_key_13' => [QUOTE], '14_key_14' => [RBRACKET],
+		'15_key_0' => [TAB], '15_key_1' => [CAPSLOCK], '15_key_2' => [A], '15_key_3' => [S], '15_key_4' => [D], '15_key_5' => [F], '15_key_6' => [G], '15_key_7' => [SPACE], '15_key_8' => [H], '15_key_9' => [J], '15_key_10' => [K], '15_key_11' => [L], '15_key_12' => [SEMICOLON], '15_key_13' => [QUOTE], '15_key_14' => [RBRACKET], '15_key_15' => [BACKSLASH],
+		'16_key_0' => [ONE], '16_key_1' => [TAB], '16_key_2' => [CAPSLOCK], '16_key_3' => [A], '16_key_4' => [S], '16_key_5' => [D], '16_key_6' => [F], '16_key_7' => [G], '16_key_8' => [SPACE], '16_key_9' => [H], '16_key_10' => [J], '16_key_11' => [K], '16_key_12' => [L], '16_key_13' => [SEMICOLON], '16_key_14' => [QUOTE], '16_key_15' => [RBRACKET], '16_key_16' => [BACKSLASH],
+		'17_key_0' => [Q], '17_key_1' => [W], '17_key_2' => [E], '17_key_3' => [R], '17_key_4' => [T], '17_key_5' => [Y], '17_key_6' => [U], '17_key_7' => [I], '17_key_8' => [O], '17_key_9' => [A], '17_key_10' => [S], '17_key_11' => [D], '17_key_12' => [F], '17_key_13' => [SPACE], '17_key_14' => [H], '17_key_15' => [J], '17_key_16' => [K], '17_key_17' => [L]
 	];
+
 	public static var gamepadBinds:Map<String, Array<FlxGamepadInputID>> = [
 		'note_up'		=> [DPAD_UP, Y],
 		'note_left'		=> [DPAD_LEFT, X],
@@ -189,30 +204,13 @@ class ClientPrefs {
 		while(gamepadBind != null && gamepadBind.contains(NONE)) gamepadBind.remove(NONE);
 	}
 
-	public static function loadDefaultKeys()
-	{
+	public static function loadDefaultKeys() {
 		defaultKeys = keyBinds.copy();
-		var saveDataKeybinds = ExtraKeysHandler.instance.data.keybinds;
-
-		// if resetting keybinds to default doesnt work, hmu
-		for (i in 0...saveDataKeybinds.length) {
-			var maniaKeybinds = saveDataKeybinds[i];
-			var maniaID = '${i}_key';
-			for (j in 0...maniaKeybinds.length) {
-				var keybindID = '${maniaID}_$j';
-				var codes = maniaKeybinds[j];
-				defaultKeys.set(keybindID, codes);
-			}
-		}
-
 		defaultButtons = gamepadBinds.copy();
 	}
 
-	public static function saveSettings()
-	{
-		// Save ALL prefs normally (including arrowRGB / arrowRGBPixel)
-		for (key in Reflect.fields(data))
-		{
+	public static function saveSettings() {
+		for (key in Reflect.fields(data)) {
 			Reflect.setField(FlxG.save.data, key, Reflect.field(data, key));
 		}
 
@@ -220,149 +218,39 @@ class ClientPrefs {
 		Achievements.save();
 		#end
 
+		FlxG.save.data.keyBinds = keyBinds;
+		FlxG.save.data.gamepadBinds = gamepadBinds;
+
 		FlxG.save.flush();
-
-		// -------- Controls are saved separately --------
-		var save:FlxSave = new FlxSave();
-		save.bind('controls_v3', CoolUtil.getSavePath());
-
-		// Keyboard binds
-		save.data.keyboard = keyBinds;
-
-		// Extra Keys (unchanged JSON system)
-		var saveDataKeybinds:Array<Array<Array<Int>>> = [];
-		for (i in 0...ExtraKeysHandler.instance.data.maxKeys + 1)
-			saveDataKeybinds.push([]);
-
-		for (k in keyBinds.keys())
-		{
-			if (k.contains('key'))
-			{
-				var storeNum = Std.parseInt(k.split('_')[0]);
-
-				var convertKeycodes = keyBinds.get(k);
-				var newKeycodes:Array<Int> = [];
-				for (key in convertKeycodes)
-					newKeycodes.push(key);
-
-				var index = Std.parseInt(k.split('_')[2]);
-				saveDataKeybinds[storeNum].insert(index, newKeycodes);
-			}
-		}
-
-		var saveKeybindData:EKKeybindSavedData = new EKKeybindSavedData(saveDataKeybinds);
-		var writer = new json2object.JsonWriter<EKKeybindSavedData>();
-		var content = writer.write(saveKeybindData, '  ');
-
-		#if sys
-		Log.hxTrace('Saved ekkeybinds.json');
-		File.saveContent('ekkeybinds.json', content);
-		#end
-
-		// Gamepad binds
-		save.data.gamepad = gamepadBinds;
-		save.flush();
-
 		FlxG.log.add("Settings saved!");
 	}
 
-	public static function loadPrefs()
-	{
+	public static function loadPrefs() {
 		#if ACHIEVEMENTS_ALLOWED
 		Achievements.load();
 		#end
 
-		// Load normal saved values (INCLUDING arrowRGB / arrowRGBPixel)
-		for (key in Reflect.fields(data))
-		{
-			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key))
-			{
+		for (key in Reflect.fields(data)) {
+			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key)) {
 				Reflect.setField(data, key, Reflect.field(FlxG.save.data, key));
 			}
 		}
 
-		#if (!html5 && !switch)
-		FlxG.autoPause = ClientPrefs.data.autoPause;
-
-		if (FlxG.save.data.framerate == null)
-		{
-			final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
-			data.framerate = Std.int(FlxMath.bound(refreshRate, 60, 240));
-		}
-		#end
-
-		// Apply framerate
-		if (data.framerate > FlxG.drawFramerate)
-		{
-			FlxG.updateFramerate = data.framerate;
-			FlxG.drawFramerate = data.framerate;
-		}
-		else
-		{
-			FlxG.drawFramerate = data.framerate;
-			FlxG.updateFramerate = data.framerate;
-		}
-
-		// Load gameplay settings map
-		if (FlxG.save.data.gameplaySettings != null)
-		{
-			var savedMap:Map<String, Dynamic> = FlxG.save.data.gameplaySettings;
-			for (name => value in savedMap)
-				data.gameplaySettings.set(name, value);
-		}
-
-		// Volume (flixel handles saving automatically)
-		if (FlxG.save.data.volume != null)
-			FlxG.sound.volume = FlxG.save.data.volume;
-		if (FlxG.save.data.mute != null)
-			FlxG.sound.muted = FlxG.save.data.mute;
-
-		#if DISCORD_ALLOWED
-		DiscordClient.check();
-		#end
-
-		// -------- Controls (separate save) --------
-		var save:FlxSave = new FlxSave();
-		save.bind('controls_v3', CoolUtil.getSavePath());
-
-		if (save != null)
-		{
-			if (save.data.keyboard != null)
-			{
-				var loadedControls:Map<String, Array<FlxKey>> = save.data.keyboard;
-				for (control => keys in loadedControls)
-					if (keyBinds.exists(control))
-						keyBinds.set(control, keys);
+		if (FlxG.save.data.keyBinds != null) {
+			var loadedKeys:Map<String, Array<FlxKey>> = FlxG.save.data.keyBinds;
+			for (control => keys in loadedKeys) {
+				if (keyBinds.exists(control)) keyBinds.set(control, keys);
 			}
-
-			// Extra Keys (still JSON-based, unchanged)
-			var savedKeybindJson =
-				CoolUtil.getKeybinds('ekkeybinds.json', ExtraKeysHandler.instance.data.keybinds);
-			var saveDataKeybinds = savedKeybindJson.keybinds;
-
-			for (i in 0...saveDataKeybinds.length)
-			{
-				var maniaKeybinds = saveDataKeybinds[i];
-				var maniaID = '${i}_key';
-
-				for (j in 0...maniaKeybinds.length)
-				{
-					var keybindID = '${maniaID}_$j';
-					var codes = maniaKeybinds[j];
-					keyBinds.set(keybindID, codes);
-				}
-			}
-
-			if (save.data.gamepad != null)
-			{
-				var loadedControls:Map<String, Array<FlxGamepadInputID>> = save.data.gamepad;
-				for (control => keys in loadedControls)
-					if (gamepadBinds.exists(control))
-						gamepadBinds.set(control, keys);
-			}
-
-			reloadVolumeKeys();
 		}
+
+		if (FlxG.save.data.gamepadBinds != null) {
+			var loadedButtons:Map<String, Array<FlxGamepadInputID>> = FlxG.save.data.gamepadBinds;
+			for (control => buttons in loadedButtons) {
+				if (gamepadBinds.exists(control)) gamepadBinds.set(control, buttons);
+			}
+		}
+
+		reloadVolumeKeys();
 	}
 
 	inline public static function getGameplaySetting(name:String, defaultValue:Dynamic = null, ?customDefaultValue:Bool = false):Dynamic
