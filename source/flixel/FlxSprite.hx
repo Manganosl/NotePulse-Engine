@@ -388,12 +388,6 @@ class FlxSprite extends FlxObject
 	 *                          (OPTIONAL - for simple stuff only, do NOT use for animated images!).
 	 */
 
-
-	/**
-	 * Handler for more data
-	 */
-	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
-
 	public function new(?X:Float = 0, ?Y:Float = 0, ?SimpleGraphic:FlxGraphicAsset)
 	{
 		super(X, Y);
