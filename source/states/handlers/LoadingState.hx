@@ -15,7 +15,7 @@ import flash.media.Sound;
 
 import backend.Song;
 import backend.StageData;
-import objects.Character;
+import backend.parsers.CodenameParser;
 
 import sys.thread.Thread;
 import sys.thread.Mutex;
@@ -616,9 +616,9 @@ class LoadingState extends MusicBeatState
 			}
 
 			#if MODS_ALLOWED
-			var character:Dynamic = Json.parse(isJSON ? File.getContent(path) : Character.xmlToJsonString(File.getContent(path)));
+			var character:Dynamic = Json.parse(isJSON ? File.getContent(path) : CodenameParser.characterParse(File.getContent(path)));
 			#else
-			var character:Dynamic = Json.parse(isJSON ? Assets.getText(path) : Character.xmlToJsonString(Assets.getText(path)));
+			var character:Dynamic = Json.parse(isJSON ? Assets.getText(path) : CodenameParser.characterParse(Assets.getText(path)));
 			#end
 
 			var isAnimateAtlas:Bool = false;

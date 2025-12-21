@@ -31,6 +31,7 @@ import backend.Highscore;
 import backend.Difficulty;
 import backend.Section;
 import backend.ExtraKeysHandler;
+import backend.parsers.CodenameParser;
 
 import openfl.net.FileReference;
 import openfl.events.Event;
@@ -5395,9 +5396,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					isJSON = false;
 				}
 				#if MODS_ALLOWED
-				var unparsedJson = File.getContent(isJSON ? path : Character.xmlToJsonString(path));
+				var unparsedJson = File.getContent(isJSON ? path : CodenameParser.characterParse(path));
 				#else
-				var unparsedJson = Assets.getText(isJSON ? path : Character.xmlToJsonString(path));
+				var unparsedJson = Assets.getText(isJSON ? path : CodenameParser.characterParse(path));
 				#end
 				return cast Json.parse(unparsedJson);
 			}
