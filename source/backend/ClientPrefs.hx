@@ -1,6 +1,5 @@
 package backend;
 
-import backend.ExtraKeysHandler.EKNoteColor;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
@@ -36,17 +35,44 @@ import states.menus.TitleState;
 	public var noteOffset:Int = 0;
 	public var devMode:Bool = false;
 
-	// Warning: These aren't used!! Modify data/extrakeys.json instead!
 	public var arrowRGB:Array<Array<FlxColor>> = [
 		[0xFFC24B99, 0xFFFFFFFF, 0xFF3C1F56],
 		[0xFF00FFFF, 0xFFFFFFFF, 0xFF1542B7],
 		[0xFF12FA05, 0xFFFFFFFF, 0xFF0A4447],
-		[0xFFF9393F, 0xFFFFFFFF, 0xFF651038]];
+		[0xFFF9393F, 0xFFFFFFFF, 0xFF651038],
+		[0xFF999999, 0xFFFFFFFF, 0xFF201E31],
+		[0xFFFFFF00, 0xFFFFFFFF, 0xFF993300],
+		[0xFF8B4AFF, 0xFFFFFFFF, 0xFF3B177D],
+		[0xFFFF0000, 0xFFFFFFFF, 0xFF660000],
+		[0xFF0033FF, 0xFFFFFFFF, 0xFF000066],
+		[0xFF221F21, 0xFFFFFFFF, 0xFF3C1F56],
+		[0xFF00FFFF, 0xFFFFFFFF, 0xFF1542B7],
+		[0xFF12FA05, 0xFFFFFFFF, 0xFF0A4447],
+		[0xFFF9393F, 0xFFFFFFFF, 0xFF651038],
+		[0xFF999999, 0xFFFFFFFF, 0xFF201E31],
+		[0xFFFFFF00, 0xFFFFFFFF, 0xFF993300],
+		[0xFF8B4AFF, 0xFFFFFFFF, 0xFF3B177D],
+		[0xFFFF0000, 0xFFFFFFFF, 0xFF660000],
+		[0xFF0033FF, 0xFFFFFFFF, 0xFF000066]];
 	public var arrowRGBPixel:Array<Array<FlxColor>> = [
 		[0xFFE276FF, 0xFFFFF9FF, 0xFF60008D],
 		[0xFF3DCAFF, 0xFFF4FFFF, 0xFF003060],
 		[0xFF71E300, 0xFFF6FFE6, 0xFF003100],
-		[0xFFFF884E, 0xFFFFFAF5, 0xFF6C0000]];
+		[0xFFFF884E, 0xFFFFFAF5, 0xFF6C0000],
+		[0xFFB6B6B6, 0xFFFFFFFF, 0xFF444444],
+		[0xFFFFD94A, 0xFFF4FFFF, 0xFF663500],
+	    [0xFFB055BC, 0xFFF6FFE6, 0xFF4D0060],
+	    [0xFFDF3E23, 0xFFFFFAF5, 0xFF440000],
+	    [0xFF2F69E5, 0xFFFFF9FF, 0xFF000F5D],
+	    [0xFFE276FF, 0xFFFFF9FF, 0xFF60008D],
+	    [0xFF3DCAFF, 0xFFF4FFFF, 0xFF003060],
+	    [0xFF71E300, 0xFFF6FFE6, 0xFF003100],
+		[0xFFFF884E, 0xFFFFFAF5, 0xFF6C0000],
+	    [0xFFB6B6B6, 0xFFFFFFFF, 0xFF444444],
+	    [0xFFFFD94A, 0xFFF4FFFF, 0xFF663500],
+	    [0xFFB055BC, 0xFFF6FFE6, 0xFF4D0060],
+	    [0xFFDF3E23, 0xFFFFFAF5, 0xFF440000],
+	    [0xFF2F69E5, 0xFFFFF9FF, 0xFF000F5D]];
 
 	public var ghostTapping:Bool = true;
 	public var timeBarType:String = 'Time Left';
@@ -182,161 +208,91 @@ class ClientPrefs {
 		defaultButtons = gamepadBinds.copy();
 	}
 
-	public static function saveSettings() {
+	public static function saveSettings()
+	{
+		// Save ALL prefs normally (including arrowRGB / arrowRGBPixel)
 		for (key in Reflect.fields(data))
-			if (key != 'arrowRGB' && key != 'arrowRGBPixel') {
-				Reflect.setField(FlxG.save.data, key, Reflect.field(data, key));
-			} #if sys 
-			else if (key == 'arrowRGB')
-				saveArrowRGBData('arrowRGB.json', data.arrowRGB);
-			else if (key == 'arrowRGBPixel')
-				saveArrowRGBData('arrowRGBPixel.json', data.arrowRGBPixel);
-			#end
-
-		#if ACHIEVEMENTS_ALLOWED Achievements.save(); #end
-		FlxG.save.flush();
-
-		//Placing this in a separate save so that it can be manually deleted without removing your Score and stuff
-		var save:FlxSave = new FlxSave();
-		save.bind('controls_v3', CoolUtil.getSavePath());
-		save.data.keyboard = keyBinds;
-
-		// this was NOT that easy
-		var saveDataKeybinds:Array<Array<Array<Int>>> = [];
-			//[], [], [], [], [], [], [], [], []
-
-		for (i in 0...ExtraKeysHandler.instance.data.maxKeys+1) {
-			saveDataKeybinds.push([]);
+		{
+			Reflect.setField(FlxG.save.data, key, Reflect.field(data, key));
 		}
 
-		// loads keybinds in a very specific way
-		// do NOT put "*key*" in the map or it will die
-		for (k in keyBinds.keys()) {
-			if (k.contains('key')) {
-				//trace('EK Keybind detected: $k');
+		#if ACHIEVEMENTS_ALLOWED
+		Achievements.save();
+		#end
+
+		FlxG.save.flush();
+
+		// -------- Controls are saved separately --------
+		var save:FlxSave = new FlxSave();
+		save.bind('controls_v3', CoolUtil.getSavePath());
+
+		// Keyboard binds
+		save.data.keyboard = keyBinds;
+
+		// Extra Keys (unchanged JSON system)
+		var saveDataKeybinds:Array<Array<Array<Int>>> = [];
+		for (i in 0...ExtraKeysHandler.instance.data.maxKeys + 1)
+			saveDataKeybinds.push([]);
+
+		for (k in keyBinds.keys())
+		{
+			if (k.contains('key'))
+			{
 				var storeNum = Std.parseInt(k.split('_')[0]);
-				
+
 				var convertKeycodes = keyBinds.get(k);
 				var newKeycodes:Array<Int> = [];
-				for (key in convertKeycodes) { newKeycodes.push(key); }
-				
+				for (key in convertKeycodes)
+					newKeycodes.push(key);
+
 				var index = Std.parseInt(k.split('_')[2]);
-
 				saveDataKeybinds[storeNum].insert(index, newKeycodes);
-
-				//trace('$k saved to $storeNum with codes ${keyBinds.get(k)} and index $index');
 			}
 		}
 
 		var saveKeybindData:EKKeybindSavedData = new EKKeybindSavedData(saveDataKeybinds);
 		var writer = new json2object.JsonWriter<EKKeybindSavedData>();
 		var content = writer.write(saveKeybindData, '  ');
+
 		#if sys
 		Log.hxTrace('Saved ekkeybinds.json');
 		File.saveContent('ekkeybinds.json', content);
 		#end
 
+		// Gamepad binds
 		save.data.gamepad = gamepadBinds;
 		save.flush();
+
 		FlxG.log.add("Settings saved!");
 	}
 
-	#if sys
-	public static function saveArrowRGBData(path:String, rgbArray:Array<Array<FlxColor>>) {
-		var saveArrowRGB:ArrowRGBSavedData;
-		var colors:Array<EKNoteColor> = [];
-		for (color in rgbArray) {
-			var inner = color[0];
-			var border = color[1];
-			var outline = color[2];
+	public static function loadPrefs()
+	{
+		#if ACHIEVEMENTS_ALLOWED
+		Achievements.load();
+		#end
 
-			var resultColor = new EKNoteColor();
-			resultColor.inner = inner.toHexString(false, false);
-			resultColor.border = border.toHexString(false, false);
-			resultColor.outline = outline.toHexString(false, false);
-
-			colors.push(resultColor);
-
-			//trace('Saved color ${resultColor.inner} ${resultColor.border} ${resultColor.outline}');
-		}
-
-		saveArrowRGB = new ArrowRGBSavedData(colors);
-		var writer = new json2object.JsonWriter<ArrowRGBSavedData>();
-		var content = writer.write(saveArrowRGB, '    ');
-		File.saveContent(path, content);
-
-		Log.hxTrace('Wrote to $path');
-	}
-	#end
-
-	public static function loadArrowRGBData(path:String, pixel:Bool = false, defaultColors:Array<EKNoteColor>) {
-		var savedColors:ArrowRGBSavedData = CoolUtil.getArrowRGB(path, defaultColors);
-
-		if (pixel)
-			ClientPrefs.defaultData.arrowRGBPixel = [];
-		else
-			ClientPrefs.defaultData.arrowRGB = [];
-
-		for (defaultColor in defaultColors) {
-			var thisNote = [
-				CoolUtil.colorFromString(defaultColor.inner), 
-				CoolUtil.colorFromString(defaultColor.border), 
-				CoolUtil.colorFromString(defaultColor.outline)
-			];
-			if (pixel)
-				ClientPrefs.defaultData.arrowRGBPixel.push(thisNote);
-			else
-				ClientPrefs.defaultData.arrowRGB.push(thisNote);
-		}
-
-		if (pixel)
-			ClientPrefs.data.arrowRGBPixel = [];
-		else
-			ClientPrefs.data.arrowRGB = [];
-
-		for (color in savedColors.colors) {
-			var thisNote = [
-				CoolUtil.colorFromString(color.inner), 
-				CoolUtil.colorFromString(color.border), 
-				CoolUtil.colorFromString(color.outline)
-			];
-
-			//trace('Loaded color into save: $thisNote, pixel? $pixel');
-
-			if (pixel)
-				ClientPrefs.data.arrowRGBPixel.push(thisNote);
-			else
-				ClientPrefs.data.arrowRGB.push(thisNote);
-		}
-	}
-
-	public static function loadPrefs() {
-		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
-
+		// Load normal saved values (INCLUDING arrowRGB / arrowRGBPixel)
 		for (key in Reflect.fields(data))
-			if (key != 'gameplaySettings' && 
-				key != 'arrowRGB' &&
-				key != 'arrowRGBPixel' && Reflect.hasField(FlxG.save.data, key))
+		{
+			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key))
+			{
 				Reflect.setField(data, key, Reflect.field(FlxG.save.data, key));
-			else if (key == 'arrowRGB') {
-				loadArrowRGBData('arrowRGB.json', false, ExtraKeysHandler.instance.data.colors);
-			} else if (key == 'arrowRGBPixel') {
-				loadArrowRGBData('arrowRGBPixel.json', true, ExtraKeysHandler.instance.data.pixelNoteColors);
 			}
-		
-		/*if(Main.fpsVar != null)
-			Main.fpsVar.visible = data.showFPS;*/
+		}
 
 		#if (!html5 && !switch)
 		FlxG.autoPause = ClientPrefs.data.autoPause;
 
-		if(FlxG.save.data.framerate == null) {
+		if (FlxG.save.data.framerate == null)
+		{
 			final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
 			data.framerate = Std.int(FlxMath.bound(refreshRate, 60, 240));
 		}
 		#end
 
-		if(data.framerate > FlxG.drawFramerate)
+		// Apply framerate
+		if (data.framerate > FlxG.drawFramerate)
 		{
 			FlxG.updateFramerate = data.framerate;
 			FlxG.drawFramerate = data.framerate;
@@ -347,15 +303,16 @@ class ClientPrefs {
 			FlxG.updateFramerate = data.framerate;
 		}
 
-		if(FlxG.save.data.gameplaySettings != null)
+		// Load gameplay settings map
+		if (FlxG.save.data.gameplaySettings != null)
 		{
 			var savedMap:Map<String, Dynamic> = FlxG.save.data.gameplaySettings;
 			for (name => value in savedMap)
 				data.gameplaySettings.set(name, value);
 		}
-		
-		// flixel automatically saves your volume!
-		if(FlxG.save.data.volume != null)
+
+		// Volume (flixel handles saving automatically)
+		if (FlxG.save.data.volume != null)
 			FlxG.sound.volume = FlxG.save.data.volume;
 		if (FlxG.save.data.mute != null)
 			FlxG.sound.muted = FlxG.save.data.mute;
@@ -364,40 +321,46 @@ class ClientPrefs {
 		DiscordClient.check();
 		#end
 
-		// controls on a separate save file
+		// -------- Controls (separate save) --------
 		var save:FlxSave = new FlxSave();
 		save.bind('controls_v3', CoolUtil.getSavePath());
-		if(save != null)
+
+		if (save != null)
 		{
-			if(save.data.keyboard != null)
+			if (save.data.keyboard != null)
 			{
 				var loadedControls:Map<String, Array<FlxKey>> = save.data.keyboard;
 				for (control => keys in loadedControls)
-					if(keyBinds.exists(control)) keyBinds.set(control, keys);
+					if (keyBinds.exists(control))
+						keyBinds.set(control, keys);
 			}
 
-			var savedKeybindJson = CoolUtil.getKeybinds('ekkeybinds.json', ExtraKeysHandler.instance.data.keybinds);
-			//trace(savedKeybindJson.keybinds);
+			// Extra Keys (still JSON-based, unchanged)
+			var savedKeybindJson =
+				CoolUtil.getKeybinds('ekkeybinds.json', ExtraKeysHandler.instance.data.keybinds);
 			var saveDataKeybinds = savedKeybindJson.keybinds;
 
-			for (i in 0...saveDataKeybinds.length) {
+			for (i in 0...saveDataKeybinds.length)
+			{
 				var maniaKeybinds = saveDataKeybinds[i];
 				var maniaID = '${i}_key';
-				for (j in 0...maniaKeybinds.length) {
+
+				for (j in 0...maniaKeybinds.length)
+				{
 					var keybindID = '${maniaID}_$j';
 					var codes = maniaKeybinds[j];
-					//trace('Set $keybindID to $codes');
-
 					keyBinds.set(keybindID, codes);
 				}
 			}
 
-			if(save.data.gamepad != null)
+			if (save.data.gamepad != null)
 			{
 				var loadedControls:Map<String, Array<FlxGamepadInputID>> = save.data.gamepad;
 				for (control => keys in loadedControls)
-					if(gamepadBinds.exists(control)) gamepadBinds.set(control, keys);
+					if (gamepadBinds.exists(control))
+						gamepadBinds.set(control, keys);
 			}
+
 			reloadVolumeKeys();
 		}
 	}

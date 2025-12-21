@@ -309,49 +309,6 @@ public static function getSongsForCurrentMod():Array<SongMetadata> {
 		}
 	}
 
-	public static function getArrowRGB(path:String = 'arrowRGB.json', defaultArrowRGB:Array<EKNoteColor>):ArrowRGBSavedData {
-		var result:ArrowRGBSavedData;
-		var content:String = '';
-		#if sys
-		if(FileSystem.exists(path)) content = File.getContent(path);
-		else {
-			// create a default ArrowRGBSavedData
-			var colorsToUse = [];
-			for (color in defaultArrowRGB) {
-				colorsToUse.push(color);
-			}
-
-			var defaultSaveARGB:ArrowRGBSavedData = new ArrowRGBSavedData(colorsToUse);
-
-			// write it
-			var writer = new json2object.JsonWriter<ArrowRGBSavedData>();
-			content = writer.write(defaultSaveARGB, '    ');
-			File.saveContent(path, content);
-
-			trace(path + ' (Color save) didn\'t exist. Written.');
-		}
-		#else
-		if(Assets.exists(path)) content = Assets.getText(path);
-		#end
-
-		var parser = new json2object.JsonParser<ArrowRGBSavedData>();
-		parser.fromJson(content);
-		result = parser.value;
-
-		// automatically (?) sets colors of notes that have no colors
-		for (i in 0...ExtraKeysHandler.instance.data.maxKeys+1) {
-			// colors dont exist
-			
-			// cannot take the previous approach since 
-			// this is indexed and not per mania
-			if (result.colors[i] == null) {
-				result.colors[i] = defaultArrowRGB[i];
-			}
-		}
-
-		return result;
-	}
-
 	public static function getKeybinds(path:String = 'ekkeybinds.json', defaultKeybinds:Array<Array<Array<Int>>>):EKKeybindSavedData {
 		var result:EKKeybindSavedData;
 		var content:String = '';
@@ -385,14 +342,6 @@ public static function getSongsForCurrentMod():Array<SongMetadata> {
 		}
 
 		return result;
-	}
-}
-
-class ArrowRGBSavedData {
-	public var colors:Array<EKNoteColor>;
-
-	public function new(colors){
-		this.colors = colors;
 	}
 }
 
