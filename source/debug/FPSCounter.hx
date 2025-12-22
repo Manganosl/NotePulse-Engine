@@ -6,8 +6,6 @@ import openfl.text.TextField;
 import openfl.text.TextFormat;
 import openfl.display.Sprite;
 
-using Lambda;
-
 class FPSCounter extends Sprite
 {
 	var updating:Bool = true;
@@ -138,7 +136,6 @@ class FPSCounter extends Sprite
 
 		final luaCount = PlayState.instance != null && PlayState.instance.luaArray != null ? PlayState.instance.luaArray.length : 0;
 		final hscriptCount = beatState != null && beatState.hscriptArray != null ? beatState.hscriptArray.length : 0;
-		final shaderCount = beatState != null && beatState.runtimeShaders != null ? Lambda.count(beatState.runtimeShaders) : 0;
 
 		debugText.text =
 			'State: ${Type.getClassName(Type.getClass(state))}\n' +
@@ -147,8 +144,7 @@ class FPSCounter extends Sprite
 			'FlxG Children: ${FlxG.game.numChildren}\n' +
 			'Cameras: ${FlxG.cameras.list.length}\n' +
 			'Lua Scripts: ${luaCount}\n' +
-			'HScript Files: ${hscriptCount}\n' +
-			'Runtime Shaders: ${shaderCount}\n';
+			'HScript Files: ${hscriptCount}\n';
 	}
 
 	inline function get_memoryMegas():Float

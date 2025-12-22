@@ -4,12 +4,10 @@ class Config {
 	public static final ALLOWED_CUSTOM_CLASSES = [
 		"flixel",
 		"backend",
-		"shaders",
 		"psychlua",
 		"objects",
+		"shaders",
 		"cutscenes",
-		"states",
-		"substates"
 	];
 	public static final ALLOWED_ABSTRACT_AND_ENUM = [
 		"backend",
