@@ -2522,9 +2522,6 @@ class PlayState extends MusicBeatState
 					case 'ur_good':
 						unlock = (ratingPercent >= 1 && !usedPractice);
 
-					case 'oversinging':
-						unlock = (boyfriend.holdTimer >= 10 && !usedPractice);
-
 					case 'hype':
 						unlock = (!boyfriendIdled && !usedPractice);
 
@@ -3007,9 +3004,17 @@ class PlayState extends MusicBeatState
 
 	public function playerDance():Void
 	{
-		var anim:String = boyfriend.getAnimationName();
-		if(boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 #if FLX_PITCH / FlxG.sound.music.pitch #end) * boyfriend.singDuration && anim.startsWith('sing') && !anim.endsWith('miss'))
-			boyfriend.dance();
+		var characters = [boyfriend];
+		if(modchartCharacters != null){
+			for(char in characters){
+				if(char != boyfriend && char.isPlayer) characters.push(char);
+			}
+		}
+		for(char in characters){
+			var anim:String = char.getAnimationName();
+			if(char.holdTimer > Conductor.stepCrochet * (0.0011 #if FLX_PITCH / FlxG.sound.music.pitch #end) * char.singDuration && anim.startsWith('sing') && !anim.endsWith('miss'))
+				char.dance();
+		}
 	}
 
 	//// Strums | Notes ////
@@ -3886,12 +3891,7 @@ class PlayState extends MusicBeatState
 				}
 			}
 
-			if (!holdArray.contains(true) || endingSong)
-				playerDance();
-
-			#if ACHIEVEMENTS_ALLOWED
-			else checkForAchievement(['oversinging']);
-			#end
+			playerDance();
 		}
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
