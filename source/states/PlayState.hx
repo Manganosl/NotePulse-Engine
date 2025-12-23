@@ -960,8 +960,6 @@ class PlayState extends MusicBeatState
 			{
 				if(!cpuControlled)
 					keysCheck();
-				else
-					playerDance();
 
 				if(notes.length > 0)
 				{
@@ -3002,21 +3000,6 @@ class PlayState extends MusicBeatState
 				char.dance();
 	}
 
-	public function playerDance():Void
-	{
-		var characters = [boyfriend];
-		if(modchartCharacters != null){
-			for(char in characters){
-				if(char != boyfriend && char.isPlayer) characters.push(char);
-			}
-		}
-		for(char in characters){
-			var anim:String = char.getAnimationName();
-			if(char.holdTimer > Conductor.stepCrochet * (0.0011 #if FLX_PITCH / FlxG.sound.music.pitch #end) * char.singDuration && anim.startsWith('sing') && !anim.endsWith('miss'))
-				char.dance();
-		}
-	}
-
 	//// Strums | Notes ////
 
 	public function clearNotesBefore(time:Float)
@@ -3890,8 +3873,6 @@ class PlayState extends MusicBeatState
 					}
 				}
 			}
-
-			playerDance();
 		}
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
