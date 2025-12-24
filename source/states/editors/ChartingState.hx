@@ -22,13 +22,11 @@ import haxe.Exception;
 import haxe.io.Bytes;
 
 import states.editors.content.MetaNote;
-//import states.editors.content.VSlice;
 import states.editors.content.Prompt;
 import states.editors.content.*;
 
 import backend.Song;
 import backend.StageData;
-import backend.Highscore;
 import backend.Difficulty;
 import backend.Section;
 import backend.ExtraKeysHandler;

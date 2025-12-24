@@ -1,4 +1,4 @@
-package states.editors;
+package states.editors.content;
 
 import backend.Section;
 import backend.Rating;

@@ -7,7 +7,7 @@ import objects.SustainSplash;
 import objects.NoteSplash;
 import objects.StrumNote as Strum;
 import states.PlayState;
-import states.editors.EditorPlayState;
+import states.editors.content.EditorPlayState;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;

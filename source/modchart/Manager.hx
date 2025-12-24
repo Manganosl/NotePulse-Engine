@@ -5,7 +5,7 @@ import flixel.tweens.FlxEase.EaseFunction;
 import flixel.util.FlxSort;
 import haxe.ds.Vector;
 import states.PlayState;
-import states.editors.EditorPlayState;
+import states.editors.content.EditorPlayState;
 import modchart.backend.core.ArrowData;
 import modchart.backend.core.ModifierParameters;
 import modchart.backend.core.Node.NodeFunction;
