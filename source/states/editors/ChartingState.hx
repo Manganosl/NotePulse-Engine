@@ -603,7 +603,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				speed: 1,
 				stage: 'stage'
 			};
-		ChartingState.chartPath = null;
+		Song.chartPath = null;
 		loadChart(song);
 	}
 
@@ -3446,10 +3446,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					noteTypes.insert(id, noteType);
 			}
 
-			if(ChartingState.chartPath != null && ChartingState.chartPath.length > 0)
+			if(Song.chartPath != null && Song.chartPath.length > 0)
 			{
-				var parentFolder:String = ChartingState.chartPath.replace('\\', '/');
-				parentFolder = parentFolder.substr(0, ChartingState.chartPath.lastIndexOf('/')+1);
+				var parentFolder:String = Song.chartPath.replace('\\', '/');
+				parentFolder = parentFolder.substr(0, Song.chartPath.lastIndexOf('/')+1);
 				var notetypeFile:Array<String> = CoolUtil.coolTextFile(parentFolder + 'notetypes.txt');
 				if(notetypeFile.length > 0)
 				{
@@ -3593,7 +3593,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			var func:Void->Void = function()
 			{
 				loadChart(loadedChart);
-				ChartingState.chartPath = diff ? curdiff : cur;
+				Song.chartPath = diff ? curdiff : cur;
 				reloadNotesDropdowns();
 				prepareReload();
 				showOutput('Opened chart "${diff ? curdiff : cur}" successfully!');
@@ -3727,139 +3727,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
 
-		btnY++;
-		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Open Chart...', function()
-		{
-			if(!fileDialog.completed) return;
-			upperBox.isMinimized = true;
-			upperBox.bg.visible = false;
-
-			fileDialog.open(function()
-			{
-				try
-				{
-					var filePath:String = fileDialog.path.replace('\\', '/');
-					var loadedChart:SwagSong = ChartingState.parseJSON(fileDialog.data, filePath.substr(filePath.lastIndexOf('/')));
-					if(loadedChart == null || !Reflect.hasField(loadedChart, 'song')) //Check if chart is ACTUALLY a chart and valid
-					{
-						showOutput('Error: File loaded is not a Psych Engine/FNF 0.2.x.x chart.', true);
-						return;
-					}
-
-					var func:Void->Void = function()
-					{
-						loadChart(loadedChart);
-						ChartingState.chartPath = fileDialog.path;
-						reloadNotesDropdowns();
-						prepareReload();
-						showOutput('Opened chart "${ChartingState.chartPath}" successfully!');
-					}
-					
-					if(!ignoreProgressCheckBox.checked) openSubState(new Prompt('Warning: Any unsaved progress\nwill be lost.', func));
-					else func();
-				}
-				catch(e:Exception)
-				{
-					showOutput('Error: ${e.message}', true);
-				}
-			});
-		}, btnWid);
-		btn.text.alignment = LEFT;
-		tab_group.add(btn);
-
-		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Open Autosave...', function()
-		{
-			if(!fileDialog.completed) return;
-			upperBox.isMinimized = true;
-			upperBox.bg.visible = false;
-
-			if(!FileSystem.exists('backups/'))
-			{
-				showOutput('The "backups" folder does not exist.', true);
-				return;
-			}
-			
-			var fileList:Array<String> = FileSystem.readDirectory('backups/').filter((file:String) -> file.endsWith('.$BACKUP_EXT'));
-			if(fileList.length < 1)
-			{
-				showOutput('No autosave files found.', true);
-				return;
-			}
-
-			fileList.sort((a:String, b:String) -> (a.toUpperCase() < b.toUpperCase()) ? 1 : -1); //Sort alphabetically descending
-			var maxItems:Int = Std.int(Math.min(5, fileList.length));
-			var radioGrp:PsychUIRadioGroup = new PsychUIRadioGroup(0, 0, fileList, 25, maxItems, false, 240);
-			radioGrp.checked = 0;
-
-			var hei:Float = radioGrp.height + 160;
-			openSubState(new BasePrompt(420, hei, 'Choose an Autosave',
-				function(state:BasePrompt) {
-					upperBox.isMinimized = true;
-					upperBox.bg.visible = false;
-
-					var btn:PsychUIButton = new PsychUIButton(state.bg.x + state.bg.width - 40, state.bg.y, 'X', state.close, 40);
-					btn.cameras = state.cameras;
-					state.add(btn);
-
-					radioGrp.screenCenter(X);
-					radioGrp.y = state.bg.y + 80;
-					radioGrp.cameras = state.cameras;
-					state.add(radioGrp);
-
-					var btn:PsychUIButton = new PsychUIButton(0, radioGrp.y + radioGrp.height + 20, 'Load', function()
-					{
-						var autosaveName:String = fileList[radioGrp.checked];
-						var path:String = 'backups/$autosaveName';
-						state.close();
-
-						if(FileSystem.exists(path))
-						{
-							try
-							{
-								var loadedChart:SwagSong = ChartingState.parseJSON(File.getContent(path), autosaveName, null);
-								if(loadedChart == null || !Reflect.hasField(loadedChart, '__original_path'))
-								{
-									showOutput('Error: File loaded is not a valid Psych Engine autosave.', true);
-									return;
-	
-								}
-	
-								var originalPath:String = Reflect.field(loadedChart, '__original_path');
-								Reflect.deleteField(loadedChart, '__original_path');
-	
-								var func:Void->Void = function()
-								{
-									ChartingState.chartPath = FileSystem.exists(originalPath) ? originalPath : null;
-									loadChart(loadedChart);
-									reloadNotesDropdowns();
-									prepareReload();
-	
-									showOutput('Opened autosave "$autosaveName" successfully!');
-								}
-								
-								if(!ignoreProgressCheckBox.checked) openSubState(new Prompt('Warning: Any unsaved progress\nwill be lost.', func));
-								else func();
-							}
-							catch(e:Exception)
-							{
-								showOutput('Error on loading autosave: ${e.message}', true);
-							}
-						}
-						else showOutput('Error! Autosave file selected could not be found, huh??', true);
-					});
-					btn.cameras = state.cameras;
-					btn.screenCenter(X);
-					state.add(btn);
-				}
-			));
-		}, btnWid);
-		btn.text.alignment = LEFT;
-		tab_group.add(btn);
-
 		if(SHOW_EVENT_COLUMN)
 		{
+			btnY++;
 			btnY += 20;
 			var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Open Events...', function()
 			{
@@ -3872,14 +3742,15 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					try
 					{
 						var filePath:String = fileDialog.path.replace('\\', '/');
-						var eventsFile:SwagSong = ChartingState.parseJSON(fileDialog.data, filePath.substr(filePath.lastIndexOf('/')));
-						if(eventsFile == null || Reflect.hasField(eventsFile, 'scrollSpeed') || eventsFile.events == null)
+						var raw:Dynamic = Json.parse(fileDialog.data);
+
+						if (raw == null || raw.song == null || raw.song.events == null || raw.songSpeed != null)
 						{
-							showOutput('Error: File loaded is not a Psych Engine chart/events file.', true);
+							showOutput('Error: File loaded is not a Psych Engine events file.', true);
 							return;
 						}
 	
-						var loadedEvents:Array<Dynamic> = eventsFile.events;
+						var loadedEvents:Array<Dynamic> = raw.song.events;
 						if(loadedEvents.length < 1)
 						{
 							showOutput('Events file loaded is empty.', true);
@@ -3983,7 +3854,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	
 				updateChartData();
 				fileDialog.save('events.json', PsychJsonPrinter.print({events: PlayState.SONG.events, format: 'psych_v1'}, ['events']),
-					function() showOutput('Events saved successfully to: ${fileDialog.path}'), null,
+					function() showOutput('Events saved successfully to: ${fileDialog.path}', false, true), null,
 					function() showOutput('Error on saving events!', true));
 			}, btnWid);
 			btn.text.alignment = LEFT;
@@ -3996,21 +3867,18 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			var func:Void->Void = function()
 			{
-				if(ChartingState.chartPath == null)
+				if(Song.chartPath == null)
 				{
 					showOutput('You must save/load a Chart first to Reload it!', true);
 					return;
 				}
 	
-				if(FileSystem.exists(ChartingState.chartPath))
+				if(FileSystem.exists(Song.chartPath))
 				{
 					try
 					{
-						var reloadedChart:SwagSong = ChartingState.parseJSON(File.getContent(ChartingState.chartPath));
-						loadChart(reloadedChart);
-						reloadNotesDropdowns();
-						prepareReload();
-						showOutput('Chart reloaded successfully!');
+						MusicBeatState.switchState(new LoadingState(new ChartingState(), true));
+						LoadingState.prepareToSong();
 					}
 					catch(e:Exception)
 					{
@@ -4999,82 +4867,82 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
 	}
 
-	public function saveChart(auto:Bool = true, dif:String = null) {
+	public function saveChart(auto:Bool = true, dif:String = null)
+	{
 		updateChartData();
-	    for (section in PlayState.SONG.notes)
-	    {
-	        for (note in section.sectionNotes)
-	        {
-	            var lane:Int = note[1];
-	            var gfStrum:Bool = false;
-	            if (PlayState.SONG.gfStrums && lane >= (PlayState.SONG.mania + 1) * 2 && lane < (PlayState.SONG.mania + 1) * 3)
-	                gfStrum = true;
-	            else
-	                gfStrum = false;
-	            note[4] = gfStrum;
-	        }
-	    }
 
-	    if(PlayState.SONG.events != null && PlayState.SONG.events.length > 1) PlayState.SONG.events.sort(sortByTime);
-	    var json = {
-	        "song": PlayState.SONG
-	    };
+		for (section in PlayState.SONG.notes)
+		{
+			for (note in section.sectionNotes)
+			{
+				var lane:Int = note[1];
+				var gfStrum:Bool = false;
 
-	    var data:String = haxe.Json.stringify(json, "\t");
+				if (PlayState.SONG.gfStrums
+					&& lane >= (PlayState.SONG.mania + 1) * 2
+					&& lane <  (PlayState.SONG.mania + 1) * 3)
+				{
+					gfStrum = true;
+				}
 
-	    if ((data != null) && (data.length > 0))
-	    {
-	        if (auto)
-	        {
-			    var songName = Paths.formatToSongPath(PlayState.SONG.song);
-				var diff = null;
-			    if(dif == null) diff = Difficulty.getString(); else diff = dif;
-			    var diffSuffix = (diff != null && diff != '' && diff != Difficulty.getDefault()) ? '-' + diff : '';
-			    var fileName = songName + diffSuffix;
+				note[4] = gfStrum;
+			}
+		}
 
-			    #if MODS_ALLOWED
-			    var folder = songName;
-			    var chartFile = fileName;
-			    var chartPath = Mods.currentModDirectory != null ? Paths.modJson(folder + '/' + chartFile) : 'assets/shared/data/' + songName + '/';
+		if (PlayState.SONG.events != null && PlayState.SONG.events.length > 1)
+			PlayState.SONG.events.sort(sortByTime);
 
-			    var chartDir = haxe.io.Path.directory(chartPath);
-			    if (!sys.FileSystem.exists(chartDir)) {
-			        var ensureDirectory = function(path:String) {
-			            var parent = haxe.io.Path.directory(path);
-			            if (parent != "" && !sys.FileSystem.exists(parent)) ensureDirectory(parent);
-			            if (!sys.FileSystem.exists(path)) sys.FileSystem.createDirectory(path);
-			        }
-			        ensureDirectory(chartDir);
-			    }
+		var json = {
+			"song": PlayState.SONG
+		};
 
-			    try {
-			        sys.io.File.saveContent(chartPath, data.trim());
-			        showOutput('Saved to: $chartPath', false, true);
-			    } catch (e:Dynamic) {
-			        showOutput('Failed to save chart: $e', true);
-			    }
-			    #else
-			    // Fallback for base assets
-			    var chartDir = 'assets/shared/data/' + songName + '/';
-			    if (!sys.FileSystem.exists(chartDir)) sys.FileSystem.createDirectory(chartDir);
-			    var chartPath = chartDir + fileName;
-			    try {
-			        sys.io.File.saveContent(chartPath, data.trim());
-			        showOutput('Saved to: $chartPath', false, true);
-			    } catch (e:Dynamic) {
-			        showOutput('Failed to save chart: $e', true);
-			    }
-			    #end
-	        }
-	        else
-	        {
-	            _file = new FileReference();
-	            _file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
-	            _file.addEventListener(Event.CANCEL, onSaveCancel);
-	            _file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-	            _file.save(data.trim(), Paths.formatToSongPath(PlayState.SONG.song));
-	        }
-	    }
+		var data:String = haxe.Json.stringify(json, "\t");
+
+		if (data == null || data.length <= 0)
+			return;
+
+		if (auto)
+		{
+			var chartPath:String = Song.chartPath;
+
+			if (chartPath == null || chartPath == "")
+			{
+				showOutput('Failed to save chart: Song.chartPath is null or empty', true);
+				return;
+			}
+
+			var chartDir = haxe.io.Path.directory(chartPath);
+			if (!sys.FileSystem.exists(chartDir))
+			{
+				var ensureDirectory = function(path:String)
+				{
+					var parent = haxe.io.Path.directory(path);
+					if (parent != "" && !sys.FileSystem.exists(parent))
+						ensureDirectory(parent);
+					if (!sys.FileSystem.exists(path))
+						sys.FileSystem.createDirectory(path);
+				}
+				ensureDirectory(chartDir);
+			}
+
+			try
+			{
+				sys.io.File.saveContent(chartPath, data.trim());
+				showOutput('Saved to: $chartPath', false, true);
+			}
+			catch (e:Dynamic)
+			{
+				showOutput('Failed to save chart: $e', true);
+			}
+		}
+		else
+		{
+			_file = new FileReference();
+			_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
+			_file.addEventListener(Event.CANCEL, onSaveCancel);
+			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file.save(data.trim(), Song.chartPath);
+		}
 	}
 
 	function onSaveComplete(_):Void

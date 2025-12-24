@@ -212,25 +212,13 @@ class Song
 	}
 
 	public static var loadedSongName:String;
+	public static var chartPath:String;
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
-		// FIX THE CASTING ON WINDOWS/NATIVE
-		// Windows???
-		// trace(songData);
-
-		// trace('LOADED FROM JSON: ' + songData.notes);
-		/* 
-			for (i in 0...songData.notes.length)
-			{
-				trace('LOADED FROM JSON: ' + songData.notes[i].sectionNotes);
-				// songData.notes[i].sectionNotes = songData.notes[i].sectionNotes
-			}
-
-				daNotes = songData.notes;
-				daSong = songData.song;
-				daBpm = songData.bpm; */
-
-				loadedSongName = folder;
+		var formattedFolder:String = Paths.formatToSongPath(folder);
+		var formattedSong:String = Paths.formatToSongPath(jsonInput);
+		chartPath = Paths.json('$formattedFolder/$formattedSong');
+		loadedSongName = folder;
 		return parseRawJSON(jsonInput, loadRawSong(jsonInput, folder));
 	}
 

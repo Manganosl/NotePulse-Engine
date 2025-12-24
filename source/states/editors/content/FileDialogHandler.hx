@@ -92,7 +92,7 @@ class FileDialogHandler extends FlxBasic
 		@:privateAccess
 		this.path = _fileRef._trackSavedPath;
 		this.completed = true;
-		trace('Saved file to: $path');
+		Log.info('Saved file to: $path');
 
 		removeEvents();
 		this.completed = true;
