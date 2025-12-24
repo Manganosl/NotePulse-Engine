@@ -350,6 +350,8 @@ class EditorPlayState extends MusicBeatSubstate
 		}
 		FlxG.cameras.remove(camHUD);
 		camHUD.destroy();
+		FlxG.sound.list.remove(inst);
+		flixel.util.FlxDestroyUtil.destroy(inst);
 		camHUD = null;
 		super.destroy();
 	}

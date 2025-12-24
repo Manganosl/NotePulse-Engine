@@ -821,7 +821,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 					softReloadNotes(true);
 				}
-				else if(FlxG.keys.justPressed.A != FlxG.keys.justPressed.D && !holdingAlt)
+				else if(!FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.A != FlxG.keys.justPressed.D && !holdingAlt)
 				{
 					if(FlxG.sound.music.playing)
 						setSongPlaying(false);
@@ -5203,6 +5203,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	{
 		ClientPrefs.toggleVolumeKeys(true);
 		super.closeSubState();
+		setSongPlaying(false);
 		upperBox.isMinimized = true;
 		upperBox.visible = mainBox.visible = infoBox.visible = true;
 		upperBox.bg.visible = false;
