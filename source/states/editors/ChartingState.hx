@@ -266,7 +266,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		WindowUtil.onEditorClosing = function()
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			openSubState(new Prompt("Are you sure you want to close the game? All unsaved chart data will be lost.", function(){
+			openSubState(new Prompt("Are you sure you want to close the game?\nAll unsaved chart data will be lost.", function(){
 				WindowUtil.preventClose = false;
 				Sys.exit(0);
 			}));

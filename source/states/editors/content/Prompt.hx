@@ -1,6 +1,7 @@
 package states.editors.content;
 
 import backend.ui.*;
+import openfl.filters.ShaderFilter;
 import states.editors.*;
 
 import flixel.util.FlxDestroyUtil;
@@ -86,36 +87,48 @@ class BasePrompt extends MusicBeatSubstate
 	public var titleText:FlxText;
 
 	public var promptCam:FlxCamera;
-override function create()
-{
-	promptCam = new FlxCamera();
-	promptCam.bgColor = FlxColor.TRANSPARENT;
-	FlxG.cameras.add(promptCam, false);
+	var blurShader:shaders.BlurShader;
+	override function create()
+	{
+		blurShader = new shaders.BlurShader();
+		for(cam in FlxG.cameras.list)
+		{
+			if(cam.filters == null)
+				cam.filters = [new ShaderFilter(blurShader)];
+			else
+				cam.filters.push(new ShaderFilter(blurShader));
+		}
+		FlxTween.num(0, 0.0075, 0.1, {ease: FlxEase.cubeOut}, function(v:Float) {
+			blurShader.strength.value = [v];
+		});
+		promptCam = new FlxCamera();
+		promptCam.bgColor = FlxColor.TRANSPARENT;
+		FlxG.cameras.add(promptCam, false);
 
-    cameras = [promptCam];
+		cameras = [promptCam];
 
-    // Center the background box
-    bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
-    bg.alpha = 0.8;
-    bg.scale.set(_sizeX, _sizeY);
-    bg.updateHitbox();
-    bg.x = (FlxG.width - bg.width) / 2;
-    bg.y = (FlxG.height - bg.height) / 2;
-    bg.cameras = cameras;
-    add(bg);
+		// Center the background box
+		bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		bg.alpha = 0.8;
+		bg.scale.set(_sizeX, _sizeY);
+		bg.updateHitbox();
+		bg.x = (FlxG.width - bg.width) / 2;
+		bg.y = (FlxG.height - bg.height) / 2;
+		bg.cameras = cameras;
+		add(bg);
 
-    // Center the title text inside the box
-    titleText = new FlxText(0, 0, _sizeX - 40, _title, 16);
-    titleText.x = bg.x + 20;
-    titleText.y = bg.y + 30;
-    titleText.alignment = CENTER;
-    titleText.cameras = cameras;
-    add(titleText);
+		// Center the title text inside the box
+		titleText = new FlxText(0, 0, _sizeX - 40, _title, 16);
+		titleText.x = bg.x + 20;
+		titleText.y = bg.y + 30;
+		titleText.alignment = CENTER;
+		titleText.cameras = cameras;
+		add(titleText);
 
-    if(onCreate != null)
-        onCreate(this);
-    super.create();
-}
+		if(onCreate != null)
+			onCreate(this);
+		super.create();
+	}
 
 	var _blockInput:Float = 0.1;
 	override function update(elapsed:Float)
@@ -140,6 +153,20 @@ override function create()
 			FlxG.cameras.remove(promptCam, true);
 			promptCam = null;
 		}
+		FlxTween.num(blurShader.strength.value[0], 0, 0.1, {ease: FlxEase.cubeOut, onComplete: function(tweener:FlxTween)
+		{
+			for(cam in FlxG.cameras.list)
+			{
+				if(cam.filters != null)
+				{
+					cam.filters = [for (f in cam.filters) if (!(f is ShaderFilter && cast(f, ShaderFilter).shader is shaders.BlurShader)) f];
+					if (cam.filters.length == 0) cam.filters = null;
+				}
+			}
+		}}, function(v:Float)
+		{
+			blurShader.strength.value = [v];
+		});
 		for (member in members) FlxDestroyUtil.destroy(member);
 		super.destroy();
 	}

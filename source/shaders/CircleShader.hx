@@ -1,16 +1,11 @@
 package shaders;
 
 import flixel.system.FlxAssets.FlxShader;
-import openfl.display.BitmapData;
-import openfl.display.ShaderInput;
-import openfl.utils.Assets;
-import flixel.FlxG;
-import openfl.Lib;
 
 class CircleShader extends FlxShader
 {
-  @:glFragmentSource('
-          #pragma header
+    @:glFragmentSource('
+        #pragma header
 
         float PI = 3.14159265358;
         uniform float percent;
@@ -45,10 +40,10 @@ class CircleShader extends FlxShader
         
             gl_FragColor = spritecolor;
         }
-	')
+	  ')
   
-  public function new()
-  {
-    super();
-  }
+    public function new()
+    {
+      super();
+    }
 }
