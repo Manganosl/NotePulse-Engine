@@ -86,10 +86,14 @@ class WindowUtil
 	}
 
 	public static var onClosing:Void->Void;
+	public static var onEditorClosing:Void->Void;
+	public static var preventClose:Bool = false;
 
 	public static inline function init() {
 		Lib.application.window.onClose.add(function () {
-			if (onClosing != null) {onClosing();}
+			if(onClosing != null) onClosing();
+			if(onEditorClosing != null) onEditorClosing();
+			if(preventClose) Lib.application.window.onClose.cancel();
 		});
 	}
 

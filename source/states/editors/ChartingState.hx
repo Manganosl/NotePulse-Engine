@@ -8,6 +8,7 @@ import flixel.util.FlxStringUtil;
 import flixel.util.FlxDestroyUtil;
 import flixel.input.keyboard.FlxKey;
 import backend.ui.*;
+import backend.utils.WindowUtil;
 
 import lime.utils.Assets;
 import lime.media.AudioBuffer;
@@ -261,6 +262,15 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	override function create()
 	{
+		WindowUtil.preventClose = true;
+		WindowUtil.onEditorClosing = function()
+		{
+			FlxG.sound.play(Paths.sound('cancelMenu'));
+			openSubState(new Prompt("Are you sure you want to close the game? All unsaved chart data will be lost.", function(){
+				WindowUtil.preventClose = false;
+				Sys.exit(0);
+			}));
+		};
 		if(PlayState.SONG == null)
 		{
 			openNewChart();
@@ -4407,9 +4417,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		btnY += 20;
 		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Exit', function()
 		{
-			PlayState.chartingMode = false;
-			MusicBeatState.switchState(new MainMenuState());
-			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			FlxG.sound.play(Paths.sound('cancelMenu'));
+			openSubState(new Prompt("Are you sure you want to exit the Chart Editor?\nAny unsaved progress will be lost.", function() {
+				PlayState.chartingMode = false;
+				MusicBeatState.switchState(new MainMenuState());
+				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			}));
 		}, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
@@ -5330,6 +5343,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	override function destroy()
 	{
+		WindowUtil.preventClose = false;
+		WindowUtil.onEditorClosing = null;
 		Note.globalRgbShaders = [];
 		backend.NoteTypesConfig.clearNoteTypesData();
 
