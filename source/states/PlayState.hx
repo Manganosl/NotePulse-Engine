@@ -1005,7 +1005,7 @@ class PlayState extends MusicBeatState
 							// Kill extremely late notes and cause misses
 							if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
 							{
-								if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
+								if (daNote.strum.playable && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
 									noteMiss(daNote);
 
 								daNote.active = daNote.visible = false;
@@ -3458,21 +3458,34 @@ class PlayState extends MusicBeatState
 		RecalculateRating(true);
 
 		// play character anims
-		var char:Character = !isPlayerOpponent ? boyfriend : dad;
-		if((note != null && (note.gfNote || note.gfStrum)) || (SONG.notes[curSection] != null && SONG.notes[curSection].gfSection)) char = gf;
+		var chars:Array<Character> = [];
+		if(note != null){
+			for(char in note.characters){
+				if(char == null) continue;
+				if(char == boyfriend || boyfriendGroup.members.contains(char)) chars.push(boyfriend);
+				else if(char == dad || dadGroup.members.contains(char)) chars.push(dad);
+				else if(char == gf || gfGroup.members.contains(char)) chars.push(gf);
+				else chars.push(char);
+			}
+		} else {
+			chars = isPlayerOpponent ? [dad] : [boyfriend];
+		}
+		for(char in chars){	
+			if((note != null && (note.gfNote || note.gfStrum)) || (SONG.notes[curSection] != null && SONG.notes[curSection].gfSection)) char = gf;
 
-		if(char != null && (note == null || !note.noMissAnimation) && char.hasMissAnimations && !char.noNoteAnim)
-		{
-			var suffix:String = '';
-			if(note != null) suffix = note.animSuffix;
-
-			var animToPlay:String = singAnimation(direction) + 'miss' + suffix;
-			char.playAnim(animToPlay, true);
-
-			if(char != gf && lastCombo > 5 && gf != null && gf.animOffsets.exists('sad'))
+			if(char != null && (note == null || !note.noMissAnimation) && char.hasMissAnimations && !char.noNoteAnim)
 			{
-				gf.playAnim('sad');
-				gf.specialAnim = true;
+				var suffix:String = '';
+				if(note != null) suffix = note.animSuffix;
+
+				var animToPlay:String = singAnimation(direction) + 'miss' + suffix;
+				char.playAnim(animToPlay, true);
+
+				if(char != gf && lastCombo > 5 && gf != null && gf.animOffsets.exists('sad'))
+				{
+					gf.playAnim('sad');
+					gf.specialAnim = true;
+				}
 			}
 		}
 		vocals.volume = 0;
@@ -3763,9 +3776,10 @@ class PlayState extends MusicBeatState
 
 				if (doubleNote.noteData == funnyNote.noteData) {
 					// if the note has a 0ms distance (is on top of the current note), kill it
-					if (Math.abs(doubleNote.strumTime - funnyNote.strumTime) < 1.0)
-						invalidateNote(doubleNote);
-					else if (doubleNote.strumTime < funnyNote.strumTime)
+					if (Math.abs(doubleNote.strumTime - funnyNote.strumTime) < 1.0){
+						if(funnyNote.strum == doubleNote.strum) invalidateNote(doubleNote);
+						else goodNoteHit(doubleNote);
+					} else if (doubleNote.strumTime < funnyNote.strumTime)
 					{
 						// replace the note if its ahead of time (or at least ensure "doubleNote" is ahead)
 						funnyNote = doubleNote;
