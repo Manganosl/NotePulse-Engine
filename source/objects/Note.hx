@@ -419,7 +419,8 @@ class Note extends FlxSkewedSprite
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		if (mustPress)
+		if(strum == null) return;
+		if (strum.playable)
 		{
 			canBeHit = (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult) &&
 						strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult));
@@ -449,19 +450,20 @@ class Note extends FlxSkewedSprite
 	}
 
 	private var realDirection:Float = 0;
-	public function followStrumNote(myStrum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1)
+	public function followStrumNote(strum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1)
 	{
+		this.strum = strum;
 		var mania = 3;
 		if (PlayState.SONG != null) mania = PlayState.SONG.mania;
 		var Mscale = ExtraKeysHandler.instance.data.scales[mania];
 		if (PlayState.isPixelStage) Mscale = ExtraKeysHandler.instance.data.pixelScales[mania];
 		var sWidth = Note.swagWidthUnscaled * Mscale;
-		var strumX:Float = myStrum.x;
-		var strumY:Float = myStrum.y;
-		var strumAngle:Float = myStrum.angle;
-		var strumAlpha:Float = myStrum.alpha;
-		realDirection = myStrum.direction + (!myStrum.downScroll ? 180 : 0);
-		distance = (0.45 * (Conductor.songPosition - strumTime) * songSpeed * multSpeed * myStrum.noteSpeed);
+		var strumX:Float = strum.x;
+		var strumY:Float = strum.y;
+		var strumAngle:Float = strum.angle;
+		var strumAlpha:Float = strum.alpha;
+		realDirection = strum.direction + (!strum.downScroll ? 180 : 0);
+		distance = (0.45 * (Conductor.songPosition - strumTime) * songSpeed * multSpeed * strum.noteSpeed);
 		var angleDir = realDirection * Math.PI / 180;
 		if (copyAngle)
 			angle = strumAngle + offsetAngle;
@@ -475,12 +477,13 @@ class Note extends FlxSkewedSprite
 		if(copyY)
 			y = strumY + offsetY + correctionOffset + Math.sin(angleDir) * distance;
 		if (isSustainNote)
-			updateSustain(myStrum, songSpeed * multSpeed);
+			updateSustain(strum, songSpeed * multSpeed);
 	}
 
 	public var extraOffsetX:Float = 0;
-	public function updateSustain(myStrum:StrumNote, noteSpeed:Float = 1)
+	public function updateSustain(strum:StrumNote, noteSpeed:Float = 1)
 	{
+		this.strum = strum;
 		if (!isSustainEnd)
 		{
 			scale.y = getDistance(sustainLength, noteSpeed) / frameHeight;
@@ -495,12 +498,13 @@ class Note extends FlxSkewedSprite
 			else
 				extraOffsetX = prevNote.extraOffsetX;
 		}
-		x = myStrum.x + offsetX + (extraOffsetX * (PlayState.isPixelStage ? -1 : 1)) + Math.cos(angleDir) * distance;
+		x = strum.x + offsetX + (extraOffsetX * (PlayState.isPixelStage ? -1 : 1)) + Math.cos(angleDir) * distance;
 		angle += 180;
 	}
 
-	public function clipToStrumNote(myStrum:StrumNote)
+	public function clipToStrumNote(strum:StrumNote)
 	{
+		this.strum = strum;
 		var mania = 3;
 		if (PlayState.SONG != null) mania = PlayState.SONG.mania;
 		var Mscale = ExtraKeysHandler.instance.data.scales[mania];
@@ -509,7 +513,7 @@ class Note extends FlxSkewedSprite
 
 		if (isSustainNote && (mustPress || !ignoreNote) && wasGoodHit)
 		{
-			var clipDistance:Float = Math.max(distance - (myStrum.downScroll ? (myStrum.height/2) : 0), 0);
+			var clipDistance:Float = Math.max(distance - (strum.downScroll ? (strum.height/2) : 0), 0);
 			clipRect ??= new FlxRect(0, 0, frameWidth);
 			clipRect.y = clipDistance / scale.y;
 			clipRect.height = frameHeight - clipRect.y;

@@ -812,8 +812,9 @@ class PlayState extends MusicBeatState
 		setOnScripts('mania', SONG.mania);
 		setOnScripts("isPlayerOpponent", isPlayerOpponent);
 		
-		callOnScripts('initModchart'); // Could use onCreatePost? Yes but this could be used to do some stuff
+		callOnScripts('initModchart');
 		callOnScripts('onCreatePost');
+		callOnScripts('postCreate');
 		notesLength = notes.length;
 		unspawnNotesLength = unspawnNotes.length;
 
@@ -940,7 +941,6 @@ class PlayState extends MusicBeatState
 			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
 			{
 				var dunceNote:Note = unspawnNotes[0];
-				if(isPlayerOpponent) dunceNote.mustPress = !dunceNote.mustPress;
 				notes.insert(0, dunceNote);
 				dunceNote.spawned = true;
 
@@ -968,14 +968,14 @@ class PlayState extends MusicBeatState
 						var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
 						notes.forEachAlive(function(daNote:Note)
 						{
-							var strumGroup:FlxTypedGroup<StrumNote> = !isPlayerOpponent ? playerStrums : opponentStrums;
-							if(!daNote.mustPress) strumGroup = !isPlayerOpponent ? opponentStrums : playerStrums;
+							var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
+							if(!daNote.mustPress) strumGroup = opponentStrums;
 							if(daNote.gfStrum) strumGroup = gfStrums;	
 
 							var strum:StrumNote = strumGroup.members[daNote.noteData];
 							daNote.followStrumNote(strum, fakeCrochet, songSpeed / playbackRate);
 
-							if(daNote.mustPress)
+							if(daNote.strum.playable)
 							{
 								if(cpuControlled && !daNote.blockHit && daNote.canBeHit && (daNote.isSustainNote || daNote.strumTime <= Conductor.songPosition)){
 									goodNoteHit(daNote);
@@ -994,7 +994,7 @@ class PlayState extends MusicBeatState
 							if (daNote.isSustainNote && daNote.wasGoodHit && !strum.sustainSplash.updatedThisFrame) {
 								if (daNote.animation.curAnim.name.endsWith("holdend")) {
 									if (Conductor.songPosition >= daNote.strumTime) {
-										if(!cpuControlled) strum.sustainSplash.hide(!daNote.mustPress);
+										if(!cpuControlled) strum.sustainSplash.hide(!daNote.strum.playable);
 										else strum.sustainSplash.hide(true);
 									}
 								} else {
@@ -1261,10 +1261,7 @@ class PlayState extends MusicBeatState
 
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 				swagNote.row = Conductor.secsToRow(daStrumTime);
-				var realGotta:Bool;
-				if(isPlayerOpponent) realGotta = !gottaHitNote;
-				else realGotta = gottaHitNote;
-				var rowArray = noteRows[realGotta ? 0 : 1];
+				var rowArray = noteRows[gottaHitNote ? 0 : 1];
 				if(songNotes[4] == true) rowArray = noteRows[2];
 				if (rowArray[swagNote.row] == null) rowArray[swagNote.row] = [];
 				rowArray[swagNote.row].push(swagNote);
@@ -1275,7 +1272,7 @@ class PlayState extends MusicBeatState
 				swagNote.noteType = songNotes[3];
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 				swagNote.gfStrum = (songNotes[4] == true);
-				if(swagNote.gfStrum) swagNote.mustPress = isPlayerOpponent ? true : false;
+				if(swagNote.gfStrum) swagNote.mustPress = false;
 				if(swagNote.gfStrum || swagNote.gfNote) swagNote.characters = [gf];
 
 				swagNote.scrollFactor.set();
@@ -1296,7 +1293,7 @@ class PlayState extends MusicBeatState
 						sustainNote.gfNote = (section.gfSection && (songNotes[1]<(SONG.mania + 1)));
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.gfStrum = swagNote.gfStrum;
-						if(sustainNote.gfStrum) sustainNote.mustPress = isPlayerOpponent ? true : false;
+						if(sustainNote.gfStrum) sustainNote.mustPress = false;
 						if(sustainNote.gfStrum || sustainNote.gfNote) sustainNote.characters = [gf];
 						sustainNote.scrollFactor.set();
 						sustainNote.parent = swagNote;
@@ -2869,8 +2866,8 @@ class PlayState extends MusicBeatState
 		}
 		if(!cpuControlled)
 		{
-			for (note in (!isPlayerOpponent ? playerStrums : opponentStrums))
-				if(note.animation.curAnim != null && note.animation.curAnim.name != 'static')
+			for (note in strumLineNotes)
+				if(note.playable && note.animation.curAnim != null && note.animation.curAnim.name != 'static')
 				{
 					note.playAnim('static');
 					note.resetAnim = 0;
@@ -3059,12 +3056,18 @@ class PlayState extends MusicBeatState
 			else
 				babyArrow.alpha = targetAlpha;
 
-			if (player == 1)
+			if (player == 1){
 				playerStrums.add(babyArrow);
-			else if (player == 2)
+				babyArrow.playable = isPlayerOpponent ? false : true;
+			}
+			else if (player == 2){
 				gfStrums.add(babyArrow);
-			else
+				babyArrow.playable = false;
+			}
+			else {
 				opponentStrums.add(babyArrow);
+				babyArrow.playable = isPlayerOpponent ? true : false;
+			}
 
 			grpSustainSplashes.add(babyArrow.sustainSplash);
 
@@ -3208,7 +3211,7 @@ class PlayState extends MusicBeatState
 				swagNote.gfNote = (section.gfSection && (rawNoteIndex < (SONG.mania + 1)));
 				swagNote.noteType = songNotes[3];
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]];
-				if (swagNote.gfStrum) swagNote.mustPress = isPlayerOpponent ? true : false;
+				if (swagNote.gfStrum) swagNote.mustPress = false;
 				if (swagNote.gfStrum) swagNote.characters = [gf];
 				swagNote.scrollFactor.set();
 
@@ -3225,7 +3228,7 @@ class PlayState extends MusicBeatState
 						sustainNote.gfNote = (section.gfSection && (songNotes[1]<(SONG.mania + 1)));
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.gfStrum = swagNote.gfStrum;
-						if(sustainNote.gfStrum) sustainNote.mustPress = isPlayerOpponent ? true : false;
+						if(sustainNote.gfStrum) sustainNote.mustPress = false;
 						if(sustainNote.gfStrum) sustainNote.characters = [gf];
 						sustainNote.scrollFactor.set();
 						sustainNote.parent = swagNote;
@@ -3352,9 +3355,8 @@ class PlayState extends MusicBeatState
 
 	public function spawnNoteSplashOnNote(note:Note) {
 		if(note != null) {
-			var strum:StrumNote = !isPlayerOpponent ? playerStrums.members[note.noteData] : opponentStrums.members[note.noteData];
-			if(strum != null)
-				spawnNoteSplash(strum.x, strum.y, note.noteData, note, strum);
+			if(note.strum != null)
+				spawnNoteSplash(note.strum.x, note.strum.y, note.noteData, note, note.strum);
 		}
 	}
 
@@ -3686,7 +3688,7 @@ class PlayState extends MusicBeatState
 		}
 		if(!cpuControlled)
 		{
-			var spr = !isPlayerOpponent ? playerStrums.members[note.noteData] : opponentStrums.members[note.noteData];
+			var spr = note.strum;
 			if(spr != null) spr.playAnim('confirm', true);
 		}
 		else strumPlayAnim(1, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
@@ -3735,7 +3737,7 @@ class PlayState extends MusicBeatState
 
 	private function keyPressed(key:Int)
 	{
-		if(cpuControlled || paused || inCutscene || key < 0 || key >= (!isPlayerOpponent ? playerStrums.length : opponentStrums.length) || !generatedMusic || endingSong || boyfriend.stunned) return;
+		if(cpuControlled || paused || inCutscene || key < 0 || key >= playerStrums.length || !generatedMusic || endingSong || boyfriend.stunned) return;
 
 		var ret:Dynamic = callOnScripts('onKeyPressPre', [key]);
 		if(ret == LuaUtils.Function_Stop) return;
@@ -3746,7 +3748,7 @@ class PlayState extends MusicBeatState
 
 		// obtain notes that the player can hit
 		var plrInputNotes:Array<Note> = notes.members.filter(function(n:Note):Bool {
-			var canHit:Bool = !strumsBlocked[n.noteData] && n.canBeHit && n.mustPress && !n.tooLate && !n.wasGoodHit && !n.blockHit;
+			var canHit:Bool = !strumsBlocked[n.noteData] && n.canBeHit && n.strum.playable && !n.tooLate && !n.wasGoodHit && !n.blockHit;
 			return n != null && canHit && !n.isSustainNote && n.noteData == key;
 		});
 		plrInputNotes.sort(sortHitNotes);
@@ -3785,11 +3787,16 @@ class PlayState extends MusicBeatState
 		//more accurate hit time for the ratings? part 2 (Now that the calculations are done, go back to the time it was before for not causing a note stutter)
 		Conductor.songPosition = lastTime;
 
-		var spr:StrumNote = !isPlayerOpponent ? playerStrums.members[key] : opponentStrums.members[key];
-		if(strumsBlocked[key] != true && spr != null && spr.animation.curAnim.name != 'confirm')
-		{
-			spr.playAnim('pressed');
-			spr.resetAnim = 0;
+		var sprs:Array<StrumNote> = [];
+		if(playerStrums.members[key].playable) sprs.push(playerStrums.members[key]);
+		if(opponentStrums.members[key].playable) sprs.push(opponentStrums.members[key]);
+		if(SONG.gfStrums) if(gfStrums.members[key].playable) sprs.push(gfStrums.members[key]);
+		for(spr in sprs){		
+			if(strumsBlocked[key] != true && spr != null && spr.animation.curAnim.name != 'confirm')
+			{
+				spr.playAnim('pressed');
+				spr.resetAnim = 0;
+			}
 		}
 		callOnScripts('onKeyPress', [key]);
 	}
@@ -3803,16 +3810,21 @@ class PlayState extends MusicBeatState
 
 	private function keyReleased(key:Int)
 	{
-		if(cpuControlled || !startedCountdown || paused || key < 0 || key >= (!isPlayerOpponent ? playerStrums.length : opponentStrums.length)) return;
+		if(cpuControlled || !startedCountdown || paused || key < 0 || key >= playerStrums.length) return;
 
 		var ret:Dynamic = callOnScripts('onKeyReleasePre', [key]);
 		if(ret == LuaUtils.Function_Stop) return;
 
-		var spr:StrumNote = !isPlayerOpponent ? playerStrums.members[key] : opponentStrums.members[key];
-		if(spr != null)
-		{
-			spr.playAnim('static');
-			spr.resetAnim = 0;
+		var sprs:Array<StrumNote> = [];
+		if(playerStrums.members[key].playable) sprs.push(playerStrums.members[key]);
+		if(opponentStrums.members[key].playable) sprs.push(opponentStrums.members[key]);
+		if(SONG.gfStrums) if(gfStrums.members[key].playable) sprs.push(gfStrums.members[key]);
+		for(spr in sprs){
+			if(spr != null)
+			{
+				spr.playAnim('static');
+				spr.resetAnim = 0;
+			}
 		}
 		callOnScripts('onKeyRelease', [key]);
 	}
@@ -3860,7 +3872,7 @@ class PlayState extends MusicBeatState
 			if (notes.length > 0) {
 				for (n in notes) { // I can't do a filter here, that's kinda awesome
 					var canHit:Bool = (n != null && !strumsBlocked[n.noteData] && n.canBeHit
-						&& n.mustPress && !n.tooLate && !n.wasGoodHit && !n.blockHit);
+						&& n.strum.playable && !n.tooLate && !n.wasGoodHit && !n.blockHit);
 
 					if (guitarHeroSustains)
 						canHit = canHit && n.parent != null && n.parent.wasGoodHit;
@@ -4040,7 +4052,7 @@ class PlayState extends MusicBeatState
 		var baseX:Float = placement - 40;
 		var baseY:Float = FlxG.height / 2 - 60;
 
-		var linkStrum:StrumNote = !isPlayerOpponent ? playerStrums.members[note.noteData] : opponentStrums.members[note.noteData];
+		var linkStrum:StrumNote = note.strum;
 
 		if (camMode == "Game") {
 			if (isPlayerOpponent) {
