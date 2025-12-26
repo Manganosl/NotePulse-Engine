@@ -1,6 +1,6 @@
 package objects;
 
-class BGSprite extends FlxSkewedSprite
+class BGSprite extends FlxSprite
 {
 	private var idleAnim:String;
 
@@ -8,7 +8,7 @@ class BGSprite extends FlxSkewedSprite
 		super(x, y);
 
 		if (animArray != null) {
-			frames = Paths.getSparrowAtlas(image);
+			frames = Paths.getSparrowAtlas('base_game/$image');
 			for (i in 0...animArray.length) {
 				var anim:String = animArray[i];
 				animation.addByPrefix(anim, anim, 24, loop);
@@ -19,7 +19,7 @@ class BGSprite extends FlxSkewedSprite
 			}
 		} else {
 			if(image != null) {
-				loadGraphic(Paths.image(image));
+				loadGraphic(Paths.image('base_game/$image'));
 			}
 			active = false;
 		}

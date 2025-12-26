@@ -49,7 +49,7 @@ class PhillyStreets extends BaseStage
 	{
 		if(!ClientPrefs.data.lowQuality)
 		{
-			var skyImage = Paths.image('phillyStreets/phillySkybox');
+			var skyImage = Paths.image('base_game/phillyStreets/phillySkybox');
 			scrollingSky = new FlxTiledSprite(skyImage, skyImage.width + 400, skyImage.height, true, false);
 			scrollingSky.antialiasing = ClientPrefs.data.antialiasing;
 			scrollingSky.setPosition(-650, -375);
@@ -139,10 +139,10 @@ class PhillyStreets extends BaseStage
 			setupRainShader();
 
 		var _song = PlayState.SONG;
-		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pico';
-		if(_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'gameOver-pico';
-		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'gameOverEnd-pico';
-		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'pico-dead';
+		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'base_game/fnf_loss_sfx-pico';
+		if(_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'base_game/gameOver-pico';
+		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'base_game/gameOverEnd-pico';
+		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'base_game/pico-dead';
 		setDefaultGF('nene');
 		
 		if (isStoryMode)
@@ -251,15 +251,15 @@ class PhillyStreets extends BaseStage
 		cutsceneHandler = new CutsceneHandler();
 		cutsceneHandler.endTime = 10;
 
-		var cutsceneMusic:FlxSound = new FlxSound().loadEmbedded(Paths.music('darnellCanCutscene'));
+		var cutsceneMusic:FlxSound = new FlxSound().loadEmbedded(Paths.music('base_game/darnellCanCutscene'));
 		cutsceneMusic.looped = true;
 		FlxG.sound.list.add(cutsceneMusic);
 
-		var darnellLaugh:FlxSound = new FlxSound().loadEmbedded(Paths.sound('cutscene/darnell_laugh'));
+		var darnellLaugh:FlxSound = new FlxSound().loadEmbedded(Paths.sound('base_game/cutscene/darnell_laugh'));
 		darnellLaugh.volume = 0.6;
 		FlxG.sound.list.add(darnellLaugh);
 
-		var neneLaugh:FlxSound = new FlxSound().loadEmbedded(Paths.sound('cutscene/nene_laugh'));
+		var neneLaugh:FlxSound = new FlxSound().loadEmbedded(Paths.sound('base_game/cutscene/nene_laugh'));
 		neneLaugh.volume = 0.6;
 		FlxG.sound.list.add(neneLaugh);
 
@@ -324,7 +324,7 @@ class PhillyStreets extends BaseStage
 		{
 			boyfriend.playAnim('intro2', true);
 
-			FlxG.sound.play(Paths.soundRandom('shot', 1, 4));
+			FlxG.sound.play(Paths.soundRandom('base_game/shot', 1, 4));
 
 			FlxTween.tween(FlxG.camera.scroll, {x: camFollow.x + 100 - FlxG.width/2}, 2.5, {ease: FlxEase.quadInOut});
 
@@ -436,15 +436,15 @@ class PhillyStreets extends BaseStage
 
 			lightCanSnd = new FlxSound();
 			FlxG.sound.list.add(lightCanSnd);
-			lightCanSnd.loadEmbedded(Paths.sound('Darnell_Lighter'));
+			lightCanSnd.loadEmbedded(Paths.sound('base_game/Darnell_Lighter'));
 			
 			kickCanSnd = new FlxSound();
 			FlxG.sound.list.add(kickCanSnd);
-			kickCanSnd.loadEmbedded(Paths.sound('Kick_Can_UP'));
+			kickCanSnd.loadEmbedded(Paths.sound('base_game/Kick_Can_UP'));
 
 			kneeCanSnd = new FlxSound();
 			FlxG.sound.list.add(kneeCanSnd);
-			kneeCanSnd.loadEmbedded(Paths.sound('Kick_Can_FORWARD'));
+			kneeCanSnd.loadEmbedded(Paths.sound('base_game/Kick_Can_FORWARD'));
 			didCreateCan = true;
 		}
 
@@ -454,14 +454,14 @@ class PhillyStreets extends BaseStage
 			if(didCreateCasing) return;
 			if(!ClientPrefs.data.lowQuality)
 			{
-				casingFrames = Paths.getSparrowAtlas('PicoBullet'); //precache
+				casingFrames = Paths.getSparrowAtlas('base_game/PicoBullet'); //precache
 				casingGroup = new FlxSpriteGroup();
 				add(casingGroup);
 			}
 			
 			gunPrepSnd = new FlxSound();
 			FlxG.sound.list.add(gunPrepSnd);
-			gunPrepSnd.loadEmbedded(Paths.sound('Gun_Prep'));
+			gunPrepSnd.loadEmbedded(Paths.sound('base_game/Gun_Prep'));
 			didCreateCasing = true;
 		}
 
@@ -476,7 +476,7 @@ class PhillyStreets extends BaseStage
 				case 'weekend-1-firegun':
 					bonkSnd = new FlxSound();
 					FlxG.sound.list.add(bonkSnd);
-					bonkSnd.loadEmbedded(Paths.sound('Pico_Bonk'));
+					bonkSnd.loadEmbedded(Paths.sound('base_game/Pico_Bonk'));
 			}
 		}
 		
@@ -491,7 +491,7 @@ class PhillyStreets extends BaseStage
 		}
 
 		for (i in 1...5)
-			Paths.sound('shots/shot$i');
+			Paths.sound('base_game/shots/shot$i');
 	}
 
 	function setupRainShader()
@@ -967,9 +967,9 @@ class PhillyStreets extends BaseStage
 				game.health -= 0.4;
 				if(game.health <= 0.0 && !game.practiceMode)
 				{
-					GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pico-explode';
-					GameOverSubstate.loopSoundName = 'gameOverStart-pico-explode';
-					GameOverSubstate.characterName = 'pico-explosion-dead';
+					GameOverSubstate.deathSoundName = 'base_game/fnf_loss_sfx-pico-explode';
+					GameOverSubstate.loopSoundName = 'base_game/gameOverStart-pico-explode';
+					GameOverSubstate.characterName = 'base_game/pico-explosion-dead';
 				}
 		}
 	}

@@ -12,10 +12,10 @@ class School extends BaseStage
 	override function create()
 	{
 		var _song = PlayState.SONG;
-		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pixel';
-		if(_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'gameOver-pixel';
-		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
-		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'bf-pixel-dead';
+		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'base_game/fnf_loss_sfx-pixel';
+		if(_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'base_game/gameOver-pixel';
+		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'base_game/gameOverEnd-pixel';
+		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'base_game/bf-pixel-dead';
 
 		var bgSky:BGSprite = new BGSprite('weeb/weebSky', 0, 0, 0.1, 0.1);
 		add(bgSky);
@@ -76,14 +76,14 @@ class School extends BaseStage
 		switch (songName)
 		{
 			case 'senpai':
-				FlxG.sound.playMusic(Paths.music('Lunchbox'), 0);
+				FlxG.sound.playMusic(Paths.music('base_game/Lunchbox'), 0);
 				FlxG.sound.music.fadeIn(1, 0, 0.8);
 			case 'roses':
-				FlxG.sound.play(Paths.sound('ANGRY_TEXT_BOX'));
+				FlxG.sound.play(Paths.sound('base_game/ANGRY_TEXT_BOX'));
 		}
 		if(isStoryMode && !seenCutscene)
 		{
-			if(songName == 'roses') FlxG.sound.play(Paths.sound('ANGRY'));
+			if(songName == 'roses') FlxG.sound.play(Paths.sound('base_game/ANGRY'));
 			initDoof();
 			setStartCallback(schoolIntro);
 		}

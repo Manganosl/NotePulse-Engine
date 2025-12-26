@@ -223,38 +223,50 @@ class Paths
 	}
 
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
-	static public function image(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxGraphic
-	{
+	static public function image(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxGraphic {
 		var bitmap:BitmapData = null;
 		var file:String = null;
 
 		#if MODS_ALLOWED
-		file = modsImages(key);
-		if (currentTrackedAssets.exists(file))
+		var modFile:String = modsImages(key);
+
+		if (FileSystem.exists(modFile))
 		{
-			localTrackedAssets.push(file);
-			return currentTrackedAssets.get(file);
-		}
-		else if (FileSystem.exists(file))
-			bitmap = BitmapData.fromFile(file);
-		else
-		#end
-		{
-			file = getPath('images/$key.png', IMAGE, library);
+			file = modFile;
+
 			if (currentTrackedAssets.exists(file))
 			{
 				localTrackedAssets.push(file);
 				return currentTrackedAssets.get(file);
 			}
-			else if (OpenFlAssets.exists(file, IMAGE))
+
+			bitmap = BitmapData.fromFile(file);
+		}
+		#end
+
+		if (bitmap == null)
+		{
+			file = getPath('images/$key.png', IMAGE, library);
+
+			if (currentTrackedAssets.exists(file))
+			{
+				localTrackedAssets.push(file);
+				return currentTrackedAssets.get(file);
+			}
+
+			if (OpenFlAssets.exists(file, IMAGE))
+			{
 				bitmap = OpenFlAssets.getBitmapData(file);
+			}
 		}
 
 		if (bitmap != null)
 		{
-			var retVal = cacheBitmap(file, bitmap, allowGPU);
-			if(retVal != null) return retVal;
+			var graphic:FlxGraphic = cacheBitmap(file, bitmap, allowGPU);
+			if (graphic != null)
+				return graphic;
 		}
+
 		return null;
 	}
 
@@ -514,29 +526,34 @@ class Paths
 
 
 	public static var currentTrackedSounds:Map<String, Sound> = [];
-	public static function returnSound(key:String, ?path:String, ?modsAllowed:Bool = true, ?beepOnNull:Bool = true)
-	{
-		var file:String = getPath(key + '.$SOUND_EXT', SOUND, path, modsAllowed);
+	public static function returnSound(key:String, ?path:String, ?modsAllowed:Bool = true, ?beepOnNull:Bool = true):Sound {
+		var assetPath:String = getPath(key + '.$SOUND_EXT', SOUND, path, modsAllowed);
 
-		//trace('precaching sound: $file');
-		if(!currentTrackedSounds.exists(file))
+		if (!currentTrackedSounds.exists(assetPath))
 		{
+			var sound:Sound = null;
+
 			#if sys
-			if(FileSystem.exists(file))
-				currentTrackedSounds.set(file, Sound.fromFile(file));
+			if (FileSystem.exists(assetPath))
+				sound = Sound.fromFile(assetPath);
+			else if (OpenFlAssets.exists(assetPath, SOUND))
+				sound = OpenFlAssets.getSound(assetPath);
 			#else
-			if(OpenFlAssets.exists(file, SOUND))
-				currentTrackedSounds.set(file, OpenFlAssets.getSound(file));
+			if (OpenFlAssets.exists(assetPath, SOUND))
+				sound = OpenFlAssets.getSound(assetPath);
 			#end
-			else if(beepOnNull)
-			{
+
+			if (sound != null)
+				currentTrackedSounds.set(assetPath, sound);
+			else if (beepOnNull){
 				Log.hxTrace('SOUND NOT FOUND: $key, PATH: $path');
 				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
 				return FlxAssets.getSound('flixel/sounds/beep');
 			}
 		}
-		localTrackedAssets.push(file);
-		return currentTrackedSounds.get(file);
+
+		localTrackedAssets.push(assetPath);
+		return currentTrackedSounds.get(assetPath);
 	}
 
 	#if MODS_ALLOWED

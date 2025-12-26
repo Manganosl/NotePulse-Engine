@@ -36,7 +36,7 @@ class PhillyBlazin extends BaseStage
 
 		if(!ClientPrefs.data.lowQuality)
 		{
-			var skyImage = Paths.image('phillyBlazin/skyBlur');
+			var skyImage = Paths.image('base_game/phillyBlazin/skyBlur');
 			scrollingSky = new FlxTiledSprite(skyImage, Std.int(skyImage.width * 1.1) + 475, Std.int(skyImage.height / 1.1), true, false);
 			scrollingSky.antialiasing = ClientPrefs.data.antialiasing;
 			scrollingSky.setPosition(-500, -120);
@@ -82,10 +82,10 @@ class PhillyBlazin extends BaseStage
 			setupRainShader();
 
 		var _song = PlayState.SONG;
-		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pico-gutpunch';
-		if(_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'gameOver-pico';
-		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'gameOverEnd-pico';
-		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'pico-blazin';
+		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'base_game/fnf_loss_sfx-pico-gutpunch';
+		if(_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'base_game/gameOver-pico';
+		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'base_game/gameOverEnd-pico';
+		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'base_game/pico-blazin';
 		GameOverSubstate.deathDelay = 0.15;
 
 		setDefaultGF('nene');
@@ -167,7 +167,7 @@ class PhillyBlazin extends BaseStage
 	{
 		for (i in 1...4)
 		{
-			Paths.sound('lightning/Lightning$i');
+			Paths.sound('base_game/lightning/Lightning$i');
 		}
 	}
 
@@ -230,7 +230,7 @@ class PhillyBlazin extends BaseStage
 		FlxTween.color(abot, LIGHTNING_FADE_DURATION, 0xFF606060, 0xFF888888);
 
 		// Sound
-		FlxG.sound.play(Paths.soundRandom('lightning/Lightning', 1, 3));
+		FlxG.sound.play(Paths.soundRandom('base_game/lightning/Lightning', 1, 3));
 	}
 
 	// Note functions
