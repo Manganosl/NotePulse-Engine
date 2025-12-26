@@ -76,10 +76,7 @@ class NotePulse implements IAdapter {
 
 	public function getPlayerFromArrow(arrow:FlxSprite) {
 		if (arrow is Note)
-			if(Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState') 
-				return cast(arrow, Note).gfStrum ? 2 : cast(arrow, Note).mustPress ? !PlayState.isPlayerOpponent ? 1 : 0 : !PlayState.isPlayerOpponent ? 0 : 1;
-			else
-				return cast(arrow, Note).gfStrum ? 2 : cast(arrow, Note).mustPress ? 1 : 0;
+			return cast(arrow, Note).gfStrum ? 2 : cast(arrow, Note).mustPress ? 1 : 0;
 		if (arrow is FlxSprite && arrow.extraData["linkStrum"] != null)
 			return cast(arrow, FlxSprite).extraData["linkStrum"].player;
 		if (arrow is Strum) @:privateAccess
@@ -131,13 +128,6 @@ class NotePulse implements IAdapter {
 			if (player == 0) EditorPlayState.instance.opponentStrums else EditorPlayState.instance.playerStrums;
 		};
 
-		if (group == null) {
-			trace('[NotePulse] getStrumFromInfo() - group is null; state='
-				+ Type.getClassName(Type.getClass(FlxG.state))
-				+ ' lane=' + lane + ' player=' + player);
-			return null;
-		}
-
 		var found:Strum = null;
 		for (i in 0...group.members.length) {
 			var s = cast(group.members[i], Strum);
@@ -145,11 +135,6 @@ class NotePulse implements IAdapter {
 				found = s;
 				break;
 			}
-		}
-
-		if (found == null) {
-			trace('[NotePulse] getStrumFromInfo() - no matching strum found; lane=' + lane
-				+ ' player=' + player + ' groupSize=' + Std.string(group.members.length));
 		}
 
 		return found;

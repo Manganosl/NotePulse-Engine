@@ -156,7 +156,7 @@ final class ModifierGroup {
 
 		var modifierClass:Null<Class<Modifier>> = __modifierRegistrery.get(lowerName);
 		if (modifierClass == null) {
-			trace('$name modifier was not found !');
+			Log.warn('$name modifier was not found!');
 
 			return;
 		}

@@ -57,7 +57,7 @@ class DynamicModifier extends Modifier {
 		final translation:Null<Vector3> = renderFunc(safePos, safeParams);
 
 		if (nullSafety && translation == null) {
-			trace('[FunkinModchart::DynamicModifier] Failed to run "render" function!');
+			Log.error('[FunkinModchart::DynamicModifier] Failed to run "render" function!');
 			__skipRender = true;
 		}
 
@@ -80,7 +80,7 @@ class DynamicModifier extends Modifier {
 		final modifiedVisuals:Null<VisualParameters> = visualsFunc(safeData, safeParams);
 
 		if (nullSafety && modifiedVisuals == null) {
-			trace('[FunkinModchart::DynamicModifier] Failed to run "visuals" function!');
+			Log.error('[FunkinModchart::DynamicModifier] Failed to run "visuals" function!');
 			__skipVisuals = true;
 		}
 

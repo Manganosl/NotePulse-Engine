@@ -10,7 +10,7 @@ class Adapter {
 		final adapter = Type.createInstance(Type.resolveClass('modchart.backend.standalone.NotePulse'), []);
 
 		#if FM_VERBOSE
-		trace('[FunkinModchart Verbose] Found Adapter!');
+		Log.info('[FunkinModchart Verbose] Found Adapter!');
 		#end
 
 		instance = adapter;

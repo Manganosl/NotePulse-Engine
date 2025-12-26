@@ -477,13 +477,12 @@ class Note extends FlxSkewedSprite
 		if(copyY)
 			y = strumY + offsetY + correctionOffset + Math.sin(angleDir) * distance;
 		if (isSustainNote)
-			updateSustain(strum, songSpeed * multSpeed);
+			updateSustain(songSpeed * multSpeed);
 	}
 
 	public var extraOffsetX:Float = 0;
-	public function updateSustain(strum:StrumNote, noteSpeed:Float = 1)
+	public function updateSustain(noteSpeed:Float = 1)
 	{
-		this.strum = strum;
 		if (!isSustainEnd)
 		{
 			scale.y = getDistance(sustainLength, noteSpeed) / frameHeight;

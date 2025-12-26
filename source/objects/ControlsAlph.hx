@@ -1,12 +1,5 @@
 package objects;
 
-/*enum Alignment
-{
-	LEFT;
-	CENTERED;
-	RIGHT;
-}*/
-
 class ControlsAlph extends FlxSpriteGroup
 {
 	public var text(default, set):String;
