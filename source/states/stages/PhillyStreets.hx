@@ -139,10 +139,10 @@ class PhillyStreets extends BaseStage
 			setupRainShader();
 
 		var _song = PlayState.SONG;
-		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'base_game/fnf_loss_sfx-pico';
-		if(_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'base_game/gameOver-pico';
-		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'base_game/gameOverEnd-pico';
-		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'base_game/pico-dead';
+		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pico';
+		if(_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'gameOver-pico';
+		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'gameOverEnd-pico';
+		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'pico-dead';
 		setDefaultGF('nene');
 		
 		if (isStoryMode)
@@ -157,7 +157,7 @@ class PhillyStreets extends BaseStage
 						game.endingSong = true;
 						inCutscene = true;
 						canPause = false;
-						FlxTransitionableState.skipNextTransIn = true;
+						//FlxTransitionableState.skipNextTransIn = true;
 						FlxG.camera.visible = false;
 						camHUD.visible = false;
 						game.startVideo('2hotCutscene');
@@ -967,9 +967,9 @@ class PhillyStreets extends BaseStage
 				game.health -= 0.4;
 				if(game.health <= 0.0 && !game.practiceMode)
 				{
-					GameOverSubstate.deathSoundName = 'base_game/fnf_loss_sfx-pico-explode';
-					GameOverSubstate.loopSoundName = 'base_game/gameOverStart-pico-explode';
-					GameOverSubstate.characterName = 'base_game/pico-explosion-dead';
+					GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pico-explode';
+					GameOverSubstate.loopSoundName = 'gameOverStart-pico-explode';
+					GameOverSubstate.characterName = 'pico-explosion-dead';
 				}
 		}
 	}

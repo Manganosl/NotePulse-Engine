@@ -536,6 +536,8 @@ class PlayState extends MusicBeatState
 			case 'school': new states.stages.School(); //Week 6 - Senpai, Roses
 			case 'schoolEvil': new states.stages.SchoolEvil(); //Week 6 - Thorns
 			case 'tank': new states.stages.Tank(); //Week 7 - Ugh, Guns, Stress
+			case 'phillyStreets': new states.stages.PhillyStreets(); //Weekend 1 - Darnell, Lit up, 2Hot
+			case 'phillyBlazing': new states.stages.PhillyBlazin(); //Weekend 1 - Blazin'
 		}
 
 		if(isPixelStage) {
@@ -2205,6 +2207,7 @@ class PlayState extends MusicBeatState
 	//// End | Exit | Death ////
 
 	public var isDead:Bool = false; //Don't mess with this on Lua!!!
+	public var gameOverTimer:FlxTimer;
 	function doDeathCheck(?skipHealthCheck:Bool = false) {
 		if (((skipHealthCheck && instakillOnMiss) || (!isPlayerOpponent ? (health <= 0) : (health >= 2))) && !practiceMode && !isDead)
 		{
@@ -2225,10 +2228,6 @@ class PlayState extends MusicBeatState
 				}
 				#end
 
-				vocals.stop();
-				opponentVocals.stop();
-				FlxG.sound.music.stop();
-
 				persistentUpdate = false;
 				persistentDraw = false;
 				FlxTimer.globalManager.clear();
@@ -2238,7 +2237,24 @@ class PlayState extends MusicBeatState
 				modchartTweens.clear();
 				#end
 
-				openSubState(new GameOverSubstate());
+				if (GameOverSubstate.deathDelay > 0)
+				{
+					gameOverTimer = new FlxTimer().start(GameOverSubstate.deathDelay, function(_)
+					{
+						vocals.stop();
+						opponentVocals.stop();
+						FlxG.sound.music.stop();
+						openSubState(new GameOverSubstate());
+						gameOverTimer = null;
+					});
+				}
+				else
+				{
+					vocals.stop();
+					opponentVocals.stop();
+					FlxG.sound.music.stop();
+					openSubState(new GameOverSubstate());
+				}
 
 				// MusicBeatState.switchState(new GameOverState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
@@ -4357,7 +4373,7 @@ class PlayState extends MusicBeatState
 		camHitLastMoveY = moveY;
 	}
 
-	function moveCameraSection(?sec:Null<Int>):Void {
+	public function moveCameraSection(?sec:Null<Int>):Void {
 		if(sec == null) sec = curSection;
 		if(sec < 0) sec = 0;
 
