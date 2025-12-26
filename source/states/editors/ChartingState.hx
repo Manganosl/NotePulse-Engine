@@ -708,7 +708,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				if(FlxG.keys.justPressed.F12)
 				{
 					super.update(elapsed);
-					openEditorPlayState();
+					editorPlayStatePrompt();
 					lastFocus = PsychUIInputText.focusOn;
 					return;
 				}
@@ -3895,7 +3895,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		btnY++;
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Preview (F12)', openEditorPlayState, btnWid);
+		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Preview (F12)', editorPlayStatePrompt, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
 		
@@ -4752,8 +4752,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		loadSection();
 	}
 
-	public function UIEvent(id:String, sender:Dynamic)
-	{
+	public function UIEvent(id:String, sender:Dynamic){
 		switch(id)
 		{
 			case PsychUIButton.CLICK_EVENT, PsychUIDropDownMenu.CLICK_EVENT:
@@ -4776,8 +4775,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		}
 	}
 
-	function updateUpperBoxBg()
-	{
+	function updateUpperBoxBg(){
 		if(upperBox.selectedTab != null)
 		{
 			var menu = upperBox.selectedTab.menu;
@@ -4787,8 +4785,43 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		}
 	}
 
-	function openEditorPlayState()
-	{
+	function editorPlayStatePrompt(){
+		openSubState(new BasePrompt( 'Preview\nChoose the strums to play.', function(state:BasePrompt){
+			var btnY = 390;
+			var buttons:Array<PsychUIButton> = [];
+
+			buttons.push(new PsychUIButton(0, btnY, 'Opponent', function(){
+				openEditorPlayState(0);
+			}));
+
+			buttons.push(new PsychUIButton(0, btnY, 'Player', function(){
+				openEditorPlayState(1);
+			}));
+
+			if (PlayState.SONG.gfStrums){
+				state.bg.scale.x *= 1.3;
+				buttons.push(new PsychUIButton(0, btnY, 'Girlfriend', function(){
+					openEditorPlayState(2);
+				}));
+			}
+
+			var cancelBtn = new PsychUIButton(0, btnY, 'Cancel', state.close);
+			cancelBtn.normalStyle.bgColor = FlxColor.RED;
+			cancelBtn.normalStyle.textColor = FlxColor.WHITE;
+			buttons.push(cancelBtn);
+
+			var spacing = 125;
+			var totalWidth = spacing * (buttons.length - 1);
+			for (i => btn in buttons){
+				btn.screenCenter(X);
+				btn.x += i * spacing - totalWidth / 2;
+				btn.cameras = state.cameras;
+				state.add(btn);
+			}
+		}));
+	}
+
+	function openEditorPlayState(player:Int) {
 		if(FlxG.sound.music == null)
 		{
 			showOutput('Load a valid song to preview!', true);
@@ -4798,7 +4831,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		chartEditorSave.flush();
 		updateChartData();
 
-		openSubState(new EditorPlayState(playbackRate));
+		openSubState(new EditorPlayState(playbackRate, player));
 		upperBox.isMinimized = true;
 		upperBox.visible = mainBox.visible = infoBox.visible = false;
 	}
