@@ -47,12 +47,12 @@ class Log
 
 	static public function print(value:Dynamic, ?level:String = 'TRACE', ?color:Int = 201, ?pos:PosInfos):Void
 	{
-		var msg = preformatted.replace('TIME', DateTools.format(Date.now(), '%H:%M:%S')).replace('FILE', '${pos.fileName}:${pos.lineNumber}');
-		msg = msg.replace('LEVEL', '\033[90;48;5;${color}m $level \033[0;0m')
-			.replace('MSG', value);
+		// Can't use null so we use -1
+		var msg = preformatted.replace('TIME', DateTools.format(Date.now(), '%H:%M:%S')).replace('FILE', '${pos.fileName}' + (pos.lineNumber != -1 ? ':${pos.lineNumber}' : ''));
+		msg = msg.replace('LEVEL', '\033[90;48;5;${color}m $level \033[0;0m').replace('MSG', value);
 		Sys.println(msg);
 
-		log.push('${format.replace('TIME', DateTools.format(Date.now(), '%H:%M:%S')).replace('FILE', '${pos.fileName}:${pos.lineNumber}').replace('LEVEL', level).replace('MSG', value)}');
+		log.push('${format.replace('TIME', DateTools.format(Date.now(), '%H:%M:%S')).replace('FILE', '${pos.fileName}' + (pos.lineNumber != -1 ? ':${pos.lineNumber}' : '')).replace('LEVEL', level).replace('MSG', value)}');
 	}
 
 	@:keep static public function set_format(val:String):String

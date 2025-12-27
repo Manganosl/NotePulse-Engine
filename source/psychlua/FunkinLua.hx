@@ -49,6 +49,7 @@ import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 
 import haxe.Json;
+import haxe.PosInfos;
 
 class FunkinLua {
 	public var lua:State = null;
@@ -368,7 +369,8 @@ class FunkinLua {
 						if(luaInstance.scriptName == foundScript)
 						{
 							luaInstance.stop();
-							Log.hxTrace('Closing script ' + luaInstance.scriptName);
+							var pos:PosInfos = {fileName: luaInstance.scriptName, lineNumber: -1, className: null, methodName: null};
+							Log.hxTrace('Closing script', pos);
 							return true;
 						}
 			}
@@ -384,7 +386,8 @@ class FunkinLua {
 					for (script in game.hscriptArray)	
 						if(script.scriptName == foundScript)
 						{
-							Log.hxTrace('Closing script ' + (script.scriptName != null ? script.scriptName : luaFile));
+							var pos:PosInfos = {fileName: (script.scriptName != null ? script.scriptName : luaFile), lineNumber: -1, className: null, methodName: null};
+							Log.hxTrace('Closing script', pos);
 							script.stop();
 							return true;
 						}
@@ -1746,7 +1749,8 @@ class FunkinLua {
 
 		addLocalCallback("close", function() {
 			closed = true;
-			Log.hxTrace('Closing script $scriptName');
+			var pos:PosInfos = {fileName: scriptName, lineNumber: -1, className: null, methodName: null};
+			Log.hxTrace('Closing script');
 			return closed;
 		});
 
@@ -1774,7 +1778,9 @@ class FunkinLua {
 
 			var resultStr:String = Lua.tostring(lua, result);
 			if(resultStr != null && result != 0) {
-				Log.hxTrace(resultStr);
+				var parts = resultStr.split(":");
+				var pos:PosInfos = {fileName: scriptName, lineNumber: Std.parseInt(parts[1]), className: null, methodName: null};
+				Log.error(parts.slice(2).join(":"), pos);
 				#if windows
 				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
 				#else
@@ -1788,7 +1794,8 @@ class FunkinLua {
 			Log.error(e);
 			return;
 		}
-		Log.info('lua file loaded succesfully:' + scriptName);
+		var pos:PosInfos = {fileName: scriptName, lineNumber: -1, className: null, methodName: null};
+		Log.info('Lua script loaded succesfully', pos);
 
 		call('onCreate', []);
 	}
