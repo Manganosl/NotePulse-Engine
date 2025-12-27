@@ -71,7 +71,8 @@ class PsychUIBox extends FlxSpriteGroup
 	var _draggingBox:Bool = false;
 	var _lastTab:PsychUITab;
 	var _lastClick:Float = 0;
-
+	private var isPointer:Bool = false;
+	private var isMove:Bool = false;
 	public var forceCheckNext:Bool = false;
 	public var broadcastBoxEvents:Bool = true;
 	override function update(elapsed:Float)
@@ -112,6 +113,8 @@ class PsychUIBox extends FlxSpriteGroup
 			{
 				if(FlxG.mouse.overlaps(tab, camera))
 				{
+					if(!isMove) Mouse.cursor = MouseCursor.POINTER;
+					isPointer = true;
 					tab.color = hoverStyle.bgColor;
 					tab.alpha = hoverStyle.bgAlpha;
 					tab.text.color = hoverStyle.textColor;
@@ -125,6 +128,12 @@ class PsychUIBox extends FlxSpriteGroup
 						_draggingPoint = FlxG.mouse.getPositionInCameraView(camera);
 						_draggingBox = true;
 						if(broadcastBoxEvents) PsychUIEventHandler.event(DRAG_EVENT, this);
+					} 
+					if(_draggingBox){
+						isMove = true;
+						Mouse.cursor = MouseCursor.MOVE;
+					} else if(isMove){
+						isMove = false;
 					}
 					
 					if(FlxG.mouse.justReleased && canMinimize && _lastClick < 0.15 && selectedTab == tab && _lastTab == selectedTab)
@@ -148,7 +157,10 @@ class PsychUIBox extends FlxSpriteGroup
 						if(broadcastBoxEvents) PsychUIEventHandler.event(CLICK_EVENT, this);
 					}
 					else if(selectedTab != tab) continue;
-				}
+				} else if(isPointer){
+            		Mouse.cursor = MouseCursor.DEFAULT;
+           			isPointer = false;
+        		}
 				
 				var style:UIStyleData = (selectedTab == tab) ? selectedStyle : unselectedStyle;
 				tab.color = style.bgColor;

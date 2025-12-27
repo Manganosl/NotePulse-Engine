@@ -67,6 +67,7 @@ class EditorPicker extends MusicBeatSubstate {
 	public var camVelocity:Float = 0;
 
 	public override function create() {
+		Mouse.cursor = MouseCursor.POINTER;
 		super.create();
 
 		camera = subCam = new FlxCamera();
@@ -144,6 +145,8 @@ class EditorPicker extends MusicBeatSubstate {
 
 		if (FlxG.cameras.list.contains(subCam))
 			FlxG.cameras.remove(subCam);
+
+		Mouse.cursor = MouseCursor.DEFAULT;
 	}
 
 	public function changeSelection(change:Int) {

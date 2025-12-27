@@ -52,6 +52,7 @@ class PsychUIButton extends FlxSpriteGroup
 	public var forceCheckNext:Bool = false;
 	public var broadcastButtonEvent:Bool = true;
 	var _firstFrame:Bool = true;
+	private var isPointer:Bool = false;
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -84,15 +85,21 @@ class PsychUIButton extends FlxSpriteGroup
 				text.color = style.textColor;
 			}
 
-			if(overlapped && FlxG.mouse.justPressed)
-			{
-				isClicked = true;
-				bg.color = clickStyle.bgColor;
-				bg.alpha = clickStyle.bgAlpha;
-				text.color = clickStyle.textColor;
-				if(onClick != null) onClick();
-				if(broadcastButtonEvent) PsychUIEventHandler.event(CLICK_EVENT, this);
-			}
+			if(overlapped){
+				Mouse.cursor = MouseCursor.POINTER;
+				isPointer = true;
+				if(FlxG.mouse.justPressed){
+					isClicked = true;
+					bg.color = clickStyle.bgColor;
+					bg.alpha = clickStyle.bgAlpha;
+					text.color = clickStyle.textColor;
+					if(onClick != null) onClick();
+					if(broadcastButtonEvent) PsychUIEventHandler.event(CLICK_EVENT, this);
+				}
+			} else if(isPointer){
+            	Mouse.cursor = MouseCursor.DEFAULT;
+           		isPointer = false;
+        	}
 		}
 	}
 

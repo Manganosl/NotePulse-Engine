@@ -389,9 +389,18 @@ class PsychUIInputText extends FlxSpriteGroup
 		return (focusOn = v);
 	}
 
+	private var isIBeam:Bool = false;
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+		if(FlxG.mouse.overlaps(behindText, camera)){
+			isIBeam = true;
+			Mouse.cursor = MouseCursor.TEXT;
+		} else if(isIBeam){
+			isIBeam = false;
+			Mouse.cursor = MouseCursor.DEFAULT;
+		}
 
 		if(FlxG.mouse.justPressed)
 		{
@@ -417,9 +426,9 @@ class PsychUIInputText extends FlxSpriteGroup
 					else break;
 				}
 				updateCaret();
-			}
-			else if(focusOn == this)
+			} else if(focusOn == this)
 				focusOn = null;
+			
 
 			//trace('changed focus to: ' + this);
 		}

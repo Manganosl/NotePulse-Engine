@@ -74,6 +74,9 @@ import flixel.tweens.FlxTween;
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.addons.util.FlxSimplex;
+import openfl.ui.Mouse;
+import lime.ui.MouseCursor;
+import openfl.ui.MouseCursor as OpenflCursor;
 
 using StringTools;
 

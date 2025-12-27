@@ -45,26 +45,40 @@ class PsychUINumericStepper extends PsychUIInputText
 		value = defValue;
 	}
 
+	private var isPointer:Bool = false;
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
-		if(FlxG.mouse.justPressed)
+		if(buttonPlus != null && buttonPlus.exists && FlxG.mouse.overlaps(buttonPlus, camera))
 		{
-			if(buttonPlus != null && buttonPlus.exists && FlxG.mouse.overlaps(buttonPlus, camera))
+			isPointer = true;
+			Mouse.cursor = MouseCursor.POINTER;
+			if(FlxG.mouse.justPressed)
 			{
 				buttonPlus.animation.play('pressed');
 				value += step;
 				_internalOnChange();
 			}
-			else if(buttonMinus != null && buttonMinus.exists && FlxG.mouse.overlaps(buttonMinus, camera))
+		} else if(isPointer){
+			isPointer = false;
+			Mouse.cursor = MouseCursor.DEFAULT;
+		}
+		if(buttonMinus != null && buttonMinus.exists && FlxG.mouse.overlaps(buttonMinus, camera))
+		{
+			isPointer = true;
+			Mouse.cursor = MouseCursor.POINTER;
+			if(FlxG.mouse.justPressed)
 			{
 				buttonMinus.animation.play('pressed');
 				value -= step;
 				_internalOnChange();
 			}
+		} else if(isPointer){
+			isPointer = false;
+			Mouse.cursor = MouseCursor.DEFAULT;
 		}
-		else if(FlxG.mouse.released)
+		if(FlxG.mouse.released)
 		{
 			if(buttonPlus != null && buttonPlus.exists && buttonPlus.animation.curAnim != null && buttonPlus.animation.curAnim.name != 'normal')
 				buttonPlus.animation.play('normal');

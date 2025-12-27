@@ -52,8 +52,10 @@ class LoadingState extends MusicBeatState
 		super();
 	}
 
-	inline static public function loadAndSwitchState(target:FlxState, stopMusic = false, intrusive:Bool = true)
+	inline static public function loadAndSwitchState(target:FlxState, stopMusic = false, intrusive:Bool = true){
+		Mouse.cursor = MouseCursor.DEFAULT;
 		MusicBeatState.switchState(getNextState(target, stopMusic, intrusive));
+	}
 	
 	var target:FlxState = null;
 	var stopMusic:Bool = false;
@@ -80,6 +82,7 @@ class LoadingState extends MusicBeatState
 
 	override function create()
 	{
+		Mouse.cursor = MouseCursor.WAIT_ARROW;
 		instance = this;
 		persistentUpdate = true;
 		barGroup = new FlxSpriteGroup();
@@ -198,6 +201,7 @@ class LoadingState extends MusicBeatState
 			FlxG.sound.music.stop();
 
 		FlxG.camera.visible = false;
+		Mouse.cursor = MouseCursor.DEFAULT;
 		MusicBeatState.switchState(target);
 		transitioning = true;
 		finishedLoading = true;

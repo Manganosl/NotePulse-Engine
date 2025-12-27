@@ -84,10 +84,18 @@ class PsychUIDropDownMenu extends PsychUIInputText
 
 	var _items:Array<PsychUIDropDownItem> = [];
 	public var curScroll:Int = 0;
+	private var isPointer:Bool = false;
 	override function update(elapsed:Float)
 	{
 		var lastFocus = PsychUIInputText.focusOn;
 		super.update(elapsed);
+		if(FlxG.mouse.overlaps(button, camera)){
+			isPointer = true;
+			Mouse.cursor = MouseCursor.POINTER;
+		} else if(isPointer){
+			isPointer = false;
+			Mouse.cursor = MouseCursor.DEFAULT;
+		}
 		if(FlxG.mouse.justPressed)
 		{
 			if(FlxG.mouse.overlaps(button, camera))
@@ -248,6 +256,7 @@ class PsychUIDropDownItem extends FlxSpriteGroup
 
 	public var onClick:Void->Void;
 	public var forceNextUpdate:Bool = false;
+	private var isPointer:Bool = false;
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -261,8 +270,15 @@ class PsychUIDropDownItem extends FlxSpriteGroup
 			bg.alpha = style.bgAlpha;
 			forceNextUpdate = false;
 
-			if(overlapped && FlxG.mouse.justPressed)
-				onClick();
+			if(overlapped){
+				isPointer = true;
+				Mouse.cursor = MouseCursor.POINTER;
+				if(FlxG.mouse.justPressed)
+					onClick();
+			} else if(isPointer){
+				isPointer = false;
+				Mouse.cursor = MouseCursor.DEFAULT;
+			}
 		}
 		
 		text.x = bg.x;

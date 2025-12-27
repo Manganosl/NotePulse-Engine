@@ -63,15 +63,22 @@ class NPUICountdown extends FlxSpriteGroup
         add(countdownText);
     }
 
+    private var isPointer:Bool = true;
     override function update(elapsed:Float):Void
     {
         super.update(elapsed);
 
-        if (!finished && FlxG.mouse.justPressed && FlxG.mouse.overlaps(bg, camera))
-        {
-            cancelled = true;
-            finish(false);
-            if(onCancel != null) onCancel();
+        if (!finished && FlxG.mouse.overlaps(bg, camera)){
+            isPointer = true;
+            Mouse.cursor = MouseCursor.POINTER;
+            if(FlxG.mouse.justPressed){
+                cancelled = true;
+                finish(false);
+                if(onCancel != null) onCancel();
+            }
+        } else if(isPointer){
+            Mouse.cursor = MouseCursor.DEFAULT;
+            isPointer = false;
         }
 
         if (!finished && !cancelled && remainingTime > 0)
