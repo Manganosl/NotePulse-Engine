@@ -524,7 +524,7 @@ class LuaUtils
 		var _preprocessors:Map<String, Dynamic> = backend.utils.MacroUtil.compilerDefines;
 
 		_preprocessors.set("NOTEPULSE_ENGINE", true);
-		_preprocessors.set("NOTEPULSE_ENGINE_VER", states.MainMenuState.npeVersion);
+		_preprocessors.set("NOTEPULSE_ENGINE_VER", Main.npeVersion);
 		_preprocessors.set("BUILD_TARGET", LuaUtils.getBuildTarget());
 
 		return _preprocessors;

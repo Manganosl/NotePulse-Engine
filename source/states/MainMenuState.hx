@@ -14,8 +14,6 @@ enum MainMenuColumn {
 
 class MainMenuState extends MusicBeatState
 {
-	public static var npeVersion:String = '0.6.2'; // This is also used for Discord RPC
-	public static var psychEngineVersion:String = '0.7.3'; // This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 	public static var curColumn:MainMenuColumn = CENTER;
 	var allowMouse:Bool = true; //Turn this off to block mouse movement in menus
@@ -31,7 +29,7 @@ class MainMenuState extends MusicBeatState
 	var optionShit:Array<String> = [
 		'story_mode',
 		'freeplay',
-		//#if MODS_ALLOWED 'mods', #end
+		#if MODS_ALLOWED 'mods', #end
 		'credits'
 	];
 
@@ -118,9 +116,9 @@ class MainMenuState extends MusicBeatState
 			add(titleText);
 	
 			if (DiscordClient.user != null)
-				descText = new FlxText(0, 50, 1180, "Connected to discord - " + DiscordClient.user.globalName + " (" + DiscordClient.user.username + ")\nNotePulse Engine v" + npeVersion + "\nPsych Engine v" + psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
+				descText = new FlxText(0, 50, 1180, "Connected to discord - " + DiscordClient.user.globalName + " (" + DiscordClient.user.username + ")\nNotePulse Engine v" + Main.npeVersion + "\nPsych Engine v" + Main.psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
 			else
-				descText = new FlxText(0, 50, 1180, "NotePulse Engine v" + npeVersion + "\nPsych Engine v" + psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
+				descText = new FlxText(0, 50, 1180, "NotePulse Engine v" + Main.npeVersion + "\nPsych Engine v" + Main.psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
 			descText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			descText.scrollFactor.set();
 			add(descText);

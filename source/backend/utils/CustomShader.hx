@@ -82,8 +82,8 @@ class CustomShader implements IHScriptCustomBehaviour {
                 shader.setFloat(name, value);
         
             case TInt:
-                try shader.setInt(name, value) catch (_:Dynamic) {}
-                try shader.setFloat(name, value) catch (_:Dynamic) {}
+                try shader.setInt(name, value) catch (_:Dynamic){}
+                try shader.setFloat(name, value) catch (_:Dynamic){}
 
             case TBool:
                 shader.setBool(name, value);
@@ -98,8 +98,8 @@ class CustomShader implements IHScriptCustomBehaviour {
                     case TInt:
                         var fa:Array<Float> = [for (x in arr) (x:Float)];
                         var ia:Array<Int>   = [for (x in arr) (x:Int)];
-                        try shader.setIntArray(name, ia) catch (_:Dynamic) {}
-                        try shader.setFloatArray(name, fa) catch (_:Dynamic) {}
+                        try shader.setIntArray(name, ia) catch (_:Dynamic){}
+                        try shader.setFloatArray(name, fa) catch (_:Dynamic){}
                     case TBool:
                         shader.setBoolArray(name, cast arr);
                     default:

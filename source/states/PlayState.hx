@@ -537,7 +537,7 @@ class PlayState extends MusicBeatState
 			case 'schoolEvil': new states.stages.SchoolEvil(); //Week 6 - Thorns
 			case 'tank': new states.stages.Tank(); //Week 7 - Ugh, Guns, Stress
 			case 'phillyStreets': new states.stages.PhillyStreets(); //Weekend 1 - Darnell, Lit up, 2Hot
-			case 'phillyBlazing': new states.stages.PhillyBlazin(); //Weekend 1 - Blazin'
+			case 'phillyBlazin': new states.stages.PhillyBlazin(); //Weekend 1 - Blazin'
 		}
 
 		if(isPixelStage) {
@@ -622,7 +622,6 @@ class PlayState extends MusicBeatState
 			if(gf != null)
 				gf.visible = false;
 		}
-		stagesFunc(function(stage:BaseStage) stage.createPost());
 
 		comboGroup = new FlxSpriteGroup();
 		add(comboGroup);
@@ -814,6 +813,7 @@ class PlayState extends MusicBeatState
 		setOnScripts('mania', SONG.mania);
 		setOnScripts("isPlayerOpponent", isPlayerOpponent);
 		
+		stagesFunc(function(stage:BaseStage) stage.createPost());
 		callOnScripts('initModchart');
 		callOnScripts('onCreatePost');
 		callOnScripts('postCreate');
@@ -1087,6 +1087,8 @@ class PlayState extends MusicBeatState
 			hscriptArray.pop();
 		#end
 
+		stagesFunc(function(stage:BaseStage) stage.destroy());
+
 		#if VIDEOS_ALLOWED
 		if(videoCutscene != null)
 		{
@@ -1139,6 +1141,8 @@ class PlayState extends MusicBeatState
 			vocals.pause();
 			opponentVocals.pause();
 		}
+
+		stagesFunc(function(stage:BaseStage) stage.startSong());
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
@@ -3396,6 +3400,7 @@ class PlayState extends MusicBeatState
 		});
 
 		noteMissCommon(daNote.noteData, daNote);
+		stagesFunc(function(stage:BaseStage) stage.noteMiss(daNote));
 		var result:Dynamic = callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('noteMiss', [daNote]);
 	}
@@ -3406,6 +3411,7 @@ class PlayState extends MusicBeatState
 
 		noteMissCommon(direction);
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+		stagesFunc(function(stage:BaseStage) stage.noteMissPress(direction));
 		callOnScripts('noteMissPress', [direction]);
 	}
 
@@ -3599,6 +3605,7 @@ class PlayState extends MusicBeatState
 		strumPlayAnim(note.gfStrum ? 2 : 0, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
 		note.hitByOpponent = true;
 		
+		stagesFunc(function(stage:BaseStage) stage.opponentNoteHit(note));
 		var result:Dynamic = (!isPlayerOpponent && !note.gfStrum) ? callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]) : callOnLuas('goodNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) (!isPlayerOpponent ? callOnHScript('opponentNoteHit', [note]) : callOnHScript('goodNoteHit', [note]));
 
@@ -3739,6 +3746,7 @@ class PlayState extends MusicBeatState
 		if (gainHealth && !isPlayerOpponent) health += note.hitHealth * healthGain;
 		if (gainHealth && isPlayerOpponent) health -= note.hitHealth * healthGain;
 
+		stagesFunc(function(stage:BaseStage) stage.goodNoteHit(note));
 		var result:Dynamic = (!isPlayerOpponent && !note.gfStrum) ? callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]) : callOnLuas('opponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) (!isPlayerOpponent ? callOnHScript('goodNoteHit', [note]) : callOnHScript('opponentNoteHit', [note]));
 

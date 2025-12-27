@@ -833,7 +833,7 @@ class PhillyStreets extends BaseStage
 				boyfriend.holdTimer = 0;
 				boyfriend.playAnim('shoot', true);
 				boyfriend.specialAnim = true;
-				FlxG.sound.play(Paths.soundRandom('shots/shot', 1, 4));
+				FlxG.sound.play(Paths.soundRandom('base_game/shots/shot', 1, 4));
 				spraycan.playCanShot();
 
 				new FlxTimer().start(1/24, function(tmr)
@@ -890,7 +890,7 @@ class PhillyStreets extends BaseStage
 				dad.holdTimer = 0;
 				dad.playAnim('lightCan', true);
 				dad.specialAnim = true;
-				lightCanSnd.play(true, sndTime - 65);
+				if(lightCanSnd != null) lightCanSnd.play(true, sndTime - 65);
 				
 				game.isCameraOnForcedPos = true;
 				game.defaultCamZoom += 0.1;

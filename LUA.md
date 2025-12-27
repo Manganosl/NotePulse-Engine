@@ -12,13 +12,13 @@ public var variable:String = "This variable is shared with every script!";
 - Load HScript files as custom states:
 ```
 function onCreatePost(){  // Does NOT work onCreate()!
-    MusicBeatState.switchState(new ScriptedState(Paths.modState("State name on states folder of your mod")))
+    MusicBeatState.switchState(new ScriptedState("State name on states folder of your mod"))
 }
 ```
 - Open custom substates doing the same:
 ```
 function onCreatePost(){  // Does NOT work onCreate()!
-    openSubState(new ScriptedSubstate(Paths.modState("State name on states folder of your mod")))
+    openSubState(new ScriptedSubstate("State name on states folder of your mod"))
 }
 ```
 

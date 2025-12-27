@@ -90,7 +90,7 @@ class DiscordClient {
 		presence.details = details;
 		presence.state = state;
 		presence.largeImageKey = 'icon';
-		presence.largeImageText = "NotePulse Engine v" + MainMenuState.npeVersion;
+		presence.largeImageText = "NotePulse Engine v" + Main.npeVersion;
 		presence.smallImageKey = smallImageKey;
 		presence.startTimestamp = Std.int(startTimestamp / 1000);
 		presence.endTimestamp = Std.int(endTimestamp / 1000);

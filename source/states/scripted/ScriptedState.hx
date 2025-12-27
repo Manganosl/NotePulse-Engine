@@ -20,7 +20,7 @@ class ScriptedState extends MusicBeatState
 	{
 		instance = this;
 		super();
-		this.initialScriptPath = scriptPath;
+		this.initialScriptPath = Paths.modState(scriptPath);
 	}
 
 	override public function create():Void
