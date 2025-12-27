@@ -49,7 +49,7 @@ import backend.ALSoftConfig; // Just to make sure DCE doesn't remove this, since
 
 class Main extends Sprite
 {
-	public static var npeVersion:String = '0.6.2';
+	public static var npeVersion:String = '0.7.0';
 	public static var psychEngineVersion:String = '0.7.3';
 
 	var game = {
