@@ -432,7 +432,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		songPosSlider.angle = 180;
 		songPosSlider.x = FlxG.width - 20;
 		songPosSlider.bar.alpha = 0.5;
-		songPosSlider.set_value((FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0);
+		songPosSlider.value = (FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0;
 		songPosSlider.scrollFactor.set(0, 0);
 		add(songPosSlider);
 
@@ -677,7 +677,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		if(FlxG.mouse.justPressed || FlxG.mouse.justPressedRight || FlxG.mouse.justPressedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickDown'));
 		if(FlxG.mouse.justReleased || FlxG.mouse.justReleasedRight || FlxG.mouse.justReleasedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickUp'));
 		if(FlxG.keys.justPressed.ANY) FlxG.sound.play(Paths.sound('chartingSounds/keyboard${FlxG.random.int(1,3)}'));
-		if(FlxG.sound.music.playing) songPosSlider.set_value((FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0);
+		if(FlxG.sound.music.playing) songPosSlider.value = (FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0;
 
 		if(infoBox.selectedName == "Information"){
 			infoBox.resize(CoolUtil.fpsLerp(infoBox.bg.width, 220, 0.2), CoolUtil.fpsLerp(infoBox.bg.height, 220, 0.2));
@@ -910,7 +910,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 			if(!songFinished) Conductor.songPosition = FlxMath.bound(FlxG.sound.music.time + Conductor.offset, 0, FlxG.sound.music.length - 1);
 			updateScrollY();
-			songPosSlider.set_value((FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0);
+			songPosSlider.value = (FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0;
 		}
 
 		super.update(elapsed);
@@ -1167,8 +1167,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		if(FlxG.mouse.x >= minX && FlxG.mouse.x < gridBg.x + gridBg.width)
 		{
-			Mouse.cursor = MouseCursor.CROSSHAIR;
-			isCrosshair = true;
+			if((!FlxG.mouse.overlaps(mainBox.bg) || !FlxG.mouse.overlaps(infoBox.bg))){
+				Mouse.cursor = MouseCursor.CROSSHAIR;
+				isCrosshair = true;
+			}
 			var diffX:Float = FlxG.mouse.x - gridBg.x;
 			var diffY:Float = FlxG.mouse.y - gridBg.y;
 			if(!FlxG.keys.pressed.SHIFT)
@@ -2568,7 +2570,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			var iconP2:HealthIcon = icons[1];
 			var iconP3:HealthIcon = icons[2];
 			var mustHitSection:Bool = (curSecData != null && curSecData.mustHitSection == true);
-			var gfSection:Bool = (curSecData != null && curSecData.gfSection == true);
+			var focusGF:Bool = (curSecData != null && curSecData.focusGF == true);
 			if (isGfSection)
 			{
 				if (mustHitSection)
@@ -2577,7 +2579,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					iconP2.changeIcon('gf');
 			}
 
-			if(gfSection)
+			if(focusGF)
 				mustHitIndicator.x = iconP3.x + iconP3.width/2 + GRID_SIZE;
 			else if(!mustHitSection)
 				mustHitIndicator.x = iconP2.x + iconP2.width/2 + GRID_SIZE;

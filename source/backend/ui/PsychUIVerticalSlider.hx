@@ -160,7 +160,7 @@ class PsychUIVerticalSlider extends FlxSpriteGroup
 		return max;
 	}
 
-	public function set_value(v:Float)
+	function set_value(v:Float)
 	{
 		value = Math.max(min, Math.min(max, v));
 		valueText.text = Std.string(FlxMath.roundDecimal(value, decimals));
