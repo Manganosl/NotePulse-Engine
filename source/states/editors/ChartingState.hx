@@ -263,11 +263,16 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		WindowUtil.preventClose = true;
 		WindowUtil.onEditorClosing = function()
 		{
-			FlxG.sound.play(Paths.sound('cancelMenu'));
-			openSubState(new Prompt("Are you sure you want to close the game?\nAll unsaved chart data will be lost.", function(){
+			if(!ignoreProgressCheckBox.checked){
+				FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
+				openSubState(new Prompt("Are you sure you want to close the game?\nAll unsaved chart data will be lost.", function(){
+					WindowUtil.preventClose = false;
+					Sys.exit(0);
+				}));
+			} else {
 				WindowUtil.preventClose = false;
 				Sys.exit(0);
-			}));
+			}
 		};
 		if(PlayState.SONG == null)
 		{
@@ -669,8 +674,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	private var isCrosshair:Bool = false;
 	override function update(elapsed:Float)
 	{
-		if(FlxG.mouse.justPressed) FlxG.sound.play(Paths.sound('chartingSounds/ClickDown'));
-		if(FlxG.mouse.released) FlxG.sound.play(Paths.sound('chartingSounds/ClickUp'));
+		if(FlxG.mouse.justPressed || FlxG.mouse.justPressedRight || FlxG.mouse.justPressedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickDown'));
+		if(FlxG.mouse.justReleased || FlxG.mouse.justReleasedRight || FlxG.mouse.justReleasedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickUp'));
 		if(FlxG.keys.justPressed.ANY) FlxG.sound.play(Paths.sound('chartingSounds/keyboard${FlxG.random.int(1,3)}'));
 		if(FlxG.sound.music.playing) songPosSlider.set_value((FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0);
 
@@ -795,7 +800,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 							var note = notes[num];
 							if(note.strumTime >= strumTime)
 							{
-								FlxG.sound.play(Paths.sound('chartingSounds/noteLay'));
 								notes.insert(num, noteAdded);
 								didAdd = true;
 								break;
@@ -803,6 +807,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						}
 						if(!didAdd) notes.push(noteAdded);
 						addedNotes.push(noteAdded);
+						FlxG.sound.play(Paths.sound('chartingSounds/noteLay'));
 					}
 
 					if(deletedNotes.length > 0)
@@ -1194,6 +1199,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				var nData:Int = Std.int(Math.max(0, noteData));
 				if(movingNotesLastData != nData)
 				{
+					FlxG.sound.play(Paths.sound("chartingSounds/stretchSNAP_UI"));
 					var isFirst:Bool = true;
 					var movingNotesMinData:Int = 0;
 					var movingNotesMaxData:Int = 0;
@@ -1235,6 +1241,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 				if(dummyArrow.y != movingNotesLastY)
 				{
+					FlxG.sound.play(Paths.sound("chartingSounds/stretchSNAP_UI"));
 					var diff:Float = dummyArrow.y - movingNotesLastY;
 					var curSecRow:Int = 0;
 					for (note in movingNotes)
@@ -1315,6 +1322,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 							selectedNotes.remove(closest);
 							curRenderedNotes.remove(closest, true);
 							addUndoAction(DELETE_NOTE, !closest.isEvent ? {notes: [closest]} : {events: [closest]});
+							FlxG.sound.play(Paths.sound('chartingSounds/noteErase'));
 						}
 						if(selectedNotes.length == 1) onSelectNote();
 						forceDataUpdate = true;
@@ -1343,6 +1351,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 								}
 							}
 							if(!didAdd) notes.push(noteAdded);
+							FlxG.sound.play(Paths.sound('chartingSounds/noteLay'));
 
 							if(!holdingAlt)
 								resetSelectedNotes();
@@ -1354,6 +1363,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						{
 							var didAdd:Bool = false;
 							var eventAdded:EventMetaNote;
+							FlxG.sound.play(Paths.sound('chartingSounds/noteLay'));
 							if (eventsBox != null && eventsBox.selectedName == "Modchart")
 							{
 								var action:String = (actionsDropdown != null && actionsDropdown.selectedLabel != null) ? actionsDropdown.selectedLabel : "";
@@ -3611,8 +3621,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				showOutput('Opened chart "${diff ? curdiff : cur}" successfully!');
 			}
 					
-			if(!ignoreProgressCheckBox.checked) openSubState(new Prompt('Warning: Any unsaved progress\nwill be lost.', func));
-			else func();
+			if(!ignoreProgressCheckBox.checked){
+				FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
+				openSubState(new Prompt('Warning: Any unsaved progress\nwill be lost.', func));
+			} else func();
 		}, 80);
 		#end
 
@@ -3733,8 +3745,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				prepareReload();
 			}
 
-			if(!ignoreProgressCheckBox.checked) openSubState(new Prompt('Are you sure you want to start over?', func));
-			else func();
+			if(!ignoreProgressCheckBox.checked){
+				FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
+				openSubState(new Prompt('Are you sure you want to start over?', func));
+			} else func();
 		}, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
@@ -3769,6 +3783,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 							return;
 						}
 	
+						FlxG.sound.play(Paths.sound('chartingSounds/openWindow'));
 						openSubState(new BasePrompt('Events Found! Choose an action.',
 							function(state:BasePrompt)
 							{
@@ -3900,8 +3915,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				else showOutput('You must save/load a Chart first to Reload it!', true);
 			}
 
-			if(!ignoreProgressCheckBox.checked) openSubState(new Prompt('Warning: Any unsaved progress will be lost', func));
-			else func();
+			if(!ignoreProgressCheckBox.checked){
+				FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
+				openSubState(new Prompt('Warning: Any unsaved progress will be lost', func));
+		    } else func();
 		}, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
@@ -3921,12 +3938,18 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		btnY += 20;
 		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Exit', function()
 		{
-			FlxG.sound.play(Paths.sound('cancelMenu'));
-			openSubState(new Prompt("Are you sure you want to exit the Chart Editor?\nAny unsaved progress will be lost.", function() {
+			if(!ignoreProgressCheckBox.checked){
+				FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
+				openSubState(new Prompt("Are you sure you want to exit the Chart Editor?\nAny unsaved progress will be lost.", function() {
+					PlayState.chartingMode = false;
+					MusicBeatState.switchState(new MainMenuState());
+					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				}));
+			} else {
 				PlayState.chartingMode = false;
 				MusicBeatState.switchState(new MainMenuState());
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
-			}));
+			}
 		}, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
@@ -3995,6 +4018,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			upperBox.isMinimized = true;
 			upperBox.bg.visible = false;
+			FlxG.sound.play(Paths.sound('chartingSounds/openWindow'));
 			openSubState(new BasePrompt(400, 160, 'Autosave Settings',
 				function(state:BasePrompt)
 				{
@@ -4057,8 +4081,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				loadSection();
 			}
 
-			if(!ignoreProgressCheckBox.checked) openSubState(new Prompt('Delete all Notes in the song?', func));
-			else func();
+			if(!ignoreProgressCheckBox.checked){
+				FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
+				openSubState(new Prompt('Delete all Notes in the song?', func));
+			} else func();
 		}, btnWid);
 		btn.normalStyle.bgColor = FlxColor.RED;
 		btn.normalStyle.textColor = FlxColor.WHITE;
@@ -4078,8 +4104,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					loadSection();
 				}
 	
-				if(!ignoreProgressCheckBox.checked) openSubState(new Prompt('Delete all Events in the song?', func));
-				else func();
+				if(!ignoreProgressCheckBox.checked){
+					FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
+					openSubState(new Prompt('Delete all Events in the song?', func));
+				} else func();
 			}, btnWid);
 			btn.normalStyle.bgColor = FlxColor.RED;
 			btn.normalStyle.textColor = FlxColor.WHITE;
@@ -4171,6 +4199,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Waveform...', function()
 		{
 			ClientPrefs.toggleVolumeKeys(false);
+			FlxG.sound.play(Paths.sound('chartingSounds/openWindow'));
 			openSubState(new BasePrompt(320, 200, 'Waveform Settings',
 				function(state:BasePrompt) {
 					upperBox.isMinimized = true;
@@ -4231,6 +4260,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			upperBox.isMinimized = true;
 			upperBox.bg.visible = false;
+			FlxG.sound.play(Paths.sound('chartingSounds/openWindow'));
 			openSubState(new BasePrompt(420, 200, 'Go to Time/Section:',
 				function(state:BasePrompt)
 				{
@@ -4313,6 +4343,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			upperBox.isMinimized = true;
 			upperBox.bg.visible = false;
 
+			FlxG.sound.play(Paths.sound('chartingSounds/openWindow'));
 			openSubState(new BasePrompt(500, 260, 'Chart Editor Theme',
 				function(state:BasePrompt)
 				{
@@ -4799,6 +4830,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	}
 
 	function editorPlayStatePrompt(){
+		FlxG.sound.play(Paths.sound('chartingSounds/openWindow'));
 		openSubState(new BasePrompt( 'Preview\nChoose the strums to play.', function(state:BasePrompt){
 			var btnY = 390;
 			var buttons:Array<PsychUIButton> = [];
@@ -4966,6 +4998,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	{
 		if(FileSystem.exists(savePath))
 		{
+			FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
 			openSubState(new Prompt('Overwrite: "$overwriteName"?', function()
 			{
 				overwriteSavedSomething = true;
@@ -5022,7 +5055,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	{
 		if(isMovingNotes || currentUndo >= undoActions.length)
 		{
-			FlxG.sound.play(Paths.sound('chartingSounds/undo'), 0.4);
+			FlxG.sound.play(Paths.sound('cancelMenu'), 0.4);
 			return;
 		}
 
@@ -5047,7 +5080,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				onSelectNote();
 		}
 		showOutput('Undo #${currentUndo+1}: ${action.action}');
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		FlxG.sound.play(Paths.sound('chartingSounds/undo'));
 		currentUndo++;
 	}
 	function redo()
@@ -5080,7 +5113,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				onSelectNote();
 		}
 		showOutput('Redo #${currentUndo+1}: ${action.action}');
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		FlxG.sound.play(Paths.sound('chartingSounds/metronome2'), 0.4);
 	}
 
 	function actionPushNotes(dataNotes:Array<MetaNote>, dataEvents:Array<EventMetaNote>)

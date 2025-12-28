@@ -61,6 +61,8 @@ class NPUICountdown extends FlxSpriteGroup
         countdownText = new FlxText(0, height / 2 + 5, width, Std.string(Std.int(seconds)));
         countdownText.setFormat(null, 14, FlxColor.WHITE, "center");
         add(countdownText);
+
+        FlxG.sound.play(Paths.sound('chartingSounds/openWindow'));
     }
 
     private var isPointer:Bool = true;
@@ -73,6 +75,7 @@ class NPUICountdown extends FlxSpriteGroup
             Mouse.cursor = MouseCursor.POINTER;
             if(FlxG.mouse.justPressed){
                 cancelled = true;
+                FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
                 finish(false);
                 if(onCancel != null) onCancel();
             }

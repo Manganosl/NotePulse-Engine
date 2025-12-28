@@ -830,6 +830,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	{
 		super.update(elapsed);
 
+		if(FlxG.mouse.justPressed || FlxG.mouse.justPressedRight || FlxG.mouse.justPressedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickDown'));
+		if(FlxG.mouse.justReleased || FlxG.mouse.justReleasedRight || FlxG.mouse.justReleasedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickUp'));
+		if(FlxG.keys.justPressed.ANY) FlxG.sound.play(Paths.sound('chartingSounds/keyboard${FlxG.random.int(1,3)}'));
+
 		if(PsychUIInputText.focusOn != null)
 		{
 			ClientPrefs.toggleVolumeKeys(false);

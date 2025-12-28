@@ -64,16 +64,19 @@ class PsychUIVerticalSlider extends FlxSpriteGroup
 	public var movingHandle:Bool = false;
 	public var forceNextUpdate:Bool = false;
 	public var broadcastSliderEvent:Bool = true;
-	private var isResize:Bool = false;
+	private var isPointer:Bool = false;
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-
-		if(FlxG.mouse.overlaps(bar, camera) || FlxG.mouse.overlaps(handle, camera)){
-			isResize = true;
+		
+		if(FlxG.mouse.overlaps(handle, camera)){
+			isPointer = true;
 			Mouse.cursor = MouseCursor.RESIZE_NS;
-		} else if(isResize){
-			isResize = false;
+		} else if(FlxG.mouse.overlaps(bar, camera)){
+			isPointer = true;
+			Mouse.cursor = MouseCursor.POINTER;
+		} else if(isPointer){
+			isPointer = false;
 			Mouse.cursor = MouseCursor.DEFAULT;
 		}
 
