@@ -7,6 +7,7 @@ import flixel.text.FlxText;
 import flixel.FlxG;
 import backend.CustomFadeTransition;
 import sys.io.File;
+import flixel.FlxBasic;
 
 class ScriptedState extends MusicBeatState
 {
@@ -101,4 +102,11 @@ class ScriptedState extends MusicBeatState
 
 		super.destroy();
 	}
+
+	#if HSCRIPT_ALLOWED
+	override public function insert(pos:Int, obj:flixel.FlxBasic):flixel.FlxBasic {   // Just why...
+		super.insert(pos, obj);
+		return obj;
+	}
+	#end
 }

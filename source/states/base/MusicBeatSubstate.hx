@@ -6,6 +6,7 @@ import psychlua.LuaUtils;
 #if !flash
 import flixel.addons.display.FlxRuntimeShader;
 #end
+import psychlua.FunkinLua;
 
 class MusicBeatSubstate extends FlxSubState
 {
@@ -235,6 +236,19 @@ class MusicBeatSubstate extends FlxSubState
 		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
 		return val == null ? 4 : val;
 	}
+
+	#if HSCRIPT_ALLOWED
+	public function importScript(path:String, absolute:Bool = false) {
+		var scriptPath = ((Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0) ? Paths.mods(Mods.currentModDirectory + '/' + path + (path.endsWith(".hx") ? "" : ".hx")) : Paths.mods(path));
+		try {
+			this.hscriptArray.push(new HScript((absolute ? path : scriptPath)));
+			return true;
+		} catch(e) {
+			FunkinLua.luaTrace('importScript: Path "${(absolute ? path : scriptPath)}" does not exist!', true, false, 0xFFFF0000);
+		}
+		return false;
+	}
+	#end
 
 	#if (!flash && sys)
 	public function createRuntimeShader(name:String):FlxRuntimeShader

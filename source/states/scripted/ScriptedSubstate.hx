@@ -6,6 +6,7 @@ import flixel.addons.display.FlxRuntimeShader;
 import flixel.text.FlxText;
 import flixel.FlxG;
 import sys.io.File;
+import flixel.FlxBasic;
 
 class ScriptedSubstate extends MusicBeatSubstate
 {
@@ -91,4 +92,11 @@ class ScriptedSubstate extends MusicBeatSubstate
 
 		super.destroy();
 	}
+
+	#if HSCRIPT_ALLOWED
+	override public function insert(pos:Int, obj:flixel.FlxBasic):flixel.FlxBasic {   // Just why...
+		super.insert(pos, obj);
+		return obj;
+	}
+	#end
 }

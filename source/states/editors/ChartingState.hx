@@ -2536,6 +2536,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		for (i in 1...GRID_PLAYERS+1)
 		{
 			var data:CharacterFile = loadCharacterFile(Reflect.field(PlayState.SONG, 'player$i'));
+			if(i == 3) data = loadCharacterFile(Reflect.field(PlayState.SONG, 'gfVersion'));
 			Reflect.setField(characterData, 'iconP$i', data != null && data.healthicon != null ? data.healthicon : 'face');
 			Reflect.setField(characterData, 'vocalsP$i', data != null && data.vocals_file != null ? data.vocals_file : '');
 		}
@@ -2565,7 +2566,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			var iconP1:HealthIcon = icons[0];
 			var iconP2:HealthIcon = icons[1];
+			var iconP3:HealthIcon = icons[2];
 			var mustHitSection:Bool = (curSecData != null && curSecData.mustHitSection == true);
+			var gfSection:Bool = (curSecData != null && curSecData.gfSection == true);
 			if (isGfSection)
 			{
 				if (mustHitSection)
@@ -2574,10 +2577,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					iconP2.changeIcon('gf');
 			}
 
-			if(mustHitSection)
-				mustHitIndicator.x = iconP1.x + iconP1.width/2 + GRID_SIZE;
-			else
+			if(gfSection)
+				mustHitIndicator.x = iconP3.x + iconP3.width/2 + GRID_SIZE;
+			else if(!mustHitSection)
 				mustHitIndicator.x = iconP2.x + iconP2.width/2 + GRID_SIZE;
+			else
+				mustHitIndicator.x = iconP1.x + iconP1.width/2 + GRID_SIZE;
 		}
 		_lastGfSection = isGfSection;
 		_lastSec = curSec;

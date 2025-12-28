@@ -133,6 +133,9 @@ class BasePrompt extends MusicBeatSubstate
 	var _blockInput:Float = 0.1;
 	override function update(elapsed:Float)
 	{
+		if(FlxG.mouse.justPressed || FlxG.mouse.justPressedRight || FlxG.mouse.justPressedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickDown'));
+		if(FlxG.mouse.justReleased || FlxG.mouse.justReleasedRight || FlxG.mouse.justReleasedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickUp'));
+		if(FlxG.keys.justPressed.ANY) FlxG.sound.play(Paths.sound('chartingSounds/keyboard${FlxG.random.int(1,3)}'));
 		super.update(elapsed);
 
 		_blockInput = Math.max(0, _blockInput - elapsed);

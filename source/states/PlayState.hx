@@ -4587,15 +4587,12 @@ class PlayState extends MusicBeatState
 	#end
 
 	public function addBehindGF(obj:FlxBasic)
-	{
 		insert(members.indexOf(gfGroup), obj);
-	}
+
 	public function addBehindBF(obj:FlxBasic)
-	{
 		insert(members.indexOf(boyfriendGroup), obj);
-	}
+	
 	public function addBehindDad(obj:FlxBasic)
-	{
 		insert(members.indexOf(dadGroup), obj);
-	}
+
 }
