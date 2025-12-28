@@ -27,6 +27,7 @@ import cutscenes.DialogueBoxPsych;
 import states.menus.StoryMenuState;
 import states.editors.ChartingState;
 import states.editors.CharacterEditorState;
+import states.scripted.ScriptedSubstate;
 
 import substates.PauseSubState;
 import substates.GameOverSubstate;
@@ -2894,7 +2895,9 @@ class PlayState extends MusicBeatState
 					note.resetAnim = 0;
 				}
 		}
-		openSubState(new PauseSubState());
+		if(Mods.modConfig != null && Mods.modConfig.pauseSubState != null){
+			openSubState(new ScriptedSubstate(Mods.modConfig.pauseSubState));
+		} else openSubState(new PauseSubState());
 
 		#if DISCORD_ALLOWED
 		if(autoUpdateRPC) DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());

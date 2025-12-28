@@ -552,12 +552,13 @@ class ModSelector extends MusicBeatState {
 	}
 
 	private function openConfigPrompt(){
-		openSubState(new BasePrompt(FlxG.width/2, FlxG.height/2, 'Edit $currentMod Config File', function(state:BasePrompt) {
+		openSubState(new BasePrompt(FlxG.width/2, FlxG.height/2+50, 'Edit $currentMod Config File', function(state:BasePrompt) {
 			var configData = {
 				titleState: "",
 				mainMenuState: "",
 				storyMenuState: "",
 				freeplayState: "",
+				pauseSubState: "",
 				hasGlobalScript: false
 			};
 
@@ -570,6 +571,7 @@ class ModSelector extends MusicBeatState {
 					if (loadedData.mainMenuState != null) configData.mainMenuState = loadedData.mainMenuState;
 					if (loadedData.storyMenuState != null) configData.storyMenuState = loadedData.storyMenuState;
 					if (loadedData.freeplayState != null) configData.freeplayState = loadedData.freeplayState;
+					if (loadedData.pauseSubState != null) configData.pauseSubState = loadedData.pauseSubState;
 					if (loadedData.hasGlobalScript != null) configData.hasGlobalScript = loadedData.hasGlobalScript;
 				} catch (e:Dynamic) {}
 			}
@@ -600,7 +602,12 @@ class ModSelector extends MusicBeatState {
 			var freeplayInput = new PsychUIInputText(startX, storyMenuInput.y + spacing, inputWidth, configData.freeplayState);
 			state.add(freeplayInput);
 
-			var globalCheck = new PsychUICheckBox(startX, freeplayInput.y + 35, "Has Global Script?", 100);
+			var labelPause = new FlxText(startX, freeplayInput.y + spacing - 14, 0, "Pause Substate:", textSize);
+			state.add(labelPause);
+			var pauseInput = new PsychUIInputText(startX, freeplayInput.y + spacing, inputWidth, configData.pauseSubState);
+			state.add(pauseInput);
+
+			var globalCheck = new PsychUICheckBox(startX, pauseInput.y + 35, "Has Global Script?", 100);
 			globalCheck.checked = configData.hasGlobalScript;
 			state.add(globalCheck);
 
@@ -610,6 +617,7 @@ class ModSelector extends MusicBeatState {
 					mainMenuState: mainMenuInput.text,
 					storyMenuState: storyMenuInput.text,
 					freeplayState: freeplayInput.text,
+					pauseSubState: pauseInput.text,
 					hasGlobalScript: globalCheck.checked
 				};
 				File.saveContent(path, Json.stringify(newData, "\t"));
