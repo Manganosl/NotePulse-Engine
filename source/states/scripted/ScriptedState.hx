@@ -70,13 +70,17 @@ class ScriptedState extends MusicBeatState
 
 		if (softlocked)
 		{
-			if (FlxG.keys.justPressed.SPACE)
+			if (FlxG.keys.justPressed.SPACE){
+				Mods.modConfig = null;
 				MusicBeatState.switchState(new states.MainMenuState());
+			}
 			return;
 		}
 
-		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5)
+		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5){
+			Mods.modConfig = null;
 			MusicBeatState.switchState(new states.MainMenuState());
+		}
 
 		callOnHScript("onUpdatePost", [elapsed]);
 	}

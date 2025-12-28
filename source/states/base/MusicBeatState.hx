@@ -1,6 +1,8 @@
 package states.base;
 
+import states.scripted.ScriptedState;
 import flixel.addons.ui.FlxUIState;
+import states.scripted.ScriptedState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.FlxState;
 import flixel.FlxState;
@@ -278,6 +280,16 @@ class MusicBeatState extends FlxUIState
 			return;
 		}
 
+		if(Mods.modConfig != null){
+			if(Mods.modConfig.titleState != null && nextState is states.menus.TitleState)
+				nextState = new ScriptedState(Mods.modConfig.titleState);
+			if(Mods.modConfig.mainMenuState != null && nextState is states.MainMenuState)
+				nextState = new ScriptedState(Mods.modConfig.mainMenuState);
+			if(Mods.modConfig.storyMenuState != null && nextState is states.menus.StoryMenuState)
+				nextState = new ScriptedState(Mods.modConfig.storyMenuState);
+			if(Mods.modConfig.freeplayMenuState != null && nextState is states.menus.FreeplayState)
+				nextState = new ScriptedState(Mods.modConfig.freeplayMenuState);
+		}
 		if(FlxTransitionableState.skipNextTransIn) FlxG.switchState(nextState);
 		else startTransition(nextState);
 		FlxTransitionableState.skipNextTransIn = false;

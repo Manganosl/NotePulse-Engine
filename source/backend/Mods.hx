@@ -11,6 +11,7 @@ typedef ModsList = {
 class Mods
 {
 	static public var currentModDirectory:String = '';
+	public static var modConfig:Dynamic;
 	public static var ignoreModFolders:Array<String> = [
 		'characters',
 		'custom_events',
@@ -26,7 +27,9 @@ class Mods
 		'weeks',
 		'fonts',
 		'scripts',
-		'achievements'
+		'achievements',
+		"states",
+		"ndlls"
 	];
 
 	private static var globalMods:Array<String> = [];

@@ -216,10 +216,11 @@ class ModSelector extends MusicBeatState {
 						openConfigPrompt();
 						return;
 					}
-					var data = Json.parse(File.getContent(path));
-					if(data != null || data.hasGlobalScript != null || data.hasGlobalScript) startGlobalScript();
-					if(data != null || data.titleState != null) MusicBeatState.switchState(new ScriptedState(data.titleState));
-					else MusicBeatState.switchState(new states.menus.TitleState());
+					FlxG.sound.music.stop();
+					Mods.modConfig = Json.parse(File.getContent(path));
+					if(Mods.modConfig != null && Mods.modConfig.hasGlobalScript != null && Mods.modConfig.hasGlobalScript) 
+						startGlobalScript();
+					MusicBeatState.switchState(new states.menus.TitleState());
 					return;
 				}
 				if(goto == BasePrompt){
