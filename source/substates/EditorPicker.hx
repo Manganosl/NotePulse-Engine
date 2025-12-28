@@ -45,10 +45,10 @@ class EditorPicker extends MusicBeatSubstate {
 			args: [states.editors.StageEditorState]
 		},
 		{
-			name: "Global Loader",
+			name: "Mod Config Editor",
 			iconShit: "debugOptions",
 			state: states.editors.ModSelector,
-			args: [states.scripted.ScriptedState]
+			args: [states.editors.content.Prompt.BasePrompt]
 		}
 	];
 

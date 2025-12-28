@@ -1,5 +1,6 @@
 package states;
 
+import states.scripted.ScriptedState;
 import flixel.FlxObject;
 import flixel.effects.FlxFlicker;
 import lime.app.Application;
@@ -29,7 +30,7 @@ class MainMenuState extends MusicBeatState
 	var optionShit:Array<String> = [
 		'story_mode',
 		'freeplay',
-		#if MODS_ALLOWED 'mods', #end
+		//#if MODS_ALLOWED 'mods', #end
 		'credits'
 	];
 
@@ -122,6 +123,11 @@ class MainMenuState extends MusicBeatState
 			descText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			descText.scrollFactor.set();
 			add(descText);
+
+			var modsText:FlxText = new FlxText(12, FlxG.height - 44, 0, "[TAB] Mod Loader", 12);
+			modsText.scrollFactor.set();
+			modsText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
+			add(modsText);
 		
 		changeItem();
 
@@ -371,7 +377,7 @@ class MainMenuState extends MusicBeatState
 			}
 			if(FlxG.keys.justPressed.TAB){
 				selectedSomethin = true;
-				MusicBeatState.switchState(new states.menus.ModsMenuState());
+				MusicBeatState.switchState(new states.editors.ModSelector(states.scripted.ScriptedState, [null]));
 			}
 			#end
 		}

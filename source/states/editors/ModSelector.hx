@@ -1,6 +1,7 @@
 package states.editors;
 
 import backend.ui.*;
+import states.editors.content.Prompt;
 import backend.WeekData;
 import states.menus.FreeplayState.SongMetadata;
 import objects.HealthIcon;
@@ -8,12 +9,14 @@ import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import flixel.util.FlxSort;
+import haxe.Json;
+import states.scripted.ScriptedState;
 
 class ModSelector extends MusicBeatState {
 	var exclusions:Array<String> = ["assets", "data", "fonts", "images", "music", "sounds", "videos", "ndlls", "scripts", "shaders", "characters", "songs", "stages", "weeks", "states", "custom_events", "custom_notetypes"];
 
     private var modArray:Array<String> = [];
-    private var goto:Class<MusicBeatState>;
+    private var goto:Class<Dynamic>;
     private var gotoArgs:Array<Dynamic> = [];
 	var curDifficulty:Int = -1;
 	var currentSong:SongMetadata = null;
@@ -27,7 +30,7 @@ class ModSelector extends MusicBeatState {
 	private var titleText:FlxText;
 	var _file:FileReference;
 
-    public function new(state:Class<MusicBeatState>, args:Array<Dynamic>){
+    public function new(state:Class<Dynamic>, args:Array<Dynamic>){
         goto = state;
         gotoArgs = args != null ? args : [];
         for (folder in Mods.getModDirectories()){
@@ -205,10 +208,24 @@ class ModSelector extends MusicBeatState {
 			}
 
             if (controls.ACCEPT){
-				if(goto == states.scripted.ScriptedState){
+				if(goto == ScriptedState){
 					currentMod = modArray[curSelected];
 					Mods.currentModDirectory = currentMod;
-					startGlobalScript();
+					var path:String = Paths.modJson("Config");
+					if (!FileSystem.exists(path)){
+						openConfigPrompt();
+						return;
+					}
+					var data = Json.parse(File.getContent(path));
+					if(data != null || data.hasGlobalScript != null || data.hasGlobalScript) startGlobalScript();
+					if(data != null || data.titleState != null) MusicBeatState.switchState(new ScriptedState(data.titleState));
+					else MusicBeatState.switchState(new states.menus.TitleState());
+					return;
+				}
+				if(goto == BasePrompt){
+					currentMod = modArray[curSelected];
+					Mods.currentModDirectory = currentMod;
+					openConfigPrompt();
 					return;
 				}
 				if(goto != states.editors.ChartingState){
@@ -531,6 +548,79 @@ class ModSelector extends MusicBeatState {
     	var parent = haxe.io.Path.directory(path);
     	if (parent != "" && !sys.FileSystem.exists(parent)) ensureDirectory(parent);
     	if (!sys.FileSystem.exists(path)) sys.FileSystem.createDirectory(path);
+	}
+
+	private function openConfigPrompt(){
+		openSubState(new BasePrompt(FlxG.width/2, FlxG.height/2, 'Edit $currentMod Config File', function(state:BasePrompt) {
+			var configData = {
+				titleState: "",
+				mainMenuState: "",
+				storyMenuState: "",
+				freeplayState: "",
+				hasGlobalScript: false
+			};
+
+			var path:String = Paths.modJson("Config");
+			if (FileSystem.exists(path)) {
+				try {
+					var rawJson:String = File.getContent(path);
+					var loadedData = Json.parse(rawJson);
+					if (loadedData.titleState != null) configData.titleState = loadedData.titleState;
+					if (loadedData.mainMenuState != null) configData.mainMenuState = loadedData.mainMenuState;
+					if (loadedData.storyMenuState != null) configData.storyMenuState = loadedData.storyMenuState;
+					if (loadedData.freeplayState != null) configData.freeplayState = loadedData.freeplayState;
+					if (loadedData.hasGlobalScript != null) configData.hasGlobalScript = loadedData.hasGlobalScript;
+				} catch (e:Dynamic) {}
+			}
+
+			var startX:Float = state.bg.x + 200;
+			var startY:Float = state.bg.y + 100;
+			var spacing:Int = 42;
+			var inputWidth:Int = 250;
+			var textSize:Int = 10;
+
+			var labelTitle = new FlxText(startX, startY - 14, 0, "Title State:", textSize);
+			state.add(labelTitle);
+			var titleInput = new PsychUIInputText(startX, startY, inputWidth, configData.titleState);
+			state.add(titleInput);
+
+			var labelMain = new FlxText(startX, titleInput.y + spacing - 14, 0, "Main Menu State:", textSize);
+			state.add(labelMain);
+			var mainMenuInput = new PsychUIInputText(startX, titleInput.y + spacing, inputWidth, configData.mainMenuState);
+			state.add(mainMenuInput);
+
+			var labelStory = new FlxText(startX, mainMenuInput.y + spacing - 14, 0, "Story Menu State:", textSize);
+			state.add(labelStory);
+			var storyMenuInput = new PsychUIInputText(startX, mainMenuInput.y + spacing, inputWidth, configData.storyMenuState);
+			state.add(storyMenuInput);
+
+			var labelFree = new FlxText(startX, storyMenuInput.y + spacing - 14, 0, "Freeplay State:", textSize);
+			state.add(labelFree);
+			var freeplayInput = new PsychUIInputText(startX, storyMenuInput.y + spacing, inputWidth, configData.freeplayState);
+			state.add(freeplayInput);
+
+			var globalCheck = new PsychUICheckBox(startX, freeplayInput.y + 35, "Has Global Script?", 100);
+			globalCheck.checked = configData.hasGlobalScript;
+			state.add(globalCheck);
+
+			var saveBtn = new PsychUIButton(startX, globalCheck.y + 45, "Save", function() {
+				var newData = {
+					titleState: titleInput.text,
+					mainMenuState: mainMenuInput.text,
+					storyMenuState: storyMenuInput.text,
+					freeplayState: freeplayInput.text,
+					hasGlobalScript: globalCheck.checked
+				};
+				File.saveContent(path, Json.stringify(newData, "\t"));
+				state.close();
+			});
+			state.add(saveBtn);
+
+			var cancelBtn = new PsychUIButton(saveBtn.x + 110, saveBtn.y, "Cancel", function() {
+				state.close();
+			});
+			state.add(cancelBtn);
+		}));
 	}
 }
 
