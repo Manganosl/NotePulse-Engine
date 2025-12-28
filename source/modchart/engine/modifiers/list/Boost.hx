@@ -11,6 +11,7 @@ class Boost extends Modifier {
 		super(pf);
 
 		setPercent('waveMult', 1, -1);
+		setPercent('boostScale', 1, -1);
 	}
 
 	static final DIV38 = 1 / 38;
