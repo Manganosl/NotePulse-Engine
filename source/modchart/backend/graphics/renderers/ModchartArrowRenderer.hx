@@ -155,8 +155,13 @@ final class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
 				? arrow._cameras[0]
 				: Adapter.instance.getArrowCamera()[0];
 
-			planeVertices[vertPointer] = projection.x - cam.scroll.x * (arrow.scrollFactor.x);
-			planeVertices[vertPointer + 1] = projection.y - cam.scroll.y * (arrow.scrollFactor.y);
+			if(cam != null){
+				planeVertices[vertPointer] = projection.x - cam.scroll.x * (arrow.scrollFactor.x);
+				planeVertices[vertPointer + 1] = projection.y - cam.scroll.y * (arrow.scrollFactor.y);
+			} else {
+				planeVertices[vertPointer] = projection.x;
+				planeVertices[vertPointer + 1] = projection.y;
+			}
 
 			// stores depth from this vert to use it for perspective correction on uv's
 			projectionZ[Math.floor(vertPointer / 2)] = Math.max(0.0001, projection.z);
