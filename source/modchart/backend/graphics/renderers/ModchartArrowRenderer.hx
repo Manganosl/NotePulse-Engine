@@ -232,8 +232,8 @@ final class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
 			final cTransform = instruction.colorData[0];
 			cTransform.alphaMultiplier *= camera.alpha;
 
-			camera.drawTriangles(item.graphic, instruction.vertices, instruction.indices, instruction.uvt, new Vector<Int>(), null, item.blend, false,
-				item.antialiasing, cTransform, item.shader);
+			var batch = camera.startTrianglesBatch( item.graphic, item.antialiasing, true, item.blend, true, item.shader);
+			batch.addGradientTriangles( instruction.vertices, instruction.indices, instruction.uvt, null, getZoomAwareBounds(camera), [cTransform]);
 		}
 	}
 }

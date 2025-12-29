@@ -332,7 +332,7 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 					t.alphaMultiplier *= camera.alpha;
 
 			var item = camera.startTrianglesBatch(item.graphic, item.antialiasing, true, item.blend, true, item.shader);
-			item.addGradientTriangles(instruction.vertices, instruction.indices, instruction.uvt, null, camera._bounds, cTransforms);
+			item.addGradientTriangles(instruction.vertices, instruction.indices, instruction.uvt, null, getZoomAwareBounds(camera), cTransforms);
 		}
 	}
 

@@ -182,7 +182,7 @@ final class ModchartPathRenderer extends ModchartRenderer<FlxSprite> {
 			for (camera in cameras) {
 				var item = camera.startTrianglesBatch(__lineGraphic, false, true, NORMAL, true);
 				@:privateAccess
-				item.addGradientTriangles(vertices, indices, uvt, null, camera._bounds, transforms);
+				item.addGradientTriangles(vertices, indices, uvt, null, getZoomAwareBounds(camera), transforms);
 			}
 		}
 	}

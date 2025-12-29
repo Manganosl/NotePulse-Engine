@@ -3,6 +3,7 @@ package modchart.backend.graphics;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.util.FlxSort;
+import flixel.math.FlxRect;
 
 @:publicFields
 @:structInit
@@ -58,6 +59,20 @@ class ModchartRenderer<T:FlxBasic> extends FlxBasic {
 			return FlxSort.byValues(FlxSort.DESCENDING, a.item._z, b.item._z);
 		});
 	}
+
+	@:privateAccess inline function getZoomAwareBounds(camera:FlxCamera):FlxRect {
+        var zoom = camera.zoom;
+
+        var viewWidth  = camera.width  / zoom;
+        var viewHeight = camera.height / zoom;
+
+        return FlxRect.get(
+            camera.scroll.x,
+            camera.scroll.y,
+            viewWidth,
+            viewHeight
+        );
+    }
 
 	// public function render(times:Null<Int>):Void {}
 }
