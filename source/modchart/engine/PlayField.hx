@@ -280,7 +280,6 @@ final class PlayField extends FlxSprite {
 						if (!getVisibility(hold))
 							continue;
 
-						applyPlayFieldCameras(hold);
 						holdRenderer.prepare(hold);
 						queue({
 							callback: holdRenderer.shift,
@@ -300,7 +299,6 @@ final class PlayField extends FlxSprite {
 					if (!getVisibility(receptor))
 						continue;
 
-					applyPlayFieldCameras(receptor);
 					receptorRenderer.prepare(receptor);
 					if (Config.RENDER_ARROW_PATHS)
 						pathRenderer.prepare(receptor);
@@ -317,7 +315,6 @@ final class PlayField extends FlxSprite {
 					if (!getVisibility(hold))
 						continue;
 
-					applyPlayFieldCameras(hold);
 					holdRenderer.prepare(hold);
 					queue({
 						callback: holdRenderer.shift,
@@ -332,7 +329,6 @@ final class PlayField extends FlxSprite {
 					if (!getVisibility(arrow))
 						continue;
 
-					applyPlayFieldCameras(arrow);
 					arrowRenderer.prepare(arrow);
 					queue({
 						callback: arrowRenderer.shift,
@@ -347,7 +343,6 @@ final class PlayField extends FlxSprite {
 					if (!getVisibility(splash))
 						continue;
 				
-					applyPlayFieldCameras(splash);
 					attachmentRenderer.prepare(splash);
 					queue({
 						callback: attachmentRenderer.shift,
@@ -364,9 +359,17 @@ final class PlayField extends FlxSprite {
 			pathRenderer.shift();
 	}
 
+	private var currentCameras:Array<FlxCamera>;
+	override function set_cameras(value:Array<FlxCamera>):Array<FlxCamera>{
+		currentCameras = value;
+		return super.set_cameras(value);
+	}
 	inline function applyPlayFieldCameras(sprite:FlxSprite) {
 		if (this.cameras != null){
-			sprite.cameras = this.cameras;
+			if(sprite.extraData["modchartCameras"] != currentCameras){
+				sprite.cameras = this.cameras;
+				sprite.extraData["modchartCameras"] = currentCameras;
+			}
 		}
 	}
 }
