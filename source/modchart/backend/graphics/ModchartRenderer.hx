@@ -63,15 +63,10 @@ class ModchartRenderer<T:FlxBasic> extends FlxBasic {
 	@:privateAccess inline function getZoomAwareBounds(camera:FlxCamera):FlxRect {
 		var zoom = camera.zoom;
 
-		var viewWidth  = camera.width  * 10 / zoom;
-		var viewHeight = camera.height * 10 / zoom;
+		var viewWidth  = camera.width  * 3 / zoom;
+		var viewHeight = camera.height * 2 / zoom;
 
-		return FlxRect.get(
-			camera.scroll.x - viewWidth * 0.5,
-			camera.scroll.y - viewHeight * 0.5,
-			viewWidth,
-			viewHeight
-		);
+		return FlxRect.get(camera.scroll.x - viewWidth * 0.5, camera.scroll.y - viewHeight * 0.5, viewWidth, viewHeight);
 	}
 
 	// public function render(times:Null<Int>):Void {}
