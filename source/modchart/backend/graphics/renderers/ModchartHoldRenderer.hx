@@ -127,8 +127,12 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 			if (view.z != 0)
 				projection = this.projection.transformVector(view);
 
-			quad.x = projection.x;
-			quad.y = projection.y;
+			final cam = hold._cameras != null
+				? hold._cameras[0]
+				: Adapter.instance.getArrowCamera()[0];
+
+			quad.x = projection.x - cam.scroll.x * (instance.scrollFactor.x);
+			quad.y = projection.y - cam.scroll.y * (instance.scrollFactor.y);
 			quad.z = projection.z;
 		}
 		return {

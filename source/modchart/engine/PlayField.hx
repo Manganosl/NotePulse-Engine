@@ -8,6 +8,7 @@ import flixel.tweens.FlxEase.EaseFunction;
 import modchart.backend.core.Node.NodeFunction;
 import modchart.backend.graphics.*;
 import modchart.backend.graphics.renderers.*;
+import modchart.backend.standalone.Adapter;
 import modchart.backend.util.ModchartUtil;
 import modchart.engine.events.types.*;
 import openfl.display.BitmapData;
@@ -33,6 +34,9 @@ final class PlayField extends FlxSprite {
 
 	public function new() {
 		super();
+
+		this.cameras = Adapter.instance.getArrowCamera();
+		this.scrollFactor.set(0, 0);
 
 		moves = false;
 
@@ -276,6 +280,7 @@ final class PlayField extends FlxSprite {
 						if (!getVisibility(hold))
 							continue;
 
+						applyPlayFieldCameras(hold);
 						holdRenderer.prepare(hold);
 						queue({
 							callback: holdRenderer.shift,
@@ -295,6 +300,7 @@ final class PlayField extends FlxSprite {
 					if (!getVisibility(receptor))
 						continue;
 
+					applyPlayFieldCameras(receptor);
 					receptorRenderer.prepare(receptor);
 					if (Config.RENDER_ARROW_PATHS)
 						pathRenderer.prepare(receptor);
@@ -311,6 +317,7 @@ final class PlayField extends FlxSprite {
 					if (!getVisibility(hold))
 						continue;
 
+					applyPlayFieldCameras(hold);
 					holdRenderer.prepare(hold);
 					queue({
 						callback: holdRenderer.shift,
@@ -325,6 +332,7 @@ final class PlayField extends FlxSprite {
 					if (!getVisibility(arrow))
 						continue;
 
+					applyPlayFieldCameras(arrow);
 					arrowRenderer.prepare(arrow);
 					queue({
 						callback: arrowRenderer.shift,
@@ -339,6 +347,7 @@ final class PlayField extends FlxSprite {
 					if (!getVisibility(splash))
 						continue;
 				
+					applyPlayFieldCameras(splash);
 					attachmentRenderer.prepare(splash);
 					queue({
 						callback: attachmentRenderer.shift,
@@ -353,5 +362,11 @@ final class PlayField extends FlxSprite {
 
 		if (Config.RENDER_ARROW_PATHS)
 			pathRenderer.shift();
+	}
+
+	inline function applyPlayFieldCameras(sprite:FlxSprite) {
+		if (this.cameras != null){
+			sprite.cameras = this.cameras;
+		}
 	}
 }
