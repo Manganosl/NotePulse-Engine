@@ -4,6 +4,7 @@ import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.math.FlxPoint;
 import flixel.tweens.FlxEase.EaseFunction;
 import modchart.backend.core.Node.NodeFunction;
 import modchart.backend.graphics.*;
@@ -32,11 +33,16 @@ final class PlayField extends FlxSprite {
 
 	public var projection:ModchartPerspective;
 
+	private var currentCameras:Array<FlxCamera>;
+	private var currentScrollFactor:FlxPoint;
+
 	public function new() {
 		super();
 
 		this.cameras = Adapter.instance.getArrowCamera();
 		this.scrollFactor.set(0, 0);
+
+		currentScrollFactor = new FlxPoint(scrollFactor.x, scrollFactor.y);
 
 		moves = false;
 
@@ -359,16 +365,32 @@ final class PlayField extends FlxSprite {
 			pathRenderer.shift();
 	}
 
-	private var currentCameras:Array<FlxCamera>;
 	override function set_cameras(value:Array<FlxCamera>):Array<FlxCamera>{
 		currentCameras = value;
 		return super.set_cameras(value);
 	}
+	
+	override function set_scrollFactor(point:FlxPoint){
+		currentScrollFactor.x = point.x;
+		currentScrollFactor.y = point.y;
+		return super.set_scrollFactor(point);
+	}
+
 	inline function applyPlayFieldCameras(sprite:FlxSprite) {
-		if (this.cameras != null){
+		if(this.cameras != null){
 			if(sprite.extraData["modchartCameras"] != currentCameras){
 				sprite.cameras = this.cameras;
 				sprite.extraData["modchartCameras"] = currentCameras;
+			}
+		}
+		if(this.scrollFactor != null){
+			if(sprite.extraData["modchartScrollFactor.x"] != currentScrollFactor.x){
+				sprite.scrollFactor.x = this.scrollFactor.x;
+				sprite.extraData["modchartScrollFactor.x"] = currentScrollFactor.x;
+			}
+			if(sprite.extraData["modchartScrollFactor.y"] != currentScrollFactor.y){
+				sprite.scrollFactor.y = this.scrollFactor.y;
+				sprite.extraData["modchartScrollFactor.y"] = currentScrollFactor.y;
 			}
 		}
 	}

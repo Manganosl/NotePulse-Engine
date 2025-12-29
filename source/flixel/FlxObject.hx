@@ -630,7 +630,7 @@ class FlxObject extends FlxBasic
 	 * `1` = same movement speed as the foreground. Default value is `(1,1)`,
 	 * except for UI elements like `FlxButton` where it's `(0,0)`.
 	 */
-	public var scrollFactor(default, null):FlxPoint;
+	public var scrollFactor(default, set):FlxPoint;
 
 	/**
 	 * Controls how much this object is affected by camera zooms. `0` = no movement,
@@ -1481,6 +1481,11 @@ class FlxObject extends FlxBasic
 	{
 		collisionXDrag = value ? IMMOVABLE : NEVER;
 		return value;
+	}
+
+	@:noCompletion
+	function set_scrollFactor(point:FlxPoint){
+		return point;
 	}
 
 	#if FLX_DEBUG
