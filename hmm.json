@@ -80,6 +80,13 @@
       "dir": null,
       "ref": "master",
       "url": "https://github.com/superpowers04/linc_luajit"
+    },
+    {
+      "name": "hscript-improved-dev",
+      "type": "git",
+      "dir": null,
+      "ref": "codename-dev",
+      "url": "https://github.com/CodenameCrew/hscript-improved"
     }
   ]
 }
