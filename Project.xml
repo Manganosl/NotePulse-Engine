@@ -93,7 +93,7 @@
 	<haxelib name="tjson" />
 	<haxelib name="nape-haxe4" />
 	<haxelib name="json2object" />
-	<haxelib name="hscript-improved-dev" if="HSCRIPT_ALLOWED"/>
+	<haxelib name="hscript-improved" if="HSCRIPT_ALLOWED"/>
 	<define name="hscriptPos" />
 	<define name="PRETTY_TRACE" />
 	<define name="CUSTOM_CLASSES"/>

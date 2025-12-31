@@ -65,7 +65,7 @@
       "type": "git",
       "dir": null,
       "ref": "main",
-      "url": "https://github.com/CodenameCrew/hxdiscord_rpc"
+      "url": "https://github.com/CodenameCrew/cne-hxdiscord_rpc"
     },
     {
       "name": "flxanimate",
@@ -82,7 +82,7 @@
       "url": "https://github.com/superpowers04/linc_luajit"
     },
     {
-      "name": "hscript-improved-dev",
+      "name": "hscript-improved",
       "type": "git",
       "dir": null,
       "ref": "codename-dev",
