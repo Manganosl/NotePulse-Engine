@@ -60,6 +60,7 @@ class ModchartRenderer<T:FlxBasic> extends FlxBasic {
 		});
 	}
 
+	// Need this to calculate the camera bounds to the objects render correctly
 	@:privateAccess inline function getZoomAwareBounds(camera:FlxCamera):FlxRect {
 		var zoom = camera.zoom;
 
@@ -68,6 +69,4 @@ class ModchartRenderer<T:FlxBasic> extends FlxBasic {
 
 		return FlxRect.get(camera.scroll.x - viewWidth * 0.5, camera.scroll.y - viewHeight * 0.5, viewWidth, viewHeight);
 	}
-
-	// public function render(times:Null<Int>):Void {}
 }

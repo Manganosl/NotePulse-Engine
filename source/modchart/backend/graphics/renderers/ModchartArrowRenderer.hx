@@ -230,7 +230,7 @@ final class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
 			return;
 
 		final item = instruction.item;
-		final cameras = item._cameras != null ? item._cameras : Adapter.instance.getArrowCamera();
+		final cameras = ModchartUtil.resolveCameras(item);
 
 		@:privateAccess
 		for (camera in cameras) {
