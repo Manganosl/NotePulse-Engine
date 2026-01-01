@@ -55,6 +55,8 @@ import flixel.tweens.FlxEase;
 
 import shaders.CircleShader;
 
+import modchart.Manager;
+
 /**
  * This is where all the Gameplay stuff happens and is managed
  *
@@ -110,7 +112,7 @@ class PlayState extends MusicBeatState
 	public var modchartTexts:Map<String, FlxText> = new Map<String, FlxText>();
 	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
 	public var modchartNdlls:Map<String, Dynamic> = new Map<String, Dynamic>();
-	public var modchartInstances:Map<String, modchart.Manager> = new Map<String, modchart.Manager>(); 
+	public var modchartInstances:Map<String, Manager> = new Map<String, Manager>(); 
 	public var modchartCharacters:Map<String, Character> = new Map<String, Character>();
 	#end
 
@@ -336,7 +338,7 @@ class PlayState extends MusicBeatState
 	public var startCallback:Void->Void = null;
 	public var endCallback:Void->Void = null;
 
-	public var manager:modchart.Manager;
+	public var manager:Manager;
 
 	//// Sets ////
 
@@ -1234,6 +1236,17 @@ class PlayState extends MusicBeatState
 		// NEW SHIT
 		noteData = songData.notes;
 
+		if(SONG.nativeModchart){
+			manager = new Manager();
+			add(manager);
+
+			var fields = 1;
+			while(fields != SONG.playfields){
+				fields++;
+				manager.addPlayfield();
+			}
+		}
+
 		var file:String = Paths.json(songName + '/events');
 		#if MODS_ALLOWED
 		if (FileSystem.exists(Paths.modsJson(songName + '/events')) || FileSystem.exists(file))
@@ -1738,17 +1751,6 @@ class PlayState extends MusicBeatState
 				Paths.sound(event.value1); //Precache sound
 
 			case "Modchart Event":
-				if(SONG.nativeModchart && manager == null){
-					manager = new modchart.Manager();
-					add(manager);
-
-					var fields = 1;
-					while(fields != SONG.playfields){
-						fields += 1;
-						manager.addPlayfield();
-					}
-				}
-				if(manager == null) return;
 				var info = event.value1.split(',');
 				if(info[0] == "Add Modifier")
 					manager.addModifier(info[1], Std.parseInt(info[6]));
