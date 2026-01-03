@@ -98,7 +98,7 @@ class TitleState extends MusicBeatState
 			MusicBeatState.switchState(new states.init.ScaleSimulationState());
 
 		#if CHECK_FOR_UPDATES
-		if(ClientPrefs.data.checkForUpdates && !closedState) {
+		if(ClientPrefs.data.checkForUpdates && !closedState && Main.GIT_COMMIT == null) {
 			Log.hxTrace('checking for update');
 			var http = new haxe.Http("https://raw.githubusercontent.com/Manganosl/NotePulse-Engine/refs/heads/main/CurrentVersion.md");
 

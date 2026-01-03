@@ -30,11 +30,13 @@ class MiscSettingsSubState extends BaseOptionsMenu
 		#end
 
 		#if CHECK_FOR_UPDATES
-		var option:Option = new Option('Check for Updates',
-			'On Release builds, turn this on to check for NotePulse updates when you start the game.',
-			'checkForUpdates',
-			'bool');
-		addOption(option);
+		if(Main.GIT_COMMIT == null){
+			var option:Option = new Option('Check for Updates',
+				'On Release builds, turn this on to check for NotePulse updates when you start the game.',
+				'checkForUpdates',
+				'bool');
+			addOption(option);
+		}
 		#end
 
 		#if !mobile

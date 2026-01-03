@@ -12,6 +12,7 @@ import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
 import flixel.FlxState;
 import haxe.io.Path;
+import haxe.macro.Compiler;
 import openfl.Assets;
 import openfl.Lib;
 import openfl.display.Sprite;
@@ -49,7 +50,9 @@ import backend.ALSoftConfig; // Just to make sure DCE doesn't remove this, since
 
 class Main extends Sprite
 {
-	public static var npeVersion:String = '0.7.0';
+	public static var GIT_COMMIT:String = Compiler.getDefine("GIT_COMMIT") != null ?
+	Compiler.getDefine("GIT_COMMIT").split("=")[0] : null;
+	public static var npeVersion:String = "0.7.1";
 	public static var psychEngineVersion:String = '0.7.3';
 
 	var game = {

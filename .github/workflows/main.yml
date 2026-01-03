@@ -44,7 +44,7 @@ jobs:
       - name: Compile
         shell: cmd
         run: |
-          haxelib run lime build windows --app-version="4.0.0-${{ github.run_id }}"
+          haxelib run lime build windows -D GIT_COMMIT=${{ github.ref }} --app-version="4.0.0-${{ github.run_id }}"
 
       - name: Publish Artifact
         uses: actions/upload-artifact@v4

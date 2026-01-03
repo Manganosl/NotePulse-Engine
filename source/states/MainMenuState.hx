@@ -117,9 +117,10 @@ class MainMenuState extends MusicBeatState
 			add(titleText);
 	
 			if (DiscordClient.user != null)
-				descText = new FlxText(0, 50, 1180, "Connected to discord - " + DiscordClient.user.globalName + " (" + DiscordClient.user.username + ")\nNotePulse Engine v" + Main.npeVersion + "\nPsych Engine v" + Main.psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
+				descText = new FlxText(0, 50, 1180, "Connected to discord - " + DiscordClient.user.globalName + " (" + DiscordClient.user.username + 
+				")\nNotePulse Engine " + (Main.GIT_COMMIT != null ? "- Commit " + Main.GIT_COMMIT : "v" + Main.npeVersion) + "\nPsych Engine v" + Main.psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
 			else
-				descText = new FlxText(0, 50, 1180, "NotePulse Engine v" + Main.npeVersion + "\nPsych Engine v" + Main.psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
+				descText = new FlxText(0, 50, 1180, "NotePulse Engine " + (Main.GIT_COMMIT != null ? "Commit " + Main.GIT_COMMIT : "v" + Main.npeVersion) + "\nPsych Engine v" + Main.psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
 			descText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			descText.scrollFactor.set();
 			add(descText);
