@@ -36,13 +36,11 @@ jobs:
         run: |
           echo oy9:showMacroty8:loopCosti25y10:includeAllfg>>%USERPROFILE%\settings.cocoa
 
-      - name: Create Version Tag
+      - name: Short commit SHA
         shell: cmd
+        id: vars
         run: |
-          echo ${{ github.run_id }} > VERSION
-
-      - name: Set Short SHA
-        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+          echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Compile
         shell: cmd
