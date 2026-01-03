@@ -41,10 +41,13 @@ jobs:
         run: |
           echo ${{ github.run_id }} > VERSION
 
+      - name: Set Short SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
       - name: Compile
         shell: cmd
         run: |
-          haxelib run lime build windows -D GIT_COMMIT=${{ github.sha }} --app-version="4.0.0-${{ github.run_id }}"
+          haxelib run lime build windows -D GIT_COMMIT=${{ env.SHORT_SHA }} --app-version="4.0.0-${{ github.run_id }}"
 
       - name: Publish Artifact
         uses: actions/upload-artifact@v4
