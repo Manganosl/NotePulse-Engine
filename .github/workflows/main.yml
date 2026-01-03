@@ -36,16 +36,14 @@ jobs:
         run: |
           echo oy9:showMacroty8:loopCosti25y10:includeAllfg>>%USERPROFILE%\settings.cocoa
 
-      - name: Short commit SHA
-        shell: cmd
-        id: vars
-        run: |
-          echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+      - name: Get Short SHA
+        uses: benjlevesque/short-sha@v3.0
+        id: short-sha
 
       - name: Compile
         shell: cmd
         run: |
-          haxelib run lime build windows -D GIT_COMMIT=${{ env.SHORT_SHA }} --app-version="4.0.0-${{ github.run_id }}"
+          haxelib run lime build windows -D GIT_COMMIT=${{ steps.short-sha.outputs.sha }} --app-version="4.0.0-${{ github.run_id }}"
 
       - name: Publish Artifact
         uses: actions/upload-artifact@v4
