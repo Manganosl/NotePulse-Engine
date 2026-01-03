@@ -272,7 +272,7 @@ class EditorPlayState extends MusicBeatSubstate
 				var strum:StrumNote = strumGroup.members[daNote.noteData];
 				daNote.followStrumNote(strum, fakeCrochet, songSpeed / playbackRate);
 
-				if(!daNote.strum.playable && daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
+				if(daNote.strum.cpuControlled && daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
 					opponentNoteHit(daNote);
 
 				if(daNote.isSustainNote && strum.sustainReduce) daNote.clipToStrumNote(strum);
@@ -280,7 +280,7 @@ class EditorPlayState extends MusicBeatSubstate
 				// Kill extremely late notes and cause misses
 				if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
 				{
-					if (daNote.strum.playable && !daNote.ignoreNote && (daNote.tooLate || !daNote.wasGoodHit))
+					if (!daNote.strum.cpuControlled && !daNote.ignoreNote && (daNote.tooLate || !daNote.wasGoodHit))
 						noteMiss(daNote);
 
 					daNote.active = daNote.visible = false;
@@ -555,10 +555,10 @@ class EditorPlayState extends MusicBeatSubstate
 			babyArrow.alpha = targetAlpha;
 
 			if (player == 1){
-				babyArrow.playable = (this.player == player ? true : false);
+				babyArrow.cpuControlled = (this.player == player ? false : true);
 				playerStrums.add(babyArrow);
 			} else if (player == 2){
-				babyArrow.playable = (this.player == player ? true : false);
+				babyArrow.cpuControlled = (this.player == player ? false : true);
 				gfStrums.add(babyArrow);
 			} else {
 				if(ClientPrefs.data.middleScroll)
@@ -568,7 +568,7 @@ class EditorPlayState extends MusicBeatSubstate
 						babyArrow.x += FlxG.width / 2 + 25;
 					}
 				}
-				babyArrow.playable = (this.player == player ? true : false);
+				babyArrow.cpuControlled = (this.player == player ? false : true);
 				opponentStrums.add(babyArrow);
 			}
 
@@ -818,7 +818,7 @@ class EditorPlayState extends MusicBeatSubstate
 
 		// obtain notes that the player can hit
 		var plrInputNotes:Array<Note> = notes.members.filter(function(n:Note)
-			return n != null && n.canBeHit && n.strum.playable && !n.tooLate &&
+			return n != null && n.canBeHit && !n.strum.cpuControlled && !n.tooLate &&
 			!n.wasGoodHit && !n.blockHit && !n.isSustainNote && n.noteData == key);
 
 		plrInputNotes.sort(PlayState.sortHitNotes);
@@ -852,9 +852,9 @@ class EditorPlayState extends MusicBeatSubstate
 		Conductor.songPosition = lastTime;
 
 		var sprs:Array<StrumNote> = [];
-		if(playerStrums.members[key].playable) sprs.push(playerStrums.members[key]);
-		if(opponentStrums.members[key].playable) sprs.push(opponentStrums.members[key]);
-		if(PlayState.SONG.gfStrums) if(gfStrums.members[key].playable) sprs.push(gfStrums.members[key]);
+		if(!playerStrums.members[key].cpuControlled) sprs.push(playerStrums.members[key]);
+		if(!opponentStrums.members[key].cpuControlled) sprs.push(opponentStrums.members[key]);
+		if(PlayState.SONG.gfStrums) if(!gfStrums.members[key].cpuControlled) sprs.push(gfStrums.members[key]);
 		for(spr in sprs){		
 			if(spr != null && spr.animation.curAnim.name != 'confirm')
 			{
@@ -876,9 +876,9 @@ class EditorPlayState extends MusicBeatSubstate
 	private function keyReleased(key:Int)
 	{
 		var sprs:Array<StrumNote> = [];
-		if(playerStrums.members[key].playable) sprs.push(playerStrums.members[key]);
-		if(opponentStrums.members[key].playable) sprs.push(opponentStrums.members[key]);
-		if(PlayState.SONG.gfStrums) if(gfStrums.members[key].playable) sprs.push(gfStrums.members[key]);
+		if(!playerStrums.members[key].cpuControlled) sprs.push(playerStrums.members[key]);
+		if(!opponentStrums.members[key].cpuControlled) sprs.push(opponentStrums.members[key]);
+		if(PlayState.SONG.gfStrums) if(!gfStrums.members[key].cpuControlled) sprs.push(gfStrums.members[key]);
 		for(spr in sprs){
 			if(spr != null)
 			{
@@ -914,7 +914,7 @@ class EditorPlayState extends MusicBeatSubstate
 		// rewritten inputs???
 		if (notes.length > 0) {
 			for (n in notes) { // I can't do a filter here, that's kinda awesome
-				var canHit:Bool = (n != null && n.canBeHit && n.strum.playable &&
+				var canHit:Bool = (n != null && n.canBeHit && !n.strum.cpuControlled &&
 					!n.tooLate && !n.wasGoodHit && !n.blockHit);
 
 				if (guitarHeroSustains)
@@ -989,7 +989,7 @@ class EditorPlayState extends MusicBeatSubstate
 	function noteMiss(daNote:Note):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
 		//Dupe note remove
 		notes.forEachAlive(function(note:Note) {
-			if (daNote != note && daNote.strum.playable && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1)
+			if (daNote != note && !daNote.strum.cpuControlled && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1)
 				invalidateNote(daNote);
 		});
 

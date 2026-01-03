@@ -15,14 +15,13 @@ class StrumNote extends FlxSkewedSprite
 	public var noteData:Int = 0;
 	public var direction:Float = 90;
 	public var downScroll:Bool = false;
-	public var cpuControlled:Bool = false;
+	public var cpuControlled:Bool = true;
 	public var sustainReduce:Bool = true;
 	public var trackedScale:Float = 0.7;
 	private var player:Int;
 	private var initialWidth:Float = 0;
 	public var sustainSplash:SustainSplash;
 	public var noteSpeed:Float = 1;
-	public var playable:Bool = false;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {

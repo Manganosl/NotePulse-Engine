@@ -420,7 +420,7 @@ class Note extends FlxSkewedSprite
 	{
 		super.update(elapsed);
 		if(strum == null) return;
-		if (strum.playable)
+		if (!strum.cpuControlled)
 		{
 			canBeHit = (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult) &&
 						strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult));
