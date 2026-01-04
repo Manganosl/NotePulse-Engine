@@ -346,6 +346,8 @@ class FreeplayState extends MusicBeatState
 				FlxG.sound.music.volume = 0;
 				instPlaying = -1;
 
+				titleText.text = "Freeplay";
+
 				player.playingMusic = false;
 				player.switchPlayMusic();
 
@@ -378,6 +380,8 @@ class FreeplayState extends MusicBeatState
 			{
 				destroyFreeplayVocals();
 				FlxG.sound.music.volume = 0;
+
+				titleText.text = "Freeplay > Music Player";
 
 				Mods.currentModDirectory = songs[curSelected].folder;
 				var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);

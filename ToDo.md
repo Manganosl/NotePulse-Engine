@@ -14,4 +14,7 @@
 - [X] Fix modchartInstance.addPlayfield() causing a black screen
 - [X] Replace SScript => HScript Improved
   - [X] Make sure (almost) all old scripts work after the change
-- [ ] Find more things to add
+- [ ] Maybe make a real modchart editor?
+- [X] Fix arrows not rendering in camGame when using FunkinModchart
+- [ ] Fix sustains not rendering when rotate modifiers are added and a receptor is not in camHUD
+- [ ] Optimize FunkinModchart (Even more)
