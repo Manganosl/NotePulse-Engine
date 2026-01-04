@@ -8,6 +8,7 @@ import objects.NoteSplash;
 import objects.StrumNote as Strum;
 import states.PlayState;
 import states.editors.content.EditorPlayState;
+import states.editors.ModchartEditor;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -31,9 +32,12 @@ class NotePulse implements IAdapter {
 
 	public function getCurrentBeat():Float {
 		@:privateAccess
-		if(Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState') 
+		if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState')
 			return PlayState.instance.curDecBeat;
-		else return EditorPlayState.instance.curDecBeat;
+		else if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.editors.ModchartEditor')
+			return ModchartEditor.instance.curDecBeat;
+		else
+			return EditorPlayState.instance.curDecBeat;
 	}
 
 	public function getCurrentCrochet():Float {
@@ -52,7 +56,6 @@ class NotePulse implements IAdapter {
 	public function isHoldEnd(arrow:FlxSprite) {
 		if (arrow is Note) {
 			final castedNote = cast(arrow, Note);
-
 			if (castedNote.nextNote != null)
 				return !castedNote.nextNote.isSustainNote;
 		}
@@ -70,7 +73,6 @@ class NotePulse implements IAdapter {
 			return cast(arrow, NoteSplash).babyArrow.noteData;
 		if (arrow is SustainSplash) @:privateAccess
 			return cast(arrow, SustainSplash).strum.noteData;
-
 		return 0;
 	}
 
@@ -89,17 +91,16 @@ class NotePulse implements IAdapter {
 	}
 
 	public function getKeyCount(?player:Int = 0):Int {
-		return PlayState.SONG.mania+1;
+		return PlayState.SONG.mania + 1;
 	}
 
 	public function getPlayerCount():Int {
-		return if(PlayState.SONG.gfStrums) 3 else 2;
+		return if (PlayState.SONG.gfStrums) 3 else 2;
 	}
 
 	public function getTimeFromArrow(arrow:FlxSprite) {
 		if (arrow is Note)
 			return cast(arrow, Note).strumTime;
-
 		return 0;
 	}
 
@@ -121,9 +122,12 @@ class NotePulse implements IAdapter {
 
 	inline function getStrumFromInfo(lane:Int, player:Int) {
 		var isPlayState:Bool = Std.is(FlxG.state, PlayState);
+		var isModchartEditor:Bool = Std.is(FlxG.state, ModchartEditor);
 
 		var group = if (isPlayState) {
 			if (player == 0) PlayState.instance.opponentStrums else PlayState.instance.playerStrums;
+		} else if (isModchartEditor) {
+			if (player == 0) ModchartEditor.instance.opponentStrums else ModchartEditor.instance.playerStrums;
 		} else {
 			if (player == 0) EditorPlayState.instance.opponentStrums else EditorPlayState.instance.playerStrums;
 		};
@@ -136,7 +140,6 @@ class NotePulse implements IAdapter {
 				break;
 			}
 		}
-
 		return found;
 	}
 
@@ -145,114 +148,91 @@ class NotePulse implements IAdapter {
 	}
 
 	public function getDefaultReceptorY(lane:Int, player:Int):Float {
-		return getDownscroll() ? FlxG.height - getStrumFromInfo(lane, player).y - Note.swagWidth : getStrumFromInfo(lane, player).y;
+		return getDownscroll()
+			? FlxG.height - getStrumFromInfo(lane, player).y - Note.swagWidth
+			: getStrumFromInfo(lane, player).y;
 	}
 
-	public function getArrowCamera():Array<FlxCamera>{
-        if(Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState') 
+	public function getArrowCamera():Array<FlxCamera> {
+		if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState')
 			return [PlayState.instance.camHUD];
-		else return [EditorPlayState.instance.camHUD];
+		else if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.editors.ModchartEditor')
+			return [ModchartEditor.instance.camHUD];
+		else
+			return [EditorPlayState.instance.camHUD];
 	}
 
 	public function getCurrentScrollSpeed():Float {
-		if(Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState') 
+		if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState')
 			return PlayState.instance.songSpeed * .45;
-		else return EditorPlayState.instance.songSpeed * .45;
+		else if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.editors.ModchartEditor')
+			return ModchartEditor.instance.songSpeed * .45;
+		else
+			return EditorPlayState.instance.songSpeed * .45;
 	}
 
 	public function getArrowItems() {
 		var pspr:Array<Array<Array<FlxSprite>>> = [[[], [], [], []], [[], [], [], []], [[], [], [], []]];
-		if(Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState') {
+
+		if (Std.is(FlxG.state, PlayState)) {
 			@:privateAccess
 			PlayState.instance.strumLineNotes.forEachAlive(strumNote -> {
-				if (pspr[strumNote.player] == null)
-					pspr[strumNote.player] = [];
-
 				pspr[strumNote.player][0].push(strumNote);
 			});
 
-			if(ClientPrefs.data.ratingCam == "Bellow Note"){
+			if (ClientPrefs.data.ratingCam == "Bellow Note") {
 				PlayState.instance.comboGroup.forEachAlive(comboSprite -> {
-				@:privateAccess
-					if (comboSprite != null) {
-						if (comboSprite.extraData["linkStrum"] != null) {
-							final player = comboSprite.extraData["linkStrum"].player;
-							if (pspr[player] == null)
-								pspr[player] = [];
-
-							pspr[player][0].push(comboSprite);
-						}
+					@:privateAccess
+					if (comboSprite != null && comboSprite.extraData["linkStrum"] != null) {
+						final player = comboSprite.extraData["linkStrum"].player;
+						pspr[player][0].push(comboSprite);
 					}
 				});
-			};
+			}
 
 			PlayState.instance.notes.forEachAlive(strumNote -> {
 				final player = Adapter.instance.getPlayerFromArrow(strumNote);
-				if (pspr[player] == null)
-					pspr[player] = [];
-
 				pspr[player][strumNote.isSustainNote ? 2 : 1].push(strumNote);
 			});
 
 			PlayState.instance.grpNoteSplashes.forEachAlive(splash -> {
 				@:privateAccess
-				if (splash != null) {
-					if (splash.babyArrow != null) {
-						final player = splash.babyArrow.player;
-						if (pspr[player] == null)
-							pspr[player] = [];
-
-						pspr[player][3].push(splash);
-					}
+				if (splash != null && splash.babyArrow != null) {
+					pspr[splash.babyArrow.player][3].push(splash);
 				}
 			});
 
 			PlayState.instance.grpSustainSplashes.forEachAlive(splash -> {
 				@:privateAccess
-				if (splash != null) {
-					if (splash.strum != null && splash.shouldVisible) {
-						final player = splash.strum.player;
-						if (pspr[player] == null)
-							pspr[player] = [];
-
-						pspr[player][3].push(splash);
-					}
-					if (splash.strum != null && !splash.shouldVisible) {
-						final player = splash.strum.player;
-						if (pspr[player] == null)
-							pspr[player] = [];
-
-						pspr[player][3].remove(splash);
-					}
+				if (splash != null && splash.strum != null && splash.shouldVisible) {
+					pspr[splash.strum.player][3].push(splash);
 				}
+			});
+		} else if (Std.is(FlxG.state, ModchartEditor)) {
+			@:privateAccess
+			ModchartEditor.instance.strumLineNotes.forEachAlive(strumNote -> {
+				pspr[strumNote.player][0].push(strumNote);
+			});
+
+			ModchartEditor.instance.notes.forEachAlive(strumNote -> {
+				final player = Adapter.instance.getPlayerFromArrow(strumNote);
+				pspr[player][strumNote.isSustainNote ? 2 : 1].push(strumNote);
 			});
 		} else {
 			@:privateAccess
 			EditorPlayState.instance.strumLineNotes.forEachAlive(strumNote -> {
-				if (pspr[strumNote.player] == null)
-					pspr[strumNote.player] = [];
-
 				pspr[strumNote.player][0].push(strumNote);
 			});
 
 			EditorPlayState.instance.notes.forEachAlive(strumNote -> {
 				final player = Adapter.instance.getPlayerFromArrow(strumNote);
-				if (pspr[player] == null)
-					pspr[player] = [];
-
 				pspr[player][strumNote.isSustainNote ? 2 : 1].push(strumNote);
 			});
 
 			EditorPlayState.instance.grpNoteSplashes.forEachAlive(splash -> {
 				@:privateAccess
-				if (splash != null) {
-					if (splash.babyArrow != null) {
-						final player = splash.babyArrow.player;
-						if (pspr[player] == null)
-							pspr[player] = [];
-
-						pspr[player][3].push(splash);
-					}
+				if (splash != null && splash.babyArrow != null) {
+					pspr[splash.babyArrow.player][3].push(splash);
 				}
 			});
 		}

@@ -27,6 +27,7 @@ import cutscenes.DialogueBoxPsych;
 import states.menus.StoryMenuState;
 import states.editors.ChartingState;
 import states.editors.CharacterEditorState;
+import states.editors.ModchartEditor;
 import states.scripted.ScriptedSubstate;
 
 import substates.PauseSubState;
@@ -884,6 +885,9 @@ class PlayState extends MusicBeatState
 				openChartEditor();
 			else if (controls.justPressed('debug_2') && ClientPrefs.data.devMode)
 				openCharacterEditor();
+			else if (FlxG.keys.justPressed.NINE && ClientPrefs.data.devMode)
+				openModchartEditor();
+
 		}
 
 		if (healthBar.bounds.max != null && health > healthBar.bounds.max)
@@ -2934,6 +2938,18 @@ class PlayState extends MusicBeatState
 			FlxG.sound.music.stop();
 		#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 		MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
+	}
+
+	function openModchartEditor()
+	{
+		FlxG.camera.followLerp = 0;
+		persistentUpdate = false;
+		paused = true;
+		cancelMusicFadeTween();
+		if(FlxG.sound.music != null)
+			FlxG.sound.music.stop();
+		#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
+		MusicBeatState.switchState(new ModchartEditor(1, 1));
 	}
 
 	//// Characters ////

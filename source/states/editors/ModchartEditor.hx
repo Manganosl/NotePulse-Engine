@@ -4,7 +4,6 @@ import backend.Section;
 import backend.Rating;
 
 import objects.Note;
-import objects.NoteSplash;
 import objects.StrumNote;
 
 import flixel.util.FlxSort;
@@ -44,7 +43,6 @@ class ModchartEditor extends MusicBeatState
 	public var opponentStrums:FlxTypedGroup<StrumNote>;
 	public var gfStrums:FlxTypedGroup<StrumNote>;
 	public var playerStrums:FlxTypedGroup<StrumNote>;
-	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 	
 	var combo:Int = 0;
 	var lastRating:FlxSprite;
@@ -135,12 +133,6 @@ class ModchartEditor extends MusicBeatState
 		/**** NOTES ****/
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
-		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
-		add(grpNoteSplashes);
-		
-		var splash:NoteSplash = new NoteSplash(100, 100);
-		grpNoteSplashes.add(splash);
-		splash.alpha = 0.000001; //cant make it invisible or it won't allow precaching
 
 		opponentStrums = new FlxTypedGroup<StrumNote>();
 		playerStrums = new FlxTypedGroup<StrumNote>();
@@ -169,8 +161,6 @@ class ModchartEditor extends MusicBeatState
 		
 		generateSong(PlayState.SONG.song);
 
-		if(ChartingState.arrowPathsEnabled) Config.RENDER_ARROW_PATHS = true;
-		else Config.RENDER_ARROW_PATHS = false;
 		if(PlayState.SONG.nativeModchart){ 
 			var fields = 1;
 			manager = new Manager();
@@ -245,9 +235,9 @@ class ModchartEditor extends MusicBeatState
 			Conductor.songPosition = startPos - timerToStart;
 			if(timerToStart < 0) startSong();
 		}
-		else Conductor.songPosition += elapsed * 1000 * playbackRate;
+		else if(!paused) Conductor.songPosition += elapsed * 1000 * playbackRate;
 
-		if (unspawnNotes[0] != null && !paused)
+		if (unspawnNotes[0] != null)
 		{
 			var time:Float = spawnTime * playbackRate;
 			if(songSpeed < 1) time /= songSpeed;
@@ -265,7 +255,7 @@ class ModchartEditor extends MusicBeatState
 		}
 
 		keysCheck();
-		if(!paused) notesFollow();
+		notesFollow();
 		
 		super.update(elapsed);
 	}
@@ -659,8 +649,6 @@ class ModchartEditor extends MusicBeatState
 	private function keysCheck():Void{}
 	function goodNoteHit(note:Note):Void{}
 	function noteMiss(daNote:Note):Void {}
-	function spawnNoteSplashOnNote(note:Note) {}
-	function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null, ?strum:StrumNote) {}
 	function RecalculateRating(badHit:Bool = false){}
 	function updateScore(miss:Bool = false){}
 	function fullComboUpdate(){}
@@ -740,7 +728,6 @@ class ModchartEditor extends MusicBeatState
 		}
 		else
 		{
-			seek(0);
 			FlxG.sound.music.play();
 			vocals.play();
 			opponentVocals.play();
@@ -802,10 +789,5 @@ class ModchartEditor extends MusicBeatState
 		}
 
 		unspawnNotes.sort(CoolUtil.sortByTime);
-		if(paused){
-			togglePause();
-			notesFollow();
-			togglePause();
-		}
 	}
 }
