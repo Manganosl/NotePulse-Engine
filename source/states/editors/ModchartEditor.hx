@@ -7,6 +7,7 @@ import objects.Note;
 import objects.StrumNote;
 
 import flixel.util.FlxSort;
+import openfl.geom.Rectangle;
 import openfl.events.KeyboardEvent;
 
 import haxe.Json;
@@ -14,10 +15,11 @@ import objects.Character;
 
 import modchart.Manager;
 import modchart.Config;
-import modchart.engine.events.EventManager;
-import modchart.engine.modifiers.ModifierGroup;
 
 import states.editors.ChartingState;
+
+import states.editors.content.MetaNote.*;
+import states.editors.content.*;
 
 import psychlua.LuaUtils;
 class ModchartEditor extends MusicBeatState
@@ -25,6 +27,7 @@ class ModchartEditor extends MusicBeatState
 	// Borrowed from original PlayState
 	public var bgCam:FlxCamera;
 	public var camHUD:FlxCamera;
+	public var gridCam:FlxCamera;
 
 	var finishTimer:FlxTimer = null;
 	var noteKillOffset:Float = 350;
@@ -88,6 +91,8 @@ class ModchartEditor extends MusicBeatState
 	var paused:Bool = false;
 	static inline var SEEK_STEP:Float = 1000;
 
+	var grid:ChartingGridSprite;
+
 	public function new(playbackRate:Float, player:Int)
 	{
 		super();
@@ -118,6 +123,10 @@ class ModchartEditor extends MusicBeatState
 		camHUD.bgColor = 0x00000000;
 		FlxG.cameras.add(camHUD, true);
 
+		gridCam = new FlxCamera();
+		gridCam.bgColor = 0x00000000;
+		FlxG.cameras.add(gridCam, false);
+
 		Conductor.safeZoneOffset = (ClientPrefs.data.safeFrames / 60) * 1000 * playbackRate;
 		Conductor.songPosition -= startOffset;
 		startOffset = Conductor.crochet;
@@ -138,6 +147,26 @@ class ModchartEditor extends MusicBeatState
 		bg.color = 0xFF101010;
 		bg.alpha = 0.9;
 		add(bg);
+
+        var box:FlxSprite = new FlxSprite();
+        box.makeGraphic(camHUD.width, camHUD.height, FlxColor.TRANSPARENT);
+        box.pixels.fillRect(new Rectangle(0, 0, camHUD.width, 5), FlxColor.RED);
+        box.pixels.fillRect(new Rectangle(0, camHUD.height - 5, camHUD.width, 5), FlxColor.RED);
+        box.pixels.fillRect(new Rectangle(0, 0, 5, camHUD.height), FlxColor.RED);
+        box.pixels.fillRect(new Rectangle(camHUD.width - 5, 0, 5, camHUD.height), FlxColor.RED);
+        box.dirty = true;
+
+        add(box);
+		camHUD.y -= 125;
+		camHUD.zoom = 0.4;
+
+		grid = new ChartingGridSprite(1, 0xFF5F5F5F, 0xFF4A4A4A);
+		grid.cameras = [gridCam];
+		grid.rows = 30;
+		grid.stripes = [];
+		grid.scrollFactor.set(0, 1);
+		grid.updateStripes();
+		grid.x = gridCam.width-grid.width;
 		
 		/**** NOTES ****/
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
@@ -174,7 +203,6 @@ class ModchartEditor extends MusicBeatState
 		
 		generateSong(PlayState.SONG.song);
 
-		if(PlayState.SONG.nativeModchart){ 
 			var fields = 1;
 			manager = new Manager();
 			add(manager);
@@ -212,16 +240,11 @@ class ModchartEditor extends MusicBeatState
 					}
 				}
 			}
-		}
-
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
 		DiscordClient.changePresence('Playtesting on Chart Editor', PlayState.SONG.song, null, true, songLength);
 		#end
-		RecalculateRating();
 		super.create();
 	}
 
@@ -269,8 +292,9 @@ class ModchartEditor extends MusicBeatState
 			}
 		}
 
-		keysCheck();
 		notesFollow();
+
+		grid.y = -((Conductor.songPosition / Conductor.stepCrochet) * ChartingState.GRID_SIZE);
 		
 		super.update(elapsed);
 	}
@@ -288,17 +312,13 @@ class ModchartEditor extends MusicBeatState
 				var strum:StrumNote = strumGroup.members[daNote.noteData];
 				daNote.followStrumNote(strum, fakeCrochet, songSpeed / playbackRate);
 
-				if(daNote.strum.cpuControlled && daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
+				if(daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
 					opponentNoteHit(daNote);
 
 				if(daNote.isSustainNote && strum.sustainReduce) daNote.clipToStrumNote(strum);
 
-				// Kill extremely late notes and cause misses
 				if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
 				{
-					if (!daNote.strum.cpuControlled && !daNote.ignoreNote && (daNote.tooLate || !daNote.wasGoodHit))
-						noteMiss(daNote);
-
 					daNote.active = daNote.visible = false;
 					invalidateNote(daNote);
 				}
@@ -345,16 +365,18 @@ class ModchartEditor extends MusicBeatState
 	{
 		if (PlayState.SONG.notes[curSection] != null)
 		{
-			if (PlayState.SONG.notes[curSection].changeBPM)
+			if (PlayState.SONG.notes[curSection].changeBPM){
 				Conductor.bpm = PlayState.SONG.notes[curSection].bpm;
+				var totalSteps:Int = Math.ceil(songLength / Conductor.stepCrochet);
+        		grid.rows = totalSteps;
+        		grid.updateStripes();
+			}
 		}
 		super.sectionHit();
 	}
 
 	override function destroy()
 	{
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		FlxG.mouse.visible = true;
 		Config.RENDER_ARROW_PATHS = false;
 		if(PlayState.SONG.nativeModchart){ 
@@ -386,6 +408,10 @@ class ModchartEditor extends MusicBeatState
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
+
+		var totalSteps:Int = Math.ceil(songLength / Conductor.stepCrochet);
+		grid.rows = totalSteps;
+		add(grid);
 	}
 
 	// Borrowed from PlayState
@@ -659,18 +685,6 @@ class ModchartEditor extends MusicBeatState
 		note.kill();
 		notes.remove(note, true);
 	}
-
-	private function cachePopUpScore(){}
-	private function popUpScore(note:Note = null):Void{}
-	private function onKeyPress(event:KeyboardEvent):Void{}
-	private function keyPressed(key:Int){}
-	private function onKeyRelease(event:KeyboardEvent):Void{}
-	private function keysCheck():Void{}
-	function goodNoteHit(note:Note):Void{}
-	function noteMiss(daNote:Note):Void {}
-	function RecalculateRating(badHit:Bool = false){}
-	function updateScore(miss:Bool = false){}
-	function fullComboUpdate(){}
 	
 	function opponentNoteHit(note:Note):Void
 	{
