@@ -49,7 +49,7 @@ final class Manager extends FlxBasic {
      * Apply a function to all playfields or a specific one.
      */
     @:noCompletion
-    private inline function __forEachPlayfield(func:PlayField->Void, player:Int = -1) {
+    public inline function __forEachPlayfield(func:PlayField->Void, player:Int = -1) {
         if (playfieldCount <= 1 || player != -1) {
             var pf = playfields[player != -1 ? player : 0];
             if (pf != null) func(pf);

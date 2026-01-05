@@ -7,7 +7,6 @@ import objects.Note;
 import objects.StrumNote;
 
 import flixel.util.FlxSort;
-import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
 
 import haxe.Json;
@@ -15,6 +14,8 @@ import objects.Character;
 
 import modchart.Manager;
 import modchart.Config;
+import modchart.engine.events.EventManager;
+import modchart.engine.modifiers.ModifierGroup;
 
 import states.editors.ChartingState;
 
@@ -22,7 +23,8 @@ import psychlua.LuaUtils;
 class ModchartEditor extends MusicBeatState
 {
 	// Borrowed from original PlayState
-	public var camHUD:FlxCamera = new FlxCamera();
+	public var bgCam:FlxCamera;
+	public var camHUD:FlxCamera;
 
 	var finishTimer:FlxTimer = null;
 	var noteKillOffset:Float = 350;
@@ -96,11 +98,6 @@ class ModchartEditor extends MusicBeatState
 		}
 
 		instance = this;
-		camHUD.bgColor = 0x00000000;
-		FlxG.cameras.add(camHUD, false);
-
-		camHUD.zoom = 0.4;
-		camHUD.y -= 100;
 
 		this.player = player;
 		
@@ -108,6 +105,18 @@ class ModchartEditor extends MusicBeatState
 		/* setting up some important data */
 		this.playbackRate = playbackRate;
 		this.startPos = Conductor.songPosition;
+	}
+
+	override public function create(){
+		initPsychCamera();
+
+		bgCam = new FlxCamera();
+		bgCam.bgColor = 0xFF000000;
+		FlxG.cameras.add(bgCam, false);
+
+		camHUD = new FlxCamera();
+		camHUD.bgColor = 0x00000000;
+		FlxG.cameras.add(camHUD, true);
 
 		Conductor.safeZoneOffset = (ClientPrefs.data.safeFrames / 60) * 1000 * playbackRate;
 		Conductor.songPosition -= startOffset;
@@ -118,7 +127,6 @@ class ModchartEditor extends MusicBeatState
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
-		cachePopUpScore();
 		guitarHeroSustains = ClientPrefs.data.guitarHeroSustains;
 		if(ClientPrefs.data.hitsoundVolume > 0) Paths.sound('hitsound');
 
@@ -126,17 +134,22 @@ class ModchartEditor extends MusicBeatState
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.scrollFactor.set();
+		bg.cameras = [bgCam];
 		bg.color = 0xFF101010;
 		bg.alpha = 0.9;
 		add(bg);
 		
 		/**** NOTES ****/
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
+		strumLineNotes.cameras = [camHUD];
 		add(strumLineNotes);
 
 		opponentStrums = new FlxTypedGroup<StrumNote>();
+		opponentStrums.cameras = [camHUD];
 		playerStrums = new FlxTypedGroup<StrumNote>();
+		playerStrums.cameras = [camHUD];
 		gfStrums = new FlxTypedGroup<StrumNote>();
+		gfStrums.cameras = [camHUD];
 		
 		generateStaticArrows(0);
 		generateStaticArrows(1);
@@ -209,6 +222,7 @@ class ModchartEditor extends MusicBeatState
 		DiscordClient.changePresence('Playtesting on Chart Editor', PlayState.SONG.song, null, true, songLength);
 		#end
 		RecalculateRating();
+		super.create();
 	}
 
 	override function update(elapsed:Float)
@@ -246,6 +260,7 @@ class ModchartEditor extends MusicBeatState
 			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
 			{
 				var dunceNote:Note = unspawnNotes[0];
+				dunceNote.cameras = [camHUD];
 				notes.insert(0, dunceNote);
 				dunceNote.spawned = true;
 
@@ -443,6 +458,7 @@ class ModchartEditor extends MusicBeatState
 		FlxG.sound.music.volume = 0;
 
 		notes = new FlxTypedGroup<Note>();
+		notes.cameras = [camHUD];
 		add(notes);
 
 		var noteData:Array<SwagSection>;
@@ -471,6 +487,7 @@ class ModchartEditor extends MusicBeatState
 					oldNote = null;
 
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, this);
+				swagNote.cameras = [camHUD];
 				swagNote.mustPress = gottaHitNote;
 				swagNote.sustainLength = songNotes[2];
 				//swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
@@ -497,6 +514,7 @@ class ModchartEditor extends MusicBeatState
 						//sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.scrollFactor.set();
+						sustainNote.cameras = [camHUD];
 						sustainNote.parent = swagNote;
 						sustainNote.gfStrum = swagNote.gfStrum;
 						if(sustainNote.gfStrum) sustainNote.mustPress = false;
@@ -566,6 +584,7 @@ class ModchartEditor extends MusicBeatState
 			}
 
 			var babyArrow:StrumNote = new StrumNote(strumLineX, strumLineY, i, player);
+			babyArrow.cameras = [camHUD];
 			babyArrow.downScroll = ClientPrefs.data.downScroll;
 			babyArrow.alpha = targetAlpha;
 
@@ -734,8 +753,7 @@ class ModchartEditor extends MusicBeatState
 		}
 	}
 
-	function seek(delta:Float)
-	{
+	function seek(delta:Float){
 		var newTime = Math.max(0, FlxG.sound.music.time + delta);
 
 		// Audio
@@ -789,5 +807,45 @@ class ModchartEditor extends MusicBeatState
 		}
 
 		unspawnNotes.sort(CoolUtil.sortByTime);
+		if(delta > 0) return;
+		remove(manager);
+		manager.destroy();
+		manager = new Manager();
+		add(manager);
+
+		var fields = 1;
+		while(fields != PlayState.SONG.playfields){
+			fields++;
+			manager.addPlayfield();
+		}
+
+		for (songEvent in PlayState.SONG.events){
+			for (i in 0...songEvent[1].length){
+				var evName:String = songEvent[1][i][0];
+				if(evName == "Modchart Event"){
+					var value1:String = songEvent[1][i][1];
+					if(value1 == null) continue;
+					var info = value1.split(',');
+					if(info[0] == "Add Modifier")
+						manager.addModifier(info[1], Std.parseInt(info[6]));
+					if(info[0] == "Ease"){
+						var ease = FlxEase.linear;
+						if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
+						var strumTime:Float = songEvent[0] + ClientPrefs.data.noteOffset;
+						manager.ease(info[1], strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+					}
+					if(info[0] == "Set")
+						manager.set(info[1], (songEvent[0] + ClientPrefs.data.noteOffset)/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+					if(info[0] == "EaseAdd"){
+						var ease = FlxEase.linear;
+						if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
+						var strumTime:Float = songEvent[0] + ClientPrefs.data.noteOffset;
+						manager.add(info[1], strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+					}
+					if(info[0] == "SetAdd")
+						manager.setAdd(info[1], (songEvent[0] + ClientPrefs.data.noteOffset)/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+				}
+			}
+		}
 	}
 }

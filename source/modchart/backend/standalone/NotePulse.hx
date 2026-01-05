@@ -130,7 +130,7 @@ class NotePulse implements IAdapter {
 			if (player == 0) ModchartEditor.instance.opponentStrums else ModchartEditor.instance.playerStrums;
 		} else {
 			if (player == 0) EditorPlayState.instance.opponentStrums else EditorPlayState.instance.playerStrums;
-		};
+		}
 
 		var found:Strum = null;
 		for (i in 0...group.members.length) {
