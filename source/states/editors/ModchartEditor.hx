@@ -18,7 +18,7 @@ import modchart.Config;
 
 import states.editors.ChartingState;
 
-import states.editors.content.MetaNote.*;
+import states.editors.content.MetaNote.EventMetaNote;
 import states.editors.content.*;
 
 import psychlua.LuaUtils;
@@ -28,6 +28,10 @@ class ModchartEditor extends MusicBeatState
 	public var bgCam:FlxCamera;
 	public var camHUD:FlxCamera;
 	public var gridCam:FlxCamera;
+
+	var prevGridBg:ChartingGridSprite;
+	var gridBg:ChartingGridSprite;
+	var nextGridBg:ChartingGridSprite;
 
 	var finishTimer:FlxTimer = null;
 	var noteKillOffset:Float = 350;
@@ -90,8 +94,6 @@ class ModchartEditor extends MusicBeatState
 
 	var paused:Bool = false;
 	static inline var SEEK_STEP:Float = 1000;
-
-	var grid:ChartingGridSprite;
 
 	public function new(playbackRate:Float, player:Int)
 	{
@@ -159,14 +161,6 @@ class ModchartEditor extends MusicBeatState
         add(box);
 		camHUD.y -= 125;
 		camHUD.zoom = 0.4;
-
-		grid = new ChartingGridSprite(1, 0xFF5F5F5F, 0xFF4A4A4A);
-		grid.cameras = [gridCam];
-		grid.rows = 30;
-		grid.stripes = [];
-		grid.scrollFactor.set(0, 1);
-		grid.updateStripes();
-		grid.x = gridCam.width-grid.width;
 		
 		/**** NOTES ****/
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
@@ -199,7 +193,7 @@ class ModchartEditor extends MusicBeatState
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
 		add(scoreTxt);
 
-		FlxG.mouse.visible = false;
+		FlxG.mouse.visible = true;
 		
 		generateSong(PlayState.SONG.song);
 
@@ -245,11 +239,436 @@ class ModchartEditor extends MusicBeatState
 		// Updating Discord Rich Presence (with Time Left)
 		DiscordClient.changePresence('Playtesting on Chart Editor', PlayState.SONG.song, null, true, songLength);
 		#end
+
+		gridBg = new ChartingGridSprite(1, 0xFF3F3F3F, 0xFF2F2F2F);
+		gridBg.screenCenter(X);
+		prevGridBg = new ChartingGridSprite(1, 0xFF1F1F1F, 0xFF111111);
+		nextGridBg = new ChartingGridSprite(1, 0xFF1F1F1F, 0xFF111111);
+		prevGridBg.x = nextGridBg.x = gridBg.x = gridCam.width-gridBg.width;
+		prevGridBg.stripes = nextGridBg.stripes = gridBg.stripes = [1];
+		gridBg.cameras = prevGridBg.cameras = nextGridBg.cameras = [gridCam];
+		add(prevGridBg);
+		add(nextGridBg);
+		add(gridBg);
+
+		vortexIndicator = new FlxSprite(gridBg.x - ChartingState.GRID_SIZE - (ChartingState.GRID_SIZE/2), FlxG.height/2).loadGraphic(Paths.image('editors/vortex_indicator'));
+		vortexIndicator.setGraphicSize(ChartingState.GRID_SIZE*2);
+		vortexIndicator.updateHitbox();
+		vortexIndicator.scrollFactor.set();
+		vortexIndicator.active = false;
+		vortexIndicator.cameras = [gridCam];
+		add(vortexIndicator);
+
+		_cacheSections();
+
 		super.create();
+
+		loadSection(0);
+	}
+	var vortexIndicator:FlxSprite;
+
+	function createEvent(event:Dynamic)
+	{
+		var daStrumTime:Float = event[0];
+		var swagEvent:EventMetaNote = new EventMetaNote(daStrumTime, event);
+		swagEvent.x = gridBg.x;
+		swagEvent.eventText.x = swagEvent.x - swagEvent.eventText.width - 10;
+		swagEvent.scrollFactor.x = 0;
+		swagEvent.active = false;
+
+		var secNum:Int = 0;
+		for (i in 1...cachedSectionTimes.length)
+		{
+			if(cachedSectionTimes[i] > daStrumTime) break;
+			secNum++;
+		}
+		positionNoteYOnTime(swagEvent, secNum);
+		return swagEvent;
+	}
+
+	function _cacheSections()
+	{
+		var time:Float = 0;
+		var row:Int = 0;
+		cachedSectionRow = [];
+		cachedSectionTimes = [];
+		cachedSectionCrochets = [];
+		cachedSectionBPMs = [];
+
+		if(PlayState.SONG == null)
+		{
+			cachedSectionRow.push(0);
+			cachedSectionTimes.push(0);
+			cachedSectionCrochets.push(0);
+			cachedSectionBPMs.push(0);
+			return;
+		}
+
+		var bpm:Float = PlayState.SONG.bpm;
+		var reachedLimit:Bool = false;
+		for (secNum => section in PlayState.SONG.notes)
+		{
+			var secs:Null<Float> = cast section.sectionBeats;
+			if(secs == null || Math.isNaN(secs) || secs <= 0) section.sectionBeats = 4;
+	
+			if(section.changeBPM) bpm = section.bpm;
+			var beat:Float = Conductor.calculateCrochet(bpm);
+			
+			cachedSectionRow.push(row);
+			cachedSectionTimes.push(time);
+			cachedSectionCrochets.push(beat);
+			cachedSectionBPMs.push(bpm);
+
+			var lastTime:Float = time;
+			var rowRound:Int = Math.round(4 * section.sectionBeats);
+			row += rowRound;
+			time += beat * (rowRound / 4);
+
+			for (note in section.sectionNotes)
+			{
+				if(secNum > 0 && note[0] < lastTime) note[0] = lastTime;
+				else if(secNum < PlayState.SONG.notes.length && note[0] >= time - 0.000001) note[0] = time - 0.000001;
+			}
+
+			if(FlxG.sound.music != null && time >= FlxG.sound.music.length)
+			{
+				var lastSectionNum:Int = PlayState.SONG.notes.length - 1;
+				if(secNum < lastSectionNum) //Delete extra sections
+				{
+					while(PlayState.SONG.notes.length - 1 > secNum)
+					{
+						PlayState.SONG.notes.pop();
+					}
+					reachedLimit = true;
+					break;
+				}
+				else if(secNum == lastSectionNum)
+				{
+					reachedLimit = true;
+				}
+			}
+		}
+
+		if(FlxG.sound.music != null && !reachedLimit) //Created sections to fill blank space
+		{
+			var lastSection = PlayState.SONG.notes[PlayState.SONG.notes.length-1];
+			var beat:Float = Conductor.calculateCrochet(bpm);
+			var sectionBeats:Float = lastSection != null ? lastSection.sectionBeats : 4;
+			var rowRound:Int = Math.round(4 * sectionBeats);
+			var timeAdd:Float = beat * (rowRound / 4);
+			var mustHitSec:Bool = lastSection != null ? lastSection.mustHitSection : true;
+			var changeBpmSec:Bool = lastSection != null ? lastSection.changeBPM : false;
+			var altAnimSec:Bool = lastSection != null ? lastSection.altAnim : false;
+			var gfSec:Bool = lastSection != null ? lastSection.gfSection : false;
+
+			while(!reachedLimit)
+			{
+				PlayState.SONG.notes.push({
+					sectionNotes: [],
+					sectionBeats: sectionBeats,
+					mustHitSection: mustHitSec,
+					bpm: bpm,
+					changeBPM: changeBpmSec,
+					altAnim: altAnimSec,
+					gfSection: gfSec,
+					focusGF: false
+				});
+
+				cachedSectionRow.push(row);
+				cachedSectionTimes.push(time);
+				cachedSectionCrochets.push(beat);
+				cachedSectionBPMs.push(bpm);
+
+				row += rowRound;
+				time += timeAdd;
+
+				if(time >= FlxG.sound.music.length)
+				{
+					reachedLimit = true;
+				}
+			}
+		}
+		cachedSectionRow.push(row);
+		cachedSectionTimes.push(time);
+	}
+
+	function adaptNotesToNewTimes(oldTimes:Array<Float>){
+		var gridLerp:Float = FlxMath.bound((scrollY + FlxG.height/2 - gridBg.y) / gridBg.height, 0.000001, 0.999999);
+		_cacheSections();
+		
+		for (event in events)
+		{
+			var secNum:Int = 0;
+			for (time in cachedSectionTimes)
+			{
+				if(time > event.strumTime) break;
+				secNum++;
+			}
+			positionNoteYOnTime(event, secNum);
+		}
+		
+		var time:Float = FlxMath.remapToRange(gridLerp, 0, 1, cachedSectionTimes[curSec], cachedSectionTimes[curSec + 1]);
+		if(Math.isNaN(time))
+		{
+			time = 0;
+			curSec = 0;
+		}
+		
+		if(FlxG.sound.music != null && time >= FlxG.sound.music.length)
+		{
+			time = FlxG.sound.music.length - 1;
+			curSec = PlayState.SONG.notes.length - 1;
+		}
+		FlxG.sound.music.time = time;
+		Conductor.songPosition = time;
+		forceDataUpdate = true;
+		loadSection();
+	}
+
+	function updateScrollY()
+	{
+		var secStartTime:Null<Float> = cast cachedSectionTimes[curSec];
+		var secCrochet:Null<Float> = cast cachedSectionCrochets[curSec];
+		var secRows:Null<Float> = cast cachedSectionRow[curSec];
+		if(secStartTime == null || secCrochet == null || secRows == null) return;
+
+		scrollY = (((Conductor.songPosition - secStartTime) / secCrochet * ChartingState.GRID_SIZE * 4) + (secRows * ChartingState.GRID_SIZE)) * curZoom - FlxG.height/2;
+	}
+
+	var sectionFirstNoteID:Int = 0;
+	var sectionFirstEventID:Int = 0;
+	var curSec:Int = 0;
+	var cachedSectionRow:Array<Int>;
+	var cachedSectionTimes:Array<Float>;
+	var cachedSectionCrochets:Array<Float>;
+	var cachedSectionBPMs:Array<Float>;
+	var showPreviousSection:Bool = true;
+	var showNextSection:Bool = true;
+	var showNoteTypeLabels:Bool = true;
+	var forceDataUpdate:Bool = true;
+	var scrollY:Float = 0;
+	
+	var zoomList:Array<Float> = [
+		0.25,
+		0.5,
+		1,
+		2,
+		3,
+		4,
+		6,
+		8,
+		12,
+		16,
+		24
+	];
+	var curZoom:Float = 1;
+	function loadSection(?sec:Null<Int> = null)
+	{
+		if(sec != null) curSec = sec;
+		curSec = Std.int(FlxMath.bound(curSec, 0, PlayState.SONG.notes.length-1));
+		Conductor.bpm = cachedSectionBPMs[curSec];
+
+		var hei:Float = 0;
+		if(curSec > 0)
+		{
+			prevGridBg.y = cachedSectionRow[curSec-1] * ChartingState.GRID_SIZE * curZoom;
+			prevGridBg.rows = 4 * PlayState.SONG.notes[curSec-1].sectionBeats * curZoom;
+			prevGridBg.visible = showPreviousSection;
+			hei += prevGridBg.height;
+		}
+		else prevGridBg.visible = false;
+
+		if(curSec < PlayState.SONG.notes.length - 1)
+		{
+			nextGridBg.y = cachedSectionRow[curSec+1] * ChartingState.GRID_SIZE * curZoom;
+			nextGridBg.rows = 4 * PlayState.SONG.notes[curSec+1].sectionBeats * curZoom;
+			nextGridBg.visible = showNextSection;
+			hei += nextGridBg.height;
+		}
+		else nextGridBg.visible = false;
+
+		gridBg.y = cachedSectionRow[curSec] * ChartingState.GRID_SIZE * curZoom;
+		gridBg.rows = 4 * PlayState.SONG.notes[curSec].sectionBeats * curZoom;
+		hei += gridBg.height;
+
+		softReloadNotes();
+
+		prevGridBg.vortexLineEnabled = gridBg.vortexLineEnabled = nextGridBg.vortexLineEnabled = true;
+		prevGridBg.vortexLineSpace = gridBg.vortexLineSpace = nextGridBg.vortexLineSpace = ChartingState.GRID_SIZE * 4 * curZoom;
+	}
+
+	inline function getCurChartSection()
+	{
+		return PlayState.SONG.notes != null ? PlayState.SONG.notes[curSec] : null;
+	}
+
+	var behindRenderedNotes:FlxTypedGroup<MetaNote> = new FlxTypedGroup<MetaNote>();
+	var curRenderedNotes:FlxTypedGroup<MetaNote> = new FlxTypedGroup<MetaNote>();
+	var events:Array<EventMetaNote> = [];
+	function softReloadNotes(onlyCurrent:Bool = false)
+	{
+		if(!onlyCurrent) behindRenderedNotes.clear();
+		curRenderedNotes.clear();
+
+		var minTime:Float = getMinNoteTime(curSec);
+		var maxTime:Float = getMaxNoteTime(curSec);
+		function curSecFilter(note:MetaNote)
+		{
+			return (note.strumTime >= minTime && note.strumTime < maxTime);
+		}
+
+		var firstNote:Bool = false;
+		var firstEvent:Bool = false;
+		sectionFirstNoteID = 0;
+		sectionFirstEventID = 0;
+
+		for (num => event in events)
+		{
+			if(event != null && curSecFilter(event))
+			{
+				if(!firstEvent) sectionFirstEventID = num;
+				curRenderedNotes.add(event);
+				event.alpha = (event.strumTime >= Conductor.songPosition) ? 1 : 0.6;
+				event.eventText.visible = true;
+			}
+		}
+
+		if(!onlyCurrent)
+		{
+			if(showPreviousSection || showNextSection)
+			{
+				var prevMinTime:Float = getMinNoteTime(curSec-1);
+				var prevMaxTime:Float = getMaxNoteTime(curSec-1);
+				var nextMinTime:Float = getMinNoteTime(curSec+1);
+				var nextMaxTime:Float = getMaxNoteTime(curSec+1);
+				function otherSecFilter(note:MetaNote)
+				{
+					return (prevGridBg.visible && (note.strumTime >= prevMinTime && note.strumTime < prevMaxTime)) ||
+						(nextGridBg.visible && (note.strumTime >= nextMinTime && note.strumTime < nextMaxTime));
+				}
+
+				for(event in events.filter(otherSecFilter)){
+					behindRenderedNotes.add(event);
+					event.alpha = 0.4;
+					event.eventText.visible = false;
+				}
+			}
+		}
+	}
+
+	function reloadNotes()
+	{
+		for (event in events) if(event != null) event.destroy();
+		events = [];
+
+		for (eventNum => event in PlayState.SONG.events)
+			if(event != null && (cachedSectionTimes.length < 1 || event[0] < cachedSectionTimes[cachedSectionTimes.length-1])) //dont spawn events over the time limit
+				events.push(createEvent(event));
+
+		events.sort(CoolUtil.sortByTime);
+
+		loadSection();
+	}
+
+	function getMinNoteTime(sec:Int)
+	{
+		var minTime:Float = Math.NEGATIVE_INFINITY;
+		if(sec > 0)
+			minTime = cachedSectionTimes[sec];
+		return minTime;
+	}
+
+	function getMaxNoteTime(sec:Int)
+	{
+		var maxTime:Float = Math.POSITIVE_INFINITY;
+		if(sec < cachedSectionTimes.length)
+			maxTime = cachedSectionTimes[sec + 1];
+		return maxTime;
+	}
+	
+	function positionNoteXByData(note:MetaNote, ?data:Null<Int> = null)
+	{
+		if (data == null)
+			data = note.songData[1];
+
+		var noteX:Float = gridBg.x + (ChartingState.GRID_SIZE - note.width) / 2;
+		noteX += ChartingState.GRID_SIZE;
+
+		var lane:Int = Std.int(data % ChartingState.GRID_COLUMNS_PER_PLAYER);
+		var groupIndex:Int = 0;
+
+		if (note.gfStrum)
+		{
+			groupIndex = 2;
+		}
+		else
+		{
+			var sec:Int = 0;
+			for (i in 0...cachedSectionTimes.length)
+			{
+				if (i == cachedSectionTimes.length - 1 ||
+					(note.strumTime >= cachedSectionTimes[i] && note.strumTime < cachedSectionTimes[i + 1]))
+				{
+					sec = i;
+					break;
+				}
+			}
+
+			if (sec < 0) sec = 0;
+			if (sec >= PlayState.SONG.notes.length) sec = PlayState.SONG.notes.length - 1;
+
+			var section = PlayState.SONG.notes[sec];
+			if (section != null && section.mustHitSection)
+			{
+				groupIndex = note.mustPress ? 0 : 1;
+			}
+			else
+			{
+				groupIndex = note.mustPress ? 1 : 0;
+			}
+		}
+
+		if (groupIndex == 2)
+			note.gfStrum = true;
+
+		if (groupIndex >= ChartingState.GRID_PLAYERS) groupIndex = ChartingState.GRID_PLAYERS - 1;
+		if (groupIndex < 0) groupIndex = 0;
+		if (note.gfStrum)
+			groupIndex = 2;
+
+		noteX += ChartingState.GRID_SIZE * (groupIndex * ChartingState.GRID_COLUMNS_PER_PLAYER + lane);
+
+		note.x = noteX;
+	}
+
+	function positionNoteYOnTime(note:MetaNote, section:Int)
+	{
+		var time:Float = note.strumTime - cachedSectionTimes[section];
+		var noteY:Float = (time / cachedSectionCrochets[section]) * ChartingState.GRID_SIZE * 4 * curZoom;
+		noteY += cachedSectionRow[section] * ChartingState.GRID_SIZE * curZoom;
+		noteY = Math.max(noteY, -150);
+		note.y = noteY + (ChartingState.GRID_SIZE/2 - note.height/2);
+		note.chartY = noteY;
 	}
 
 	override function update(elapsed:Float)
 	{
+		updateScrollY();
+		gridCam.scroll.y = scrollY;
+
+		if(FlxG.sound.music != null)
+		{
+			if(FlxG.sound.music.time >= vocals.length)
+				vocals.pause();
+			if(FlxG.sound.music.time >= opponentVocals.length)
+				opponentVocals.pause();
+
+			while(curSec > 0 && Conductor.songPosition < cachedSectionTimes[curSec])
+				loadSection(curSec - 1);
+			while(curSec < cachedSectionTimes.length - 1 && Conductor.songPosition >= cachedSectionTimes[curSec + 1])
+				loadSection(curSec + 1);
+		}
+
 		if (FlxG.keys.justPressed.SPACE)
 			togglePause();
 
@@ -293,8 +712,6 @@ class ModchartEditor extends MusicBeatState
 		}
 
 		notesFollow();
-
-		grid.y = -((Conductor.songPosition / Conductor.stepCrochet) * ChartingState.GRID_SIZE);
 		
 		super.update(elapsed);
 	}
@@ -367,9 +784,6 @@ class ModchartEditor extends MusicBeatState
 		{
 			if (PlayState.SONG.notes[curSection].changeBPM){
 				Conductor.bpm = PlayState.SONG.notes[curSection].bpm;
-				var totalSteps:Int = Math.ceil(songLength / Conductor.stepCrochet);
-        		grid.rows = totalSteps;
-        		grid.updateStripes();
 			}
 		}
 		super.sectionHit();
@@ -377,7 +791,6 @@ class ModchartEditor extends MusicBeatState
 
 	override function destroy()
 	{
-		FlxG.mouse.visible = true;
 		Config.RENDER_ARROW_PATHS = false;
 		if(PlayState.SONG.nativeModchart){ 
 			remove(manager);
@@ -408,10 +821,6 @@ class ModchartEditor extends MusicBeatState
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
-
-		var totalSteps:Int = Math.ceil(songLength / Conductor.stepCrochet);
-		grid.rows = totalSteps;
-		add(grid);
 	}
 
 	// Borrowed from PlayState
