@@ -95,7 +95,7 @@ class ModchartEditor extends MusicBeatState
 	var paused:Bool = false;
 	static inline var SEEK_STEP:Float = 1000;
 
-	public function new(playbackRate:Float, player:Int)
+	public function new()
 	{
 		super();
 
@@ -106,11 +106,11 @@ class ModchartEditor extends MusicBeatState
 
 		instance = this;
 
-		this.player = player;
+		this.player = 0;
 		
 		Conductor.songPosition = 0;
 		/* setting up some important data */
-		this.playbackRate = playbackRate;
+		this.playbackRate = 1;
 		this.startPos = Conductor.songPosition;
 	}
 
@@ -251,6 +251,9 @@ class ModchartEditor extends MusicBeatState
 		add(nextGridBg);
 		add(gridBg);
 
+		add(behindRenderedNotes);
+		add(curRenderedNotes);
+
 		vortexIndicator = new FlxSprite(gridBg.x - ChartingState.GRID_SIZE - (ChartingState.GRID_SIZE/2), FlxG.height/2).loadGraphic(Paths.image('editors/vortex_indicator'));
 		vortexIndicator.setGraphicSize(ChartingState.GRID_SIZE*2);
 		vortexIndicator.updateHitbox();
@@ -264,14 +267,18 @@ class ModchartEditor extends MusicBeatState
 		super.create();
 
 		loadSection(0);
+		reloadNotes();
 	}
 	var vortexIndicator:FlxSprite;
 
 	function createEvent(event:Dynamic)
 	{
+		if(event[1][0][0] != "Modchart Event") return null;
 		var daStrumTime:Float = event[0];
 		var swagEvent:EventMetaNote = new EventMetaNote(daStrumTime, event);
 		swagEvent.x = gridBg.x;
+		swagEvent.cameras = [gridCam];
+		swagEvent.eventText.cameras = [gridCam];
 		swagEvent.eventText.x = swagEvent.x - swagEvent.eventText.width - 10;
 		swagEvent.scrollFactor.x = 0;
 		swagEvent.active = false;
@@ -561,10 +568,13 @@ class ModchartEditor extends MusicBeatState
 		for (event in events) if(event != null) event.destroy();
 		events = [];
 
-		for (eventNum => event in PlayState.SONG.events)
-			if(event != null && (cachedSectionTimes.length < 1 || event[0] < cachedSectionTimes[cachedSectionTimes.length-1])) //dont spawn events over the time limit
-				events.push(createEvent(event));
-
+		for (eventNum => event in PlayState.SONG.events){
+			if(event != null && (cachedSectionTimes.length < 1 || event[0] < cachedSectionTimes[cachedSectionTimes.length-1])){ //dont spawn events over the time limit
+				var daEvent = createEvent(event);
+				if(daEvent == null) continue;
+				events.push(daEvent);
+			}
+		}
 		events.sort(CoolUtil.sortByTime);
 
 		loadSection();

@@ -45,6 +45,12 @@ class EditorPicker extends MusicBeatSubstate {
 			args: [states.editors.StageEditorState]
 		},
 		{
+			name: "Modchart Editor",
+			iconShit: "modchart",
+			state: states.editors.ModSelector,
+			args: [states.editors.ModchartEditor]
+		},
+		{
 			name: "Mod Config Editor",
 			iconShit: "debugOptions",
 			state: states.editors.ModSelector,

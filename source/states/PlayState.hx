@@ -1755,23 +1755,25 @@ class PlayState extends MusicBeatState
 				Paths.sound(event.value1); //Precache sound
 
 			case "Modchart Event":
-				var info = event.value1.split(',');
-				if(info[0] == "Add Modifier")
-					manager.addModifier(info[1], Std.parseInt(info[6]));
-				if(info[0] == "Ease"){
-					var ease = FlxEase.linear;
-					if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
-					manager.ease(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+				if(SONG.nativeModchart){
+					var info = event.value1.split(',');
+					switch(info[0]){
+						case "Add Modifier":
+							manager.addModifier(info[1], Std.parseInt(info[6]));
+						case "Ease":
+							var ease = FlxEase.linear;
+							if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
+							manager.ease(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "Set":
+							manager.set(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "EaseAdd":
+							var ease = FlxEase.linear;
+							if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
+							manager.add(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "SetAdd":
+							manager.setAdd(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+					}
 				}
-				if(info[0] == "Set")
-					manager.set(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
-				if(info[0] == "EaseAdd"){
-					var ease = FlxEase.linear;
-					if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
-					manager.add(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-				}
-				if(info[0] == "SetAdd")
-					manager.setAdd(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventPushedUnique(event));
 	}
@@ -2949,7 +2951,7 @@ class PlayState extends MusicBeatState
 		if(FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 		#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
-		MusicBeatState.switchState(new ModchartEditor(1, 1));
+		MusicBeatState.switchState(new ModchartEditor());
 	}
 
 	//// Characters ////

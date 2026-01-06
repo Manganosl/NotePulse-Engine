@@ -64,7 +64,7 @@ class ModSelector extends MusicBeatState {
 		
         changeSelection();
 		updateTexts();
-		if (goto == states.editors.ChartingState) reloadSongs();
+		if (goto == states.editors.ChartingState && goto == states.editors.ModchartEditor) reloadSongs();
 
 		iconGroup = new FlxTypedGroup();
 		add(iconGroup);
@@ -229,7 +229,7 @@ class ModSelector extends MusicBeatState {
 					openConfigPrompt();
 					return;
 				}
-				if(goto != states.editors.ChartingState){
+				if(goto != states.editors.ChartingState && goto != states.editors.ModchartEditor){
 					if(curSelected == 0){
 						currentMod = null;
 					} else {
@@ -238,7 +238,7 @@ class ModSelector extends MusicBeatState {
 					}
 					try MusicBeatState.switchState(Type.createInstance(goto, gotoArgs));
 				}
-				else if(goto == states.editors.ChartingState){
+				else if(goto == states.editors.ChartingState && goto == states.editors.ModchartEditor){
 					if(inDifSelect){
 						if(curSelected == 0){
 							var newDiffName:String = null;
@@ -272,7 +272,10 @@ class ModSelector extends MusicBeatState {
 							WeekData.setDirectoryFromWeek(WeekData.weeksLoaded.get(weekName));
 							var formated = backend.Highscore.formatSong(currentSong.songName.toLowerCase(), curDifficulty);
 							PlayState.SONG = backend.Song.loadFromJson(formated, currentSong.songName.toLowerCase());
-							try LoadingState.loadAndSwitchState(new ChartingState(), false);
+							if(goto == states.editors.ModchartEditor)
+								try LoadingState.loadAndSwitchState(new states.editors.ModchartEditor(), false);
+							else
+								try LoadingState.loadAndSwitchState(new ChartingState(), false);
 						}
 					} else if(inSongSelect){
 						if (curSelected == 0) {
