@@ -95,6 +95,8 @@ class ModchartEditor extends MusicBeatState
 	var paused:Bool = false;
 	static inline var SEEK_STEP:Float = 1000;
 
+	var dummyArrow:FlxSprite;
+
 	public function new()
 	{
 		super();
@@ -250,6 +252,13 @@ class ModchartEditor extends MusicBeatState
 		add(prevGridBg);
 		add(nextGridBg);
 		add(gridBg);
+
+		dummyArrow = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
+		dummyArrow.setGraphicSize(ChartingState.GRID_SIZE, ChartingState.GRID_SIZE);
+		dummyArrow.updateHitbox();
+		dummyArrow.cameras = [gridCam];
+		dummyArrow.scrollFactor.x = 0;
+		add(dummyArrow);
 
 		add(behindRenderedNotes);
 		add(curRenderedNotes);
@@ -661,6 +670,14 @@ class ModchartEditor extends MusicBeatState
 		note.chartY = noteY;
 	}
 
+	var curQuant(default, set):Int = 16;
+	function set_curQuant(v:Int)
+	{
+		curQuant = v;
+		return curQuant;
+	}
+
+	private var isCrosshair:Bool = false;
 	override function update(elapsed:Float)
 	{
 		updateScrollY();
@@ -722,6 +739,89 @@ class ModchartEditor extends MusicBeatState
 		}
 
 		notesFollow();
+
+		var minX:Float = gridBg.x;
+		if(FlxG.mouse.x >= minX && FlxG.mouse.x < gridBg.x + gridBg.width)
+		{
+			//if((!FlxG.mouse.overlaps(mainBox.bg) || !FlxG.mouse.overlaps(infoBox.bg))){
+				Mouse.cursor = MouseCursor.CROSSHAIR;
+				isCrosshair = true;
+			//}
+			var diffX:Float = FlxG.mouse.x - gridBg.x;
+			var diffY:Float = (FlxG.mouse.y+gridCam.scroll.y) - gridBg.y;
+			if(!FlxG.keys.pressed.SHIFT)
+				diffY -= diffY % (ChartingState.GRID_SIZE / (curQuant/16));
+
+			if(nextGridBg.visible) diffY = Math.min(diffY, gridBg.height + nextGridBg.height);
+			else diffY = Math.min(diffY, gridBg.height);
+
+			if(prevGridBg.visible) diffY = Math.max(diffY, -prevGridBg.height);
+			else diffY = Math.max(diffY, 0);
+
+			var noteData:Int = Math.floor(diffX / ChartingState.GRID_SIZE);
+			dummyArrow.x = gridBg.x + noteData * ChartingState.GRID_SIZE;
+			noteData--;
+
+			if(FlxG.keys.pressed.SHIFT || (FlxG.mouse.y+gridCam.scroll.y) >= gridBg.y || !prevGridBg.visible)
+				dummyArrow.y = gridBg.y + diffY;
+			else
+			{
+				var t:Float = (diffY - (ChartingState.GRID_SIZE / (curQuant/16)));
+				if((FlxG.mouse.y+gridCam.scroll.y) >= gridBg.y) t *= curZoom;
+				dummyArrow.y = gridBg.y + t;
+			}
+			if(FlxG.mouse.justPressed)
+			{
+				if(FlxG.mouse.x >= gridBg.x && FlxG.mouse.x < gridBg.x + gridBg.width)
+				{
+					var closeNotes:Array<MetaNote> = curRenderedNotes.members.filter(function(note:MetaNote)
+					{
+						var chartY:Float = (FlxG.mouse.y+gridCam.scroll.y) - note.chartY;
+						return (note.isEvent && noteData < 0) && chartY >= 0 && chartY < ChartingState.GRID_SIZE;
+					});
+					closeNotes.sort(function(a:MetaNote, b:MetaNote) return Math.abs(a.strumTime - (FlxG.mouse.y+gridCam.scroll.y)) < Math.abs(b.strumTime - (FlxG.mouse.y+gridCam.scroll.y)) ? 1 : -1);
+
+					var closest = closeNotes[0];
+					if(closest != null)
+					{
+						if(!FlxG.keys.pressed.CONTROL)
+						{
+							events.remove(cast (closest, EventMetaNote));
+							curRenderedNotes.remove(closest, true);
+							FlxG.sound.play(Paths.sound('chartingSounds/noteErase'));
+						}
+					} else if((FlxG.mouse.y+gridCam.scroll.y) >= gridBg.y && (FlxG.mouse.y+gridCam.scroll.y) < gridBg.y + gridBg.height){ // Add note
+						var strumTime:Float = (diffY / ChartingState.GRID_SIZE * Conductor.stepCrochet / curZoom) + cachedSectionTimes[curSec];
+
+						var didAdd:Bool = false;
+						var eventAdded:EventMetaNote;
+						FlxG.sound.play(Paths.sound('chartingSounds/noteLay'));
+
+						//var action:String = (actionsDropdown != null && actionsDropdown.selectedLabel != null) ? actionsDropdown.selectedLabel : "";
+						//var modifier:String = (modifierInput != null) ? modifierInput.text : "";
+						//var timeStr:String = (timeStepper != null) ? Std.string(timeStepper.value) : "";
+						//var valueStr:String = (valueStepper != null) ? Std.string(valueStepper.value) : "";
+						//var easeStr:String = (easeInput != null) ? easeInput.text : "";
+						//var playerStr:String = (playerStepper != null) ? Std.string(playerStepper.value) : "";
+						//var playfieldStr:String = (playfieldModStepper != null) ? Std.string(playfieldModStepper.value) : "";
+						var combined:String = "Add Modifier,Test,Test";//action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + "," + playfieldStr;
+
+						var evData:Array<Dynamic> = [strumTime, [["Modchart Event", combined, ""]]];
+						eventAdded = createEvent(evData);
+						for (num in sectionFirstEventID...events.length){
+							var event = events[num];
+							if(event.strumTime >= strumTime){
+								events.insert(num, eventAdded);
+								didAdd = true;
+								break;
+							}
+						}
+						if(!didAdd) events.push(eventAdded);
+						softReloadNotes();
+					}
+				}
+			}
+		}
 		
 		super.update(elapsed);
 	}
