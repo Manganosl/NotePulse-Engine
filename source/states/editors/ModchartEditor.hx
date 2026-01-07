@@ -3,6 +3,8 @@ package states.editors;
 import backend.Section;
 import backend.Rating;
 import backend.ui.*;
+import backend.Song;
+import backend.StageData;
 
 import objects.Note;
 import objects.StrumNote;
@@ -10,6 +12,9 @@ import objects.StrumNote;
 import flixel.util.FlxSort;
 import openfl.geom.Rectangle;
 import openfl.events.KeyboardEvent;
+import openfl.net.FileReference;
+import openfl.events.Event;
+import openfl.events.IOErrorEvent;
 
 import haxe.Json;
 import objects.Character;
@@ -97,6 +102,8 @@ class ModchartEditor extends MusicBeatState
 	static inline var SEEK_STEP:Float = 1000;
 
 	var dummyArrow:FlxSprite;
+
+	var _file:FileReference;
 
 	public function new()
 	{
@@ -237,16 +244,14 @@ class ModchartEditor extends MusicBeatState
 		vortexIndicator.cameras = [camUI];
 		add(vortexIndicator);
 
-		modchartBox = new PsychUIBox(0, 0, 300, 0, ['Modchart']);
-		modchartBox.selectedName = 'Events';
+		modchartBox = new PsychUIBox(0, 0, 300, 280, ['Modchart', 'Song']);
+		modchartBox.selectedName = 'Modchart';
 		modchartBox.scrollFactor.set();
-		modchartBox.zoomFactor = 0;
-		modchartBox.canMove = true;
-		modchartBox.canMinimize = true;
 		modchartBox.cameras = [camUI];
 		add(modchartBox);
 
 		addModchartTab();
+		addSongTab();
 
 		_cacheSections();
 
@@ -383,6 +388,20 @@ class ModchartEditor extends MusicBeatState
 		tabGroupModchart.add(playerLabelText);
 		tabGroupModchart.add(playfieldModLabelText);
 		tabGroupModchart.add(actionsDropdown);
+	}
+
+	function addSongTab():Void {
+		var tabGroup = modchartBox.getTab('Song').menu;
+		var posX = 10;
+		var posY = 25;
+
+		var saveButton:PsychUIButton = new PsychUIButton(posX, posY, 'Save Modchart', function()
+		{
+			saveChart();
+		}, 100);
+		saveButton.normalStyle.bgColor = FlxColor.GREEN;
+		saveButton.normalStyle.textColor = FlxColor.WHITE;
+		tabGroup.add(saveButton);
 	}
 
 	var vortexIndicator:FlxSprite;
@@ -783,9 +802,17 @@ class ModchartEditor extends MusicBeatState
 		return curQuant;
 	}
 
+	function goToPlayState()
+	{
+		StageData.loadDirectory(PlayState.SONG);
+		LoadingState.loadAndSwitchState(new PlayState());
+		ClientPrefs.toggleVolumeKeys(true);
+	}
+
 	private var isCrosshair:Bool = false;
 	override function update(elapsed:Float)
 	{
+		ClientPrefs.toggleVolumeKeys(PsychUIInputText.focusOn == null);
 		updateScrollY();
 		camUI.scroll.y = scrollY;
 
@@ -802,18 +829,18 @@ class ModchartEditor extends MusicBeatState
 				loadSection(curSec + 1);
 		}
 
-		if (FlxG.keys.justPressed.SPACE)
+		if (FlxG.keys.justPressed.SPACE && PsychUIInputText.focusOn == null)
 			togglePause();
 
-		if (FlxG.keys.justPressed.RIGHT)
+		if (FlxG.keys.justPressed.RIGHT && PsychUIInputText.focusOn == null)
 			seek(SEEK_STEP);
 
-		if (FlxG.keys.justPressed.LEFT)
+		if (FlxG.keys.justPressed.LEFT && PsychUIInputText.focusOn == null)
 			seek(-SEEK_STEP);
 
-		if(controls.BACK || FlxG.keys.justPressed.ESCAPE)
+		if((controls.BACK || FlxG.keys.justPressed.ESCAPE) && PsychUIInputText.focusOn == null)
 		{
-			//endSong();
+			goToPlayState();
 			super.update(elapsed);
 			return;
 		}
@@ -907,6 +934,9 @@ class ModchartEditor extends MusicBeatState
 							closest.destroy();
 
 							FlxG.sound.play(Paths.sound('chartingSounds/noteErase'));
+							reloadManager();
+						} else {
+							selectedNote = cast (closest, EventMetaNote);
 						}
 					} else if((FlxG.mouse.y+camUI.scroll.y) >= gridBg.y && (FlxG.mouse.y+camUI.scroll.y) < gridBg.y + gridBg.height){ // Add note
 						var strumTime:Float = (diffY / ChartingState.GRID_SIZE * Conductor.stepCrochet / curZoom) + cachedSectionTimes[curSec];
@@ -930,25 +960,18 @@ class ModchartEditor extends MusicBeatState
 							var event = events[num];       
 							if(event.strumTime >= strumTime){
 								events.insert(num, eventAdded);
+								selectedNote = eventAdded;
+								PlayState.SONG.events.insert(num, evData);
+								reloadManager();
 								didAdd = true;
 								break;
 							}
 						}
 						if(!didAdd){
-							var inserted:Bool = false;
-							for (i in 0...PlayState.SONG.events.length)
-							{
-								if (PlayState.SONG.events[i][0] > strumTime)
-								{
-									PlayState.SONG.events.insert(i, evData);
-									inserted = true;
-									break;
-								}
-							}
-							if (!inserted)
-								PlayState.SONG.events.push(evData);
-
 							events.push(eventAdded);
+							PlayState.SONG.events.push(evData);
+							reloadManager();
+							selectedNote = eventAdded;
 						}
 						softReloadNotes();
 					}
@@ -1519,5 +1542,149 @@ class ModchartEditor extends MusicBeatState
 				}
 			}
 		}
+	}
+
+	private var outputGroup:Array<FlxText> = [];
+	function showOutput(message:String, isError:Bool = false, isSave:Bool = false)
+	{
+		var outputTxt = new FlxText(25, FlxG.height - 50, FlxG.width - 50, '', 20);
+		outputTxt.borderSize = 2;
+		outputTxt.borderStyle = OUTLINE_FAST;
+		outputTxt.scrollFactor.set();
+		outputTxt.cameras = [camUI];
+		outputTxt.alpha = 1;
+		outputTxt.text = message;
+		outputTxt.y = FlxG.height - outputTxt.height - 30;
+		add(outputTxt);
+		outputGroup.push(outputTxt);
+		for(txt in outputGroup)
+		{
+			if(txt == null) continue;
+			if(txt == outputTxt) continue;
+			FlxTween.cancelTweensOf(txt, ["y"]);
+			FlxTween.tween(txt, {y: txt.y - 35}, 0.2, {ease: FlxEase.cubeOut});
+		}
+		if(isError)
+		{
+			FlxG.sound.play(Paths.sound('cancelMenu'), 0.6);
+			outputTxt.color = FlxColor.RED;
+		}
+		else if(isSave)
+		{
+			FlxG.sound.play(Paths.sound('confirmMenu'), 0.6);
+			outputTxt.color = FlxColor.GREEN;
+		}
+		else
+		{
+			FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
+			outputTxt.color = FlxColor.WHITE;
+		}
+		FlxTween.tween(outputTxt, {alpha: 0}, 5, {ease: FlxEase.cubeIn, onComplete: function(twn:FlxTween)
+		{
+			outputGroup.remove(outputTxt);
+			outputTxt.destroy();
+		}});
+	}
+
+	public function saveChart(auto:Bool = true, dif:String = null)
+	{
+		for (section in PlayState.SONG.notes)
+		{
+			for (note in section.sectionNotes)
+			{
+				var lane:Int = note[1];
+				var gfStrum:Bool = false;
+
+				if (PlayState.SONG.gfStrums
+					&& lane >= (PlayState.SONG.mania + 1) * 2
+					&& lane <  (PlayState.SONG.mania + 1) * 3)
+				{
+					gfStrum = true;
+				}
+
+				note[4] = gfStrum;
+			}
+		}
+
+		if (PlayState.SONG.events != null && PlayState.SONG.events.length > 1)
+			PlayState.SONG.events.sort(ChartingState.sortByTime);
+
+		var json = {
+			"song": PlayState.SONG
+		};
+
+		var data:String = haxe.Json.stringify(json, "\t");
+
+		if (data == null || data.length <= 0)
+			return;
+
+		if (auto)
+		{
+			var chartPath:String = Song.chartPath;
+
+			if (chartPath == null || chartPath == "")
+			{
+				showOutput('Failed to save events: Song.chartPath is null or empty', true);
+				return;
+			}
+
+			var chartDir = haxe.io.Path.directory(chartPath);
+			if (!sys.FileSystem.exists(chartDir))
+			{
+				var ensureDirectory = function(path:String)
+				{
+					var parent = haxe.io.Path.directory(path);
+					if (parent != "" && !sys.FileSystem.exists(parent))
+						ChartingState.ensureDirectory(parent);
+					if (!sys.FileSystem.exists(path))
+						sys.FileSystem.createDirectory(path);
+				}
+				ChartingState.ensureDirectory(chartDir);
+			}
+
+			try
+			{
+				sys.io.File.saveContent(chartPath, data.trim());
+				showOutput('Saved modchart events to: $chartPath', false, true);
+			}
+			catch (e:Dynamic)
+			{
+				showOutput('Failed to save events: $e', true);
+			}
+		}
+		else
+		{
+			_file = new FileReference();
+			_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
+			_file.addEventListener(Event.CANCEL, onSaveCancel);
+			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file.save(data.trim(), Song.chartPath);
+		}
+	}
+
+	function onSaveComplete(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+		FlxG.log.notice("Successfully saved LEVEL DATA.");
+	}
+
+	function onSaveCancel(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+	}
+
+	function onSaveError(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+		FlxG.log.error("Problem saving Level data");
 	}
 }

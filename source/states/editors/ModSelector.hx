@@ -64,7 +64,7 @@ class ModSelector extends MusicBeatState {
 		
         changeSelection();
 		updateTexts();
-		if (goto == states.editors.ChartingState && goto == states.editors.ModchartEditor) reloadSongs();
+		if (goto == states.editors.ChartingState || goto == states.editors.ModchartEditor) reloadSongs();
 
 		iconGroup = new FlxTypedGroup();
 		add(iconGroup);
@@ -238,7 +238,7 @@ class ModSelector extends MusicBeatState {
 					}
 					try MusicBeatState.switchState(Type.createInstance(goto, gotoArgs));
 				}
-				else if(goto == states.editors.ChartingState && goto == states.editors.ModchartEditor){
+				else if(goto == states.editors.ChartingState || goto == states.editors.ModchartEditor){
 					if(inDifSelect){
 						if(curSelected == 0){
 							var newDiffName:String = null;

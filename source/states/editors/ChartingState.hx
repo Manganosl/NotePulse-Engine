@@ -4531,13 +4531,13 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			PlayState.SONG.events.push(event.songData);
 	}
 
-	private function ensureDirectory(path:String) {
+	public static function ensureDirectory(path:String) {
 	    var parent = haxe.io.Path.directory(path);
 	    if (parent != "" && !sys.FileSystem.exists(parent)) ensureDirectory(parent);
 	    if (!sys.FileSystem.exists(path)) sys.FileSystem.createDirectory(path);
 	}
 
-	function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int {
+	public static function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int {
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
 	}
 
