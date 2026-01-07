@@ -2,6 +2,7 @@ package states.editors;
 
 import backend.Section;
 import backend.Rating;
+import backend.ui.*;
 
 import objects.Note;
 import objects.StrumNote;
@@ -27,7 +28,7 @@ class ModchartEditor extends MusicBeatState
 	// Borrowed from original PlayState
 	public var bgCam:FlxCamera;
 	public var camHUD:FlxCamera;
-	public var gridCam:FlxCamera;
+	public var camUI:FlxCamera;
 
 	var prevGridBg:ChartingGridSprite;
 	var gridBg:ChartingGridSprite;
@@ -116,6 +117,7 @@ class ModchartEditor extends MusicBeatState
 		this.startPos = Conductor.songPosition;
 	}
 
+	var modchartBox:PsychUIBox;
 	override public function create(){
 		initPsychCamera();
 
@@ -127,9 +129,9 @@ class ModchartEditor extends MusicBeatState
 		camHUD.bgColor = 0x00000000;
 		FlxG.cameras.add(camHUD, true);
 
-		gridCam = new FlxCamera();
-		gridCam.bgColor = 0x00000000;
-		FlxG.cameras.add(gridCam, false);
+		camUI = new FlxCamera();
+		camUI.bgColor = 0x00000000;
+		FlxG.cameras.add(camUI, false);
 
 		Conductor.safeZoneOffset = (ClientPrefs.data.safeFrames / 60) * 1000 * playbackRate;
 		Conductor.songPosition -= startOffset;
@@ -199,43 +201,7 @@ class ModchartEditor extends MusicBeatState
 		
 		generateSong(PlayState.SONG.song);
 
-			var fields = 1;
-			manager = new Manager();
-			add(manager);
-
-			while(fields != PlayState.SONG.playfields){
-				fields += 1;
-				manager.addPlayfield();
-			}
-
-			for (songEvent in PlayState.SONG.events){
-				for (i in 0...songEvent[1].length){
-					var evName:String = songEvent[1][i][0];
-					if(evName == "Modchart Event"){
-						var value1:String = songEvent[1][i][1];
-						if(value1 == null) continue;
-						var info = value1.split(',');
-						if(info[0] == "Add Modifier")
-							manager.addModifier(info[1], Std.parseInt(info[6]));
-						if(info[0] == "Ease"){
-							var ease = FlxEase.linear;
-							if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
-							var strumTime:Float = songEvent[0] + ClientPrefs.data.noteOffset;
-							manager.ease(info[1], strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-						}
-						if(info[0] == "Set")
-							manager.set(info[1], (songEvent[0] + ClientPrefs.data.noteOffset)/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
-						if(info[0] == "EaseAdd"){
-							var ease = FlxEase.linear;
-							if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
-							var strumTime:Float = songEvent[0] + ClientPrefs.data.noteOffset;
-							manager.add(info[1], strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-						}
-						if(info[0] == "SetAdd")
-							manager.setAdd(info[1], (songEvent[0] + ClientPrefs.data.noteOffset)/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
-					}
-				}
-			}
+		reloadManager();
 		
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
@@ -246,9 +212,9 @@ class ModchartEditor extends MusicBeatState
 		gridBg.screenCenter(X);
 		prevGridBg = new ChartingGridSprite(1, 0xFF1F1F1F, 0xFF111111);
 		nextGridBg = new ChartingGridSprite(1, 0xFF1F1F1F, 0xFF111111);
-		prevGridBg.x = nextGridBg.x = gridBg.x = gridCam.width-gridBg.width;
+		prevGridBg.x = nextGridBg.x = gridBg.x = camUI.width-gridBg.width;
 		prevGridBg.stripes = nextGridBg.stripes = gridBg.stripes = [1];
-		gridBg.cameras = prevGridBg.cameras = nextGridBg.cameras = [gridCam];
+		gridBg.cameras = prevGridBg.cameras = nextGridBg.cameras = [camUI];
 		add(prevGridBg);
 		add(nextGridBg);
 		add(gridBg);
@@ -256,7 +222,7 @@ class ModchartEditor extends MusicBeatState
 		dummyArrow = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
 		dummyArrow.setGraphicSize(ChartingState.GRID_SIZE, ChartingState.GRID_SIZE);
 		dummyArrow.updateHitbox();
-		dummyArrow.cameras = [gridCam];
+		dummyArrow.cameras = [camUI];
 		dummyArrow.scrollFactor.x = 0;
 		add(dummyArrow);
 
@@ -268,8 +234,19 @@ class ModchartEditor extends MusicBeatState
 		vortexIndicator.updateHitbox();
 		vortexIndicator.scrollFactor.set();
 		vortexIndicator.active = false;
-		vortexIndicator.cameras = [gridCam];
+		vortexIndicator.cameras = [camUI];
 		add(vortexIndicator);
+
+		modchartBox = new PsychUIBox(0, 0, 300, 0, ['Modchart']);
+		modchartBox.selectedName = 'Events';
+		modchartBox.scrollFactor.set();
+		modchartBox.zoomFactor = 0;
+		modchartBox.canMove = true;
+		modchartBox.canMinimize = true;
+		modchartBox.cameras = [camUI];
+		add(modchartBox);
+
+		addModchartTab();
 
 		_cacheSections();
 
@@ -278,16 +255,145 @@ class ModchartEditor extends MusicBeatState
 		loadSection(0);
 		reloadNotes();
 	}
-	var vortexIndicator:FlxSprite;
 
+	var selectedNote:EventMetaNote;
+
+	var modchartCheckbox:PsychUICheckBox;
+	var playfieldStepper:PsychUINumericStepper;
+	var modifierInput:PsychUIInputText;
+	var actionsDropdown:PsychUIDropDownMenu;
+	var timeStepper:PsychUINumericStepper;
+	var valueStepper:PsychUINumericStepper;
+	var easeInput:PsychUIInputText;
+	var playerStepper:PsychUINumericStepper;
+	var playfieldModStepper:PsychUINumericStepper;
+	function updateModEvV1():Void {
+		if (selectedNote == null) return;
+
+		var eventNote:EventMetaNote = selectedNote;
+
+		if (eventNote.events == null || eventNote.events.length == 0) return;
+
+		var myEvent:Array<String> = eventNote.events[0];
+		if (myEvent == null) return;
+
+		var eventName:String = (myEvent[0] != null) ? myEvent[0] : '';
+		if (eventName != "Modchart Event") return;
+
+		var action:String = (actionsDropdown != null) ? actionsDropdown.selectedLabel : '';
+		var modifier:String = (modifierInput != null) ? modifierInput.text : '';
+		var timeStr:String = (timeStepper != null) ? Std.string(timeStepper.value) : '';
+		var valueStr:String = (valueStepper != null) ? Std.string(valueStepper.value) : '';
+		var easeStr:String = (easeInput != null) ? easeInput.text : '';
+		var playerStr:String = (playerStepper != null) ? Std.string(playerStepper.value) : '';
+		var playfieldStr:String = (playfieldModStepper != null) ? Std.string(playfieldModStepper.value) : '';
+
+		var combined:String = action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + "," + playfieldStr;
+
+		eventNote.events[0][1] = combined;
+
+		eventNote.updateEventText();
+		eventNote.loadIcon();
+	}
+
+	function addModchartTab():Void {
+		var tabGroupModchart = modchartBox.getTab('Modchart').menu;
+		var posX = 10;
+		var posY = 25;
+
+		modchartCheckbox = new PsychUICheckBox(posX, posY-7.5, 'Modchart', 150, function(){
+			PlayState.SONG.nativeModchart = modchartCheckbox.checked;
+		});
+		modchartCheckbox.checked = PlayState.SONG.nativeModchart;
+
+		playfieldStepper = new PsychUINumericStepper(posX + 150, posY, 1, 0, 1, 16, 1);
+		playfieldStepper.value = PlayState.SONG.playfields;	
+		playfieldStepper.onValueChange = function() {
+			PlayState.SONG.playfields = Std.int(playfieldStepper.value);
+		};
+
+		var playfieldsLabelText = new FlxText(playfieldStepper.x, playfieldStepper.y - 15, 80, 'Playfields:');
+
+		posY += 40;
+
+		modifierInput = new PsychUIInputText(posX+150, posY, 120, '', 8);
+    	modifierInput.onChange = function(old:String, cur:String){
+			updateModEvV1();
+		}
+
+		var modifierLabelText = new FlxText(modifierInput.x, modifierInput.y - 15, 80, 'Modifier:');
+
+		actionsDropdown = new PsychUIDropDownMenu(posX, posY, ["Add Modifier", "Set", "Ease", "EaseAdd", "SetAdd"], function(index:Int, name:String){
+			updateModEvV1();
+		});
+
+		var actionsLabelText = new FlxText(actionsDropdown.x, actionsDropdown.y - 15, 80, 'Action:');
+
+		posY += 40;
+
+		timeStepper = new PsychUINumericStepper(posX, posY, 0.01, 0, 0, 9999, 2);
+		timeStepper.onValueChange = function() {
+			updateModEvV1();
+		};
+
+		valueStepper = new PsychUINumericStepper(posX + 150, posY, 0.01, 0, -999999, 999999, 2);
+		valueStepper.onValueChange = function() {
+			updateModEvV1();
+		};
+
+		posY += 40;
+
+		easeInput = new PsychUIInputText(posX, posY, 120, '', 8);
+		easeInput.onChange = function(old:String, cur:String){
+			updateModEvV1();
+		}
+
+		posY += 40;
+
+		playerStepper = new PsychUINumericStepper(posX, posY, 1, -1, -1, playfieldStepper.value*2, 0);
+		playerStepper.onValueChange = function() {
+			updateModEvV1();
+		};
+
+		playfieldModStepper = new PsychUINumericStepper(posX + 150, posY, 1, -1, -1, 16, 0);
+		playfieldModStepper.onValueChange = function() {
+			updateModEvV1();
+		};
+
+		var timeLabelText = new FlxText(timeStepper.x, timeStepper.y - 15, 80, 'Time (beats):');
+		var valueLabelText = new FlxText(valueStepper.x, valueStepper.y - 15, 80, 'Value:');
+		var easeLabelText = new FlxText(easeInput.x, easeInput.y - 15, 80, 'Ease (if ease):');
+		var playerLabelText = new FlxText(playerStepper.x, playerStepper.y - 15, 80, 'Player:');
+		var playfieldModLabelText = new FlxText(playfieldModStepper.x, playfieldModStepper.y - 15, 80, 'Playfield:');
+
+		tabGroupModchart.add(modchartCheckbox);
+		tabGroupModchart.add(playfieldStepper);
+		tabGroupModchart.add(playfieldsLabelText);
+		tabGroupModchart.add(modifierInput);
+		tabGroupModchart.add(modifierLabelText);
+		tabGroupModchart.add(actionsLabelText);
+		tabGroupModchart.add(timeStepper);
+		tabGroupModchart.add(valueStepper);
+		tabGroupModchart.add(easeInput);
+		tabGroupModchart.add(playerStepper);
+		tabGroupModchart.add(playfieldModStepper);
+		tabGroupModchart.add(timeLabelText);
+		tabGroupModchart.add(valueLabelText);
+		tabGroupModchart.add(easeLabelText);
+		tabGroupModchart.add(playerLabelText);
+		tabGroupModchart.add(playfieldModLabelText);
+		tabGroupModchart.add(actionsDropdown);
+	}
+
+	var vortexIndicator:FlxSprite;
 	function createEvent(event:Dynamic)
 	{
 		if(event[1][0][0] != "Modchart Event") return null;
 		var daStrumTime:Float = event[0];
 		var swagEvent:EventMetaNote = new EventMetaNote(daStrumTime, event);
 		swagEvent.x = gridBg.x;
-		swagEvent.cameras = [gridCam];
-		swagEvent.eventText.cameras = [gridCam];
+		swagEvent.cameras = [camUI];
+		swagEvent.eventText.cameras = [camUI];
 		swagEvent.eventText.x = swagEvent.x - swagEvent.eventText.width - 10;
 		swagEvent.scrollFactor.x = 0;
 		swagEvent.active = false;
@@ -681,7 +787,7 @@ class ModchartEditor extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		updateScrollY();
-		gridCam.scroll.y = scrollY;
+		camUI.scroll.y = scrollY;
 
 		if(FlxG.sound.music != null)
 		{
@@ -748,7 +854,7 @@ class ModchartEditor extends MusicBeatState
 				isCrosshair = true;
 			//}
 			var diffX:Float = FlxG.mouse.x - gridBg.x;
-			var diffY:Float = (FlxG.mouse.y+gridCam.scroll.y) - gridBg.y;
+			var diffY:Float = (FlxG.mouse.y+camUI.scroll.y) - gridBg.y;
 			if(!FlxG.keys.pressed.SHIFT)
 				diffY -= diffY % (ChartingState.GRID_SIZE / (curQuant/16));
 
@@ -760,14 +866,15 @@ class ModchartEditor extends MusicBeatState
 
 			var noteData:Int = Math.floor(diffX / ChartingState.GRID_SIZE);
 			dummyArrow.x = gridBg.x + noteData * ChartingState.GRID_SIZE;
+			dummyArrow.visible = true;
 			noteData--;
 
-			if(FlxG.keys.pressed.SHIFT || (FlxG.mouse.y+gridCam.scroll.y) >= gridBg.y || !prevGridBg.visible)
+			if(FlxG.keys.pressed.SHIFT || (FlxG.mouse.y+camUI.scroll.y) >= gridBg.y || !prevGridBg.visible)
 				dummyArrow.y = gridBg.y + diffY;
 			else
 			{
 				var t:Float = (diffY - (ChartingState.GRID_SIZE / (curQuant/16)));
-				if((FlxG.mouse.y+gridCam.scroll.y) >= gridBg.y) t *= curZoom;
+				if((FlxG.mouse.y+camUI.scroll.y) >= gridBg.y) t *= curZoom;
 				dummyArrow.y = gridBg.y + t;
 			}
 			if(FlxG.mouse.justPressed)
@@ -776,52 +883,78 @@ class ModchartEditor extends MusicBeatState
 				{
 					var closeNotes:Array<MetaNote> = curRenderedNotes.members.filter(function(note:MetaNote)
 					{
-						var chartY:Float = (FlxG.mouse.y+gridCam.scroll.y) - note.chartY;
+						var chartY:Float = (FlxG.mouse.y+camUI.scroll.y) - note.chartY;
 						return (note.isEvent && noteData < 0) && chartY >= 0 && chartY < ChartingState.GRID_SIZE;
 					});
-					closeNotes.sort(function(a:MetaNote, b:MetaNote) return Math.abs(a.strumTime - (FlxG.mouse.y+gridCam.scroll.y)) < Math.abs(b.strumTime - (FlxG.mouse.y+gridCam.scroll.y)) ? 1 : -1);
+					closeNotes.sort(function(a:MetaNote, b:MetaNote) return Math.abs(a.strumTime - (FlxG.mouse.y+camUI.scroll.y)) < Math.abs(b.strumTime - (FlxG.mouse.y+camUI.scroll.y)) ? 1 : -1);
 
 					var closest = closeNotes[0];
 					if(closest != null)
 					{
 						if(!FlxG.keys.pressed.CONTROL)
 						{
+							for (i in 0...PlayState.SONG.events.length)
+							{
+								if (PlayState.SONG.events[i][0] == closest.strumTime)
+								{
+									PlayState.SONG.events.splice(i, 1);
+									break;
+								}
+							}
+
 							events.remove(cast (closest, EventMetaNote));
 							curRenderedNotes.remove(closest, true);
+							closest.destroy();
+
 							FlxG.sound.play(Paths.sound('chartingSounds/noteErase'));
 						}
-					} else if((FlxG.mouse.y+gridCam.scroll.y) >= gridBg.y && (FlxG.mouse.y+gridCam.scroll.y) < gridBg.y + gridBg.height){ // Add note
+					} else if((FlxG.mouse.y+camUI.scroll.y) >= gridBg.y && (FlxG.mouse.y+camUI.scroll.y) < gridBg.y + gridBg.height){ // Add note
 						var strumTime:Float = (diffY / ChartingState.GRID_SIZE * Conductor.stepCrochet / curZoom) + cachedSectionTimes[curSec];
 
 						var didAdd:Bool = false;
 						var eventAdded:EventMetaNote;
 						FlxG.sound.play(Paths.sound('chartingSounds/noteLay'));
 
-						//var action:String = (actionsDropdown != null && actionsDropdown.selectedLabel != null) ? actionsDropdown.selectedLabel : "";
-						//var modifier:String = (modifierInput != null) ? modifierInput.text : "";
-						//var timeStr:String = (timeStepper != null) ? Std.string(timeStepper.value) : "";
-						//var valueStr:String = (valueStepper != null) ? Std.string(valueStepper.value) : "";
-						//var easeStr:String = (easeInput != null) ? easeInput.text : "";
-						//var playerStr:String = (playerStepper != null) ? Std.string(playerStepper.value) : "";
-						//var playfieldStr:String = (playfieldModStepper != null) ? Std.string(playfieldModStepper.value) : "";
-						var combined:String = "Add Modifier,Test,Test";//action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + "," + playfieldStr;
+						var action:String = (actionsDropdown != null && actionsDropdown.selectedLabel != null) ? actionsDropdown.selectedLabel : "";
+						var modifier:String = (modifierInput != null) ? modifierInput.text : "";
+						var timeStr:String = (timeStepper != null) ? Std.string(timeStepper.value) : "";
+						var valueStr:String = (valueStepper != null) ? Std.string(valueStepper.value) : "";
+						var easeStr:String = (easeInput != null) ? easeInput.text : "";
+						var playerStr:String = (playerStepper != null) ? Std.string(playerStepper.value) : "";
+						var playfieldStr:String = (playfieldModStepper != null) ? Std.string(playfieldModStepper.value) : "";
+						var combined:String = action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + "," + playfieldStr;
 
 						var evData:Array<Dynamic> = [strumTime, [["Modchart Event", combined, ""]]];
 						eventAdded = createEvent(evData);
 						for (num in sectionFirstEventID...events.length){
-							var event = events[num];
+							var event = events[num];       
 							if(event.strumTime >= strumTime){
 								events.insert(num, eventAdded);
 								didAdd = true;
 								break;
 							}
 						}
-						if(!didAdd) events.push(eventAdded);
+						if(!didAdd){
+							var inserted:Bool = false;
+							for (i in 0...PlayState.SONG.events.length)
+							{
+								if (PlayState.SONG.events[i][0] > strumTime)
+								{
+									PlayState.SONG.events.insert(i, evData);
+									inserted = true;
+									break;
+								}
+							}
+							if (!inserted)
+								PlayState.SONG.events.push(evData);
+
+							events.push(eventAdded);
+						}
 						softReloadNotes();
 					}
 				}
 			}
-		}
+		} else dummyArrow.visible = false;
 		
 		super.update(elapsed);
 	}
@@ -1341,8 +1474,14 @@ class ModchartEditor extends MusicBeatState
 
 		unspawnNotes.sort(CoolUtil.sortByTime);
 		if(delta > 0) return;
-		remove(manager);
-		manager.destroy();
+		reloadManager();
+	}
+
+	function reloadManager(){
+		if(manager != null){
+			remove(manager);
+			manager.destroy();
+		}
 		manager = new Manager();
 		add(manager);
 

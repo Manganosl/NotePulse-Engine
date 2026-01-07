@@ -314,8 +314,7 @@ class EventMetaNote extends MetaNote
 	public function loadIcon(){
 		if(events.length>1){
 			loadGraphic(Paths.image('editors/eventIcon-many'));
-		}
-        if(Paths.fileExists('images/editors/events/${events[0][0]}.png',IMAGE)) {
+		} else if(Paths.fileExists('images/editors/events/${events[0][0]}.png',IMAGE)) {
             loadGraphic(Paths.image('editors/events/${events[0][0]}'));
         } else loadGraphic(Paths.image('editors/eventArrow'));
         if(events[0][0] == "Modchart Event"){
