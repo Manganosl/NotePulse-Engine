@@ -298,7 +298,6 @@ class ModchartEditor extends MusicBeatState
 		eventNote.events[0][1] = combined;
 
 		eventNote.updateEventText();
-		eventNote.loadIcon();
 	}
 
 	function addModchartTab():Void {
@@ -896,6 +895,28 @@ class ModchartEditor extends MusicBeatState
 			dummyArrow.visible = true;
 			noteData--;
 
+			if(FlxG.keys.justPressed.Z != FlxG.keys.justPressed.X) //Decrease/Increase Zoom
+				{
+					if(FlxG.keys.justPressed.Z)
+						curZoom = zoomList[Std.int(Math.max(zoomList.indexOf(curZoom) - 1, 0))];
+					else
+						curZoom = zoomList[Std.int(Math.min(zoomList.indexOf(curZoom) + 1, zoomList.length - 1))];
+	
+					for (event in events)
+					{
+						var secNum:Int = 0;
+						for (time in cachedSectionTimes)
+						{
+							if(time > event.strumTime) break;
+							secNum++;
+						}
+						positionNoteYOnTime(event, secNum);
+					}
+					loadSection();
+					showOutput('Zoom: ${Math.round(curZoom * 100)}%');
+					updateScrollY();
+				}
+
 			if(FlxG.keys.pressed.SHIFT || (FlxG.mouse.y+camUI.scroll.y) >= gridBg.y || !prevGridBg.visible)
 				dummyArrow.y = gridBg.y + diffY;
 			else
@@ -929,7 +950,9 @@ class ModchartEditor extends MusicBeatState
 								}
 							}
 
-							events.remove(cast (closest, EventMetaNote));
+							var evNote:EventMetaNote = cast(closest, EventMetaNote);
+							events.remove(evNote);
+							if(selectedNote == evNote) selectedNote = null;
 							curRenderedNotes.remove(closest, true);
 							closest.destroy();
 
@@ -1058,10 +1081,8 @@ class ModchartEditor extends MusicBeatState
 	override function destroy()
 	{
 		Config.RENDER_ARROW_PATHS = false;
-		if(PlayState.SONG.nativeModchart){ 
-			remove(manager);
-			manager = null;
-		}
+		remove(manager);
+		manager.destroy();
 		FlxG.cameras.remove(camHUD);
 		camHUD.destroy();
 		FlxG.sound.list.remove(inst);
