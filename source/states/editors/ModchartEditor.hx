@@ -261,7 +261,7 @@ class ModchartEditor extends MusicBeatState
 		reloadNotes();
 	}
 
-	var selectedNote:EventMetaNote;
+	var selectedEvent:EventMetaNote;
 
 	var modchartCheckbox:PsychUICheckBox;
 	var playfieldStepper:PsychUINumericStepper;
@@ -273,9 +273,9 @@ class ModchartEditor extends MusicBeatState
 	var playerStepper:PsychUINumericStepper;
 	var playfieldModStepper:PsychUINumericStepper;
 	function updateModEvV1():Void {
-		if (selectedNote == null) return;
+		if (selectedEvent == null) return;
 
-		var eventNote:EventMetaNote = selectedNote;
+		var eventNote:EventMetaNote = selectedEvent;
 
 		if (eventNote.events == null || eventNote.events.length == 0) return;
 
@@ -952,14 +952,15 @@ class ModchartEditor extends MusicBeatState
 
 							var evNote:EventMetaNote = cast(closest, EventMetaNote);
 							events.remove(evNote);
-							if(selectedNote == evNote) selectedNote = null;
+							if(selectedEvent == evNote) selectedEvent = null;
 							curRenderedNotes.remove(closest, true);
 							closest.destroy();
 
 							FlxG.sound.play(Paths.sound('chartingSounds/noteErase'));
 							reloadManager();
 						} else {
-							selectedNote = cast (closest, EventMetaNote);
+							selectedEvent = cast (closest, EventMetaNote);
+							reloadEventText();
 						}
 					} else if((FlxG.mouse.y+camUI.scroll.y) >= gridBg.y && (FlxG.mouse.y+camUI.scroll.y) < gridBg.y + gridBg.height){ // Add note
 						var strumTime:Float = (diffY / ChartingState.GRID_SIZE * Conductor.stepCrochet / curZoom) + cachedSectionTimes[curSec];
@@ -983,7 +984,8 @@ class ModchartEditor extends MusicBeatState
 							var event = events[num];       
 							if(event.strumTime >= strumTime){
 								events.insert(num, eventAdded);
-								selectedNote = eventAdded;
+								selectedEvent = eventAdded;
+								reloadEventText();
 								PlayState.SONG.events.insert(num, evData);
 								reloadManager();
 								didAdd = true;
@@ -994,15 +996,65 @@ class ModchartEditor extends MusicBeatState
 							events.push(eventAdded);
 							PlayState.SONG.events.push(evData);
 							reloadManager();
-							selectedNote = eventAdded;
+							selectedEvent = eventAdded;
+							reloadEventText();
 						}
 						softReloadNotes();
 					}
-				}
+				} else selectedEvent = null;
 			}
 		} else dummyArrow.visible = false;
 		
 		super.update(elapsed);
+	}
+
+	function reloadEventText(){
+		if(selectedEvent != null){
+			var myEvent:Array<String> = selectedEvent.events[0];
+			if(myEvent != null){
+				var eventName:String = (myEvent[0] != null) ? myEvent[0] : '';
+				if (eventName == "Modchart Event") {
+					var combined:String = (myEvent[1] != null) ? myEvent[1] : "";
+					if (combined != "") {
+						var parts:Array<String> = combined.split(",");
+						while (parts.length < 7) parts.push("");
+						if (actionsDropdown != null) {
+							actionsDropdown.selectedLabel = parts[0];
+						}
+						if (modifierInput != null) modifierInput.text = parts[1];
+						if (timeStepper != null) {
+							var tVal:Float = 0;
+							try {tVal = Std.parseFloat(parts[2]);} catch(e:Dynamic) {tVal = timeStepper.value;}
+							timeStepper.value = tVal;
+						}
+						if (valueStepper != null) {
+							var vVal:Float = 0;
+							try {vVal = Std.parseFloat(parts[3]);} catch(e:Dynamic) {vVal = valueStepper.value;}
+							valueStepper.value = vVal;
+						}
+						if (easeInput != null) easeInput.text = parts[4];
+						if (playerStepper != null) {
+							var pVal:Int = 0;
+							try pVal = {Std.parseInt(parts[5]);} catch(e:Dynamic) {pVal = Std.int(playerStepper.value);}
+							playerStepper.value = pVal;
+						}
+						if (playfieldModStepper != null) {
+							var pfVal:Int = 0;
+							try pfVal = {Std.parseInt(parts[6]);} catch(e:Dynamic) {pfVal = Std.int(playfieldModStepper.value);}
+							playfieldModStepper.value = pfVal;
+						}
+					} else {
+						if (actionsDropdown != null) actionsDropdown.selectedIndex = 0;
+						if (modifierInput != null) modifierInput.text = "";
+						if (timeStepper != null) timeStepper.value = 0;
+						if (valueStepper != null) valueStepper.value = 0;
+						if (easeInput != null) easeInput.text = "";
+						if (playerStepper != null) playerStepper.value = -1;
+						if (playfieldModStepper != null) playfieldModStepper.value = -1;
+					}
+				}
+			}
+		}
 	}
 
 	function notesFollow(){
