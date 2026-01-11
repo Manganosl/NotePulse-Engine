@@ -102,6 +102,7 @@ class Note extends FlxSkewedSprite
 	public var offsetX:Float = 0;
 	public var offsetY:Float = 0;
 	public var offsetAngle:Float = 0;
+	public var offsetDirection:Float = 0;
 	public var multAlpha:Float = 1;
 	public var multSpeed(default, set):Float = 1;
 
@@ -462,7 +463,7 @@ class Note extends FlxSkewedSprite
 		var strumY:Float = strum.y;
 		var strumAngle:Float = strum.angle;
 		var strumAlpha:Float = strum.alpha;
-		realDirection = strum.direction + (!strum.downScroll ? 180 : 0);
+		realDirection = strum.direction + (!strum.downScroll ? 180 : 0) + offsetDirection;
 		distance = (0.45 * (Conductor.songPosition - strumTime) * songSpeed * multSpeed * strum.noteSpeed);
 		var angleDir = realDirection * Math.PI / 180;
 		if (copyAngle)
