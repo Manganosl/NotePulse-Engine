@@ -60,6 +60,12 @@ class HScript implements HscriptInterface {
 		"FlxTween" => flixel.tweens.FlxTween,
 		"FlxEase" => flixel.tweens.FlxEase,
 		"FlxText" => flixel.text.FlxText,
+		"FlxTextAlign" => {
+			LEFT: flixel.text.FlxTextAlign.LEFT,
+			CENTER: flixel.text.FlxTextAlign.CENTER,
+			RIGHT: flixel.text.FlxTextAlign.RIGHT,
+			JUSTIFY: flixel.text.FlxTextAlign.JUSTIFY
+		},
 		"FlxTextBorderStyle" => flixel.text.FlxTextBorderStyle,
 		'FlxTextFormatMarkerPair' => flixel.text.FlxTextFormatMarkerPair,
 		'FlxTextFormat' => flixel.text.FlxTextFormat,
@@ -107,7 +113,7 @@ class HScript implements HscriptInterface {
 		//Abstracts
 		"FlxPoint" => LuaUtils.getMacroAbstractClass("flixel.math.FlxPoint"),
 		"FlxAxes" => LuaUtils.getMacroAbstractClass("flixel.util.FlxAxes"),
-		"FlxColor" => LuaUtils.getMacroAbstractClass("flixel.util.FlxColor")
+		"FlxColor" => LuaUtils.getMacroAbstractClass("flixel.util.FlxColor"),
     ];
 
 	/*
