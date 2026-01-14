@@ -113,7 +113,7 @@ class HScript implements HscriptInterface {
 		//Abstracts
 		"FlxPoint" => LuaUtils.getMacroAbstractClass("flixel.math.FlxPoint"),
 		"FlxAxes" => LuaUtils.getMacroAbstractClass("flixel.util.FlxAxes"),
-		"FlxColor" => LuaUtils.getMacroAbstractClass("flixel.util.FlxColor"),
+		"FlxColor" => LuaUtils.getMacroAbstractClass("flixel.util.FlxColor")
     ];
 
 	/*
