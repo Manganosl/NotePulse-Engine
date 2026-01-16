@@ -191,8 +191,10 @@ class NotePulse implements IAdapter {
 			}
 
 			PlayState.instance.notes.forEachAlive(strumNote -> {
-				final player = Adapter.instance.getPlayerFromArrow(strumNote);
-				pspr[player][strumNote.isSustainNote ? 2 : 1].push(strumNote);
+				if(strumNote.modchartVisible){
+					final player = Adapter.instance.getPlayerFromArrow(strumNote);
+					pspr[player][strumNote.isSustainNote ? 2 : 1].push(strumNote);
+				} else strumNote.visible = false;
 			});
 
 			PlayState.instance.grpNoteSplashes.forEachAlive(splash -> {

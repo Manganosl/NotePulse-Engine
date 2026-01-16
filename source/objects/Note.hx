@@ -51,6 +51,8 @@ class Note extends FlxSkewedSprite
 
 	public var characters:Array<Character> = null;
 
+	public var modchartVisible:Bool = true;
+
 	public var strumTime:Float = 0;
 	public var noteData:Int = 0;
 
