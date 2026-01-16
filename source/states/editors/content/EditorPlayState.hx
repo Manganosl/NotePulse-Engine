@@ -480,7 +480,6 @@ class EditorPlayState extends MusicBeatSubstate
 
 						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true, this);
 						sustainNote.mustPress = gottaHitNote;
-						//sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.scrollFactor.set();
 						sustainNote.parent = swagNote;
@@ -489,7 +488,6 @@ class EditorPlayState extends MusicBeatSubstate
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 
-						sustainNote.correctionOffset = swagNote.height / 2;
 						if(!PlayState.isPixelStage)
 						{
 							if(oldNote.isSustainNote)
@@ -498,9 +496,6 @@ class EditorPlayState extends MusicBeatSubstate
 								oldNote.scale.y /= playbackRate;
 								oldNote.updateHitbox();
 							}
-
-							if(ClientPrefs.data.downScroll)
-								sustainNote.correctionOffset = 0;
 						}
 						else if(oldNote.isSustainNote)
 						{

@@ -1324,7 +1324,6 @@ class PlayState extends MusicBeatState
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 
-						sustainNote.correctionOffset = swagNote.height / 2;
 						if(!PlayState.isPixelStage)
 						{
 							if(oldNote.isSustainNote)
@@ -1333,9 +1332,6 @@ class PlayState extends MusicBeatState
 								oldNote.scale.y /= playbackRate;
 								oldNote.updateHitbox();
 							}
-
-							if(ClientPrefs.data.downScroll)
-								sustainNote.correctionOffset = 0;
 						}
 						else if(oldNote.isSustainNote)
 						{
@@ -3279,7 +3275,6 @@ class PlayState extends MusicBeatState
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 
-						sustainNote.correctionOffset = swagNote.height / 2;
 						if(!PlayState.isPixelStage)
 						{
 							if(oldNote.isSustainNote)
@@ -3288,9 +3283,6 @@ class PlayState extends MusicBeatState
 								oldNote.scale.y /= playbackRate;
 								oldNote.updateHitbox();
 							}
-
-							if(ClientPrefs.data.downScroll)
-								sustainNote.correctionOffset = 0;
 						}
 						else if(oldNote.isSustainNote)
 						{
