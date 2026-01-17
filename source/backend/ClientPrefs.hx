@@ -249,6 +249,17 @@ class ClientPrefs {
 			}
 		}
 
+		if(ClientPrefs.data.framerate > FlxG.drawFramerate) // FPS did not apply.
+		{
+			FlxG.updateFramerate = ClientPrefs.data.framerate;
+			FlxG.drawFramerate = ClientPrefs.data.framerate;
+		}
+		else
+		{
+			FlxG.drawFramerate = ClientPrefs.data.framerate;
+			FlxG.updateFramerate = ClientPrefs.data.framerate;
+		}
+
 		reloadVolumeKeys();
 	}
 
