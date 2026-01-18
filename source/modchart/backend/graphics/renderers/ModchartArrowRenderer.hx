@@ -9,7 +9,7 @@ final helperVector = new Vector3();
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
-final class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
+class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
 	inline private function getGraphicVertices(planeWidth:Float, planeHeight:Float, flipX:Bool, flipY:Bool) {
 		var x1 = flipX ? planeWidth : -planeWidth;
 		var x2 = flipX ? -planeWidth : planeWidth;

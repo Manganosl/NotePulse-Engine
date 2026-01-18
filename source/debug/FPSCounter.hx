@@ -39,7 +39,7 @@ class FPSCounter extends Sprite
 		text.mouseEnabled = false;
 		text.multiline = true;
 		text.autoSize = LEFT;
-		text.defaultTextFormat = new TextFormat(Paths.font("pixel.otf"), 9, 0xFFFFFFFF);
+		text.defaultTextFormat = new TextFormat("_sans", 14, 0xFFFFFFFF);
 		text.filters = [ new GlowFilter(0x000000, 1, 1, 1, 4, 1) ];
 		addChild(text);
 
@@ -53,7 +53,7 @@ class FPSCounter extends Sprite
 		debugText.multiline = true;
 		debugText.autoSize = LEFT;
 		debugText.visible = false;
-		debugText.defaultTextFormat = new TextFormat(Paths.font("pixel.otf"), 8, 0xFFFFFFFF);
+		debugText.defaultTextFormat = new TextFormat("_sans", 12, 0xFFFFFFFF);
 		debugText.filters = [ new GlowFilter(0x000000, 1, 1, 1, 4, 1) ];
 		addChild(debugText);
 

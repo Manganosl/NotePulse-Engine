@@ -35,7 +35,7 @@ class Config {
 	 * However, it is not recommended for complex modcharts, as it may cause holds to look waggy,
 	 * especially when using modifiers that use rotation or complex path operations>
 	 *
-	 * Default: `false` (Regular hold rendering).
+	 * Default: `true`.
 	 */
 	public static var OPTIMIZE_HOLDS:Bool = true;
 
@@ -109,6 +109,15 @@ class Config {
 	 * Default `false`
 	 */
 	public static var HOLDS_BEHIND_STRUM:Bool = false;
+
+	/**
+	 * Skips all hold calculations
+	 * 
+	 * Not recommended for most modcharts, but this improves performance by a 90%
+	 * 
+	 * Default `false`
+	 */
+	public static var SKIP_HOLD_PATHS:Bool = false;
 }
 
 typedef ArrowPathConfig = {

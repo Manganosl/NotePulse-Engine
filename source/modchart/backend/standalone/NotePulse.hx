@@ -13,6 +13,7 @@ import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import modchart.backend.standalone.IAdapter;
+import modchart.Config;
 
 class NotePulse implements IAdapter {
 	private var __fCrochet:Float = 0;

@@ -25,6 +25,9 @@ final __matrix:Matrix = new Matrix();
 #end
 final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 	private var __lastHoldSubs:Int = -1;
+	private var __cachedHoldSegment:HoldSegmentOutput = null;
+	private var __cachedLeftOffset:Vector3 = null;
+	private var __cachedRightOffset:Vector3 = null;
 
 	var _indices:Null<Vector<Int>> = new Vector<Int>();
 
@@ -55,6 +58,19 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 	@:noCompletion
 	inline private function getHoldSegment(hold:FlxSprite, basePos:Vector3, params:ArrowData, doClip:Bool = true):HoldSegmentOutput {
 		@:privateAccess
+		if (Config.SKIP_HOLD_PATHS && __cachedHoldSegment != null) {
+			var origin = __cachedHoldSegment.origin.clone();
+			origin.y += params.__holdSubdivisionOffset;
+
+			return {
+				origin: origin,
+				left: origin.add(__cachedLeftOffset),
+				right: origin.add(__cachedRightOffset),
+				visuals: __cachedHoldSegment.visuals,
+				depth: __cachedHoldSegment.depth,
+				clipped: false
+			};
+		}
 		var holdTime = params.hitTime;
 		var parentTime = Adapter.instance.getHoldParentTime(hold);
 		var clipped = false;
@@ -140,7 +156,7 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 			}
 			quad.z = projection.z;
 		}
-		return {
+		var result = {
 			origin: curPoint,
 			left: quad0,
 			right: quad1,
@@ -148,6 +164,14 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 			depth: depth,
 			clipped: clipped
 		};
+
+		if (Config.SKIP_HOLD_PATHS && __cachedHoldSegment == null) {
+			__cachedHoldSegment = result;
+			__cachedLeftOffset = quad0.subtract(curPoint);
+			__cachedRightOffset = quad1.subtract(curPoint);
+		}
+
+		return result;
 	}
 
 	private var __long:Float = 0.0;
@@ -190,6 +214,10 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		if (item.alpha <= 0) {
 			return;
 		}
+
+		__cachedHoldSegment = null;
+		__cachedLeftOffset = null;
+		__cachedRightOffset = null;
 
 		Manager.HOLD_SIZE = item.width;
 		Manager.HOLD_SIZEDIV2 = item.width * .5;
