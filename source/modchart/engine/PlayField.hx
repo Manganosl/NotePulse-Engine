@@ -28,7 +28,7 @@ final class PlayField extends FlxSprite {
 	private var arrowRenderer:ModchartArrowRenderer;
 	private var receptorRenderer:ModchartArrowRenderer;
 	private var attachmentRenderer:ModchartArrowRenderer;
-	private var holdRenderer:ModchartHoldRenderer;
+	private var holdRenderer:Dynamic;
 	private var pathRenderer:ModchartPathRenderer;
 
 	public var projection:ModchartPerspective;
@@ -48,7 +48,8 @@ final class PlayField extends FlxSprite {
 		arrowRenderer = new ModchartArrowRenderer(this);
 		receptorRenderer = new ModchartArrowRenderer(this);
 		attachmentRenderer = new ModchartArrowRenderer(this);
-		holdRenderer = new ModchartHoldRenderer(this);
+		if(Config.NVE_HOLDS) holdRenderer = new ModchartNVHoldRenderer(this);
+		else holdRenderer = new ModchartHoldRenderer(this);
 		pathRenderer = new ModchartPathRenderer(this);
 
 		camera3D = new ModchartCamera3D();

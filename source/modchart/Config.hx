@@ -111,13 +111,11 @@ class Config {
 	public static var HOLDS_BEHIND_STRUM:Bool = false;
 
 	/**
-	 * Skips all hold calculations
-	 * 
-	 * Not recommended for most modcharts, but this improves performance by a 90%
+	 * Skips all hold calculations to look similar to Nightmare Vision Engine.
 	 * 
 	 * Default `false`
 	 */
-	public static var SKIP_HOLD_PATHS:Bool = false;
+	public static var NVE_HOLDS:Bool = false;
 }
 
 typedef ArrowPathConfig = {
