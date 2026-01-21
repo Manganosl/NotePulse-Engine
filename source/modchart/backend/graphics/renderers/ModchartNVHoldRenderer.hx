@@ -10,6 +10,23 @@ final helperVector = new Vector3();
 @:noDebug
 #end
 class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
+	private var __rotateX:Float = 0;
+    private var __rotateY:Float = 0;
+    private var __rotateZ:Float = 0;
+    private var __parentOutput:ModifierOutput;
+
+	inline private function __rotateTail(pos:Vector3) {
+        if (__parentOutput == null || (__rotateX == 0 && __rotateY == 0 && __rotateZ == 0))
+            return pos;
+
+        var tailFactor = pos.subtract(__parentOutput.pos);
+        tailFactor = ModchartUtil.rotate3DVector(tailFactor, __rotateX, __rotateY, __rotateZ);
+        var output = __parentOutput.pos.add(tailFactor);
+        
+        output.z *= 0.001 * Config.Z_SCALE;
+        return projection.transformVector(output, __parentOutput.pos);
+    }
+
 	inline private function getGraphicVertices(planeWidth:Float, planeHeight:Float, flipX:Bool, flipY:Bool) {
 		var x1 = flipX ? planeWidth : -planeWidth;
 		var x2 = flipX ? -planeWidth : planeWidth;
@@ -37,138 +54,99 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 	var __lastPlayer:Int = -1;
 
 	override public function prepare(arrow:FlxSprite) {
-		if (arrow.alpha <= 0)
-			return;
-
-		final arrowPosition = helperVector;
+		if (arrow.alpha <= 0) return;
 
 		final player = Adapter.instance.getPlayerFromArrow(arrow);
-
-		// setup the position
-		var arrowTime = Adapter.instance.getTimeFromArrow(arrow);
-		var songPos = Adapter.instance.getSongPosition();
-		var arrowDiff = arrowTime - songPos;
-
+		final lane = Adapter.instance.getLaneFromArrow(arrow);
 		final canUseLast = player == __lastPlayer;
 
 		final centered2 = canUseLast ? __lastC2 : (__lastC2 = instance.getPercent('centered2', player));
-		final orient = canUseLast ? __lastOrient : (__lastOrient = instance.getPercent('orient', player));
+		final dizzy = instance.getPercent('dizzyHolds', player);
+		__rotateX = instance.getPercent('holdRotateX', player);
+		__rotateY = instance.getPercent('holdRotateY', player);
+		__rotateZ = instance.getPercent('holdRotateZ', player);
 
-		// apply centered 2 (aka centered path)
-		if (Adapter.instance.isTapNote(arrow)) {
-			arrowDiff += FlxG.height * 0.25 * centered2;
-		} else {
-			arrowTime = songPos + (FlxG.height * 0.25 * centered2);
-			arrowDiff = arrowTime - songPos;
-		}
-		var arrowData:ArrowData = getArrowParams(arrow);
-
-		if (arrowData.hitten && arrowData.distance < 0) {
-			arrowData.distance = 0;
-		}
+		var arrowData = getArrowParams(arrow);
+		if (arrowData.hitten && arrowData.distance < 0) arrowData.distance = 0;
 
 		final shouldClip = arrowData.hitten && arrowData.distance < 0;
 		final clipRatio = shouldClip ? FlxMath.bound(1 + (arrowData.distance / (arrow.frame.frame.height * arrow.scale.y)), 0, 1) : 1;
 
-		arrowPosition.setTo(Adapter.instance.getDefaultReceptorX(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2,
-			Adapter.instance.getDefaultReceptorY(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2, 0);
+		var basePos = ModchartUtil.getHalfPos();
+		basePos.x += Adapter.instance.getDefaultReceptorX(lane, player);
+		basePos.y += Adapter.instance.getDefaultReceptorY(lane, player);
 
-		final output = instance.modifiers.getPath(arrowPosition, arrowData);
+		final output = instance.modifiers.getPath(basePos.clone(), arrowData);
+		if (output == null || (output.visuals.alpha * arrow.alpha <= 0)) return;
 
-		if (output == null) {
-		    return;
-		}
-		if (output.visuals != null && output.visuals.alpha * arrow.alpha <= 0) {
-		    return;
-		}
+		var parentTime = Adapter.instance.getHoldParentTime(arrow);
+		var parentData:ArrowData = {
+			hitTime: parentTime,
+			distance: Math.max(0, parentTime - Adapter.instance.getSongPosition()),
+			lane: lane, player: player,
+			hitten: Adapter.instance.arrowHit(arrow),
+			isTapArrow: true
+		};
+		__parentOutput = instance.modifiers.getPath(basePos.clone(), parentData);
+		__parentOutput.pos.z = (__parentOutput.pos.z - 1) * 1000;
 
-		arrowPosition.copyFrom(output.pos.clone());
+		var nextOutput = instance.modifiers.getPath(basePos.clone(), arrowData, 1, false, true);
+		var unit = nextOutput.pos.subtract(output.pos);
+		unit.normalize();
+		
+		var pathAngle = (unit.x == 0 && unit.y == 0) ? 0 : Math.atan2(unit.y, unit.x) * FlxAngle.TO_DEG - 90;
 
-		if (arrow.extraData != null && arrow.extraData["linkStrum"] != null) {
-			final nextOutputForLink = instance.modifiers.getPath(
-				new Vector3(
-					Adapter.instance.getDefaultReceptorX(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2,
-					Adapter.instance.getDefaultReceptorY(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2
-				), arrowData, 1, false, true);
-
-			arrowPosition.y = nextOutputForLink.pos.y + (arrow.extraData["linkStrum"].scale.y * 110);
-		}
-
-
-		// internal mods
-		if (orient != 0) {
-			final nextOutput = instance.modifiers.getPath(new Vector3(Adapter.instance.getDefaultReceptorX(arrowData.lane, arrowData.player)
-				+ Manager.ARROW_SIZEDIV2,
-				Adapter.instance.getDefaultReceptorY(arrowData.lane, arrowData.player)
-				+ Manager.ARROW_SIZEDIV2),
-				arrowData, 1, false, true);
-			final thisPos = output.pos;
-			final nextPos = nextOutput.pos;
-
-			output.visuals.angleZ += FlxAngle.wrapAngle((-90 + (Math.atan2(nextPos.y - thisPos.y, nextPos.x - thisPos.x) * FlxAngle.TO_DEG)) * orient);
-		}
-
-		__lastPlayer = player;
-
-		// prepare the instruction for drawing
-		final projectionDepth = arrowPosition.z;
-		final depth = projectionDepth;
-
-		var depthScale = 1 / depth;
 		var planeWidth = arrow.frame.frame.width * arrow.scale.x * .5;
 		var planeHeight = arrow.frame.frame.height * arrow.scale.y * .5;
-
-		arrow._z = (depth - 1) * 1000;
-
 		var planeVertices = getGraphicVertices(planeWidth, planeHeight, arrow.flipX, arrow.flipY);
-		var projectionZ:haxe.ds.Vector<Float> = new haxe.ds.Vector(Math.ceil(planeVertices.length / 2));
+		var projectionZ:haxe.ds.Vector<Float> = new haxe.ds.Vector(4);
+
+		final zScale:Float = output.pos.z != 0 ? (1 / output.pos.z) : 1;
+		var curPoint = output.pos.clone();
+		curPoint.z = 0;
 
 		var vertPointer = 0;
-		@:privateAccess do {
+		while (vertPointer < planeVertices.length) {
 			rotationVector.setTo(planeVertices[vertPointer], planeVertices[vertPointer + 1], 0);
+			var rotation = ModchartUtil.rotate3DVector(rotationVector, 0, output.visuals.angleY * dizzy, 0);
+			rotation = ModchartUtil.rotate3DVector(rotation, output.visuals.angleX, output.visuals.angleY, pathAngle + output.visuals.angleZ);
 
-			// The result of the vert rotation
-			var rotation = ModchartUtil.rotate3DVector(rotationVector, output.visuals.angleX, output.visuals.angleY,
-				ModchartUtil.getFrameAngle(arrow) + output.visuals.angleZ + arrow.angle);
-
-			// apply skewness
+			@:privateAccess
 			if (output.visuals.skewX != 0 || output.visuals.skewY != 0) {
 				matrix.identity();
-
 				matrix.b = ModchartUtil.tan(output.visuals.skewY * FlxAngle.TO_RAD);
 				matrix.c = ModchartUtil.tan(output.visuals.skewX * FlxAngle.TO_RAD);
-
-				rotation.x = matrix.__transformX(rotation.x, rotation.y);
-				rotation.y = matrix.__transformY(rotation.x, rotation.y);
+				var tx = matrix.__transformX(rotation.x, rotation.y);
+				var ty = matrix.__transformY(rotation.x, rotation.y);
+				rotation.x = tx; rotation.y = ty;
 			}
-			rotation.x = rotation.x * depthScale * output.visuals.scaleX;
-			rotation.y = rotation.y * depthScale * output.visuals.scaleY;
 
-			var view = new Vector3(rotation.x + arrowPosition.x, rotation.y + arrowPosition.y, rotation.z);
+			rotation.x *= zScale * output.visuals.scaleX;
+			rotation.y *= zScale * output.visuals.scaleY;
+
+			var view = new Vector3(rotation.x + curPoint.x, rotation.y + curPoint.y, rotation.z);
+			view = __rotateTail(view);
+
+			@:privateAccess
 			if (Config.CAMERA3D_ENABLED)
 				view = instance.camera3D.applyViewTo(view);
-			view.z *= 0.001 * Config.Z_SCALE;
+			
+			view.z *= 0.001;
 
-			// The result of the perspective projection of rotation
-			final projection = this.projection.transformVector(view);
+			final projection = (view.z != 0) ? this.projection.transformVector(view) : view;
 
-			final cam = arrow._cameras != null
-				? arrow._cameras[0]
-				: Adapter.instance.getArrowCamera()[0];
+            final cam = arrow._cameras != null ? arrow._cameras[0] : Adapter.instance.getArrowCamera()[0];
+            if(cam != null){
+                planeVertices[vertPointer] = projection.x - cam.scroll.x * (arrow.scrollFactor.x);
+                planeVertices[vertPointer + 1] = projection.y - cam.scroll.y * (arrow.scrollFactor.y);
+            } else {
+                planeVertices[vertPointer] = projection.x;
+                planeVertices[vertPointer + 1] = projection.y;
+            }
 
-			if(cam != null){
-				planeVertices[vertPointer] = projection.x - cam.scroll.x * (arrow.scrollFactor.x);
-				planeVertices[vertPointer + 1] = projection.y - cam.scroll.y * (arrow.scrollFactor.y);
-			} else {
-				planeVertices[vertPointer] = projection.x;
-				planeVertices[vertPointer + 1] = projection.y;
-			}
-
-			// stores depth from this vert to use it for perspective correction on uv's
-			projectionZ[Math.floor(vertPointer / 2)] = Math.max(0.0001, projection.z);
-
-			vertPointer = vertPointer + 2;
-		} while (vertPointer < planeVertices.length);
+            projectionZ[Math.floor(vertPointer / 2)] = Math.max(0.0001, projection.z);
+            vertPointer += 2;
+        }
 
         // @formatter:off
 		// this is confusing af
