@@ -28,7 +28,7 @@ final class PlayField extends FlxSprite {
 	private var arrowRenderer:ModchartArrowRenderer;
 	private var receptorRenderer:ModchartArrowRenderer;
 	private var attachmentRenderer:ModchartArrowRenderer;
-	private var holdRenderer:Dynamic;
+	private var holdRenderer:ModchartRenderer<FlxSprite>;
 	private var pathRenderer:ModchartPathRenderer;
 
 	public var projection:ModchartPerspective;
