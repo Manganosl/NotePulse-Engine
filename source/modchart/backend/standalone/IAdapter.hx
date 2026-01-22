@@ -9,6 +9,7 @@ interface IAdapter {
 
 	// Song-related stuff
 	public function getSongPosition():Float; // Current song position
+	public function getPixelStage():Bool; // If the stage is pixel
 	// public function getCrochet():Float           // Current beat crochet
 	public function getCurrentBeat():Float; // Current beat
 	public function getCurrentCrochet():Float; // Current beat

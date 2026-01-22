@@ -15,6 +15,12 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
     private var __rotateZ:Float = 0;
     private var __parentOutput:ModifierOutput;
 
+	public function new(instance:PlayField) {
+		super(instance);
+
+		instance.setPercent('dizzyHolds', 1, -1);
+	}
+
 	inline private function __rotateTail(pos:Vector3) {
         if (__parentOutput == null || (__rotateX == 0 && __rotateY == 0 && __rotateZ == 0))
             return pos;
@@ -70,7 +76,7 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 			arrowData.distance = 0;
 		}
 
-		final fullHeight = arrow.frame.frame.height * arrow.scale.y;
+		final fullHeight = arrow.frame.frame.height * arrow.scale.y * (Adapter.instance.getPixelStage() ? 8 : 1);
 		final clipRatio = (isHitten && realDistance < 0) 
 			? FlxMath.bound(1 + (realDistance / fullHeight), 0, 1) 
 			: 1;

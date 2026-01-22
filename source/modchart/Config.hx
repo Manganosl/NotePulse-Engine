@@ -115,7 +115,7 @@ class Config {
 	 * 
 	 * Default `false`
 	 */
-	public static var NVE_HOLDS:Bool = true;
+	public static var NVE_HOLDS:Bool = false;
 }
 
 typedef ArrowPathConfig = {

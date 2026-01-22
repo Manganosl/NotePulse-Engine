@@ -31,6 +31,10 @@ class NotePulse implements IAdapter {
 		return Conductor.songPosition;
 	}
 
+	public function getPixelStage():Bool {
+		return PlayState.isPixelStage;
+	}
+
 	public function getCurrentBeat():Float {
 		@:privateAccess
 		if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState')
