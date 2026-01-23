@@ -163,6 +163,15 @@ class MusicBeatSubstate extends FlxSubState
 			}
 		}
 
+		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F2)
+			backend.utils.WindowUtil.showConsole();
+
+		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5){
+			Mods.modConfig = null;
+			psychlua.GlobalHandler.stopGlobalHX();
+			MusicBeatState.switchState(new states.MainMenuState());
+		}
+
 		super.update(elapsed);
 	}
 

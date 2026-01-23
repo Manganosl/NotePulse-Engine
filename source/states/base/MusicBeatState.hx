@@ -145,17 +145,7 @@ class MusicBeatState extends FlxUIState
 		#end
 	}
 
-	public function startGlobalScript(){
-		var input:String = Paths.mods('${Mods.currentModDirectory}/Global.hx');
-		var global = initHScript(input);
-		if(global != null){
-			callOnHScript("onGlobal");
-		} else
-			Log.error('$input does not exist!');
-	}
-
 	override function create() {
-
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		if(luaDebugGroup == null){
 			luaDebugGroup = new FlxTypedGroup<psychlua.DebugLuaText>();
@@ -220,6 +210,12 @@ class MusicBeatState extends FlxUIState
 
 		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F2)
 			backend.utils.WindowUtil.showConsole();
+
+		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5){
+			Mods.modConfig = null;
+			psychlua.GlobalHandler.stopGlobalHX();
+			MusicBeatState.switchState(new states.MainMenuState());
+		}
 
 		super.update(elapsed);
 	}

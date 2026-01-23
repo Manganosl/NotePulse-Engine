@@ -11,6 +11,7 @@ import openfl.events.IOErrorEvent;
 import flixel.util.FlxSort;
 import haxe.Json;
 import states.scripted.ScriptedState;
+import psychlua.GlobalHandler;
 
 class ModSelector extends MusicBeatState {
 	var exclusions:Array<String> = ["assets", "data", "fonts", "images", "music", "sounds", "videos", "ndlls", "scripts", "shaders", "characters", "songs", "stages", "weeks", "states", "custom_events", "custom_notetypes"];
@@ -219,7 +220,7 @@ class ModSelector extends MusicBeatState {
 					FlxG.sound.music.stop();
 					Mods.modConfig = Json.parse(File.getContent(path));
 					if(Mods.modConfig != null && Mods.modConfig.hasGlobalScript != null && Mods.modConfig.hasGlobalScript) 
-						startGlobalScript();
+						GlobalHandler.loadGlobalHX();
 					MusicBeatState.switchState(new states.menus.TitleState());
 					return;
 				}

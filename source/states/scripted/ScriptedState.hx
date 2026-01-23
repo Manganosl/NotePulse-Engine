@@ -78,11 +78,6 @@ class ScriptedState extends MusicBeatState
 			return;
 		}
 
-		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5){
-			Mods.modConfig = null;
-			MusicBeatState.switchState(new states.MainMenuState());
-		}
-
 		callOnHScript("onUpdatePost", [elapsed]);
 	}
 

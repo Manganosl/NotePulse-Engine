@@ -70,9 +70,6 @@ class ScriptedSubstate extends MusicBeatSubstate
 			return;
 		}
 
-		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5)
-			MusicBeatState.switchState(new states.MainMenuState());
-
 		callOnHScript("onUpdatePost", [elapsed]);
 	}
 
