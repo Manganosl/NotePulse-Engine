@@ -17,6 +17,7 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 
 	public function new(instance:PlayField) {
 		super(instance);
+		this.instance = instance;
 
 		instance.setPercent('dizzyHolds', 1, -1);
 	}
@@ -40,18 +41,10 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 		var y2 = flipY ? -planeHeight : planeHeight;
 
 		return [
-			// top left
-			x1,
-			y1,
-			// top right
-			x2,
-			y1,
-			// bottom left
-			x1,
-			y2,
-			// bottom right
-			x2,
-			y2
+			x1, y1, // top left
+			x2, y1, // top right
+			x1, y2, // bottom left
+			x2, y2  // bottom right
 		];
 	}
 
@@ -76,7 +69,8 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 			arrowData.distance = 0;
 		}
 
-		final fullHeight = arrow.frame.frame.height * arrow.scale.y * (Adapter.instance.getPixelStage() ? 8 : 1);
+		final offScale = instance.getPercent("scale", -1) + instance.getPercent("scaleY", -1) + instance.getPercent('scale$lane', -1) + instance.getPercent('scaleY$lane', -1);
+		final fullHeight = (arrow.frame.frame.height * arrow.scale.y * (Adapter.instance.getPixelStage() ? 8 : 1)) - offScale;
 		final clipRatio = (isHitten && realDistance < 0) 
 			? FlxMath.bound(1 + (realDistance / fullHeight), 0, 1) 
 			: 1;
@@ -120,7 +114,7 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 			x2, y2  // bottom right
 		];
 
-		var projectionZ:haxe.ds.Vector<Float> = new haxe.ds.Vector(4);
+		var projectionZ:NativeVector<Float> = new NativeVector(4);
 		final zScale:Float = output.pos.z != 0 ? (1 / output.pos.z) : 1;
 		var vertPointer = 0;
 		while (vertPointer < planeVertices.length) {
@@ -167,13 +161,13 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 			uv.left,  uv.bottom, 1 / projectionZ[2],
 			uv.right, uv.bottom, 1 / projectionZ[3]
 			#else
-			uv.x,          FlxMath.lerp(uv.height, uv.y, clipRatio), 1 / projectionZ[0],
-			uv.width,      FlxMath.lerp(uv.height, uv.y, clipRatio), 1 / projectionZ[1],
-			uv.width,      uv.height, 1 / projectionZ[3],
+			uv.x,     FlxMath.lerp(uv.height, uv.y, clipRatio), 1 / projectionZ[0],
+			uv.width, FlxMath.lerp(uv.height, uv.y, clipRatio), 1 / projectionZ[1],
+			uv.width, uv.height, 1 / projectionZ[3],
 			
-			uv.x,          FlxMath.lerp(uv.height, uv.y, clipRatio), 1 / projectionZ[0],
-			uv.x,          uv.height, 1 / projectionZ[2],
-			uv.width,      uv.height, 1 / projectionZ[3]
+			uv.x,     FlxMath.lerp(uv.height, uv.y, clipRatio), 1 / projectionZ[0],
+			uv.x,     uv.height, 1 / projectionZ[2],
+			uv.width, uv.height, 1 / projectionZ[3]
 			#end
 		]);
 
@@ -207,8 +201,8 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 			final cTransform = instruction.colorData[0];
 			cTransform.alphaMultiplier *= camera.alpha;
 
-			var batch = camera.startTrianglesBatch( item.graphic, item.antialiasing, true, item.blend, true, item.shader);
-			batch.addGradientTriangles( instruction.vertices, instruction.indices, instruction.uvt, null, getZoomAwareBounds(camera), [cTransform]);
+			var batch = camera.startTrianglesBatch(item.graphic, item.antialiasing, true, item.blend, true, item.shader);
+			batch.addGradientTriangles(instruction.vertices, instruction.indices, instruction.uvt, null, getZoomAwareBounds(camera), [cTransform]);
 		}
 	}
 

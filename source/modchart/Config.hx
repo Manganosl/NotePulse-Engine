@@ -113,9 +113,9 @@ class Config {
 	/**
 	 * Skips all hold calculations to look similar to Nightmare Vision Engine.
 	 * 
-	 * Default `false`
+	 * Default `true`
 	 */
-	public static var NVE_HOLDS:Bool = false;
+	public static var NVE_HOLDS:Bool = true;
 }
 
 typedef ArrowPathConfig = {
