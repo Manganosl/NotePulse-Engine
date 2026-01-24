@@ -1839,6 +1839,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			remove(eventLockOverlay);
 			remove(gfLockOverlay);
 			remove(timeLine);
+			remove(eventIcon);
 			destroyed = true;
 		}
 
@@ -1867,6 +1868,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		waveformSprite = new FlxSprite(gridBg.x + (SHOW_EVENT_COLUMN ? GRID_SIZE : 0), 0).makeGraphic(1, 1, 0x00FFFFFF);
 		waveformSprite.scrollFactor.x = 0;
 		waveformSprite.visible = false;
+		if(chartEditorSave.data.waveformColor != null)
+			waveformSprite.color = CoolUtil.colorFromString(chartEditorSave.data.waveformColor);
 		add(waveformSprite);
 
 		dummyArrow = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);

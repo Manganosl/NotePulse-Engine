@@ -88,10 +88,9 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 		var unit = nextOutput.pos.subtract(output.pos);
 		unit.normalize();
 
-		var pathAngle = (unit.x == 0 && unit.y == 0) ? 0 : Math.atan2(unit.y, unit.x) * FlxAngle.TO_DEG - 90;
-		
-		var planeWidth = arrow.frame.frame.width * arrow.scale.x * .5;
 		var isDownscroll = Adapter.instance.getDownscroll(); 
+		var pathAngle = (unit.x == 0 && unit.y == 0) ? 0 : Math.atan2(unit.y, unit.x) * FlxAngle.TO_DEG - 90 + (isDownscroll ? 180 : 0);
+		var planeWidth = arrow.frame.frame.width * arrow.scale.x * .5;
 
 		var y1:Float = 0;
 		var y2:Float = fullHeight * clipRatio;

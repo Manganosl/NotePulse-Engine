@@ -1,17 +1,16 @@
 package substates.options;
 
 import backend.ExtraKeysHandler;
+import backend.Song.SwagSong;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.display.shapes.FlxShapeCircle;
 import flixel.input.keyboard.FlxKey;
-import flixel.input.gamepad.FlxGamepadInputID;
 import lime.system.Clipboard;
 import flixel.util.FlxGradient;
 import objects.StrumNote;
 import objects.Note;
 
-import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 
 class NotesSubState extends MusicBeatSubstate
@@ -47,10 +46,12 @@ class NotesSubState extends MusicBeatSubstate
 	var controllerPointer:FlxSprite;
 	var _lastControllerMode:Bool = false;
 	var tipTxt:FlxText;
+	var oldSONG:SwagSong;
 
 	public function new() {
 		super();
 
+		oldSONG = PlayState.SONG;
 		PlayState.SONG = {
 			song: 'Test',
 			notes: [],
@@ -733,4 +734,9 @@ class NotesSubState extends MusicBeatSubstate
 	function setShaderColor(value:FlxColor) dataArray[curSelectedNote][curSelectedMode] = value;
 	function getShaderColor() return dataArray[curSelectedNote][curSelectedMode];
 	function getShader() return Note.globalRgbShaders[curSelectedNote];
+
+	override function destroy() {
+		PlayState.SONG = oldSONG;
+		super.destroy();
+	}
 }
