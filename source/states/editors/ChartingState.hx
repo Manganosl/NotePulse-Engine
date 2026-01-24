@@ -304,6 +304,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
+		bg.zoomFactor = 0;
 		bg.scrollFactor.set();
 		add(bg);
 
@@ -345,7 +346,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		eventsBox = new PsychUIBox(0, 0, 300, 0, ['Events', 'Modchart']);
 		eventsBox.selectedName = 'Events';
 		eventsBox.scrollFactor.set();
-		eventsBox.zoomFactor = 0;
 		eventsBox.canMove = false;
 		eventsBox.canMinimize = false;
 		mainBox.getTab('Actions').menu.add(eventsBox);
@@ -434,6 +434,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		songPosSlider.bar.alpha = 0.5;
 		songPosSlider.value = (FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0;
 		songPosSlider.scrollFactor.set(0, 0);
+		songPosSlider.cameras = [camUI];
 		add(songPosSlider);
 
 		var tipText:FlxText = new FlxText(FlxG.width - 210, FlxG.height - 30, 200, 'Press F1 for Help', 20);
@@ -671,9 +672,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var backupLimit:Int = 10;
 
 	var lastBeatHit:Int = 0;
-	private var isCrosshair:Bool = false;
+	var isCrosshair:Bool = false;
+	var intendedCamZoom:Float = 1;
 	override function update(elapsed:Float)
 	{
+		FlxG.camera.zoom = CoolUtil.fpsLerp(FlxG.camera.zoom, intendedCamZoom, 0.1);
 		if(FlxG.mouse.justPressed || FlxG.mouse.justPressedRight || FlxG.mouse.justPressedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickDown'));
 		if(FlxG.mouse.justReleased || FlxG.mouse.justReleasedRight || FlxG.mouse.justReleasedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickUp'));
 		if(FlxG.keys.justPressed.ANY) FlxG.sound.play(Paths.sound('chartingSounds/keyboard${FlxG.random.int(1,3)}'));
@@ -944,9 +947,13 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				return;
 			}
 			else if(FlxG.keys.pressed.CONTROL && !isMovingNotes && (FlxG.keys.justPressed.Z || FlxG.keys.justPressed.Y || FlxG.keys.justPressed.X ||
-				FlxG.keys.justPressed.C || FlxG.keys.justPressed.V || FlxG.keys.justPressed.A || FlxG.keys.justPressed.S))
+				FlxG.keys.justPressed.C || FlxG.keys.justPressed.V || FlxG.keys.justPressed.A || FlxG.keys.justPressed.S || FlxG.keys.justPressed.PLUS || FlxG.keys.justPressed.MINUS))
 			{
 				canContinue = false;
+				if(FlxG.keys.justPressed.PLUS)
+					intendedCamZoom += 0.1;
+				if(FlxG.keys.justPressed.MINUS)
+					intendedCamZoom -= 0.1;
 				if(FlxG.keys.justPressed.S)
 					saveChart();
 				else if(FlxG.keys.justPressed.Z)

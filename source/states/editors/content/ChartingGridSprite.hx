@@ -2,7 +2,6 @@ package states.editors.content;
 
 import flixel.addons.display.FlxGridOverlay;
 
-// Laggier than a single sprite for the grid, but this is to avoid having to re-create the sprite constantly
 class ChartingGridSprite extends FlxSprite
 {
 	public var rows(default, set):Float = 16;
@@ -28,7 +27,6 @@ class ChartingGridSprite extends FlxSprite
 		recalcHeight();
 
 		vortexLine = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
-		vortexLine.scale.x = this.width;
 		vortexLine.scrollFactor.x = 0;
 		vortexLine.color = 0xFF660000;
 		vortexLine.updateHitbox();
@@ -51,11 +49,20 @@ class ChartingGridSprite extends FlxSprite
 
 	override function draw()
 	{
-		if(!visible || alpha == 0 || y - camera.scroll.y >= FlxG.height) return;
+		if(!visible || alpha == 0) return;
+
+		var cam = camera;
+		var camTop = cam.scroll.y;
+		var camBottom = cam.scroll.y + (FlxG.height / cam.zoom);
+
+		// Cull if entire grid is below camera view
+		if (y >= camBottom) return;
+
 		scale.y = ChartingState.GRID_SIZE * Math.min(1, rows);
 		offset.y = -0.5 * (scale.y - 1);
 
 		super.draw();
+
 		if(rows <= 1)
 		{
 			_drawStripes();
@@ -63,17 +70,21 @@ class ChartingGridSprite extends FlxSprite
 		}
 
 		var initialY:Float = y;
+
 		for (i in 1...Math.ceil(rows))
 		{
 			y += ChartingState.GRID_SIZE + spacing;
-			if(y - camera.scroll.y >= FlxG.height)
+
+			if (y >= camBottom)
 				break;
 
 			animation.play((i % 2 == 1) ? 'odd' : 'even', true);
 			scale.y = ChartingState.GRID_SIZE * Math.min(1, rows - i);
 			offset.y = -0.5 * (scale.y - 1);
+
 			super.draw();
 		}
+
 		animation.play('even', true);
 		y = initialY;
 
@@ -82,13 +93,18 @@ class ChartingGridSprite extends FlxSprite
 		if(vortexLineEnabled)
 		{
 			vortexLine.x = this.x;
+			vortexLine.scale.x = this.width;
+			vortexLine.updateHitbox();
+
 			vortexLine.y = this.y - 1;
+
 			while (true)
 			{
 				vortexLine.y += vortexLineSpace;
 				if(vortexLine.y >= this.y + this.height) break;
 
-				vortexLine.draw();
+				if (vortexLine.y >= camTop && vortexLine.y <= camBottom)
+					vortexLine.draw();
 			}
 		}
 	}
@@ -101,6 +117,7 @@ class ChartingGridSprite extends FlxSprite
 				stripe.x = this.x;
 			else 
 				stripe.x = this.x + ChartingState.GRID_SIZE * column - stripe.width/2;
+
 			stripe.draw();
 		}
 	}
@@ -108,6 +125,7 @@ class ChartingGridSprite extends FlxSprite
 	public function updateStripes()
 	{
 		if(stripe == null || !stripe.exists) return;
+
 		stripe.y = this.y;
 		stripe.setGraphicSize(2, this.height);
 		stripe.updateHitbox();
