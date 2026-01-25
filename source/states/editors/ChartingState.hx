@@ -709,7 +709,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			}
 		}
 
-		ClientPrefs.toggleVolumeKeys(PsychUIInputText.focusOn == null);
+		ClientPrefs.toggleVolumeKeys((PsychUIInputText.focusOn == null && !FlxG.keys.pressed.CONTROL));
 
 		var lastTime:Float = Conductor.songPosition;
 		var holdingAlt:Bool = FlxG.keys.pressed.ALT;
