@@ -950,9 +950,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				FlxG.keys.justPressed.C || FlxG.keys.justPressed.V || FlxG.keys.justPressed.A || FlxG.keys.justPressed.S || FlxG.keys.justPressed.PLUS || FlxG.keys.justPressed.MINUS))
 			{
 				canContinue = false;
-				if(FlxG.keys.justPressed.PLUS)
+				if(FlxG.keys.justPressed.PLUS && intendedCamZoom < 1.09)
 					intendedCamZoom += 0.1;
-				if(FlxG.keys.justPressed.MINUS)
+				if(FlxG.keys.justPressed.MINUS && intendedCamZoom > 0.51)
 					intendedCamZoom -= 0.1;
 				if(FlxG.keys.justPressed.S)
 					saveChart();
@@ -1544,6 +1544,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		FlxG.camera.scroll.y = scrollY;
 		lastFocus = PsychUIInputText.focusOn;
+
+		for(icon in icons)
+			icon.zoomFactor = 0.5;
 	}
 
 	function moveSelectedNotes(noteData:Int = 0, lastY:Float)
@@ -1948,6 +1951,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			eventIcon.alpha = 0.6;
 			eventIcon.setGraphicSize(30, 30);
 			eventIcon.updateHitbox();
+			eventIcon.zoomFactor = 0.5;
 			eventIcon.scrollFactor.set();
 			add(eventIcon);
 			eventIcon.x = iconX + (GRID_SIZE * 0.5) - eventIcon.width/2;
@@ -1960,6 +1964,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			mustHitIndicator = FlxSpriteUtil.drawTriangle(new FlxSprite(0, iconY - 20).makeGraphic(16, 16, FlxColor.TRANSPARENT), 0, 0, 16);
 			mustHitIndicator.scrollFactor.set();
 			mustHitIndicator.flipY = true;
+			mustHitIndicator.zoomFactor = 0.5;
 			mustHitIndicator.offset.x += mustHitIndicator.width/2;
 			add(mustHitIndicator);
 		}
@@ -1977,6 +1982,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			icon.y = iconY;
 			icon.alpha = 0.6;
 			icon.scrollFactor.set();
+			icon.zoomFactor = 0.5;
 			icon.scale.set(0.3, 0.3);
 			icon.updateHitbox();
 			icon.ID = i+1;
@@ -2601,7 +2607,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	}
 
 	var playbackSlider:PsychUISlider;
-
 	var mouseSnapCheckBox:PsychUICheckBox;
 	var ignoreProgressCheckBox:PsychUICheckBox;
 	var hitsoundPlayerStepper:PsychUINumericStepper;

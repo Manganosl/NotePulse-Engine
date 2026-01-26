@@ -77,6 +77,15 @@ class FlxSkewedSprite extends FlxSprite
 		if (isPixelPerfectRender(camera))
 			_point.floor();
 
+		if(__shouldDoZoomFactor()) {
+			_matrix.translate(-camera.width / 2, -camera.height / 2);
+
+			var requestedZoom = (camera.zoom >= 0 ? Math.max : Math.min)(FlxMath.lerp(1, camera.zoom, zoomFactor), 0);
+			var diff = requestedZoom / camera.zoom;
+			_matrix.scale(diff, diff);
+			_matrix.translate(camera.width / 2, camera.height / 2);
+		}
+
 		_matrix.translate(_point.x, _point.y);
 		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, ((shader is CustomShader) ? shader.shader : shader));
 	}
