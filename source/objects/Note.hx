@@ -494,7 +494,7 @@ class Note extends FlxSkewedSprite
 	{
 		strum = myStrum;
 		var noteSpeed:Float = songSpeed * multSpeed;
-		var strumDir:Float = myStrum.direction;
+		var strumDir:Float = myStrum.direction + this.offsetDirection;
 		
 		distance = getDistance(strumTime - Conductor.songPosition, noteSpeed, myStrum);
 		var scrollMult:Int = (myStrum.downScroll ? -1 : 1);
