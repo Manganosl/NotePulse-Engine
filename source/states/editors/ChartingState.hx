@@ -676,6 +676,15 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var intendedCamZoom:Float = 1;
 	override function update(elapsed:Float)
 	{
+		if(icons != null){
+			var iconX:Float = gridBg.x;
+			eventIcon.x = iconX + (GRID_SIZE * 0.5) - eventIcon.width/2;
+			iconX += GRID_SIZE;
+			for(icon in icons){
+				icon.x = CoolUtil.fpsLerp(icon.x, iconX + GRID_SIZE * ((GRID_COLUMNS_PER_PLAYER/2)-1) - (icon.width/2), 0.1);
+				iconX += GRID_SIZE * GRID_COLUMNS_PER_PLAYER;
+			}
+		}
 		FlxG.camera.zoom = CoolUtil.fpsLerp(FlxG.camera.zoom, intendedCamZoom, 0.1);
 		if(FlxG.mouse.justPressed || FlxG.mouse.justPressedRight || FlxG.mouse.justPressedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickDown'));
 		if(FlxG.mouse.justReleased || FlxG.mouse.justReleasedRight || FlxG.mouse.justReleasedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickUp'));
@@ -1842,7 +1851,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			remove(eventLockOverlay);
 			remove(gfLockOverlay);
 			remove(timeLine);
-			remove(eventIcon);
 			destroyed = true;
 		}
 
@@ -1944,7 +1952,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		var columns:Int = 0;
 		var iconX:Float = gridBg.x;
 		var iconY:Float = 50;
-		if(SHOW_EVENT_COLUMN)
+		if(SHOW_EVENT_COLUMN && eventIcon == null)
 		{
 			eventIcon = new FlxSprite(0, iconY).loadGraphic(Paths.image('editors/eventArrow'));
 			eventIcon.antialiasing = ClientPrefs.data.antialiasing;
@@ -1970,27 +1978,26 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		}
 
 		var gridStripes:Array<Int> = [];
-		for(i in 0...icons.length)
-			remove(icons[i]);
-		icons = [];
-		for (i in 0...GRID_PLAYERS)
-		{
-			if(columns > 0) gridStripes.push(columns);
-			columns += GRID_COLUMNS_PER_PLAYER;
+		if(icons.length != GRID_PLAYERS){
+			for (i in 0...GRID_PLAYERS)
+			{
+				if(columns > 0) gridStripes.push(columns);
+				columns += GRID_COLUMNS_PER_PLAYER;
 
-			var icon:HealthIcon = new HealthIcon();
-			icon.y = iconY;
-			icon.alpha = 0.6;
-			icon.scrollFactor.set();
-			icon.zoomFactor = 0.5;
-			icon.scale.set(0.3, 0.3);
-			icon.updateHitbox();
-			icon.ID = i+1;
-			add(icon);
-			icons.push(icon);
-			
-			icon.x = iconX + GRID_SIZE * ((GRID_COLUMNS_PER_PLAYER/2)-1) - icon.width/2;
-			iconX += GRID_SIZE * GRID_COLUMNS_PER_PLAYER;
+				var icon:HealthIcon = new HealthIcon();
+				icon.y = iconY;
+				icon.alpha = 0.6;
+				icon.scrollFactor.set();
+				icon.zoomFactor = 0.5;
+				icon.scale.set(0.3, 0.3);
+				icon.updateHitbox();
+				icon.ID = i+1;
+				add(icon);
+				icons.push(icon);
+				
+				icon.x = iconX + GRID_SIZE * ((GRID_COLUMNS_PER_PLAYER/2)-1) - icon.width/2;
+				iconX += GRID_SIZE * GRID_COLUMNS_PER_PLAYER;
+			}
 		}
 		prevGridBg.stripes = nextGridBg.stripes = gridBg.stripes = gridStripes;
 	}
