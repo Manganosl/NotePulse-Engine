@@ -674,6 +674,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var lastBeatHit:Int = 0;
 	var isCrosshair:Bool = false;
 	var intendedCamZoom:Float = 1;
+	var iconDiff:Int = 0;
 	override function update(elapsed:Float)
 	{
 		if(icons != null){
@@ -681,7 +682,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			eventIcon.x = iconX + (GRID_SIZE * 0.5) - eventIcon.width/2;
 			iconX += GRID_SIZE;
 			for(icon in icons){
-				icon.x = CoolUtil.fpsLerp(icon.x, iconX + GRID_SIZE * ((GRID_COLUMNS_PER_PLAYER/2)-1) - (icon.width/2), 0.1);
+				icon.x = CoolUtil.fpsLerp(icon.x, iconX + GRID_SIZE * ((GRID_COLUMNS_PER_PLAYER/2)-1) - (icon.width/2) + ((icon.width/2)*1.5)*iconDiff, 0.1);
 				iconX += GRID_SIZE * GRID_COLUMNS_PER_PLAYER;
 			}
 		}
@@ -959,10 +960,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				FlxG.keys.justPressed.C || FlxG.keys.justPressed.V || FlxG.keys.justPressed.A || FlxG.keys.justPressed.S || FlxG.keys.justPressed.PLUS || FlxG.keys.justPressed.MINUS))
 			{
 				canContinue = false;
-				if(FlxG.keys.justPressed.PLUS && intendedCamZoom < 1.09)
+				if(FlxG.keys.justPressed.PLUS && intendedCamZoom < 1.09){
 					intendedCamZoom += 0.1;
-				if(FlxG.keys.justPressed.MINUS && intendedCamZoom > 0.51)
+					iconDiff -= 1;
+				}
+				if(FlxG.keys.justPressed.MINUS && intendedCamZoom > 0.51){
 					intendedCamZoom -= 0.1;
+					iconDiff += 1;
+				}
 				if(FlxG.keys.justPressed.S)
 					saveChart();
 				else if(FlxG.keys.justPressed.Z)

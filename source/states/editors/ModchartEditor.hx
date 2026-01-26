@@ -219,12 +219,22 @@ class ModchartEditor extends MusicBeatState
 		gridBg.screenCenter(X);
 		prevGridBg = new ChartingGridSprite(1, 0xFF1F1F1F, 0xFF111111);
 		nextGridBg = new ChartingGridSprite(1, 0xFF1F1F1F, 0xFF111111);
-		prevGridBg.x = nextGridBg.x = gridBg.x = camUI.width-gridBg.width;
+		prevGridBg.x = nextGridBg.x = gridBg.x = camUI.width-gridBg.width-25;
 		prevGridBg.stripes = nextGridBg.stripes = gridBg.stripes = [1];
 		gridBg.cameras = prevGridBg.cameras = nextGridBg.cameras = [camUI];
 		add(prevGridBg);
 		add(nextGridBg);
 		add(gridBg);
+
+		var whiteRect1:FlxSprite = new FlxSprite(gridBg.x-2, 0).makeGraphic(2, FlxG.height, FlxColor.WHITE);
+		whiteRect1.scrollFactor.set();
+		whiteRect1.cameras = [camUI];
+		add(whiteRect1);
+
+		var whiteRect2:FlxSprite = new FlxSprite(gridBg.x + gridBg.width, 0).makeGraphic(2, FlxG.height, FlxColor.WHITE);
+		whiteRect2.scrollFactor.set();
+		whiteRect2.cameras = [camUI];
+		add(whiteRect2);
 
 		dummyArrow = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
 		dummyArrow.setGraphicSize(ChartingState.GRID_SIZE, ChartingState.GRID_SIZE);
@@ -236,11 +246,8 @@ class ModchartEditor extends MusicBeatState
 		add(behindRenderedNotes);
 		add(curRenderedNotes);
 
-		vortexIndicator = new FlxSprite(gridBg.x - ChartingState.GRID_SIZE - (ChartingState.GRID_SIZE/2), FlxG.height/2).loadGraphic(Paths.image('editors/vortex_indicator'));
-		vortexIndicator.setGraphicSize(ChartingState.GRID_SIZE*2);
-		vortexIndicator.updateHitbox();
+		vortexIndicator = new FlxSprite(gridBg.x, FlxG.height/2).makeGraphic(ChartingState.GRID_SIZE, 2, FlxColor.RED);
 		vortexIndicator.scrollFactor.set();
-		vortexIndicator.active = false;
 		vortexIndicator.cameras = [camUI];
 		add(vortexIndicator);
 
@@ -831,11 +838,17 @@ class ModchartEditor extends MusicBeatState
 		if (FlxG.keys.justPressed.SPACE && PsychUIInputText.focusOn == null)
 			togglePause();
 
+		if (FlxG.keys.justPressed.D && PsychUIInputText.focusOn == null)
+			seek(Conductor.stepCrochet);
+
+		if (FlxG.keys.justPressed.A && PsychUIInputText.focusOn == null)
+			seek(-Conductor.stepCrochet);
+
 		if (FlxG.keys.justPressed.RIGHT && PsychUIInputText.focusOn == null)
-			seek(SEEK_STEP);
+			seek(Conductor.stepCrochet*4*4);
 
 		if (FlxG.keys.justPressed.LEFT && PsychUIInputText.focusOn == null)
-			seek(-SEEK_STEP);
+			seek(-Conductor.stepCrochet*4*4);
 
 		if((controls.BACK || FlxG.keys.justPressed.ESCAPE) && PsychUIInputText.focusOn == null)
 		{
