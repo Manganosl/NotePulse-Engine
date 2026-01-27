@@ -9,7 +9,7 @@ final helperVector = new Vector3();
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
-class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
+final class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
 	inline private function getGraphicVertices(planeWidth:Float, planeHeight:Float, flipX:Bool, flipY:Bool) {
 		var x1 = flipX ? planeWidth : -planeWidth;
 		var x2 = flipX ? -planeWidth : planeWidth;
@@ -120,7 +120,7 @@ class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
 		arrow._z = (depth - 1) * 1000;
 
 		var planeVertices = getGraphicVertices(planeWidth, planeHeight, arrow.flipX, arrow.flipY);
-		var projectionZ:haxe.ds.Vector<Float> = new haxe.ds.Vector(Math.ceil(planeVertices.length / 2));
+		var projectionZ:NativeVector<Float> = new NativeVector(Math.ceil(planeVertices.length / 2));
 
 		var vertPointer = 0;
 		@:privateAccess do {

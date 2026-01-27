@@ -493,7 +493,7 @@ class Note extends FlxSkewedSprite
 	public function followStrumNote(myStrum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1)
 	{
 		strum = myStrum;
-		var noteSpeed:Float = songSpeed * multSpeed;
+		var noteSpeed:Float = songSpeed * multSpeed * myStrum.noteSpeed;
 		var strumDir:Float = myStrum.direction + this.offsetDirection;
 		
 		distance = getDistance(strumTime - Conductor.songPosition, noteSpeed, myStrum);
