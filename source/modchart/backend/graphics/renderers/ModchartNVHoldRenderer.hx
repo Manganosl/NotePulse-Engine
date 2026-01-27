@@ -83,6 +83,11 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 		if (output == null || (output.visuals.alpha * arrow.alpha <= 0)) return;
 
 		var nextOutput = instance.modifiers.getPath(basePos.clone(), arrowData, 1, false, true);
+		var deltaPos = nextOutput.pos.subtract(output.pos);
+		var pathSpeed = deltaPos.length; 
+		var baseScrollSpeed = Adapter.instance.getCurrentScrollSpeed();
+		if (baseScrollSpeed == 0) baseScrollSpeed = 1.0;
+		var speedFactor = (pathSpeed*baseScrollSpeed)/2;
 		var unit = nextOutput.pos.subtract(output.pos);
 		unit.normalize();
 
@@ -91,7 +96,7 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 		var planeWidth = arrow.frame.frame.width * arrow.scale.x * .5;
 
 		var y1:Float = 0;
-		var y2:Float = (fullHeight * clipRatio);
+		var y2:Float = fullHeight * clipRatio * speedFactor;
 		if (isDownscroll)
 			y2 = -y2;
 

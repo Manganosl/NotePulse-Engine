@@ -114,10 +114,6 @@ import states.menus.TitleState;
 	public var safeFrames:Float = 10;
 	public var guitarHeroSustains:Bool = true;
 	public var discordRPC:Bool = true;
-
-	public var CustomFade:String = 'Move';
-	public var CustomFadeSound:Float = 0.5;
-	public var CustomFadeText:Bool = true;
 }
 
 class ClientPrefs {

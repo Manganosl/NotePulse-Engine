@@ -98,16 +98,6 @@ class FunkinSoundTray extends FlxSoundTray
 		{
 			visible = false;
 			active = false;
-			
-			#if FLX_SAVE
-			// Save sound preferences
-			if (FlxG.save.isBound)
-			{
-				FlxG.save.data.mute = FlxG.sound.muted;
-				FlxG.save.data.volume = FlxG.sound.volume;
-				FlxG.save.flush();
-			}
-			#end
 		}
 	}
 	
@@ -159,6 +149,16 @@ class FunkinSoundTray extends FlxSoundTray
 			_bars[i].visible = i < globalVolume;
 			
 		checkAntialiasing();
+
+		#if FLX_SAVE
+		// Save sound preferences
+		if (FlxG.save.isBound)
+		{
+			FlxG.save.data.mute = FlxG.sound.muted;
+			FlxG.save.data.volume = FlxG.sound.volume;
+			FlxG.save.flush();
+		}
+		#end
 	}
 	
 	#if (flixel > "6.0.0")
