@@ -17,7 +17,6 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 
 	public function new(instance:PlayField) {
 		super(instance);
-		this.instance = instance;
 
 		instance.setPercent('dizzyHolds', 1, -1);
 	}
@@ -69,8 +68,7 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 			arrowData.distance = 0;
 		}
 
-		final offScale = instance.getPercent("scale", -1) + instance.getPercent("scaleY", -1) + instance.getPercent('scale$lane', -1) + instance.getPercent('scaleY$lane', -1);
-		final fullHeight = (arrow.frame.frame.height * arrow.scale.y * (Adapter.instance.getPixelStage() ? 8 : 1)) - offScale;
+		final fullHeight = (arrow.frame.frame.height * arrow.scale.y * (Adapter.instance.getPixelStage() ? 8 : 1));
 		final clipRatio = (isHitten && realDistance < 0) 
 			? FlxMath.bound(1 + (realDistance / fullHeight), 0, 1) 
 			: 1;
@@ -93,7 +91,7 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 		var planeWidth = arrow.frame.frame.width * arrow.scale.x * .5;
 
 		var y1:Float = 0;
-		var y2:Float = fullHeight * clipRatio;
+		var y2:Float = (fullHeight * clipRatio);
 		if (isDownscroll)
 			y2 = -y2;
 
@@ -120,7 +118,7 @@ class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 			rotationVector.setTo(planeVertices[vertPointer], planeVertices[vertPointer + 1], 0);
 			var rotation = ModchartUtil.rotate3DVector(rotationVector, 0, 0, pathAngle);
 			rotation.x *= zScale * output.visuals.scaleX;
-			rotation.y *= zScale * output.visuals.scaleY;
+			rotation.y *= zScale;
 
 			var view = new Vector3(rotation.x + output.pos.x, rotation.y + output.pos.y, output.pos.z);
 			
