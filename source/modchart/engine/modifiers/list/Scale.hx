@@ -5,48 +5,64 @@ import modchart.backend.core.ModifierParameters;
 import modchart.backend.core.VisualParameters;
 
 class Scale extends Modifier {
-	public function new(pf) {
-		super(pf);
+    public function new(pf) {
+        super(pf);
 
-		setPercent('scale', 1, -1);
-		setPercent('scaleX', 1, -1);
-		setPercent('scaleY', 1, -1);
-	}
+        setPercent('scale', 1, -1);
+        setPercent('scaleX', 1, -1);
+        setPercent('scaleY', 1, -1);
+        
+        setPercent('squish', 0, -1);
+        setPercent('stretch', 0, -1);
+    }
 
-	private inline function applyScale(vis:VisualParameters, params:ModifierParameters, axis:String, realAxis:String) {
-		var receptorName = Std.string(params.lane);
-		var player = params.player;
+    private inline function lerp(a:Float, b:Float, c:Float):Float {
+        return a + (b - a) * c;
+    }
 
-		var scale = 1.;
-		// Scale
-		scale *= getPercent('scale' + axis, player) + getPercent('scale' + axis + receptorName, player);
-		scale *= 1 - (getPercent('tiny' + axis, player) + getPercent('tiny' + axis + receptorName, player)) * 0.5;
+    private inline function applyScale(vis:VisualParameters, params:ModifierParameters, axis:String, realAxis:String) {
+        var receptorName = Std.string(params.lane);
+        var player = params.player;
 
-		switch (realAxis) {
-			case 'x':
-				vis.scaleX *= scale;
-			case 'y':
-				vis.scaleY *= scale;
-			default:
-				vis.scaleX *= scale;
-				vis.scaleY *= scale;
-		}
-	}
+        var scale = 1.0;
+        
+        scale *= getPercent('scale' + axis, player) + getPercent('scale' + axis + receptorName, player);
+        scale *= 1 - (getPercent('tiny' + axis, player) + getPercent('tiny' + axis + receptorName, player)) * 0.5;
 
-	override public function visuals(data:VisualParameters, params:ModifierParameters) {
-		var player = params.player;
-		var receptorName = Std.string(params.lane);
+        switch (realAxis) {
+            case 'x':
+                vis.scaleX *= scale;
+            case 'y':
+                vis.scaleY *= scale;
+            default:
+                vis.scaleX *= scale;
+                vis.scaleY *= scale;
+        }
+    }
 
-		applyScale(data, params, '', '');
-		applyScale(data, params, 'x', 'x');
-		applyScale(data, params, 'y', 'y');
+    override public function visuals(data:VisualParameters, params:ModifierParameters) {
+        var player = params.player;
+        var lane = Std.string(params.lane);
 
-		data.scaleX *= 1;
-		data.scaleY *= 1;
+        applyScale(data, params, '', '');
+        applyScale(data, params, 'x', 'x');
+        applyScale(data, params, 'y', 'y');
 
-		return data;
-	}
+		var stretchVal = getPercent("stretch", player) + getPercent("stretch" + lane, player);
+        var squishVal = getPercent("squish", player) + getPercent("squish" + lane, player);
 
-	override public function shouldRun(params:ModifierParameters):Bool
-		return true;
+        var stretchX = lerp(1, 0.5, stretchVal);
+        var stretchY = lerp(1, 2.0, stretchVal);
+
+        var squishX = lerp(1, 2.0, squishVal);
+        var squishY = lerp(1, 0.5, squishVal);
+
+        data.scaleX *= (squishX * stretchX);
+        data.scaleY *= (squishY * stretchY);
+
+        return data;
+    }
+
+    override public function shouldRun(params:ModifierParameters):Bool
+        return true;
 }

@@ -61,6 +61,8 @@ final class PlayField extends FlxSprite {
 		addModifier('stealth');
 		addModifier('skew');
 		addModifier('zoom');
+		addModifier('transform');
+		addModifier('scale');
 
 		setPercent('arrowPathAlpha', 1, -1);
 		setPercent('arrowPathThickness', 2, -1);
