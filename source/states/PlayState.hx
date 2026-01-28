@@ -3986,7 +3986,7 @@ class PlayState extends MusicBeatState
 		if (!miss && !cpuControlled)
 			doScoreBop();
 
-		if(ClientPrefs.data.judgecounter) judgementCounter.text = 'Note Hits: ${songHits}\nCombo: ${combo}\n\nMarvelous: ${ratingsData[0].hits}\nSick: ${ratingsData[1].hits}\nGood: ${ratingsData[2].hits}\nBad: ${ratingsData[3].hits}\nShit: ${ratingsData[4].hits}\nMiss: ${songMisses}';
+		if(ClientPrefs.data.judgecounter) judgementCounter.text = 'Note Hits: ${songHits}\nCombo: ${combo}\n\nEpic: ${ratingsData[0].hits}\nSick: ${ratingsData[1].hits}\nGood: ${ratingsData[2].hits}\nBad: ${ratingsData[3].hits}\nShit: ${ratingsData[4].hits}\nMiss: ${songMisses}';
 
 		callOnScripts('onUpdateScore', [miss]);
 	}
@@ -4169,7 +4169,7 @@ class PlayState extends MusicBeatState
 		var earlyLateType:String = null;
 		var earlyLateThreshold:Float = 20;
 
-		if (absNoteDiff > earlyLateThreshold && daRating.image != "marvelous"){
+		if (absNoteDiff > earlyLateThreshold && daRating.image != "epic"){
 			if (noteDiff < 0) earlyLateType = "late"; else earlyLateType = "early";
 
 			earlyLateSpr = new FlxSprite();

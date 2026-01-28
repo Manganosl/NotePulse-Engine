@@ -8,7 +8,7 @@ import openfl.geom.Rectangle;
 
 typedef NoteTypeColorData =
 {
-	marvelous:FlxColor,
+	epic:FlxColor,
 	sick:FlxColor,
 	good:FlxColor,
     bad:FlxColor,
@@ -29,8 +29,8 @@ class ResultsScreen extends MusicBeatSubstate
 	public var graphSizeRight:FlxSprite;
 	
 	public var graphJudgeCenter:FlxSprite;
-	public var graphMarvelousUp:FlxSprite;
-	public var graphMarvelousDown:FlxSprite;
+	public var graphEpicUp:FlxSprite;
+	public var graphEpicDown:FlxSprite;
 	public var graphSickUp:FlxSprite;
 	public var graphSickDown:FlxSprite;
 	public var graphGoodUp:FlxSprite;
@@ -105,15 +105,15 @@ class ResultsScreen extends MusicBeatSubstate
 		graphJudgeCenter.alpha = 0;		
 		add(graphJudgeCenter);
 
-		graphMarvelousUp = new FlxSprite(graphBG.x, graphBG.y + graphHeight * 0.5 - graphHeight * 0.5 * MoveSize * (20 / 166.6) - judgeHeight * 0.5).makeGraphic(graphWidth, judgeHeight, ColorArray[0]);
-		graphMarvelousUp.scrollFactor.set();
-		graphMarvelousUp.alpha = 0;		
-		add(graphMarvelousUp);
+		graphEpicUp = new FlxSprite(graphBG.x, graphBG.y + graphHeight * 0.5 - graphHeight * 0.5 * MoveSize * (ClientPrefs.data.epicWindow / 166.6) - judgeHeight * 0.5).makeGraphic(graphWidth, judgeHeight, ColorArray[0]);
+		graphEpicUp.scrollFactor.set();
+		graphEpicUp.alpha = 0;		
+		add(graphEpicUp);
 		
-		graphMarvelousDown = new FlxSprite(graphBG.x, graphBG.y + graphHeight * 0.5 + graphHeight * 0.5 * MoveSize * (20 / 166.6) - judgeHeight * 0.5).makeGraphic(graphWidth, judgeHeight, ColorArray[0]);
-		graphMarvelousDown.scrollFactor.set();
-		graphMarvelousDown.alpha = 0;		
-		add(graphMarvelousDown);
+		graphEpicDown = new FlxSprite(graphBG.x, graphBG.y + graphHeight * 0.5 + graphHeight * 0.5 * MoveSize * (ClientPrefs.data.epicWindow / 166.6) - judgeHeight * 0.5).makeGraphic(graphWidth, judgeHeight, ColorArray[0]);
+		graphEpicDown.scrollFactor.set();
+		graphEpicDown.alpha = 0;		
+		add(graphEpicDown);
 		
 		graphSickUp = new FlxSprite(graphBG.x, graphBG.y + graphHeight * 0.5 - graphHeight * 0.5 * MoveSize * (ClientPrefs.data.sickWindow / 166.6) - judgeHeight * 0.5).makeGraphic(graphWidth, judgeHeight, ColorArray[1]);
 		graphSickUp.scrollFactor.set();
@@ -205,7 +205,7 @@ class ResultsScreen extends MusicBeatSubstate
 	    
 	    var ACC = Math.ceil(parent.ratingPercent * 10000) / 100;
 		judgeText = new FlxText(-400, 200, 0, 
-		'Marvelous: ' + parent.ratingsData[0].hits
+		'Epics: ' + parent.ratingsData[0].hits
 		+ '\nSicks: ' + parent.ratingsData[1].hits
 		+ '\nGoods: ' + parent.ratingsData[2].hits
 		+ '\nBads: ' + parent.ratingsData[3].hits
