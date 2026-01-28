@@ -430,7 +430,7 @@ class HScript implements HscriptInterface {
 		}
 		#end
 
-		trace(Std.string(v), {fileName: posInfos.fileName, lineNumber: posInfos.lineNumber, className: null, methodName: null});
+		Log.hxTrace(Std.string(v), {fileName: posInfos.fileName, lineNumber: posInfos.lineNumber, className: null, methodName: null});
     }
 
     function onError(e:Error) {
