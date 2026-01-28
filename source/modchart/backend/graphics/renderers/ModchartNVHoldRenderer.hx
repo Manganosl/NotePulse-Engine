@@ -83,15 +83,26 @@ final class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 		if (output == null || (output.visuals.alpha * arrow.alpha <= 0)) return;
 
 		var nextOutput = instance.modifiers.getPath(basePos.clone(), arrowData, 1, false, true);
-		var unit = nextOutput.pos.subtract(output.pos);
+		var diff = nextOutput.pos.subtract(output.pos);
+
+		var velocity = diff.length; 
+
+		var unit = diff.clone();
 		unit.normalize();
 
 		var isDownscroll = Adapter.instance.getDownscroll(); 
 		var pathAngle = (unit.x == 0 && unit.y == 0) ? 0 : Math.atan2(unit.y, unit.x) * FlxAngle.TO_DEG - 90 + (isDownscroll ? 180 : 0);
+
+		var speedConstant = 0.45;
+		var scrollSpeed = Math.abs(Adapter.instance.getCurrentScrollSpeed());
+		var baseVelocity = scrollSpeed * speedConstant; 
+		var stretch = (velocity / baseVelocity) * speedConstant;
+
 		var planeWidth = arrow.frame.frame.width * arrow.scale.x * .5;
 
 		var y1:Float = 0;
-		var y2:Float = (fullHeight * clipRatio);
+		var y2:Float = (fullHeight * clipRatio) * stretch; 
+
 		if (isDownscroll)
 			y2 = -y2;
 
@@ -208,7 +219,7 @@ final class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 		final lane = Adapter.instance.getLaneFromArrow(arrow);
 
 		final centered2 = (player == __lastPlayer) ? __lastC2 : (__lastC2 = instance.getPercent('centered2', player));
-		final timeC2 = flixel.FlxG.height * 0.25 * centered2;
+		final timeC2 = FlxG.height * 0.25 * centered2;
 		final hitTime = Adapter.instance.getTimeFromArrow(arrow);
 
 		var pos = (hitTime - Adapter.instance.getSongPosition()) + posOff;

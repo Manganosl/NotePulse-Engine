@@ -347,7 +347,7 @@ final class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		final player = Adapter.instance.getPlayerFromArrow(arrow);
 		final lane = Adapter.instance.getLaneFromArrow(arrow);
 
-		final timeC2 = flixel.FlxG.height * 0.25 * __centered2;
+		final timeC2 = FlxG.height * 0.25 * __centered2;
 		final hitTime = Adapter.instance.getTimeFromArrow(arrow);
 
 		var pos = (hitTime - Adapter.instance.getSongPosition()) + posOff;
