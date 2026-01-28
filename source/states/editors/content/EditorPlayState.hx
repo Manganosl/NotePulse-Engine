@@ -23,6 +23,7 @@ import psychlua.LuaUtils;
 class EditorPlayState extends MusicBeatSubstate
 {
 	// Borrowed from original PlayState
+	public var bgCam:FlxCamera = new FlxCamera();
 	public var camHUD:FlxCamera = new FlxCamera();
 
 	var finishTimer:FlxTimer = null;
@@ -95,6 +96,8 @@ class EditorPlayState extends MusicBeatSubstate
 		}
 
 		instance = this;
+		bgCam.bgColor = 0x00000000;
+		FlxG.cameras.add(bgCam, false);
 		camHUD.bgColor = 0x00000000;
 		FlxG.cameras.add(camHUD, false);
 
@@ -123,6 +126,7 @@ class EditorPlayState extends MusicBeatSubstate
 		bg.scrollFactor.set();
 		bg.color = 0xFF101010;
 		bg.alpha = 0.9;
+		bg.cameras = [bgCam];
 		add(bg);
 		
 		/**** NOTES ****/
@@ -156,6 +160,7 @@ class EditorPlayState extends MusicBeatSubstate
 		scoreTxt.scrollFactor.set();
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
+		scoreTxt.cameras = [bgCam];
 		add(scoreTxt);
 		
 		dataTxt = new FlxText(10, 580, FlxG.width - 20, "Section: 0", 20);
@@ -354,9 +359,12 @@ class EditorPlayState extends MusicBeatSubstate
 		}
 		FlxG.cameras.remove(camHUD);
 		camHUD.destroy();
+		FlxG.cameras.remove(bgCam);
+		bgCam.destroy();
 		FlxG.sound.list.remove(inst);
 		flixel.util.FlxDestroyUtil.destroy(inst);
 		camHUD = null;
+		bgCam = null;
 		super.destroy();
 	}
 	
