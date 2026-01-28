@@ -268,6 +268,8 @@ class ResultsScreen extends MusicBeatSubstate
 			FlxTween.tween(graphBG, {alpha: 0.75}, 0.5);
 			
 			FlxTween.tween(graphJudgeCenter, {alpha: 0.3}, 0.5);	
+			FlxTween.tween(graphEpicUp, {alpha: 0.3}, 0.5);	
+			FlxTween.tween(graphEpicDown, {alpha: 0.3}, 0.5);	
 			FlxTween.tween(graphSickUp, {alpha: 0.3}, 0.5);	
 			FlxTween.tween(graphSickDown, {alpha: 0.3}, 0.5);	
 			FlxTween.tween(graphGoodUp, {alpha: 0.3}, 0.5);	
