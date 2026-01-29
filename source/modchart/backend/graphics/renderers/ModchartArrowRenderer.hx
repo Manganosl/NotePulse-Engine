@@ -61,6 +61,9 @@ final class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
 			arrowTime = songPos + (FlxG.height * 0.25 * centered2);
 			arrowDiff = arrowTime - songPos;
 		}
+		if(arrow.extraData != null && arrow.extraData["linkStrum"] != null)
+			arrowDiff += arrow.extraData["linkStrum"].height/Adapter.instance.getCurrentScrollSpeed();
+
 		var arrowData:ArrowData = {
 			hitTime: arrowTime,
 			distance: arrowDiff,
@@ -82,17 +85,6 @@ final class ModchartArrowRenderer extends ModchartRenderer<FlxSprite> {
 		}
 
 		arrowPosition.copyFrom(output.pos.clone());
-
-		if (arrow.extraData != null && arrow.extraData["linkStrum"] != null) {
-			final nextOutputForLink = instance.modifiers.getPath(
-				new Vector3(
-					Adapter.instance.getDefaultReceptorX(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2,
-					Adapter.instance.getDefaultReceptorY(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2
-				), arrowData, 1, false, true);
-
-			arrowPosition.y = nextOutputForLink.pos.y + (arrow.extraData["linkStrum"].scale.y * 110);
-		}
-
 
 		// internal mods
 		if (orient != 0) {

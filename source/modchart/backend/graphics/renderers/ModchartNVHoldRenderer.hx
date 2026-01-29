@@ -93,7 +93,7 @@ final class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 		var isDownscroll = Adapter.instance.getDownscroll(); 
 		var pathAngle = (unit.x == 0 && unit.y == 0) ? 0 : Math.atan2(unit.y, unit.x) * FlxAngle.TO_DEG - 90 + (isDownscroll ? 180 : 0);
 
-		var speedConstant = 0.45;
+		var speedConstant = 0.5;
 		var scrollSpeed = Math.abs(Adapter.instance.getCurrentScrollSpeed());
 		var baseVelocity = scrollSpeed * speedConstant; 
 		var stretch = (velocity / baseVelocity) * speedConstant;
