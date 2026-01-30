@@ -84,8 +84,6 @@ final class ModifierGroup {
 		__loadModifiers();
 	}
 
-	public inline function postRender() {}
-
 	/**
 	 * Computes the transformed position and visual properties of an arrow based on active modifiers.
 	 *

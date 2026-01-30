@@ -21,13 +21,12 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 	var indices:NativeVector<Int>;
 
 	public function updateTris(divisions:Int) {
-		final segs = divisions - 1;
 		if (divisions != __lastDivisions) {
 			uvt = new NativeVector<Float>(divisions * 12);
 			indices = new NativeVector<Int>(divisions * 6);
 
 			var ui = 0, ii = 0, vertCount = 0;
-			for (div in 0...segs) {
+			for (div in 0...divisions) {
 				for (_ in 0...4) {
 					uvt.set(ui++, 0);
 					uvt.set(ui++, 0);
@@ -78,8 +77,8 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 		__lastThickness = pathThickness;
 		__lastPlayer = fn;
 
-		final divisions = Std.int(20 * Config.ARROW_PATHS_CONFIG.RESOLUTION);
-		final limit = 1500 + Config.ARROW_PATHS_CONFIG.LENGTH;
+		final divisions = Std.int(15 * Config.ARROW_PATHS_CONFIG.RESOLUTION);
+		final limit = 1800 + Config.ARROW_PATHS_CONFIG.LENGTH;
 		final interval = limit / divisions;
 		final songPos = Adapter.instance.getSongPosition();
 
@@ -115,7 +114,7 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 
 			var output = parent.modifiers.getPath(vec, param);
 
-			if (vertCount > 0) {
+			if (lastOutput != null) {
 				final p0 = lastOutput;
 				final p1 = output;
 
@@ -179,7 +178,7 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 			graphic: __lineGraphic,
 			antialiasing: false,
 			blend: NORMAL,
-			cameras: Adapter.instance.getArrowCamera(),
+			cameras: ModchartUtil.resolveCameras(parent, item),
 			shader: null,
 
 			vertices: vertices,

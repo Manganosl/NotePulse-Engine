@@ -47,7 +47,7 @@ class CtxRenderer {
 	public function emitPathCmd(item:FlxSprite) {
 		final dc = ctx.pathRenderer.prepare(item);
 		if (dc != null)
-			dc.zIndex = Std.int(item._z * 1000) - 1;
+			dc.zIndex = Std.int(item._z * 1000) + 1;
 		return dc;
 	}
 
