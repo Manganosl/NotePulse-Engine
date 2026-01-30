@@ -46,7 +46,7 @@ class CompiledClassList {
 			init();
 
 		if (!classLists.exists(request)) {
-			Log.warn('Class list $request not properly generated. Please debug the build macro.');
+			trace('[WARNING] Class list $request not properly generated. Please debug the build macro.');
 			classLists.set(request, new List()); // Make the error only appear once.
 		}
 

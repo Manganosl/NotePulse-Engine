@@ -23,6 +23,8 @@ class NotePulse implements IAdapter {
 		PlayState.fModchart = true;
 	}
 
+	public function onModchartingDispose(){}
+
 	public function isTapNote(sprite:FlxSprite) {
 		return sprite is Note;
 	}

@@ -137,7 +137,7 @@ final class ModifierGroup {
 				visuals = mod.visuals(visuals, args);
 		}
 		pos.z *= 0.001 * Config.Z_SCALE;
-		pos = playfield.projection.transformVector(pos);
+		pos = playfield.view.transformVector(pos);
 		final output:ModifierOutput = {
 			pos: pos,
 			visuals: visuals
@@ -156,7 +156,7 @@ final class ModifierGroup {
 
 		var modifierClass:Null<Class<Modifier>> = __modifierRegistrery.get(lowerName);
 		if (modifierClass == null) {
-			Log.warn('$name modifier was not found!');
+			trace('$name modifier was not found !');
 
 			return;
 		}

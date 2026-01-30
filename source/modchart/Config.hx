@@ -35,9 +35,9 @@ class Config {
 	 * However, it is not recommended for complex modcharts, as it may cause holds to look waggy,
 	 * especially when using modifiers that use rotation or complex path operations>
 	 *
-	 * Default: `true`.
+	 * Default: `false` (Regular hold rendering).
 	 */
-	public static var OPTIMIZE_HOLDS:Bool = true;
+	public static var OPTIMIZE_HOLDS:Bool = false;
 
 	/**
 	 * Scales the Z-axis values.
@@ -109,13 +109,6 @@ class Config {
 	 * Default `false`
 	 */
 	public static var HOLDS_BEHIND_STRUM:Bool = false;
-
-	/**
-	 * Skips all hold calculations to look similar to Nightmare Vision Engine.
-	 * 
-	 * Default `true`
-	 */
-	public static var NVE_HOLDS:Bool = true;
 }
 
 typedef ArrowPathConfig = {

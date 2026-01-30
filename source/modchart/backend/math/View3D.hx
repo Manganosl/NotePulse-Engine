@@ -16,7 +16,7 @@ import flixel.FlxG;
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
-final class ModchartPerspective {
+final class View3D {
 	/**
 	 * Distance to the near clipping plane.
 	 * Objects closer than this distance will not be rendered.
@@ -51,6 +51,36 @@ final class ModchartPerspective {
 	private var __depthRange:Float = 1;
 	private var __depthScale:Float = 1;
 	private var __depthOffset:Float = 0;
+
+	/**
+	 * Camera position (eye).
+	 * Ignored unless `useCamera` is enabled.
+	 */
+	public var position:Vector3 = new Vector3(0, 0, 0);
+
+	/**
+	 * Camera target (look-at point).
+	 * Ignored unless `useCamera` is enabled.
+	 */
+	public var target:Vector3 = new Vector3(0, 0, -1);
+
+	/**
+	 * Camera up vector.
+	 * Ignored unless `useCamera` is enabled.
+	 */
+	public var up:Vector3 = new Vector3(0, 1, 0);
+
+	/**
+	 * Enables camera-space transformation before projection.
+	 * 
+	 * Defaults to `Config.CAMERA3D_ENABLED`
+	 */
+	public var useCamera:Bool = Config.CAMERA3D_ENABLED;
+
+	private var __forward:Vector3 = new Vector3();
+	private var __right:Vector3 = new Vector3();
+	private var __up:Vector3 = new Vector3();
+	private var __dirtyCamera:Bool = true;
 
 	public function new() {
 		fov = Math.PI / 2;
@@ -87,6 +117,39 @@ final class ModchartPerspective {
 	}
 
 	/**
+	 * Sets camera parameters using a look-at model.
+	 * Enables camera transformation automatically.
+	 */
+	public inline function lookAt(eye:Vector3, center:Vector3, up:Vector3):Void {
+		position.copyFrom(eye);
+		target.copyFrom(center);
+		this.up.copyFrom(up);
+		__dirtyCamera = true;
+		useCamera = true;
+	}
+
+	private inline function updateCameraBasis():Void {
+		// pendejada mas pendeja alaverga
+		__forward = position - target;
+		__forward.normalize();
+
+		__right = up.crossProduct(__forward);
+		__right.normalize();
+
+		__up = __forward.crossProduct(__right);
+
+		__dirtyCamera = false;
+	}
+
+	private inline function applyViewTransform(v:Vector3):Vector3 {
+		if (__dirtyCamera)
+			updateCameraBasis();
+
+		var p = v - position;
+		return new Vector3(p.dotProduct(__right), p.dotProduct(__up), p.dotProduct(__forward));
+	}
+
+	/**
 	 * Transforms a 3D vector into 2D screen space using perspective projection.
 	 *
 	 * @param vector The 3D vector to project.
@@ -98,12 +161,15 @@ final class ModchartPerspective {
 			origin = new Vector3(FlxG.width * 0.5, FlxG.height * 0.5);
 		}
 
-		var translation = vector - origin;
+		var world = useCamera ? applyViewTransform(vector) : vector;
+		var translation = world - origin;
 
 		final projectedZ = __depthScale * Math.min(translation.z - 1, 0) + __depthOffset;
+
 		final projectedFov = (__tanHalfFov / projectedZ);
 
 		translation.setTo(translation.x * projectedFov, translation.y * projectedFov, projectedZ);
+
 		return translation += origin;
 	}
 }

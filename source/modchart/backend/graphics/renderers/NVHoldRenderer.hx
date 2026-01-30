@@ -1,5 +1,7 @@
 package modchart.backend.graphics.renderers;
 
+using flixel.util.FlxColorTransformUtil;
+
 final matrix:Matrix = new Matrix();
 final fMatrix:FlxMatrix = new FlxMatrix();
 final rotationVector = new Vector3();
@@ -9,7 +11,7 @@ final helperVector = new Vector3();
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
-final class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
+final class NVHoldRenderer extends BaseRenderer<FlxSprite> {
 	private var __rotateX:Float = 0;
     private var __rotateY:Float = 0;
     private var __rotateZ:Float = 0;
@@ -30,7 +32,7 @@ final class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
         var output = __parentOutput.pos.add(tailFactor);
         
         output.z *= 0.001 * Config.Z_SCALE;
-        return projection.transformVector(output, __parentOutput.pos);
+        return this.view.transformVector(output, __parentOutput.pos);
     }
 
 	inline private function getGraphicVertices(planeWidth:Float, planeHeight:Float, flipX:Bool, flipY:Bool) {
@@ -50,8 +52,8 @@ final class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 	var __lastOrient:Float = 0;
 	var __lastC2:Float = 0;
 	var __lastPlayer:Int = -1;
-	override public function prepare(arrow:FlxSprite) {
-		if (arrow.alpha <= 0) return;
+	override public function prepare(arrow:FlxSprite):Null<DrawCommand> {
+		if (arrow.alpha <= 0) return null;
 
 		final player = Adapter.instance.getPlayerFromArrow(arrow);
 		final lane = Adapter.instance.getLaneFromArrow(arrow);
@@ -73,16 +75,16 @@ final class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 			? FlxMath.bound(1 + (realDistance / fullHeight), 0, 1) 
 			: 1;
 
-		if (clipRatio <= 0.001) return;
+		if (clipRatio <= 0.001) return null;
 
 		var basePos = ModchartUtil.getHalfPos();
 		basePos.x += Adapter.instance.getDefaultReceptorX(lane, player);
 		basePos.y += Adapter.instance.getDefaultReceptorY(lane, player);
 
-		final output = instance.modifiers.getPath(basePos.clone(), arrowData);
-		if (output == null || (output.visuals.alpha * arrow.alpha <= 0)) return;
+		final output = parent.modifiers.getPath(basePos.clone(), arrowData);
+		if (output == null || (output.visuals.alpha * arrow.alpha <= 0)) return null;
 
-		var nextOutput = instance.modifiers.getPath(basePos.clone(), arrowData, 1, false, true);
+		var nextOutput = parent.modifiers.getPath(basePos.clone(), arrowData, 1, false, true);
 		var diff = nextOutput.pos.subtract(output.pos);
 
 		var velocity = diff.length; 
@@ -133,92 +135,137 @@ final class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 
 			var view = new Vector3(rotation.x + output.pos.x, rotation.y + output.pos.y, output.pos.z);
 			
-			@:privateAccess
-			if (Config.CAMERA3D_ENABLED)
-				view = instance.camera3D.applyViewTo(view);
+			//@:privateAccess
+			//if (Config.CAMERA3D_ENABLED)
+			//	view = parent.camera3D.applyViewTo(view);
 			
 			view.z *= 0.001;
-			final projection = (view.z != 0) ? this.projection.transformVector(view) : view;
-
-			final cam = arrow._cameras != null ? arrow._cameras[0] : Adapter.instance.getArrowCamera()[0];
-			if(cam != null){
-				planeVertices[vertPointer] = projection.x - cam.scroll.x * (arrow.scrollFactor.x);
-				planeVertices[vertPointer + 1] = projection.y - cam.scroll.y * (arrow.scrollFactor.y);
-			} else {
-				planeVertices[vertPointer] = projection.x;
-				planeVertices[vertPointer + 1] = projection.y;
-			}
+			final projection = (view.z != 0) ? this.view.transformVector(view) : view;
+			
+			planeVertices[vertPointer] = projection.x;
+			planeVertices[vertPointer + 1] = projection.y;
 
 			projectionZ[Math.floor(vertPointer / 2)] = Math.max(0.0001, projection.z);
 			vertPointer += 2;
 		}
 
-		var vertices = new DrawData<Float>(12, true, [
-			planeVertices[0], planeVertices[1], planeVertices[2], planeVertices[3], planeVertices[6], planeVertices[7],
-			planeVertices[0], planeVertices[1], planeVertices[4], planeVertices[5], planeVertices[6], planeVertices[7]
-		]);
+		var vertices = new NativeVector<Float>(8);
+		// top left
+		vertices[0] = planeVertices[0];
+		vertices[1] = planeVertices[1];
+		// top right
+		vertices[2] = planeVertices[2];
+		vertices[3] = planeVertices[3];
 
-		final uv = arrow.frame.uv;
-		var uvData = new DrawData<Float>(18, true, [
-			#if (flixel >= "6.1.0")
-			uv.left,  FlxMath.lerp(uv.bottom, uv.top, clipRatio), 1 / projectionZ[0],
-			uv.right, FlxMath.lerp(uv.bottom, uv.top, clipRatio), 1 / projectionZ[1],
-			uv.right, uv.bottom, 1 / projectionZ[3],
-			
-			uv.left,  FlxMath.lerp(uv.bottom, uv.top, clipRatio), 1 / projectionZ[0],
-			uv.left,  uv.bottom, 1 / projectionZ[2],
-			uv.right, uv.bottom, 1 / projectionZ[3]
-			#else
-			uv.x,     FlxMath.lerp(uv.height, uv.y, clipRatio), 1 / projectionZ[0],
-			uv.width, FlxMath.lerp(uv.height, uv.y, clipRatio), 1 / projectionZ[1],
-			uv.width, uv.height, 1 / projectionZ[3],
-			
-			uv.x,     FlxMath.lerp(uv.height, uv.y, clipRatio), 1 / projectionZ[0],
-			uv.x,     uv.height, 1 / projectionZ[2],
-			uv.width, uv.height, 1 / projectionZ[3]
-			#end
-		]);
+		// botton left
+		vertices[4] = planeVertices[4];
+		vertices[5] = planeVertices[5];
+		// bottom right
+		vertices[6] = planeVertices[6];
+		vertices[7] = planeVertices[7];
+
+		final uvRectangle = arrow.frame.uv;
+		var uvData = new NativeVector<Float>(12);
+		var k = 0;
+
+		#if (flixel == "6.1.0")
+		// top left
+		uvData[k++] = uvRectangle.left;
+		uvData[k++] = uvRectangle.right;
+		uvData[k++] = 1 / projectionZ[0];
+		// top right
+		uvData[k++] = uvRectangle.top;
+		uvData[k++] = uvRectangle.right;
+		uvData[k++] = 1 / projectionZ[1];
+		// bottom left
+		uvData[k++] = uvRectangle.top;
+		uvData[k++] = uvRectangle.bottom;
+		uvData[k++] = 1 / projectionZ[2];
+		// bottom right
+		uvData[k++] = uvRectangle.left;
+		uvData[k++] = uvRectangle.bottom;
+		uvData[k++] = 1 / projectionZ[3];
+		#elseif (flixel >= "6.1.1")
+		// top left
+		uvData[k++] = uvRectangle.left;
+		uvData[k++] = uvRectangle.top;
+		uvData[k++] = 1 / projectionZ[0];
+		// top right
+		uvData[k++] = uvRectangle.right;
+		uvData[k++] = uvRectangle.top;
+		uvData[k++] = 1 / projectionZ[1];
+		// bottom left
+		uvData[k++] = uvRectangle.left;
+		uvData[k++] = uvRectangle.bottom;
+		uvData[k++] = 1 / projectionZ[2];
+		// bottom right
+		uvData[k++] = uvRectangle.right;
+		uvData[k++] = uvRectangle.bottom;
+		uvData[k++] = 1 / projectionZ[3];
+		#else
+		// top left
+		uvData[k++] = uvRectangle.x;
+		uvData[k++] = uvRectangle.y;
+		uvData[k++] = 1 / projectionZ[0];
+		// top right
+		uvData[k++] = uvRectangle.width;
+		uvData[k++] = uvRectangle.y;
+		uvData[k++] = 1 / projectionZ[1];
+		// bottom left
+		uvData[k++] = uvRectangle.x;
+		uvData[k++] = uvRectangle.height;
+		uvData[k++] = 1 / projectionZ[2];
+		// bottom right
+		uvData[k++] = uvRectangle.width;
+		uvData[k++] = uvRectangle.height;
+		uvData[k++] = 1 / projectionZ[3];
+		#end
+
+		var indices = new NativeVector<Int>(6);
+
+		// triangle 1
+		indices[0] = 0;
+		indices[1] = 1;
+		indices[2] = 2;
+
+		// triangle 2
+		indices[3] = 1;
+		indices[4] = 3;
+		indices[5] = 2;
 
 		final absGlow = output.visuals.glow * 255;
 		final negGlow = 1 - output.visuals.glow;
+
+		if ((arrow.alpha * output.visuals.alpha) <= 0)
+			return null;
+
 		var color = new ColorTransform(negGlow, negGlow, negGlow, arrow.alpha * output.visuals.alpha, Math.round(output.visuals.glowR * absGlow),
 			Math.round(output.visuals.glowG * absGlow), Math.round(output.visuals.glowB * absGlow));
 
-		var newInstruction:FMDrawInstruction = {};
-		newInstruction.item = arrow;
-		newInstruction.vertices = vertices;
-		newInstruction.uvt = uvData;
-		newInstruction.indices = new Vector<Int>(vertices.length, true, [for (i in 0...vertices.length) i]);
-		newInstruction.colorData = [color];
-		queue[count++] = newInstruction;
-	}
+		// make the instruction
+		var dc:DrawCommand = {
+			parent: arrow,
+			graphic: arrow.graphic,
+			antialiasing: arrow.antialiasing,
+			blend: arrow.blend,
+			cameras: ModchartUtil.resolveCameras(parent, arrow),
+			shader: arrow.shader,
 
-	override public function shift() {
-		__drawInstruction(queue[postCount++]);
-	}
-
-	private function __drawInstruction(instruction:FMDrawInstruction) {
-		if (instruction == null)
-			return;
-
-		final item = instruction.item;
-		final cameras = ModchartUtil.resolveCameras(item);
-
-		@:privateAccess
-		for (camera in cameras) {
-			final cTransform = instruction.colorData[0];
-			cTransform.alphaMultiplier *= camera.alpha;
-
-			var batch = camera.startTrianglesBatch(item.graphic, item.antialiasing, true, item.blend, true, item.shader);
-			batch.addGradientTriangles(instruction.vertices, instruction.indices, instruction.uvt, null, getZoomAwareBounds(camera), [cTransform]);
-		}
+			vertices: vertices,
+			uvs: uvData,
+			indices: indices,
+			color: color,
+			isColored: color.hasRGBMultipliers() || color.alphaMultiplier != 1,
+			hasColorOffsets: color.hasRGBAOffsets()
+		};
+		return dc;
 	}
 
 	inline private function getArrowParams(arrow:FlxSprite, posOff:Float = 0):ArrowData {
 		final player = Adapter.instance.getPlayerFromArrow(arrow);
 		final lane = Adapter.instance.getLaneFromArrow(arrow);
 
-		final centered2 = (player == __lastPlayer) ? __lastC2 : (__lastC2 = instance.getPercent('centered2', player));
+		final centered2 = (player == __lastPlayer) ? __lastC2 : (__lastC2 = parent.getPercent('centered2', player));
 		final timeC2 = FlxG.height * 0.25 * centered2;
 		final hitTime = Adapter.instance.getTimeFromArrow(arrow);
 
@@ -227,7 +274,6 @@ final class ModchartNVHoldRenderer extends ModchartRenderer<FlxSprite> {
 		pos += timeC2;
 
 		return {
-			__holdSubdivisionOffset: posOff,
 			hitTime: hitTime + posOff + timeC2,
 			distance: pos,
 			lane: lane,

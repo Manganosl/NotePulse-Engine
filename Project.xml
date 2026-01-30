@@ -100,7 +100,7 @@
 
 	<!--FunkinModchart-->
 	<haxedef name="funkin-modchart" />
-	<haxedef name="FM_ENGINE" value="notepulse"/>
+	<haxedef name="FM_ENGINE" value="NOTEPULSE"/>
 	<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
 	<assets path="source/assets/modchart/arrowShape.csv" rename="modchart/arrowShape.csv" embed="true" />
 	<assets path="source/assets/modchart/eyeShape.csv" rename="modchart/eyeShape.csv" embed="true" />

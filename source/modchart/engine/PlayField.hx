@@ -4,56 +4,46 @@ import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
 import flixel.tweens.FlxEase.EaseFunction;
 import modchart.backend.core.Node.NodeFunction;
 import modchart.backend.graphics.*;
 import modchart.backend.graphics.renderers.*;
-import modchart.backend.standalone.Adapter;
 import modchart.backend.util.ModchartUtil;
 import modchart.engine.events.types.*;
 import openfl.display.BitmapData;
+import openfl.geom.Matrix;
 import openfl.geom.Rectangle;
 
-// TODO: make this extend to flxsprite and use parented transformation matrix
 #if !openfl_debug
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
 final class PlayField extends FlxSprite {
+	public var context:Context;
+
 	public var events:EventManager;
 	public var modifiers:ModifierGroup;
-	public var camera3D:ModchartCamera3D;
 
-	private var arrowRenderer:ModchartArrowRenderer;
-	private var receptorRenderer:ModchartArrowRenderer;
-	private var attachmentRenderer:ModchartArrowRenderer;
-	private var holdRenderer:ModchartRenderer<FlxSprite>;
-	private var pathRenderer:ModchartPathRenderer;
+	public var view(get, never):View3D;
 
-	public var projection:ModchartPerspective;
+	public var skew(default, null):FlxPoint = FlxPoint.get();
 
-	private var currentCameras:Array<FlxCamera>;
+	var _skewMatrix:Matrix = new Matrix();
+
+	function get_view()
+		return context.view;
 
 	public function new() {
 		super();
 
-		this.cameras = Adapter.instance.getArrowCamera();
-
 		moves = false;
 
-		this.events = new EventManager(this);
-		this.modifiers = new ModifierGroup(this);
+		events = new EventManager(this);
+		modifiers = new ModifierGroup(this);
 
-		arrowRenderer = new ModchartArrowRenderer(this);
-		receptorRenderer = new ModchartArrowRenderer(this);
-		attachmentRenderer = new ModchartArrowRenderer(this);
-		if(Config.NVE_HOLDS) holdRenderer = new ModchartNVHoldRenderer(this);
-		else holdRenderer = new ModchartHoldRenderer(this);
-		pathRenderer = new ModchartPathRenderer(this);
-
-		camera3D = new ModchartCamera3D();
-		projection = new ModchartPerspective();
+		context = new Context(this);
 
 		// default mods
 		addModifier('reverse');
@@ -61,12 +51,15 @@ final class PlayField extends FlxSprite {
 		addModifier('stealth');
 		addModifier('skew');
 		addModifier('zoom');
-		addModifier('transform');
-		addModifier('scale');
 
 		setPercent('arrowPathAlpha', 1, -1);
 		setPercent('arrowPathThickness', 2, -1);
 		setPercent('rotateHoldY', 1, -1);
+
+		frameWidth = FlxG.width;
+		frameHeight = FlxG.height;
+
+		updateHitbox();
 	}
 
 	public inline function setPercent(name:String, value:Float, player:Int = -1)
@@ -169,7 +162,6 @@ final class PlayField extends FlxSprite {
 			final h = it.hasNext;
 			do {
 				final node = n();
-
 				if (node == null)
 					continue;
 
@@ -206,175 +198,75 @@ final class PlayField extends FlxSprite {
 	}
 
 	override public function draw() {
-		__drawPlayField();
 		modifiers.postRender();
 	}
 
 	override public function destroy() {
-		arrowRenderer.dispose();
-		holdRenderer.dispose();
-		receptorRenderer.dispose();
-		attachmentRenderer.dispose();
-		pathRenderer.dispose();
 		super.destroy();
 	}
-
-	var drawCB:Array<{callback:Void->Void, z:Float}> = [];
 
 	private function getVisibility(obj:flixel.FlxObject) {
 		@:bypassAccessor obj.visible = false;
 		return obj._fmVisible;
 	}
 
-	private function __drawPlayField() {
-		drawCB = [];
+	private function transformCmd(cmd:DrawCommand) {
+		var vertex = cmd.vertices;
+		var vc = Std.int(vertex.length / 2);
 
-		// TODO: prepare arrow paths shit
-		var pathAlphaTotal = .0;
+		final matrix = this._matrix;
+		matrix.identity();
 
-		var playerItems:Array<Array<Array<FlxSprite>>> = Adapter.instance.getArrowItems();
-
-		// used for preallocate
-		var receptorLength = 0;
-		var arrowLength = 0;
-		var holdLength = 0;
-		var attachmentLength = 0;
-
-		for (i in 0...playerItems.length) {
-			final curItems = playerItems[i];
-
-			if (curItems[0] != null)
-				receptorLength = receptorLength + curItems[0].length;
-			if (curItems[1] != null)
-				arrowLength = arrowLength + curItems[1].length;
-			if (curItems[2] != null)
-				holdLength = holdLength + curItems[2].length;
-			if (curItems[3] != null)
-				attachmentLength = attachmentLength + curItems[3].length;
+		if (flipX) {
+			matrix.scale(-1, 1);
+			matrix.translate(width, 0);
 		}
 
-		if (receptorLength != 0)
-			receptorRenderer.preallocate(receptorLength);
-		if (arrowLength != 0)
-			arrowRenderer.preallocate(arrowLength);
-		if (holdLength != 0)
-			holdRenderer.preallocate(holdLength);
-		if (attachmentLength != 0)
-			attachmentRenderer.preallocate(attachmentLength);
-
-		if (Config.RENDER_ARROW_PATHS)
-			pathRenderer.preallocate(receptorLength);
-
-		drawCB.resize(receptorLength + arrowLength + holdLength + attachmentLength);
-
-		var j = 0;
-		inline function queue(f:{callback:Void->Void, z:Float}) {
-			drawCB[j] = f;
-			j++;
+		if (flipY) {
+			matrix.scale(1, -1);
+			matrix.translate(0, height);
 		}
 
-		// i is player index
-		for (i in 0...playerItems.length) {
-			var curItems:Array<Array<FlxSprite>> = playerItems[i];
+		matrix.translate(-origin.x, -origin.y);
+		matrix.scale(scale.x, scale.y);
 
-			if (curItems == null || curItems.length == 0) continue;
-
-			final drawHolds = () -> {
-				if (holdLength > 0) {
-					for (hold in curItems[2]) {
-						if (!getVisibility(hold))
-							continue;
-
-						holdRenderer.prepare(hold);
-						queue({
-							callback: holdRenderer.shift,
-							z: hold._z
-						});
-					}
-				}
-			};
-
-			//holds (behind strums)
-			if (Config.HOLDS_BEHIND_STRUM)
-				drawHolds();
-
-			// receptors
-			if (receptorLength > 0) {
-				for (receptor in curItems[0]) {
-					if (!getVisibility(receptor))
-						continue;
-
-					receptorRenderer.prepare(receptor);
-					if (Config.RENDER_ARROW_PATHS)
-						pathRenderer.prepare(receptor);
-					queue({
-						callback: receptorRenderer.shift,
-						z: receptor._z
-					});
-				}
-			}
-
-			// holds
-			if (holdLength > 0) {
-				for (hold in curItems[2]) {
-					if (!getVisibility(hold))
-						continue;
-
-					holdRenderer.prepare(hold);
-					queue({
-						callback: holdRenderer.shift,
-						z: hold._z
-					});
-				}
-			}
-
-			// tap arrow
-			if (arrowLength > 0) {
-				for (arrow in curItems[1]) {
-					if (!getVisibility(arrow))
-						continue;
-
-					arrowRenderer.prepare(arrow);
-					queue({
-						callback: arrowRenderer.shift,
-						z: arrow._z
-					});
-				}
-			}
-
-			// attachments (splashes)
-			if (curItems.length > 3 && curItems[3] != null && curItems[3].length > 0) {
-				for (splash in curItems[3]) {
-					if (!getVisibility(splash))
-						continue;
-				
-					attachmentRenderer.prepare(splash);
-					queue({
-						callback: attachmentRenderer.shift,
-						z: splash._z
-					});
-				}
-			}
+		if (bakedRotationAngle <= 0) {
+			updateTrig();
+			if (angle != 0)
+				matrix.rotateWithTrig(_cosAngle, _sinAngle);
 		}
 
-		for (r in [receptorRenderer, arrowRenderer, holdRenderer, attachmentRenderer])
-			r.sort();
+		updateSkewMatrix();
+		_matrix.concat(_skewMatrix);
 
-		if (Config.RENDER_ARROW_PATHS)
-			pathRenderer.shift();
+		// getScreenPosition(_point, camera).subtractPoint(offset);
+		_point.set().subtractPoint(offset);
+		_point.add(origin.x, origin.y);
+		matrix.translate(_point.x, _point.y);
+
+		// if (isPixelPerfectRender(camera)) {
+		// 	matrix.tx = Math.floor(matrix.tx);
+		// 	matrix.ty = Math.floor(matrix.ty);
+		// }
+
+		for (c in 0...vc) {
+			var i = c * 2;
+			var x = vertex[i];
+			var y = vertex[i + 1];
+
+			vertex[i] = matrix.transformX(x, y);
+			vertex[i + 1] = matrix.transformY(x, y);
+		}
+
+		return cmd;
 	}
 
-	override function set_cameras(value:Array<FlxCamera>):Array<FlxCamera>{
-		currentCameras = value;
-		return super.set_cameras(value);
-	}
+	function updateSkewMatrix():Void {
+		_skewMatrix.identity();
 
-	inline function applyPlayFieldCameras(sprite:FlxSprite) {
-		if(this.cameras != null){
-			if(sprite.extraData["modchartCameras"] != currentCameras){
-				sprite.cameras = this.cameras;
-				sprite.extraData["modchartCameras"] = currentCameras;
-			}
+		if (skew.x != 0 || skew.y != 0) {
+			_skewMatrix.b = Math.tan(skew.y * FlxAngle.TO_RAD);
+			_skewMatrix.c = Math.tan(skew.x * FlxAngle.TO_RAD);
 		}
 	}
 }
