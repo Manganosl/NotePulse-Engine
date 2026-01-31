@@ -3619,6 +3619,9 @@ class PlayState extends MusicBeatState
 		if(opponentVocals.length <= 0) vocals.volume = 1;
 		strumPlayAnim(note.gfStrum ? 2 : 0, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
 		note.hitByOpponent = true;
+		note.strum.rbgShader.r = note.rgbShader.r;
+		note.strum.rbgShader.g = note.rgbShader.g;
+		note.strum.rbgShader.b = note.rgbShader.b;
 		
 		stagesFunc(function(stage:BaseStage) stage.opponentNoteHit(note));
 		var result:Dynamic = (!isPlayerOpponent && !note.gfStrum) ? callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]) : callOnLuas('goodNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
@@ -3742,8 +3745,16 @@ class PlayState extends MusicBeatState
 		{
 			var spr = note.strum;
 			if(spr != null) spr.playAnim('confirm', true);
+			note.strum.rbgShader.r = note.rgbShader.r;
+			note.strum.rbgShader.g = note.rgbShader.g;
+			note.strum.rbgShader.b = note.rgbShader.b;
 		}
-		else strumPlayAnim(1, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
+		else {
+			strumPlayAnim(1, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
+			note.strum.rbgShader.r = note.rgbShader.r;
+			note.strum.rbgShader.g = note.rgbShader.g;
+			note.strum.rbgShader.b = note.rgbShader.b;
+		}
 		vocals.volume = 1;
 
 		if (!note.isSustainNote && !cpuControlled)
