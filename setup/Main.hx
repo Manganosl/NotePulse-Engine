@@ -25,12 +25,12 @@ class Main {
 			switch (data.type) {
 				case "install", "haxelib": // for libraries only available in the haxe package manager
 					var version:String = data.version == null ? "" : data.version;
-					Sys.command('haxelib --quiet install ${data.name} ${version}');
+					Sys.command('haxelib --quiet install ${data.name} ${version} --skip-dependencies');
 				case "git": // for libraries that contain git repositories
 					var ref:String = data.ref == null ? "" : data.ref;
 					Sys.command('haxelib --quiet git ${data.name} ${data.url} ${data.ref}');
 				default: // and finally, throw an error if the library has no type
-					Sys.println('[PSYCH ENGINE SETUP]: Unable to resolve library of type "${data.type}" for library "${data.name}"');
+					Sys.println('[NOTEPULSE ENGINE SETUP]: Unable to resolve library of type "${data.type}" for library "${data.name}"');
 			}
 		}
 
