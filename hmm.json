@@ -94,6 +94,13 @@
       "dir": null,
       "ref": "codename-dev",
       "url": "https://github.com/CodenameCrew/hscript-improved"
-    }
+    },
+		{
+			"name": "away3d",
+			"type": "git",
+			"dir": null,
+			"ref": "master",
+			"url": "https://github.com/CodenameCrew/away3d"
+		}
   ]
 }

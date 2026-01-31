@@ -94,6 +94,13 @@ class HScript implements HscriptInterface {
 		"KeyValueArray" => Types.KeyValueArray,
 		"Main" => Main,
 
+		#if(away3d && AWAY3D_ALLOWED)
+		"Flx3DCamera" => flixel.flx3d.Flx3DCamera,
+		"Flx3DView" => flixel.flx3d.Flx3DView,
+		"FlxView3D" => flixel.flx3d.FlxView3D,
+		"Flx3DUtil" => flixel.flx3d.Flx3DUtil,
+		#end
+
 		//Extras
 		"Json" => { //Using the base Json library produces a null function pointer
 			parse: function(txt:String):Dynamic { return haxe.Json.parse(txt); },

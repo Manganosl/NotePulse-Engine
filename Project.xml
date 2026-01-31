@@ -18,10 +18,11 @@
 	<!--Minimum without FLX_NO_GAMEPAD: 11.8, without FLX_NO_NATIVE_CURSOR: 11.2-->
 	<set name="SWF_VERSION" value="11.8" />
 	
-	<!-- ______________________ PSYCH ENGINE CUSTOMIZATION ______________________ -->
+	<!-- ______________________ NOTEPULSE ENGINE CUSTOMIZATION ______________________ -->
 
 	<define name="MODS_ALLOWED" if="desktop" />
 	<define name="HSCRIPT_ALLOWED" if="desktop" />
+	<define name="AWAY3D_ALLOWED"/>
 	<define name="LUA_ALLOWED" if="desktop" />
 	<define name="ACHIEVEMENTS_ALLOWED" />
 	<define name="DISCORD_ALLOWED" />
@@ -94,6 +95,7 @@
 	<haxelib name="nape-haxe4" />
 	<haxelib name="json2object" />
 	<haxelib name="hscript-improved" if="HSCRIPT_ALLOWED"/>
+	<haxelib name="away3d" if="AWAY3D_ALLOWED"/>
 	<haxedef name="hscriptPos" />
 	<haxedef name="PRETTY_TRACE" />
 	<haxedef name="CUSTOM_CLASSES"/>
@@ -182,6 +184,8 @@
 	<haxeflag name="--macro" value="allowPackage('flash')" />
 	<haxeflag name="--macro" value="include('my.pack')" />
 	<haxeflag name="--macro" value="backend.utils.MacroUtil.compileMacros()" />
+
+	<define name="IMPORT_AWAY3D" if="AWAY3D_ALLOWED"/>
 
 	<!-- _________________________________ Custom _________________________________ -->
 
