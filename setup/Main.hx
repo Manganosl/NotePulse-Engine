@@ -25,7 +25,7 @@ class Main {
 			switch (data.type) {
 				case "install", "haxelib": // for libraries only available in the haxe package manager
 					var version:String = data.version == null ? "" : data.version;
-					Sys.command('haxelib --quiet install ${data.name} ${version} --skip-dependencies');
+					Sys.command('haxelib --quiet install ${data.name} ${version}');
 				case "git": // for libraries that contain git repositories
 					var ref:String = data.ref == null ? "" : data.ref;
 					Sys.command('haxelib --quiet git ${data.name} ${data.url} ${data.ref}');
