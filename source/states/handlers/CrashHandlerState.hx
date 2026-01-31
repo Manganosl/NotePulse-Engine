@@ -50,7 +50,7 @@ class CrashHandlerState extends MusicBeatState
 
 		FlxG.sound.playMusic(null, 0);
 
-		var errorText = "<red>" + crashLines[FlxG.random.int(0, crashLines.length)] + "\n* " + errorName + " *<red>\n
+		var errorText = "<red>" + crashLines[FlxG.random.int(0, crashLines.length-1)] + "\n* " + errorName + " *<red>\n
 		\nIn case this wasn't caused by any modifications, report this error to NotePulse Engine\n
 		<hyperlink>https://github.com/Manganosl/NotePulse-Engine/<hyperlink>\n\n" + errorName + ": " + error + "\n\n > Press any key to go to the main menu < ";
 		bgError = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);

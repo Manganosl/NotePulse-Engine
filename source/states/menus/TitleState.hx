@@ -21,6 +21,8 @@ import shaders.ColorSwap;
 import states.menus.StoryMenuState;
 import states.handlers.OutdatedState;
 import states.MainMenuState;
+import states.init.*;
+
 
 typedef TitleData =
 {
@@ -31,13 +33,11 @@ typedef TitleData =
 	gfx:Float,
 	gfy:Float,
 	backgroundSprite:String,
-	bpm:Int
+	bpm:Float
 }
 
 class TitleState extends MusicBeatState
 {
-	var skipVideo:FlxText;
-
 	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
@@ -67,8 +67,6 @@ class TitleState extends MusicBeatState
 
 	var mustUpdate:Bool = false;
 
-	public static var bpm:Float = 0;
-
 	var titleJSON:TitleData;
 
 	public static var updateVersion:String = '';
@@ -95,26 +93,26 @@ class TitleState extends MusicBeatState
 		ClientPrefs.loadPrefs();
 
 		if (ExtraKeysHandler.instance.data.scales == null)
-			MusicBeatState.switchState(new states.init.ScaleSimulationState());
+			MusicBeatState.switchState(new ScaleSimulationState());
 
 		#if CHECK_FOR_UPDATES
-		if(ClientPrefs.data.checkForUpdates && !closedState && Main.GIT_COMMIT == null) {
-			Log.hxTrace('checking for update');
+		if(ClientPrefs.data.checkForUpdates && !closedState) {
+			trace('checking for update');
 			var http = new haxe.Http("https://raw.githubusercontent.com/Manganosl/NotePulse-Engine/refs/heads/main/CurrentVersion.md");
 
 			http.onData = function (data:String)
 			{
 				updateVersion = data.split('\n')[0].trim();
 				var curVersion:String = Main.npeVersion.trim();
-				Log.info('version online: ' + updateVersion + ', your version: ' + curVersion);
+				trace('version online: ' + updateVersion + ', your version: ' + curVersion);
 				if(updateVersion != curVersion) {
-					Log.warn('versions arent matching!');
+					trace('versions arent matching!');
 					mustUpdate = true;
 				}
 			}
 
 			http.onError = function (error) {
-				Log.error(error);
+				trace('error: $error');
 			}
 
 			http.request();
@@ -149,7 +147,7 @@ class TitleState extends MusicBeatState
 			if(FlxG.save.data != null && FlxG.save.data.fullscreen)
 			{
 				FlxG.fullscreen = FlxG.save.data.fullscreen;
-				//Log.hxTrace('LOADED FULLSCREEN SETTING!!');
+				//trace('LOADED FULLSCREEN SETTING!!');
 			}
 			persistentUpdate = true;
 			persistentDraw = true;
@@ -162,14 +160,14 @@ class TitleState extends MusicBeatState
 
 		FlxG.mouse.visible = false;
 		#if FREEPLAY
-		MusicBeatState.switchState(new states.menus.FreeplayState());
+		MusicBeatState.switchState(new FreeplayState());
 		#elseif CHARTING
 		MusicBeatState.switchState(new ChartingState());
 		#else
-		if(FlxG.save.data.flashing == null && !states.init.FlashingState.leftState) {
+		if(FlxG.save.data.flashing == null && !FlashingState.leftState) {
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
-			MusicBeatState.switchState(new states.init.FlashingState());
+			MusicBeatState.switchState(new FlashingState());
 		} else {
 			if (initialized)
 				startIntro();
@@ -182,7 +180,6 @@ class TitleState extends MusicBeatState
 			}
 		}
 		#end
-		bpm = titleJSON.bpm;
 	}
 
 	var logoBl:FlxSprite;
@@ -223,13 +220,11 @@ class TitleState extends MusicBeatState
 		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24, false);
 		logoBl.animation.play('bump');
 		logoBl.updateHitbox();
-		logoBl.screenCenter();
-		logoBl.y += -50;
+		// logoBl.screenCenter();
 		// logoBl.color = FlxColor.BLACK;
 
 		if(ClientPrefs.data.shaders) swagShader = new ColorSwap();
 		gfDance = new FlxSprite(titleJSON.gfx, titleJSON.gfy);
-		gfDance.visible = false;
 		gfDance.antialiasing = ClientPrefs.data.antialiasing;
 
 		var easterEgg:String = FlxG.save.data.psychDevsEasterEgg;
@@ -297,8 +292,7 @@ class TitleState extends MusicBeatState
 		
 		titleText.animation.play('idle');
 		titleText.updateHitbox();
-		titleText.screenCenter(X);
-		titleText.x += titleText.width/7;
+		// titleText.screenCenter(X);
 		add(titleText);
 
 		var logo:FlxSprite = new FlxSprite().loadGraphic(Paths.image('logo'));
@@ -306,7 +300,7 @@ class TitleState extends MusicBeatState
 		logo.screenCenter();
 		// add(logo);
 
-		FlxTween.tween(logoBl, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG});
+		// FlxTween.tween(logoBl, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG});
 		// FlxTween.tween(logo, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG, startDelay: 0.1});
 
 		credGroup = new FlxGroup();
@@ -432,9 +426,9 @@ class TitleState extends MusicBeatState
 				new FlxTimer().start(1, function(tmr:FlxTimer)
 				{
 					if (mustUpdate) {
-						MusicBeatState.switchState(new states.handlers.OutdatedState());
+						MusicBeatState.switchState(new OutdatedState());
 					} else {
-						MusicBeatState.switchState(new states.MainMenuState());
+						MusicBeatState.switchState(new MainMenuState());
 					}
 					closedState = true;
 				});
@@ -448,14 +442,14 @@ class TitleState extends MusicBeatState
 				if(allowedKeys.contains(keyName)) {
 					easterEggKeysBuffer += keyName;
 					if(easterEggKeysBuffer.length >= 32) easterEggKeysBuffer = easterEggKeysBuffer.substring(1);
-					//Log.hxTrace('Test! Allowed Key pressed!!! Buffer: ' + easterEggKeysBuffer);
+					//trace('Test! Allowed Key pressed!!! Buffer: ' + easterEggKeysBuffer);
 
 					for (wordRaw in easterEggKeys)
 					{
 						var word:String = wordRaw.toUpperCase(); //just for being sure you're doing it right
 						if (easterEggKeysBuffer.contains(word))
 						{
-							//Log.hxTrace('YOOO! ' + word);
+							//trace('YOOO! ' + word);
 							if (FlxG.save.data.psychDevsEasterEgg == word)
 								FlxG.save.data.psychDevsEasterEgg = '';
 							else
@@ -472,7 +466,7 @@ class TitleState extends MusicBeatState
 								function(twn:FlxTween) {
 									FlxTransitionableState.skipNextTransIn = true;
 									FlxTransitionableState.skipNextTransOut = true;
-									MusicBeatState.switchState(new states.menus.TitleState());
+									MusicBeatState.switchState(new TitleState());
 								}
 							});
 							FlxG.sound.music.fadeOut();
