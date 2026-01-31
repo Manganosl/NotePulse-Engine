@@ -213,11 +213,11 @@ class Song
 
 	public static var loadedSongName:String;
 	public static var chartPath:String;
-	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
+	public static function loadFromJson(jsonInput:String, ?folder:String, ?isSong:Bool = true):SwagSong
 	{
 		var formattedFolder:String = Paths.formatToSongPath(folder);
 		var formattedSong:String = Paths.formatToSongPath(jsonInput);
-		chartPath = Paths.json('$formattedFolder/$formattedSong');
+		if(isSong) chartPath = Paths.json('$formattedFolder/$formattedSong');
 		loadedSongName = folder;
 		return parseRawJSON(jsonInput, loadRawSong(jsonInput, folder));
 	}

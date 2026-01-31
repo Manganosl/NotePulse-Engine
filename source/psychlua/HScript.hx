@@ -60,12 +60,6 @@ class HScript implements HscriptInterface {
 		"FlxTween" => flixel.tweens.FlxTween,
 		"FlxEase" => flixel.tweens.FlxEase,
 		"FlxText" => flixel.text.FlxText,
-		"FlxTextAlign" => {
-			LEFT: flixel.text.FlxTextAlign.LEFT,
-			CENTER: flixel.text.FlxTextAlign.CENTER,
-			RIGHT: flixel.text.FlxTextAlign.RIGHT,
-			JUSTIFY: flixel.text.FlxTextAlign.JUSTIFY
-		},
 		"FlxTextBorderStyle" => flixel.text.FlxTextBorderStyle,
 		'FlxTextFormatMarkerPair' => flixel.text.FlxTextFormatMarkerPair,
 		'FlxTextFormat' => flixel.text.FlxTextFormat,
@@ -105,6 +99,12 @@ class HScript implements HscriptInterface {
 		"Json" => { //Using the base Json library produces a null function pointer
 			parse: function(txt:String):Dynamic { return haxe.Json.parse(txt); },
 			stringify: function(value:Dynamic, ?replacer:(key:Dynamic, value:Dynamic) -> Dynamic, ?space:String) { return haxe.Json.stringify(value, replacer, space); }
+		},
+		"FlxTextAlign" => { // Same for this
+			LEFT: flixel.text.FlxTextAlign.LEFT,
+			CENTER: flixel.text.FlxTextAlign.CENTER,
+			RIGHT: flixel.text.FlxTextAlign.RIGHT,
+			JUSTIFY: flixel.text.FlxTextAlign.JUSTIFY
 		},
 		"FlxBasic" => flixel.FlxBasic,
 		"FlxCamera" => flixel.FlxCamera,
