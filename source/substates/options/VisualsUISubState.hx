@@ -44,6 +44,12 @@ class VisualsUISubState extends BaseOptionsMenu
 			option.onChange = onChangeNoteSkin;
 			noteOptionID = optionsArray.length - 1;
 		}
+
+		var option:Option = new Option('Quant Notes',
+		"Check if you want the notes quantized",
+		"quantNotes",
+		"bool");
+		addOption(option);
 		
 		var noteSplashes:Array<String> = Mods.mergeAllTextsNamed('images/noteSplashes/list.txt');
 		if(noteSplashes.length > 0)

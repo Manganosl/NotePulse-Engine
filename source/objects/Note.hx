@@ -45,6 +45,30 @@ class Note extends FlxSkewedSprite
 		'No Animation'
 	];
 
+	static final QUANT_COLORS:Map<String, Array<FlxColor>> = [
+    "R" => 0xFFFF0000, 0xFFFFFFFF, 0xFF800000,
+    "B" => 0xFF0000FF, 0xFFFFFFFF, 0xFF000080, 
+    "P" => 0xFFAA00AA, 0xFFFFFFFF, 0xFF550055,   
+    "Y" => 0xFFFFFF00, 0xFFFFFFFF, 0xFF808000,   
+    "K" => 0xFFFF00FF, 0xFFFFFFFF, 0xFF800080, 
+    "O" => 0xFFFFA500, 0xFFFFFFFF, 0xFF804000,   
+    "C" => 0xFF00FFFF, 0xFFFFFFFF, 0xFF008080, 
+    "G" => 0xFF00FF00, 0xFFFFFFFF, 0xFF008000,  
+    "T" => 0xFF008080, 0xFFFFFFFF, 0xFF004040, 
+	];
+
+	static final BEAT_DIVS:Array<{div:Float, col:String}> = [
+		{div: 192/4,  col: "R"},
+		{div: 192/6,  col: "P"},
+		{div: 192/8,  col: "B"},
+		{div: 192/12, col: "P"},
+		{div: 192/16, col: "Y"},
+		{div: 192/24, col: "K"},
+		{div: 192/32, col: "O"},
+		{div: 192/48, col: "C"},
+		{div: 192/64, col: "G"}
+	];
+
 	public var strum:StrumNote = null;
 	public var row:Int = 0;
 	public var column:Int = 0; // Why both for the same thing? I'm dumb
@@ -193,12 +217,68 @@ class Note extends FlxSkewedSprite
 		return (hitPriority == Math.NEGATIVE_INFINITY);
 	}
 
+	inline function getQuantBeat(strumTime:Float):Int
+	{
+		var bpm:Float = Conductor.bpm;
+		var newTime:Float = strumTime;
+
+		for (change in Conductor.bpmChangeMap)
+		{
+			if (strumTime > change.songTime)
+			{
+				bpm = change.bpm;
+				newTime = strumTime - change.songTime;
+			}
+		}
+
+		var noteOffset:Float = ClientPrefs.data.noteOffset;
+		var noteBeat:Float = (bpm * (newTime - noteOffset)) / 1000 / 60;
+		return Math.round(noteBeat * 48);
+	}
+
+	function getQuantColor(strumTime:Float):Array<FlxColor>
+	{
+		var beat:Int = getQuantBeat(strumTime);
+		var col:String = "T";
+
+		for (entry in BEAT_DIVS)
+		{
+			if (beat % entry.div == 0)
+			{
+				col = entry.col;
+				break;
+			}
+		}
+
+		return QUANT_COLORS.get(col);
+	}
+
 	public function defaultRGB()
 	{
+		if(ClientPrefs.data.quantNotes && noteData > -1)
+		{
+			if(isSustainNote && prevNote != null)
+			{
+				rgbShader.r = prevNote.rgbShader.r;
+				rgbShader.g = prevNote.rgbShader.g;
+				rgbShader.b = prevNote.rgbShader.b;
+				return;
+			}
+
+			var arr = getQuantColor(strumTime);
+			rgbShader.r = arr[0];
+			rgbShader.g = arr[1];
+			rgbShader.b = arr[2];
+			return;
+		}
+
 		var mania = 3;
 		if (PlayState.SONG != null) mania = PlayState.SONG.mania;
+
 		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[getIndex(mania, noteData)];
-		if(PlayState.isPixelStage) arr = ClientPrefs.data.arrowRGBPixel[getIndex(mania, noteData)];
+		if (PlayState.isPixelStage)
+			arr = ClientPrefs.data.arrowRGBPixel[getIndex(mania, noteData)];
+
 		if (noteData > -1)
 		{
 			rgbShader.r = arr[0];
