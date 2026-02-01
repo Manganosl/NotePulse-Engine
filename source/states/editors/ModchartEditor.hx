@@ -824,11 +824,6 @@ class ModchartEditor extends MusicBeatState
 
 		if(FlxG.sound.music != null)
 		{
-			if(FlxG.sound.music.time >= vocals.length)
-				vocals.pause();
-			if(FlxG.sound.music.time >= opponentVocals.length)
-				opponentVocals.pause();
-
 			while(curSec > 0 && Conductor.songPosition < cachedSectionTimes[curSec])
 				loadSection(curSec - 1);
 			while(curSec < cachedSectionTimes.length - 1 && Conductor.songPosition >= cachedSectionTimes[curSec + 1])
@@ -1201,27 +1196,31 @@ class ModchartEditor extends MusicBeatState
 
 		try
 		{
-			if (songData.needsVoices)
+			if (songData.needsVoices || Paths.voices(songData.song) != null)
 			{
 				var playerVocals = Paths.voices(songData.song, boyfriendVocals);
+				if (playerVocals == null)
+					playerVocals = Paths.voices(songData.song);
 				if (playerVocals != null)
 				{
 					vocals.loadEmbedded(playerVocals);
 					FlxG.sound.list.add(vocals);
 					vocals.persist = true;
-					vocals.looped = true;
+					vocals.looped = false;
 					vocals.volume = 0;
 					vocals.play();
 					vocals.pause();
 				}
 
 				var oppVocals = Paths.voices(songData.song, dadVocals);
+				if (oppVocals == null)
+					oppVocals = Paths.voices(songData.song);
 				if (oppVocals != null)
 				{
 					opponentVocals.loadEmbedded(oppVocals);
 					FlxG.sound.list.add(opponentVocals);
 					opponentVocals.persist = true;
-					opponentVocals.looped = true;
+					opponentVocals.looped = false;
 					opponentVocals.volume = 0;
 					opponentVocals.play();
 					opponentVocals.pause();
