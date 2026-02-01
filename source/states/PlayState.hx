@@ -1753,21 +1753,15 @@ class PlayState extends MusicBeatState
 			case "Modchart Event":
 				if(SONG.nativeModchart){
 					var info = event.value1.split(',');
+					final daBeat:Float = Conductor.getBeat(event.strumTime);
+					var ease = FlxEase.linear;
+					if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
 					switch(info[0]){
-						case "Add Modifier":
-							manager.addModifier(info[1], Std.parseInt(info[6]));
-						case "Ease":
-							var ease = FlxEase.linear;
-							if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
-							manager.ease(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "Set":
-							manager.set(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "EaseAdd":
-							var ease = FlxEase.linear;
-							if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
-							manager.add(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "SetAdd":
-							manager.setAdd(info[1], event.strumTime/(60000 / Conductor.bpm), Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "Add Modifier": manager.addModifier(info[1], Std.parseInt(info[6]));
+						case "Ease": manager.ease(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "Set": manager.set(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "EaseAdd": manager.add(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "SetAdd": manager.setAdd(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
 					}
 				}
 		}
