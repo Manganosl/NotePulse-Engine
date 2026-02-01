@@ -137,6 +137,7 @@ class EditorPlayState extends MusicBeatSubstate
 		
 		var splash:NoteSplash = new NoteSplash(100, 100);
 		grpNoteSplashes.add(splash);
+		grpNoteSplashes.cameras = [camHUD];
 		splash.alpha = 0.000001; //cant make it invisible or it won't allow precaching
 
 		opponentStrums = new FlxTypedGroup<StrumNote>();
@@ -475,7 +476,7 @@ class EditorPlayState extends MusicBeatSubstate
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 				swagNote.gfStrum = (songNotes[4] == true);
 				if(swagNote.gfStrum) swagNote.mustPress = false;
-
+				swagNote.cameras = [camHUD];
 				swagNote.scrollFactor.set();
 
 				unspawnNotes.push(swagNote);
@@ -495,6 +496,7 @@ class EditorPlayState extends MusicBeatSubstate
 						sustainNote.parent = swagNote;
 						sustainNote.gfStrum = swagNote.gfStrum;
 						if(sustainNote.gfStrum) sustainNote.mustPress = false;
+						sustainNote.cameras = [camHUD];
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 
@@ -577,6 +579,7 @@ class EditorPlayState extends MusicBeatSubstate
 				opponentStrums.add(babyArrow);
 			}
 
+			babyArrow.cameras = [camHUD];
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
 		}

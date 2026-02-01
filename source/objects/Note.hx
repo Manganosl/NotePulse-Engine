@@ -255,7 +255,7 @@ class Note extends FlxSkewedSprite
 
 	public function defaultRGB()
 	{
-		if(ClientPrefs.data.quantNotes && noteData > -1)
+		if(!PlayState.SONG.disableNoteRGB && ClientPrefs.data.quantNotes && noteData > -1)
 		{
 			if(isSustainNote && prevNote != null)
 			{
