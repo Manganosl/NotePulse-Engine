@@ -68,7 +68,7 @@ final class Manager extends FlxBasic {
 	 */
 	public inline function iteratePlayfields(func:PlayField->Void, player:Int = -1) {
 		// If there's only one playfield or a specific player is provided, apply the function directly
-		if (playfields.length == 1 && player != -1)
+		if (player != -1 && playfields[player] != null)
 			return func(playfields[player != -1 ? player : 0]);
 
 		// Otherwise, apply the function to all playfields

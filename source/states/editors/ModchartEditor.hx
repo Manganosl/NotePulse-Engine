@@ -305,6 +305,8 @@ class ModchartEditor extends MusicBeatState
 		eventNote.events[0][1] = combined;
 
 		eventNote.updateEventText();
+
+		reloadManager();
 	}
 
 	function addModchartTab():Void {
@@ -1146,6 +1148,14 @@ class ModchartEditor extends MusicBeatState
 		FlxG.cameras.remove(camHUD);
 		camHUD.destroy();
 		FlxG.sound.list.remove(inst);
+		if(vocals != null){
+			vocals.stop();
+			FlxG.sound.list.remove(vocals);
+		}
+		if(opponentVocals != null){
+			opponentVocals.stop();
+			FlxG.sound.list.remove(opponentVocals);
+		}
 		flixel.util.FlxDestroyUtil.destroy(inst);
 		camHUD = null;
 		super.destroy();
