@@ -53,6 +53,7 @@ class PsychUISlider extends FlxSpriteGroup
 		this.max = max;
 		this.value = def;
 		_updatePositions();
+		handle.y = bar.y + bar.height/2 - handle.height/2;
 		forceNextUpdate = true;
 	}
 
@@ -110,7 +111,6 @@ class PsychUISlider extends FlxSpriteGroup
 		minText.y = maxText.y = valueText.y = bar.y + 12;
 
 		_updateHandleX();
-		handle.y = bar.y + bar.height/2 - handle.height/2;
 	}
 
 	function _updateHandleX()

@@ -39,6 +39,8 @@ class ModchartEditor extends MusicBeatState
 	var gridBg:ChartingGridSprite;
 	var nextGridBg:ChartingGridSprite;
 
+	var songPosSlider:PsychUISlider;
+
 	var finishTimer:FlxTimer = null;
 	var noteKillOffset:Float = 350;
 	var spawnTime:Float = 2000;
@@ -250,6 +252,39 @@ class ModchartEditor extends MusicBeatState
 		vortexIndicator.scrollFactor.set();
 		vortexIndicator.cameras = [camUI];
 		add(vortexIndicator);
+
+		var thatBG:FlxSprite = new FlxSprite(0, FlxG.height-125).makeGraphic(FlxG.width, 125, FlxColor.BLACK);
+		thatBG.alpha = 0.6;
+		thatBG.cameras = [camUI];
+		thatBG.scrollFactor.set();
+		add(thatBG);
+
+		var songLen:Float = (FlxG.sound.music != null ? FlxG.sound.music.length : 0.0001);
+		songPosSlider = new PsychUISlider(0, thatBG.y, function(v:Float)
+		{
+			paused = true;
+			if(FlxG.sound.music != null)
+			{
+				FlxG.sound.music.pause();
+				if(vocals != null) vocals.pause();
+				if(opponentVocals != null) opponentVocals.pause();
+				FlxG.sound.music.time = v;
+				Conductor.songPosition = v;
+				seek(0);
+			}
+		}, Conductor.songPosition, 0, songLen, FlxG.width, 0xFF4D4D4D, FlxColor.WHITE);
+		songPosSlider.bar.scale.y = 15;
+		songPosSlider.bar.updateHitbox();
+		songPosSlider.handle.y = songPosSlider.bar.y;
+		songPosSlider.handle.updateHitbox();
+		songPosSlider.y = thatBG.y;
+		songPosSlider.valueText.visible = false;
+		songPosSlider.minText.visible = false;
+		songPosSlider.maxText.visible = false;
+		songPosSlider.bar.alpha = 0.5;
+		songPosSlider.scrollFactor.set(0, 0);
+		songPosSlider.cameras = [camUI];
+		add(songPosSlider);
 
 		modchartBox = new PsychUIBox(0, 0, 300, 280, ['Modchart', 'Song']);
 		modchartBox.selectedName = 'Modchart';
@@ -820,6 +855,8 @@ class ModchartEditor extends MusicBeatState
 	private var isCrosshair:Bool = false;
 	override function update(elapsed:Float)
 	{
+		if(FlxG.sound.music.playing) songPosSlider.value = Conductor.songPosition;
+
 		ClientPrefs.toggleVolumeKeys(PsychUIInputText.focusOn == null);
 		updateScrollY();
 		camUI.scroll.y = scrollY;
