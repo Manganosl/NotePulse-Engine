@@ -3,12 +3,14 @@ import haxe.CallStack;
 import haxe.Exception;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.util.FlxSignal.FlxTypedSignal;
+import objects.FunkinSoundTray;
 
-class Funkin extends FlxGame
+class FunkinGame extends FlxGame
 {
 	public static var onGameCrash(default, null):FlxTypedSignal<(String,String)->Void> = new FlxTypedSignal<(String,String)->Void>();
 
 	override function create(_):Void {
+		_customSoundTray = FunkinSoundTray;
 		try {super.create(_);} catch(e) {onCrash(e);}
 	}
 

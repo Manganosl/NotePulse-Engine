@@ -6,8 +6,6 @@ import android.content.Context;
 
 import debug.FPSCounter;
 
-import objects.FunkinSoundTray;
-
 import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
 import flixel.FlxState;
@@ -128,9 +126,7 @@ class Main extends Sprite
 		ClientPrefs.loadDefaultKeys();
 
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
-		var mainGame:Funkin = new Funkin(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen,);
-		#if desktop @:privateAccess mainGame._customSoundTray = FunkinSoundTray; #end
-		addChild(mainGame);
+		addChild(new FunkinGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		#if !mobile
 		fpsVar = new FPSCounter(10, 3);
