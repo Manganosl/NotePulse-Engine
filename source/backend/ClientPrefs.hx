@@ -5,6 +5,7 @@ import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 import backend.utils.CoolUtil.*;
 
+import debug.FunkinDebugDisplay;
 import states.menus.TitleState;
 
 // Add a variable here and it will get automatically saved

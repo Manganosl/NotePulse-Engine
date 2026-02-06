@@ -12,7 +12,6 @@ class MiscSettingsSubState extends BaseOptionsMenu
 			'devMode',
 			'bool');
 		addOption(option);
-		option.onChange = onDevModeChange;
 
 		var option:Option = new Option('Auto Pause',
 			"If checked, the game automatically pauses if the screen isn't on focus.",
@@ -53,20 +52,9 @@ class MiscSettingsSubState extends BaseOptionsMenu
 
 	#if !mobile
 	function onChangeFPSCounter()
-	{
-		if(Main.fpsVar != null){
+		if(Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.data.showFPS;
-			Main.fpsVar.showDebug = false;
-		}
-	}
 	#end
-
-	function onDevModeChange()
-	{
-		if(Main.fpsVar != null){
-			Main.fpsVar.showDebug = false;
-		}
-	}
 
 	function onChangeAutoPause()
 		FlxG.autoPause = ClientPrefs.data.autoPause;

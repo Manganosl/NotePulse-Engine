@@ -4,7 +4,7 @@ package;
 import android.content.Context;
 #end
 
-import debug.FPSCounter;
+import debug.FunkinDebugDisplay;
 
 import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
@@ -62,7 +62,8 @@ class Main extends Sprite
 		skipSplash: true, // if the default flixel splash screen should be skipped
 		startFullscreen: false // if the game should start at fullscreen mode
 	};
-	public static var fpsVar:FPSCounter;
+	public static var fpsVar:FunkinDebugDisplay;
+	
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -129,7 +130,7 @@ class Main extends Sprite
 		addChild(new FunkinGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		#if !mobile
-		fpsVar = new FPSCounter(10, 3);
+		fpsVar = new FunkinDebugDisplay(10, 10, 0xFFFFFF);
 		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -137,6 +138,8 @@ class Main extends Sprite
 			fpsVar.visible = ClientPrefs.data.showFPS;
 		}
 		#end
+
+		FlxG.signals.postUpdate.add(handleDebugDisplayKeys);
 
 		#if linux
 		var icon = Image.fromFile("icon.png");
@@ -225,4 +228,18 @@ class Main extends Sprite
 		Sys.exit(1);
 	}
 	#end
+
+  	function handleDebugDisplayKeys():Void
+  	{
+  	  	if (!FlxG.keys.justPressed.F3) return;
+
+		if(!fpsVar.visible)
+			fpsVar.visible = true;
+		else if(!fpsVar.isAdvanced)
+			fpsVar.isAdvanced = true;
+		else {
+			fpsVar.isAdvanced = false;
+			fpsVar.visible = false;
+		}
+  	}
 }

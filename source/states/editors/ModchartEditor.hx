@@ -872,16 +872,16 @@ class ModchartEditor extends MusicBeatState
 		if (FlxG.keys.justPressed.SPACE && PsychUIInputText.focusOn == null)
 			togglePause();
 
-		if (FlxG.keys.justPressed.D && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.RIGHT && PsychUIInputText.focusOn == null)
 			seek(Conductor.stepCrochet);
 
-		if (FlxG.keys.justPressed.A && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.LEFT && PsychUIInputText.focusOn == null)
 			seek(-Conductor.stepCrochet);
 
-		if (FlxG.keys.justPressed.RIGHT && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.D && PsychUIInputText.focusOn == null)
 			seek(Conductor.stepCrochet*4*4);
 
-		if (FlxG.keys.justPressed.LEFT && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.A && PsychUIInputText.focusOn == null)
 			seek(-Conductor.stepCrochet*4*4);
 
 		if((controls.BACK || FlxG.keys.justPressed.ESCAPE) && PsychUIInputText.focusOn == null)
@@ -1253,7 +1253,7 @@ class ModchartEditor extends MusicBeatState
 					vocals.loadEmbedded(playerVocals);
 					FlxG.sound.list.add(vocals);
 					vocals.persist = true;
-					vocals.looped = false;
+					vocals.looped = true;
 					vocals.volume = 0;
 					vocals.play();
 					vocals.pause();
@@ -1267,7 +1267,7 @@ class ModchartEditor extends MusicBeatState
 					opponentVocals.loadEmbedded(oppVocals);
 					FlxG.sound.list.add(opponentVocals);
 					opponentVocals.persist = true;
-					opponentVocals.looped = false;
+					opponentVocals.looped = true;
 					opponentVocals.volume = 0;
 					opponentVocals.play();
 					opponentVocals.pause();
