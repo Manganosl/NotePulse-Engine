@@ -101,7 +101,9 @@ class MemoryUtil
 
   public static function getGCMemory():Float
   {
-    return openfl.system.System.totalMemoryNumber;
+    var mem = openfl.system.System.totalMemory;
+    if (mem < 0) return -mem;
+    else return mem;
   }
 
   /**

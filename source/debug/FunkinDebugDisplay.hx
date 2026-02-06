@@ -212,11 +212,11 @@ class FunkinDebugDisplay extends Sprite
     fpsGraph.textDisplay.text = info.join('\n');
 
     #if !html5
-    gcMemGraph.textDisplay.text = 'GC MEM: ${FlxStringUtil.formatBytes(gcMem).toLowerCase()} / ${FlxStringUtil.formatBytes(gcMemPeak).toLowerCase()}';
+    gcMemGraph.textDisplay.text = 'GC MEM: ${FlxStringUtil.formatBytes(gcMem).toUpperCase()} / ${FlxStringUtil.formatBytes(gcMemPeak).toUpperCase()}';
 
     if (taskMemGraph != null)
     {
-      taskMemGraph.textDisplay.text = 'TASK MEM: ${FlxStringUtil.formatBytes(taskMem).toLowerCase()} / ${FlxStringUtil.formatBytes(taskMemPeak).toLowerCase()}';
+      taskMemGraph.textDisplay.text = 'TASK MEM: ${FlxStringUtil.formatBytes(taskMem).toUpperCase()} / ${FlxStringUtil.formatBytes(taskMemPeak).toUpperCase()}';
     }
     #end
   }
@@ -230,10 +230,10 @@ class FunkinDebugDisplay extends Sprite
       info.push('FPS: $currentFPS');
 
       #if !html5
-      info.push('GC MEM: ${FlxStringUtil.formatBytes(gcMem).toLowerCase()} / ${FlxStringUtil.formatBytes(gcMemPeak).toLowerCase()}');
+      info.push('GC MEM: ${FlxStringUtil.formatBytes(gcMem).toUpperCase()} / ${FlxStringUtil.formatBytes(gcMemPeak).toUpperCase()}');
 
       if (MemoryUtil.supportsTaskMem())
-        info.push('TASK MEM: ${FlxStringUtil.formatBytes(taskMem).toLowerCase()} / ${FlxStringUtil.formatBytes(taskMemPeak).toLowerCase()}');
+        info.push('TASK MEM: ${FlxStringUtil.formatBytes(taskMem).toUpperCase()} / ${FlxStringUtil.formatBytes(taskMemPeak).toUpperCase()}');
       #end
 
       infoDisplay.text = info.join('\n');
