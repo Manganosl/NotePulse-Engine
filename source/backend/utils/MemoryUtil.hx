@@ -57,7 +57,9 @@ class MemoryUtil
   public static function getTaskMemory():Float
   {
     #if (windows && cpp)
-    return backend.utils.helpers.CppBackend.getProcessMemoryWorkingSetSize();
+    var mem = backend.utils.helpers.CppBackend.getProcessMemoryWorkingSetSize();
+    if(mem < 0) return -mem;
+    else return mem;
     /*#elseif ((ios || macos) && cpp)
     return funkin.external.apple.MemoryUtil.getCurrentProcessRss();
     #elseif (linux || android)
