@@ -542,6 +542,7 @@ class Note extends FlxSkewedSprite
 		animation.addByPrefix(name, prefix, framerate, doLoop);
 	}
 
+	private var currentStrumSpeed:Float = -99999999999999;  // Can't use null so fuck it
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -567,6 +568,13 @@ class Note extends FlxSkewedSprite
 		{
 			if (alpha > 0.3)
 				alpha = 0.3;
+		}
+
+		if(currentStrumSpeed == -99999999999999) currentStrumSpeed = strum.noteSpeed;
+		if(currentStrumSpeed != strum.noteSpeed){
+			var ratio = strum.noteSpeed / currentStrumSpeed;
+			currentStrumSpeed = strum.noteSpeed;
+			resizeByRatio(ratio);
 		}
 	}
 
