@@ -184,7 +184,7 @@ class Interp {
 			var v = el.shift();
 			if (el.length > 0)
 				inf.customParams = el;
-			haxe.Log.trace(Std.string(v), inf);
+			Log.hxTrace(Std.string(v), inf);
 		}));
 	}
 
@@ -570,7 +570,7 @@ class Interp {
 				throw e;
 			return null;
 		} catch(e) {
-			trace(e);
+			Log.error(e);
 		}
 		return null;
 	}
@@ -618,7 +618,7 @@ class Interp {
 		if(warnHandler != null)
 			warnHandler(e);
 		else
-			trace('[ Warning ] ${Printer.errorToString(e)}');
+			Log.warn(Printer.errorToString(e));
 	}
 
 	inline function rethrow(e:Dynamic):Void {
