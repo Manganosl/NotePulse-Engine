@@ -46,7 +46,7 @@ class Init extends FlxState {
 			}
 
 			http.onError = function (error) {
-		        Log.error('error: $error');
+		        Log.error(error);
 			}
 
 			http.request();

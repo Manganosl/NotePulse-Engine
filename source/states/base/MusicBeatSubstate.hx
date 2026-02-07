@@ -134,6 +134,13 @@ class MusicBeatSubstate extends FlxSubState
 	}
 
 	override function create() {
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		if(luaDebugGroup == null){
+			luaDebugGroup = new FlxTypedGroup<psychlua.DebugLuaText>();
+			//luaDebugGroup.cameras = FlxG.cameras.list[FlxG.cameras.list.length - 1];
+			insert(99999999, luaDebugGroup);
+		}
+		#end
 		super.create();
 	}
 

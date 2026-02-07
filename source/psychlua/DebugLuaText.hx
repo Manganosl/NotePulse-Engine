@@ -9,6 +9,8 @@ class DebugLuaText extends FlxText
 		setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scrollFactor.set(0, 0);
 		borderSize = 1;
+
+		camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 	}
 
 	override function update(elapsed:Float) {
