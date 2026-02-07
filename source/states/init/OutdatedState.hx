@@ -1,4 +1,4 @@
-package states.handlers;
+package states.init;
 
 class OutdatedState extends MusicBeatState
 {
@@ -15,7 +15,7 @@ class OutdatedState extends MusicBeatState
 		warnText = new FlxText(0, 0, FlxG.width,
 			"Sup bro, looks like you're running an   \n
 			outdated version of NotePulse Engine (" + Main.npeVersion + "),\n
-			please update to " + states.menus.TitleState.updateVersion + "!\n
+			please update to " + Init.updateVersion + "!\n
 			Press ESCAPE to proceed anyway.\n
 			\n
 			Thank you for using the mod!",
@@ -41,7 +41,7 @@ class OutdatedState extends MusicBeatState
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				FlxTween.tween(warnText, {alpha: 0}, 1, {
 					onComplete: function (twn:FlxTween) {
-						MusicBeatState.switchState(new states.MainMenuState());
+						MusicBeatState.switchState(new states.menus.TitleState());
 					}
 				});
 			}

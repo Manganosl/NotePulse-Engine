@@ -28,7 +28,6 @@ import openfl.display.BitmapData;
 import shaders.ColorSwap;
 
 import states.menus.StoryMenuState;
-import states.handlers.OutdatedState;
 import states.MainMenuState;
 import states.editors.ChartingState;
 

@@ -165,7 +165,7 @@ class ScaleSimulationState extends MusicBeatState {
 
         PlayState.SONG = null;
 
-        MusicBeatState.switchState(new states.menus.TitleState());
+        FlxG.switchState(new Init());
     }
 
     override public function update(elapsed:Float)

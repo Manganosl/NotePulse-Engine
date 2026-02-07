@@ -12,6 +12,7 @@ import flixel.FlxG;
 import flixel.FlxBasic;
 import flixel.util.FlxColor;
 import psychlua.LuaUtils;
+import hscript.Types;
 #if LUA_ALLOWED
 import llua.Lua;
 #end

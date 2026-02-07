@@ -1,4 +1,4 @@
-package;
+package hscript;
 
 class KeyValueArray<T> {
     public var map:Map<String, T>;
