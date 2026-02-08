@@ -225,6 +225,9 @@ class FreeplayState extends MusicBeatState
 		
 		player = new MusicPlayer(this);
 		add(player);
+
+		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.tween(Main.fpsVar, {y: 110}, 1, {ease: FlxEase.circOut});
 		
 		changeSelection();
 		updateTexts();
@@ -476,6 +479,8 @@ class FreeplayState extends MusicBeatState
 				}
 			}
 			new FlxTimer().start(0.75, function(tmr:FlxTimer) {
+				FlxTween.cancelTweensOf(Main.fpsVar);
+				FlxTween.tween(Main.fpsVar, {y: 10}, 1, {ease: FlxEase.circOut});
 				if (FlxG.keys.pressed.SHIFT && ClientPrefs.data.devMode) {
 					PlayState.chartingMode = true;
 					MusicBeatState.switchState(new LoadingState(new ChartingState(), true));

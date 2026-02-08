@@ -105,6 +105,9 @@ class TitleState extends MusicBeatState
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 		}
 
+		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.tween(Main.fpsVar, {y: 10}, 1, {ease: FlxEase.circOut});
+
 		FlxG.mouse.visible = false;
 		#if FREEPLAY
 		MusicBeatState.switchState(new FreeplayState());

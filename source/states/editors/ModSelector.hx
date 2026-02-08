@@ -90,6 +90,9 @@ class ModSelector extends MusicBeatState {
 		descText.setFormat(Paths.font("default.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		descText.scrollFactor.set();
 		uiGroup.add(descText);
+
+		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.tween(Main.fpsVar, {y: 105}, 1, {ease: FlxEase.circOut});
     }
 
     var velXtra:Float = 0;
@@ -221,6 +224,8 @@ class ModSelector extends MusicBeatState {
 					Mods.modConfig = Json.parse(File.getContent(path));
 					if(Mods.modConfig != null && Mods.modConfig.hasGlobalScript != null && Mods.modConfig.hasGlobalScript) 
 						GlobalHandler.loadGlobalHX();
+					FlxTween.cancelTweensOf(Main.fpsVar);
+					Main.fpsVar.y = 10;
 					MusicBeatState.switchState(new states.menus.TitleState());
 					return;
 				}

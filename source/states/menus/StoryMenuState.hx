@@ -175,6 +175,9 @@ class StoryMenuState extends MusicBeatState
 		changeWeek();
 		changeDifficulty();
 
+		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.tween(Main.fpsVar, {y: 60}, 1, {ease: FlxEase.circOut});
+
 		super.create();
 	}
 

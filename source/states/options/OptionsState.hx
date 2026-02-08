@@ -141,6 +141,9 @@ class OptionsState extends MusicBeatState
 		selectorLeft.y = intendedSelY;
 		selectorRight.y = intendedSelY;
 
+		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.tween(Main.fpsVar, {y: 105}, 1, {ease: FlxEase.circOut});
+
 		ClientPrefs.saveSettings();
 		super.create();
 	}

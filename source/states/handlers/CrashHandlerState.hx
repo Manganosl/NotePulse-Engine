@@ -73,7 +73,7 @@ class CrashHandlerState extends MusicBeatState
 		add(saveCrashTxt);
 		#end
 
-		Log.error('$errorName\n$error');
+		Log.error('\n$errorName\n\n$error');
 		canLeave = true;
 
 		super.create();

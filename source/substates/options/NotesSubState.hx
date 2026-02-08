@@ -183,6 +183,9 @@ class NotesSubState extends MusicBeatSubstate
 		FlxG.mouse.visible = !controls.controllerMode;
 		controllerPointer.visible = controls.controllerMode;
 		_lastControllerMode = controls.controllerMode;
+
+		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.tween(Main.fpsVar, {y: 10}, 1, {ease: FlxEase.circOut});
 	}
 
 	function updateTip()
@@ -737,6 +740,8 @@ class NotesSubState extends MusicBeatSubstate
 
 	override function destroy() {
 		PlayState.SONG = oldSONG;
+		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.tween(Main.fpsVar, {y: 105}, 1, {ease: FlxEase.circOut});
 		super.destroy();
 	}
 }

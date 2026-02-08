@@ -30,7 +30,7 @@ class MainMenuState extends MusicBeatState
 	var optionShit:Array<String> = [
 		'story_mode',
 		'freeplay',
-		//#if MODS_ALLOWED 'mods', #end
+		#if MODS_ALLOWED 'mods', #end
 		'credits'
 	];
 
@@ -150,6 +150,9 @@ class MainMenuState extends MusicBeatState
 		add(block);
 
 		super.create();
+
+		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.tween(Main.fpsVar, {y: 125}, 1, {ease: FlxEase.circOut});
 
 		FlxG.camera.follow(camFollow, null, 0.15);
 	}

@@ -293,6 +293,9 @@ class ModsMenuState extends MusicBeatState
 		add(modsGroup);
 		_lastControllerMode = controls.controllerMode;
 
+		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.tween(Main.fpsVar, {y: 10}, 1, {ease: FlxEase.circOut});
+
 		changeSelectedMod();
 		super.create();
 	}
