@@ -81,6 +81,7 @@ import states.menus.TitleState;
 	public var noReset:Bool = false;
 	public var healthBarAlpha:Float = 1;
 	public var hitsoundVolume:Float = 0;
+	public var alphaFPS:Float = 0.5;
 	public var pauseMusic:String = 'Tea Time';
 	public var menuMusic:String = 'Vanilla';
 	public var checkForUpdates:Bool = true;
@@ -258,6 +259,8 @@ class ClientPrefs {
 			FlxG.drawFramerate = ClientPrefs.data.framerate;
 			FlxG.updateFramerate = ClientPrefs.data.framerate;
 		}
+
+		Main.fpsVar.backgroundOpacity = ClientPrefs.alphaFPS;
 
 		reloadVolumeKeys();
 	}

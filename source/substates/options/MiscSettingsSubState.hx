@@ -7,6 +7,22 @@ class MiscSettingsSubState extends BaseOptionsMenu
 		title = 'Misc Settings';
 		rpcTitle = 'Misc Settings Menu';
 
+		#if !mobile
+		var option:Option = new Option('FPS Counter',
+			'If unchecked, hides FPS Counter.',
+			'showFPS',
+			'bool');
+		addOption(option);
+		option.onChange = onChangeFPSCounter;
+
+		var option:Option = new Option('FPS Counter Background Alpha',
+			'Set the transparency of the FPS counter\'s background.',
+			'alphaFPS',
+			'percent');
+		addOption(option);
+		option.onChange = onChangeFPSalpha;
+		#end
+
 		var option:Option = new Option('Developer Mode',
 			'If checked, editors will be enabled.',
 			'devMode',
@@ -38,15 +54,6 @@ class MiscSettingsSubState extends BaseOptionsMenu
 		}
 		#end
 
-		#if !mobile
-		var option:Option = new Option('FPS Counter',
-			'If unchecked, hides FPS Counter.',
-			'showFPS',
-			'bool');
-		addOption(option);
-		option.onChange = onChangeFPSCounter;
-		#end
-
 		super();
 	}
 
@@ -54,6 +61,10 @@ class MiscSettingsSubState extends BaseOptionsMenu
 	function onChangeFPSCounter()
 		if(Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.data.showFPS;
+
+	function onFPSalpha()
+		if(Main.fpsVar != null)
+			Main.fpsVar.backgroundOpacity = ClientPrefs.alphaFPS;
 	#end
 
 	function onChangeAutoPause()
