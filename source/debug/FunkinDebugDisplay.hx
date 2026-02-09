@@ -68,7 +68,7 @@ class FunkinDebugDisplay extends Sprite
     #end
     this.times = [];
     this.color = color;
-    this.backgroundOpacity = 0.5;
+    this.backgroundOpacity = ClientPrefs.data.alphaFPS;
     this.isAdvanced = false;
   }
 
