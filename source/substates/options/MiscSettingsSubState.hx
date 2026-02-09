@@ -62,9 +62,9 @@ class MiscSettingsSubState extends BaseOptionsMenu
 		if(Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.data.showFPS;
 
-	function onFPSalpha()
+	function onChangeFPSalpha()
 		if(Main.fpsVar != null)
-			Main.fpsVar.backgroundOpacity = ClientPrefs.alphaFPS;
+			Main.fpsVar.backgroundOpacity = ClientPrefs.data.alphaFPS;
 	#end
 
 	function onChangeAutoPause()

@@ -260,7 +260,7 @@ class ClientPrefs {
 			FlxG.updateFramerate = ClientPrefs.data.framerate;
 		}
 
-		Main.fpsVar.backgroundOpacity = ClientPrefs.alphaFPS;
+		Main.fpsVar.backgroundOpacity = ClientPrefs.data.alphaFPS;
 
 		reloadVolumeKeys();
 	}
