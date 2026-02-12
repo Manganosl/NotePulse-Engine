@@ -135,10 +135,6 @@ final class NVHoldRenderer extends BaseRenderer<FlxSprite> {
 
 			var view = new Vector3(rotation.x + output.pos.x, rotation.y + output.pos.y, output.pos.z);
 			
-			//@:privateAccess
-			//if (Config.CAMERA3D_ENABLED)
-			//	view = parent.camera3D.applyViewTo(view);
-			
 			view.z *= 0.001;
 			final projection = (view.z != 0) ? this.view.transformVector(view) : view;
 			

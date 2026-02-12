@@ -76,6 +76,7 @@ class Note extends FlxSkewedSprite
 	public var characters:Array<Character> = null;
 
 	public var modchartVisible:Bool = true;
+	public var followStrum:Bool = true;
 
 	public var strumTime:Float = 0;
 	public var noteData:Int = 0;
@@ -578,6 +579,7 @@ class Note extends FlxSkewedSprite
 		}
 	}
 
+	private var lastDistance:Float = 0;
 	public function followStrumNote(myStrum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1)
 	{
 		strum = myStrum;
@@ -585,6 +587,7 @@ class Note extends FlxSkewedSprite
 		var strumDir:Float = myStrum.direction + this.offsetDirection;
 		
 		distance = getDistance(strumTime - Conductor.songPosition, noteSpeed, myStrum);
+		lastDistance = distance;
 		var scrollMult:Int = (myStrum.downScroll ? -1 : 1);
 		
 		if(copyAlpha)
@@ -594,7 +597,7 @@ class Note extends FlxSkewedSprite
 		if(copyX)
 			x = myStrum.x + offsetX + Math.cos(angleDir) * distance;
 		if(copyY)
-			y = myStrum.y + offsetY + Math.sin(angleDir) * distance * scrollMult;
+			y = myStrum.y + offsetY + Math.sin(angleDir) * (followStrum ? distance : lastDistance) * scrollMult;
 		if (copyAngle)
 			angle = (isSustainNote ? strumDir - 90 : myStrum.angle) + offsetAngle;
 		
