@@ -70,32 +70,26 @@ class Reverse extends Modifier {
 
 	function applyScrollMods(scroll:Vector3, params:ModifierParameters) {
 		var player = params.player;
-		var angleX = 0.;
-		var angleY = 0.;
-		var angleZ = 0.;
+		var laneStr = Std.string(params.lane);
 
-		// Speed
-		scroll.y = scroll.y * (getPercent('xmod', player) + getPercent('xmod' + Std.string(params.lane), player));
+		var totalXMod = getPercent('xmod', player) + getPercent('xmod' + laneStr, player);
+		scroll.y *= totalXMod;
 
-		// Main
-		angleX = angleX + getPercent('scrollAngleX', player);
-		angleY = angleY + getPercent('scrollAngleY', player);
-		angleZ = angleZ + getPercent('scrollAngleZ', player);
+		var angleX = getPercent('scrollAngleX', player) + getPercent('scrollAngleX' + laneStr, player);
+		var angleY = getPercent('scrollAngleY', player) + getPercent('scrollAngleY' + laneStr, player);
+		var angleZ = getPercent('scrollAngleZ', player) + getPercent('scrollAngleZ' + laneStr, player);
 
-		// Curved
-		final shift:Float = params.distance * 0.25 * (1 + getPercent('curvedScrollPeriod', player));
+		var totalPeriod = getPercent('curvedScrollPeriod', player) + getPercent('curvedScrollPeriod' + laneStr, player);
+		final shift:Float = params.distance * 0.25 * (1 + totalPeriod);
 
-		angleX = angleX + shift * getPercent('curvedScrollX', player);
-		angleY = angleY + shift * getPercent('curvedScrollY', player);
-		angleZ = angleZ + shift * getPercent('curvedScrollZ', player);
+		angleX += shift * (getPercent('curvedScrollX', player) + getPercent('curvedScrollX' + laneStr, player));
+		angleY += shift * (getPercent('curvedScrollY', player) + getPercent('curvedScrollY' + laneStr, player));
+		angleZ += shift * (getPercent('curvedScrollZ', player) + getPercent('curvedScrollZ' + laneStr, player));
 
-		// angleY doesnt do anything if angleX and angleZ are disabled
 		if (angleX == 0 && angleZ == 0)
 			return scroll;
 
-		scroll = ModchartUtil.rotate3DVector(scroll, angleX, angleY, angleZ);
-
-		return scroll;
+		return ModchartUtil.rotate3DVector(scroll, angleX, angleY, angleZ);
 	}
 
 	override public function shouldRun(params:ModifierParameters):Bool
