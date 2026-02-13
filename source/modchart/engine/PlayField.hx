@@ -59,10 +59,16 @@ final class PlayField extends FlxSprite {
 		context = new Context(this);
 
 		// default mods
+		addModifier('transform');
+		addModifier('opponentSwap');
+		addModifier('invert');
 		addModifier('reverse');
 		addModifier('confusion');
 		addModifier('stealth');
 		addModifier('skew');
+		addModifier('scale');
+		addModifier('tipsy');
+		addModifier('drunk');
 		addModifier('zoom');
 
 		setPercent('arrowPathAlpha', 1, -1);
