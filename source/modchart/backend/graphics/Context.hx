@@ -9,7 +9,7 @@ class Context {
 	public var view:View3D;
 
 	public var arrowRenderer:ArrowRenderer;
-	public var holdRenderer:NVHoldRenderer;
+	public var holdRenderer:BaseRenderer<FlxSprite>;
 	public var pathRenderer:PathRenderer;
 
 	public function new(parent:PlayField) {
@@ -17,6 +17,8 @@ class Context {
 
 		arrowRenderer = new ArrowRenderer(parent);
 		holdRenderer = new NVHoldRenderer(parent);
+		if(!Adapter.instance.getNVHoldsPref())
+			holdRenderer = new HoldRenderer(parent);
 		pathRenderer = new PathRenderer(parent);
 
 		view = new View3D();

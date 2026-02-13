@@ -35,6 +35,7 @@ import states.menus.TitleState;
 	public var judgecounter:Bool = true;
 	public var noteOffset:Int = 0;
 	public var devMode:Bool = false;
+	public var nvFMHolds:Bool = true;
 
 	public var arrowRGB:Array<Array<FlxColor>> = [
 		[0xFFC24B99, 0xFFFFFFFF, 0xFF3C1F56],

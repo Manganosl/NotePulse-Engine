@@ -178,6 +178,10 @@ class NotePulse implements IAdapter {
 			return EditorPlayState.instance.songSpeed * .45;
 	}
 
+	public function getNVHoldsPref() {
+		return ClientPrefs.data.nvFMHolds;
+	}
+
 	public function getArrowItems() {
 		var pspr:Array<Array<Array<FlxSprite>>> = [[[], [], [], []], [[], [], [], []], [[], [], [], []]];
 

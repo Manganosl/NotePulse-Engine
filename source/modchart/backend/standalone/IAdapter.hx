@@ -53,6 +53,7 @@ interface IAdapter {
 	// Options section
 	public function getHoldSubdivisions(item:FlxSprite):Int; // Hold resolution
 	public function getDownscroll():Bool; // Get if it is downscroll
+	public function getNVHoldsPref():Bool;
 
 	/**
 	 * Get the every arrow/lane indexed by player.
