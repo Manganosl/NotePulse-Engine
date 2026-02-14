@@ -150,11 +150,11 @@ final class Manager extends FlxBasic {
 		iteratePlayfields((pf) -> pf.set(name, beat, value, player), field);
 
 	/**
-	 * Applies easing to a modifier.
+	 * Applies easing to a modifier using beats.
 	 *
 	 * @param name The name of the modifier.
 	 * @param beat The beat at which to start easing.
-	 * @param length The length of the easing.
+	 * @param length The length in beats of the easing.
 	 * @param value The final value after easing.
 	 * @param easeFunc The easing function to use.
 	 * @param player Optionally, the player to target.
@@ -164,11 +164,11 @@ final class Manager extends FlxBasic {
 		iteratePlayfields((pf) -> pf.ease(name, beat, length, value, easeFunc, player), field);
 
 	/**
-	 * Adds easing to a modifier.
+	 * Adds easing to a modifier using beats.
 	 *
 	 * @param name The name of the modifier.
 	 * @param beat The beat at which to start easing.
-	 * @param length The length of the easing.
+	 * @param length The length in beats of the easing.
 	 * @param value The value to apply after easing.
 	 * @param easeFunc The easing function to use.
 	 * @param player Optionally, the player to target.
@@ -178,7 +178,7 @@ final class Manager extends FlxBasic {
 		iteratePlayfields((pf) -> pf.add(name, beat, length, value, easeFunc, player), field);
 
 	/**
-	 * Sets and adds a value to a modifier.
+	 * Sets and adds a value to a modifier using beats.
 	 *
 	 * @param name The name of the modifier.
 	 * @param beat The beat at which the value should be set.
@@ -188,6 +188,58 @@ final class Manager extends FlxBasic {
 	 */
 	public inline function setAdd(name:String, beat:Float, value:Float, player:Int = -1, field:Int = -1)
 		iteratePlayfields((pf) -> pf.setAdd(name, beat, value, player), field);
+
+	/**
+	 * Sets a specific value at a certain step for all playfields or a specific one.
+	 *
+	 * @param name The name of the value.
+	 * @param step The step at which the value should be set.
+	 * @param value The value to set.
+	 * @param player Optionally, the player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function setS(name:String, step:Float, value:Float, player:Int = -1, field:Int = -1)
+		iteratePlayfields((pf) -> pf.set(name, stepToBeat(step), value, player), field);
+
+	/**
+	 * Applies easing to a modifier using steps.
+	 *
+	 * @param name The name of the modifier.
+	 * @param step The step at which to start easing.
+	 * @param length The length in steps of the easing.
+	 * @param value The final value after easing.
+	 * @param easeFunc The easing function to use.
+	 * @param player Optionally, the player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function easeS(name:String, step:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
+		iteratePlayfields((pf) -> pf.ease(name, stepToBeat(step), stepToBeat(length), value, easeFunc, player), field);
+
+	/**
+	 * Adds easing to a modifier using steps.
+	 *
+	 * @param name The name of the modifier.
+	 * @param step The step at which to start easing.
+	 * @param length The length in steps of the easing.
+	 * @param value The value to apply after easing.
+	 * @param easeFunc The easing function to use.
+	 * @param player Optionally, the player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function addS(name:String, step:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
+		iteratePlayfields((pf) -> pf.add(name, stepToBeat(step), stepToBeat(length), value, easeFunc, player), field);
+
+	/**
+	 * Sets and adds a value to a modifier using steps.
+	 *
+	 * @param name The name of the modifier.
+	 * @param step The step at which the value should be set.
+	 * @param value The value to set.
+	 * @param player Optionally, the player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function setAddS(name:String, step:Float, value:Float, player:Int = -1, field:Int = -1)
+		iteratePlayfields((pf) -> pf.setAdd(name, stepToBeat(step), value, player), field);
 
 	/**
 	 * Adds a repeater event for all playfields or a specific one.
