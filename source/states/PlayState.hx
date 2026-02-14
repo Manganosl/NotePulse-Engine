@@ -4228,6 +4228,7 @@ class PlayState extends MusicBeatState
 			rating.y = linkStrum.y + (linkStrum.downScroll ? -25 : linkStrum.height + 10);
 			comboSpr.x = rating.x + 40;
 			comboSpr.y = rating.y + 60;
+			if(PlayState.isPixelStage) rating.x -= rating.width/2;
 		}
 
 		comboGroup.add(rating);

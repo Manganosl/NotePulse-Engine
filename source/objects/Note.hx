@@ -379,6 +379,7 @@ class Note extends FlxSkewedSprite
 				if(PlayState.isPixelStage) {
 					prevNote.scale.y *= 1.19;
 					prevNote.scale.y *= (6 / height);
+					prevNote.scale.y *= 6;
 				}
 				prevNote.updateHitbox();
 			}
