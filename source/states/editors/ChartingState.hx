@@ -42,6 +42,16 @@ import objects.Note;
 import objects.StrumNote;
 import objects.OurLittleFriend;
 
+import moonchart.formats.fnf.legacy.FNFPsych;
+import moonchart.formats.fnf.FNFCodename;
+import moonchart.formats.BasicFormat.DynamicFormat;
+import moonchart.backend.Util.OneOfArray;
+import moonchart.formats.fnf.legacy.FNFLegacy;
+import moonchart.formats.BasicFormat.FormatDifficulty;
+import moonchart.formats.fnf.FNFVSlice;
+
+import openfl.net.FileFilter;
+
 using DateTools;
 
 typedef UndoStruct = {
