@@ -17,6 +17,8 @@ import modchart.engine.modifiers.list.*;
 import modchart.events.*;
 import modchart.events.types.*;
 
+import psychlua.LuaUtils;
+
 /**
  * This assembles the modchart components, including:
  * - PlayFields
@@ -59,6 +61,9 @@ final class Manager extends FlxBasic {
 
 		addPlayfield();
 	}
+
+	private static inline function stepToBeat(step:Float):Float
+		return step / 4;
 
 	/**
 	 * Internal helper function to apply a function to each playfield.
@@ -225,6 +230,147 @@ final class Manager extends FlxBasic {
 	 */
 	public inline function alias(name:String, alias:String, field:Int)
 		iteratePlayfields((pf) -> pf.alias(name, alias), field);
+
+	/**
+	 * Sets a modifier at a specific step.
+	 *
+	 * @param step The step at which the value should be set.
+	 * @param name The name of the modifier.
+	 * @param value The value to set.
+	 * @param player Optionally, the player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function queueSet(step:Float, name:String, value:Float, player:Int = -1, field:Int = -1)
+		set(name, stepToBeat(step), value, player, field);
+
+	/**
+	 * Sets a modifier at a specific beat.
+	 *
+	 * @param beat The beat at which the value should be set.
+	 * @param name The name of the modifier.
+	 * @param value The value to set.
+	 * @param player Optionally, the player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function queueSetB(beat:Float, name:String, value:Float, player:Int = -1, field:Int = -1)
+		set(name, beat, value, player, field);
+
+	/**
+	 * Applies easing to a modifier using step timing.
+	 *
+	 * @param step The step at which to start easing.
+	 * @param endStep The step at which easing ends.
+	 * @param name The name of the modifier.
+	 * @param value The final value after easing.
+	 * @param easeFunc The easing function to use.
+	 * @param player Optionally, the player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 * @param startVal Optional starting value override.
+	 */
+	public function queueEase(step:Float, endStep:Float, name:String, value:Float, style:Any, player:Int = -1, field:Int = -1, ?startVal:Float)
+	{
+		var beat = stepToBeat(step);
+		var length = stepToBeat(endStep - step);
+
+		var easeFunc:EaseFunction = FlxEase.linear;
+
+		if (style == null) {}
+		else if (style is String)
+			easeFunc = LuaUtils.getTweenEaseByString(style);
+		else if (Reflect.isFunction(style))
+			easeFunc = style;
+
+		if (startVal != null)
+			set(name, beat, startVal, player, field);
+
+		ease(name, beat, length, value, easeFunc, player, field);
+	}
+
+	/**
+	 * Applies easing to a modifier using step + length.
+	 */
+	public inline function queueEaseL(step:Float, length:Float, name:String, value:Float, easeFunc:Dynamic = 'linear', player:Int = -1, field:Int = -1, ?startVal:Float)
+		queueEase(step, step + length, name, value, easeFunc, player, field, startVal);
+
+	/**
+	 * Applies easing to a modifier using beat timing.
+	 */
+	public function queueEaseB(beat:Float, endBeat:Float, name:String, value:Float, style:Any, player:Int = -1, field:Int = -1, ?startVal:Float) {
+		if (startVal != null)
+			set(name, beat, startVal, player, field);
+
+		var easeFunc:EaseFunction = FlxEase.linear;
+
+		if (style == null) {}
+		else if (style is String)
+			easeFunc = LuaUtils.getTweenEaseByString(style);
+		else if (Reflect.isFunction(style))
+			easeFunc = style;
+
+		ease(name, beat, endBeat - beat, value, easeFunc, player, field);
+	}
+
+	/**
+	 * Applies easing using beat + length.
+	 */
+	public inline function queueEaseLB(beat:Float, length:Float, name:String, value:Float, easeFunc:Dynamic = 'linear', player:Int = -1, field:Int = -1, ?startVal:Float)
+		queueEaseB(beat, beat + length, name, value, easeFunc, player, field, startVal);
+
+	/**
+	 * Adds easing to a modifier using step timing.
+	 *
+	 * @param step The step at which to start easing.
+	 * @param endStep The step at which easing ends.
+	 * @param name The name of the modifier.
+	 * @param value The value to apply after easing.
+	 * @param easeFunc The easing function to use.
+	 * @param player Optionally, the player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function queueAdd(step:Float, endStep:Float, name:String, value:Float, style:Any, player:Int = -1, field:Int = -1) {
+		var easeFunc:EaseFunction = FlxEase.linear;
+
+		if (style == null) {}
+		else if (style is String)
+			easeFunc = LuaUtils.getTweenEaseByString(style);
+		else if (Reflect.isFunction(style))
+			easeFunc = style;
+
+		add(name, stepToBeat(step), stepToBeat(endStep - step), value, easeFunc, player, field);
+	}
+
+	/**
+	 * Adds a callback at a specific step.
+	 *
+	 * @param step The step at which the callback is triggered.
+	 * @param func The callback function.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function queueFuncOnce(step:Float, func:Event->Void, field:Int = -1)
+		callback(stepToBeat(step), func, field);
+
+	/**
+	 * Adds a repeating callback between steps.
+	 *
+	 * @param step The starting step.
+	 * @param endStep The ending step.
+	 * @param func The callback function.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function queueFunc(step:Float, endStep:Float, func:Event->Void, field:Int = -1)
+		repeater(stepToBeat(step), stepToBeat(endStep - step), func, field);
+
+	/**
+	 * Adds a repeating callback between beats.
+	 */
+	public inline function queueFuncB(beat:Float, endBeat:Float, func:Event->Void, field:Int = -1)
+		repeater(beat, endBeat - beat, func, field);
+
+	/**
+	 * Adds a repeating callback using beat and length.
+	 */
+	public inline function queueFuncLB(beat:Float, length:Float, func:Event->Void, field:Int = -1)
+		repeater(beat, length, func, field);
 
 	/**
 	 * Creates and adds a new playfield to the Manager.
