@@ -1,6 +1,11 @@
 {
   "dependencies": [
     {
+      "name": "moonchart",
+      "type": "haxelib",
+      "version": "0.5.1"
+    },
+    {
       "name": "lime",
       "type": "haxelib",
       "version": "8.0.1"

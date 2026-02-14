@@ -96,6 +96,7 @@
 	<haxelib name="json2object" />
 	<haxelib name="hscript-improved" if="HSCRIPT_ALLOWED"/>
 	<haxelib name="away3d" if="AWAY3D_ALLOWED"/>
+	<haxelib name="moonchart"/>
 	<haxedef name="hscriptPos" />
 	<haxedef name="PRETTY_TRACE" />
 	<haxedef name="CUSTOM_CLASSES"/>
