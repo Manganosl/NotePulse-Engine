@@ -11,6 +11,13 @@ class SustainSplash extends FlxSkewedSprite {
 	public var firstTime:Bool = true;
 	public var updatedThisFrame:Bool = false;
 
+	public var offsetX:Float = 0;
+	public var offsetY:Float = 0;
+	public var offsetAlpha:Float = 0;
+	public var offsetAngle:Float = 0;
+	public var offsetScaleX:Float = 0;
+	public var offsetScaleY:Float = 0;
+
 	override public function new(strum:StrumNote) {
 		super();
 		this.strum = strum;
@@ -104,11 +111,11 @@ class SustainSplash extends FlxSkewedSprite {
 
 	public function center() {
 		centerOffsets();
-		scale.x = strum.scale.x * (1 / (!PlayState.isPixelStage ? 0.7 : 6));
-		scale.y = strum.scale.y * (1 / (!PlayState.isPixelStage ? 0.7 : 6));
-		angle = strum.direction-90;
-		alpha = strum.alpha;
-		x = strum.x + (strum.width / 2) - (width / 2);
-		y = strum.y + (strum.height / 2) - (height / 2);
+		scale.x = strum.scale.x * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleX;
+		scale.y = strum.scale.y * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleY;
+		angle = strum.direction-90 + offsetAngle;
+		alpha = strum.alpha + offsetAlpha;
+		x = strum.x + (strum.width / 2) - (width / 2) + offsetX;
+		y = strum.y + (strum.height / 2) - (height / 2) + offsetY;
 	}
 }

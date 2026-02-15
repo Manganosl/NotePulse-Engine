@@ -1,6 +1,5 @@
 package psychlua;
 
-import states.scripted.ScriptedState;
 #if HSCRIPT_ALLOWED
 import hscript.Expr.Error;
 import hscript.Expr;
@@ -88,6 +87,7 @@ class HScript implements HscriptInterface {
 		#end
 		"KeyValueArray" => Types.KeyValueArray,
 		"Main" => Main,
+		"LuaUtils" => psychlua.LuaUtils,
 
 		#if(away3d && AWAY3D_ALLOWED)
 		"Flx3DCamera" => flixel.flx3d.Flx3DCamera,
@@ -264,6 +264,8 @@ class HScript implements HscriptInterface {
 				});
 			}
 		}
+		obj.variables.set("controls", Controls.instance);
+
 		obj.variables.set("Function_Stop", LuaUtils.Function_Stop);
 		obj.variables.set("Function_Continue", LuaUtils.Function_Continue);
 		obj.variables.set("Function_StopHScript", LuaUtils.Function_StopHScript);
