@@ -37,6 +37,8 @@ import states.menus.TitleState;
 	public var devMode:Bool = false;
 	public var nvFMHolds:Bool = true;
 
+	public var trans:String = "Stickers";
+
 	public var arrowRGB:Array<Array<FlxColor>> = [
 		[0xFFC24B99, 0xFFFFFFFF, 0xFF3C1F56],
 		[0xFF00FFFF, 0xFFFFFFFF, 0xFF1542B7],

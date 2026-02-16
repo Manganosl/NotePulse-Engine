@@ -69,6 +69,8 @@ class Init extends FlxState {
 			backend.utils.WindowUtil.showConsole();
 
 		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5){
+			Mods.currentModDirectory = null;
+			Mods.currentLoadedMod = null;
 			Mods.modPack = null;
 			psychlua.GlobalHandler.stopGlobalHX();
 			MusicBeatState.switchState(new TitleState());
