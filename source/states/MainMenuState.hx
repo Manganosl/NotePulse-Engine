@@ -29,9 +29,7 @@ class MainMenuState extends MusicBeatState
 	//Centered/Text options
 	var optionShit:Array<String> = [
 		'story_mode',
-		'freeplay',
-		#if MODS_ALLOWED 'mods', #end
-		'credits'
+		'freeplay'
 	];
 
 	var leftOption:String = #if ACHIEVEMENTS_ALLOWED 'achievements' #else null #end;
@@ -40,8 +38,14 @@ class MainMenuState extends MusicBeatState
 	var magenta:FlxSprite;
 	var camFollow:FlxObject;
 
-	override function create()
-	{
+	override function create() {
+		if (Mods.currentLoadedMod == null || Mods.currentLoadedMod.length == 0) {
+			#if MODS_ALLOWED
+			optionShit.push('mods');
+			#end
+		}
+		optionShit.push('credits');
+
 		#if MODS_ALLOWED
 		Mods.pushGlobalMods();
 		#end
