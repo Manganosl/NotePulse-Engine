@@ -8,10 +8,10 @@ typedef ModsList = {
 	all:Array<String>
 };
 
-class Mods
-{
+class Mods {
 	static public var currentModDirectory:String = '';
-	public static var modConfig:Dynamic;
+	static public var currentLoadedMod:String = '';
+	static public var modPack(get, default):Dynamic;
 	public static var ignoreModFolders:Array<String> = [
 		'characters',
 		'custom_events',
@@ -31,6 +31,27 @@ class Mods
 		"states",
 		"ndlls"
 	];
+
+	private static function get_modPack(){
+		#if MODS_ALLOWED
+		var folder = Mods.currentLoadedMod;
+
+		var path = Paths.mods(folder + '/pack.json');
+		if(FileSystem.exists(path)) {
+			try {
+				#if sys
+				var rawJson:String = File.getContent(path);
+				#else
+				var rawJson:String = Assets.getText(path);
+				#end
+				if(rawJson != null && rawJson.length > 0) return tjson.TJSON.parse(rawJson);
+			} catch(e:Dynamic) {
+				trace(e);
+			}
+		}
+		#end
+		return null;
+	};
 
 	private static var globalMods:Array<String> = [];
 

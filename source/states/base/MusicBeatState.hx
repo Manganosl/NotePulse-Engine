@@ -208,15 +208,6 @@ class MusicBeatState extends FlxUIState
 			stage.update(elapsed);
 		});
 
-		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F2)
-			backend.utils.WindowUtil.showConsole();
-
-		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5){
-			Mods.modConfig = null;
-			psychlua.GlobalHandler.stopGlobalHX();
-			MusicBeatState.switchState(new states.MainMenuState());
-		}
-
 		super.update(elapsed);
 	}
 
@@ -276,15 +267,15 @@ class MusicBeatState extends FlxUIState
 			return;
 		}
 
-		if(Mods.modConfig != null){
-			if(Mods.modConfig.titleState != null && nextState is states.menus.TitleState)
-				nextState = new ScriptedState(Mods.modConfig.titleState);
-			if(Mods.modConfig.mainMenuState != null && nextState is states.MainMenuState)
-				nextState = new ScriptedState(Mods.modConfig.mainMenuState);
-			if(Mods.modConfig.storyMenuState != null && nextState is states.menus.StoryMenuState)
-				nextState = new ScriptedState(Mods.modConfig.storyMenuState);
-			if(Mods.modConfig.freeplayMenuState != null && nextState is states.menus.FreeplayState)
-				nextState = new ScriptedState(Mods.modConfig.freeplayMenuState);
+		if(Mods.modPack != null){
+			if(Mods.modPack.titleState != null && nextState is states.menus.TitleState)
+				nextState = new ScriptedState(Mods.modPack.titleState);
+			if(Mods.modPack.mainMenuState != null && nextState is states.MainMenuState)
+				nextState = new ScriptedState(Mods.modPack.mainMenuState);
+			if(Mods.modPack.storyMenuState != null && nextState is states.menus.StoryMenuState)
+				nextState = new ScriptedState(Mods.modPack.storyMenuState);
+			if(Mods.modPack.freeplayMenuState != null && nextState is states.menus.FreeplayState)
+				nextState = new ScriptedState(Mods.modPack.freeplayMenuState);
 		}
 		if(FlxTransitionableState.skipNextTransIn) FlxG.switchState(nextState);
 		else startTransition(nextState);

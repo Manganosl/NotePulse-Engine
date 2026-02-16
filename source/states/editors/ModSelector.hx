@@ -214,15 +214,9 @@ class ModSelector extends MusicBeatState {
             if (controls.ACCEPT){
 				if(goto == ScriptedState){
 					currentMod = modArray[curSelected];
-					Mods.currentModDirectory = currentMod;
-					var path:String = Paths.modJson("Config");
-					if (!FileSystem.exists(path)){
-						openConfigPrompt();
-						return;
-					}
+					Mods.currentLoadedMod = Mods.currentModDirectory = currentMod;
 					FlxG.sound.music.stop();
-					Mods.modConfig = Json.parse(File.getContent(path));
-					if(Mods.modConfig != null && Mods.modConfig.hasGlobalScript != null && Mods.modConfig.hasGlobalScript) 
+					if(Mods.modPack != null && Mods.modPack.hasGlobalScript != null && Mods.modPack.hasGlobalScript) 
 						GlobalHandler.loadGlobalHX();
 					FlxTween.cancelTweensOf(Main.fpsVar);
 					Main.fpsVar.y = 10;
@@ -231,7 +225,7 @@ class ModSelector extends MusicBeatState {
 				}
 				if(goto == BasePrompt){
 					currentMod = modArray[curSelected];
-					Mods.currentModDirectory = currentMod;
+					Mods.currentLoadedMod = Mods.currentModDirectory = currentMod;
 					openConfigPrompt();
 					return;
 				}
@@ -561,85 +555,129 @@ class ModSelector extends MusicBeatState {
 	}
 
 	private function openConfigPrompt(){
-		openSubState(new BasePrompt(FlxG.width/2, FlxG.height/2+50, 'Edit $currentMod Config File', function(state:BasePrompt) {
-			var configData = {
-				titleState: "",
-				mainMenuState: "",
-				storyMenuState: "",
-				freeplayState: "",
-				pauseSubState: "",
-				hasGlobalScript: false
-			};
+        openSubState(new BasePrompt(FlxG.width/2, FlxG.height/2+50, 'Edit $currentMod Config File', function(state:BasePrompt) {
+            state.bg.setGraphicSize(Std.int(state.bg.width), 680);
+            state.bg.updateHitbox();
+            state.bg.screenCenter();
 
-			var path:String = Paths.modJson("Config");
-			if (FileSystem.exists(path)) {
-				try {
-					var rawJson:String = File.getContent(path);
-					var loadedData = Json.parse(rawJson);
-					if (loadedData.titleState != null) configData.titleState = loadedData.titleState;
-					if (loadedData.mainMenuState != null) configData.mainMenuState = loadedData.mainMenuState;
-					if (loadedData.storyMenuState != null) configData.storyMenuState = loadedData.storyMenuState;
-					if (loadedData.freeplayState != null) configData.freeplayState = loadedData.freeplayState;
-					if (loadedData.pauseSubState != null) configData.pauseSubState = loadedData.pauseSubState;
-					if (loadedData.hasGlobalScript != null) configData.hasGlobalScript = loadedData.hasGlobalScript;
-				} catch (e:Dynamic) {}
-			}
+            var configData = {
+                name: "",
+                description: "",
+                titleState: "",
+                mainMenuState: "",
+                storyMenuState: "",
+                freeplayState: "",
+                pauseSubState: "",
+                discordRPC: "",
+                defaultTransition: "",
+                runsGlobally: false,
+                hasGlobalScript: false
+            };
 
-			var startX:Float = state.bg.x + 200;
-			var startY:Float = state.bg.y + 100;
-			var spacing:Int = 42;
-			var inputWidth:Int = 250;
-			var textSize:Int = 10;
+            if (Mods.modPack != null) {
+                try {
+                    if (Mods.modPack.name != null) configData.name = Mods.modPack.name;
+                    if (Mods.modPack.description != null) configData.description = Mods.modPack.description;
+                    if (Mods.modPack.titleState != null) configData.titleState = Mods.modPack.titleState;
+                    if (Mods.modPack.mainMenuState != null) configData.mainMenuState = Mods.modPack.mainMenuState;
+                    if (Mods.modPack.storyMenuState != null) configData.storyMenuState = Mods.modPack.storyMenuState;
+                    if (Mods.modPack.freeplayState != null) configData.freeplayState = Mods.modPack.freeplayState;
+                    if (Mods.modPack.pauseSubState != null) configData.pauseSubState = Mods.modPack.pauseSubState;
+                    if (Mods.modPack.discordRPC != null) configData.discordRPC = Mods.modPack.discordRPC;
+                    if (Mods.modPack.defaultTransition != null) configData.defaultTransition = Mods.modPack.defaultTransition;
+                    if (Mods.modPack.runsGlobally != null) configData.runsGlobally = Mods.modPack.runsGlobally;
+                    if (Mods.modPack.hasGlobalScript != null) configData.hasGlobalScript = Mods.modPack.hasGlobalScript;
+                } catch (e:Dynamic) {}
+            }
 
-			var labelTitle = new FlxText(startX, startY - 14, 0, "Title State:", textSize);
-			state.add(labelTitle);
-			var titleInput = new PsychUIInputText(startX, startY, inputWidth, configData.titleState);
-			state.add(titleInput);
+            var startX:Float = state.bg.x + 20;
+            var startY:Float = state.bg.y + 40;
+            var spacing:Int = 40;
+            var inputWidth:Int = 250;
+            var textSize:Int = 10;
 
-			var labelMain = new FlxText(startX, titleInput.y + spacing - 14, 0, "Main Menu State:", textSize);
-			state.add(labelMain);
-			var mainMenuInput = new PsychUIInputText(startX, titleInput.y + spacing, inputWidth, configData.mainMenuState);
-			state.add(mainMenuInput);
+            var labelName = new FlxText(startX, startY - 14, 0, "Mod Name:", textSize);
+            state.add(labelName);
+            var nameInput = new PsychUIInputText(startX, startY, inputWidth, configData.name);
+            state.add(nameInput);
 
-			var labelStory = new FlxText(startX, mainMenuInput.y + spacing - 14, 0, "Story Menu State:", textSize);
-			state.add(labelStory);
-			var storyMenuInput = new PsychUIInputText(startX, mainMenuInput.y + spacing, inputWidth, configData.storyMenuState);
-			state.add(storyMenuInput);
+            var labelDesc = new FlxText(startX, nameInput.y + spacing - 14, 0, "Description:", textSize);
+            state.add(labelDesc);
+            var descInput = new PsychUIInputText(startX, nameInput.y + spacing, inputWidth, configData.description);
+            state.add(descInput);
 
-			var labelFree = new FlxText(startX, storyMenuInput.y + spacing - 14, 0, "Freeplay State:", textSize);
-			state.add(labelFree);
-			var freeplayInput = new PsychUIInputText(startX, storyMenuInput.y + spacing, inputWidth, configData.freeplayState);
-			state.add(freeplayInput);
+            var labelTitle = new FlxText(startX, descInput.y + spacing - 14, 0, "Title State:", textSize);
+            state.add(labelTitle);
+            var titleInput = new PsychUIInputText(startX, descInput.y + spacing, inputWidth, configData.titleState);
+            state.add(titleInput);
 
-			var labelPause = new FlxText(startX, freeplayInput.y + spacing - 14, 0, "Pause Substate:", textSize);
-			state.add(labelPause);
-			var pauseInput = new PsychUIInputText(startX, freeplayInput.y + spacing, inputWidth, configData.pauseSubState);
-			state.add(pauseInput);
+            var labelMain = new FlxText(startX, titleInput.y + spacing - 14, 0, "Main Menu State:", textSize);
+            state.add(labelMain);
+            var mainMenuInput = new PsychUIInputText(startX, titleInput.y + spacing, inputWidth, configData.mainMenuState);
+            state.add(mainMenuInput);
 
-			var globalCheck = new PsychUICheckBox(startX, pauseInput.y + 35, "Has Global Script?", 100);
-			globalCheck.checked = configData.hasGlobalScript;
-			state.add(globalCheck);
+            var labelStory = new FlxText(startX, mainMenuInput.y + spacing - 14, 0, "Story Menu State:", textSize);
+            state.add(labelStory);
+            var storyMenuInput = new PsychUIInputText(startX, mainMenuInput.y + spacing, inputWidth, configData.storyMenuState);
+            state.add(storyMenuInput);
 
-			var saveBtn = new PsychUIButton(startX, globalCheck.y + 45, "Save", function() {
-				var newData = {
-					titleState: titleInput.text,
-					mainMenuState: mainMenuInput.text,
-					storyMenuState: storyMenuInput.text,
-					freeplayState: freeplayInput.text,
-					pauseSubState: pauseInput.text,
-					hasGlobalScript: globalCheck.checked
-				};
-				File.saveContent(path, Json.stringify(newData, "\t"));
-				state.close();
-			});
-			state.add(saveBtn);
+            var labelFree = new FlxText(startX, storyMenuInput.y + spacing - 14, 0, "Freeplay State:", textSize);
+            state.add(labelFree);
+            var freeplayInput = new PsychUIInputText(startX, storyMenuInput.y + spacing, inputWidth, configData.freeplayState);
+            state.add(freeplayInput);
 
-			var cancelBtn = new PsychUIButton(saveBtn.x + 110, saveBtn.y, "Cancel", function() {
-				state.close();
-			});
-			state.add(cancelBtn);
-		}));
-	}
+            var labelPause = new FlxText(startX, freeplayInput.y + spacing - 14, 0, "Pause Substate:", textSize);
+            state.add(labelPause);
+            var pauseInput = new PsychUIInputText(startX, freeplayInput.y + spacing, inputWidth, configData.pauseSubState);
+            state.add(pauseInput);
+
+            var labelDiscord = new FlxText(startX, pauseInput.y + spacing - 14, 0, "Discord RPC ID:", textSize);
+            state.add(labelDiscord);
+            var discordInput = new PsychUIInputText(startX, pauseInput.y + spacing, inputWidth, configData.discordRPC);
+            state.add(discordInput);
+
+            var labelTransition = new FlxText(startX, discordInput.y + spacing - 14, 0, "Default Transition:", textSize);
+            state.add(labelTransition);
+            var transitionInput = new PsychUIInputText(startX, discordInput.y + spacing, inputWidth, configData.defaultTransition);
+            state.add(transitionInput);
+
+            var globalCheck = new PsychUICheckBox(startX, transitionInput.y + 35, "Has Global Script?", 100);
+            globalCheck.checked = configData.hasGlobalScript;
+            state.add(globalCheck);
+
+            var runsGloballyCheck = new PsychUICheckBox(startX + 180, transitionInput.y + 35, "Runs Globally?", 100);
+            runsGloballyCheck.checked = configData.runsGlobally;
+            state.add(runsGloballyCheck);
+
+            var saveBtn = new PsychUIButton(startX, globalCheck.y + 45, "Save", function() {
+                var newData = {
+                    name: nameInput.text,
+                    description: descInput.text,
+                    titleState: titleInput.text,
+                    mainMenuState: mainMenuInput.text,
+                    storyMenuState: storyMenuInput.text,
+                    freeplayState: freeplayInput.text,
+                    pauseSubState: pauseInput.text,
+                    discordRPC: discordInput.text,
+                    defaultTransition: transitionInput.text,
+                    hasGlobalScript: globalCheck.checked,
+                    runsGlobally: runsGloballyCheck.checked
+                };
+				var folder = Mods.currentLoadedMod;
+				var path = Paths.mods(folder + '/pack.json');
+                File.saveContent(path, Json.stringify(newData, "\t"));
+				Mods.currentLoadedMod = null;
+                state.close();
+            });
+            state.add(saveBtn);
+
+            var cancelBtn = new PsychUIButton(saveBtn.x + 110, saveBtn.y, "Cancel", function() {
+				Mods.currentLoadedMod = null;
+                state.close();
+            });
+            state.add(cancelBtn);
+        }));
+    }
 }
 
 class ImIcon extends FlxSprite {

@@ -60,5 +60,18 @@ class Init extends FlxState {
 	    } else {
 	    	FlxG.switchState(new TitleState());
 	    }
+
+		FlxG.signals.postUpdate.add(handleDaKeys);
     }
+
+	function handleDaKeys(){
+		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F2)
+			backend.utils.WindowUtil.showConsole();
+
+		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5){
+			Mods.modPack = null;
+			psychlua.GlobalHandler.stopGlobalHX();
+			MusicBeatState.switchState(new TitleState());
+		}
+	}
 }

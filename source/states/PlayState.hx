@@ -2884,8 +2884,8 @@ class PlayState extends MusicBeatState
 					note.resetAnim = 0;
 				}
 		}
-		if(Mods.modConfig != null && Mods.modConfig.pauseSubState != null){
-			openSubState(new ScriptedSubstate(Mods.modConfig.pauseSubState));
+		if(Mods.modPack != null && Mods.modPack.pauseSubState != null){
+			openSubState(new ScriptedSubstate(Mods.modPack.pauseSubState));
 		} else openSubState(new PauseSubState());
 
 		#if DISCORD_ALLOWED

@@ -72,8 +72,9 @@ class ScriptedState extends MusicBeatState
 		if (softlocked)
 		{
 			if (FlxG.keys.justPressed.SPACE){
-				Mods.modConfig = null;
-				MusicBeatState.switchState(new states.MainMenuState());
+				Mods.modPack = null;
+				psychlua.GlobalHandler.stopGlobalHX();
+				MusicBeatState.switchState(new states.menus.TitleState());
 			}
 			return;
 		}
