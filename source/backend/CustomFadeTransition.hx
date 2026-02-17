@@ -64,7 +64,7 @@ class CustomFadeTransition extends MusicBeatSubstate
         super.create();
     }
 
-function createStickerTransition() {
+    function createStickerTransition() {
         stickerGrp = new FlxTypedGroup<FlxSprite>();
         add(stickerGrp);
 
@@ -78,13 +78,9 @@ function createStickerTransition() {
 
         if (!isTransIn) {
             FlxG.save.data.stickerData = [];
-            
-            // --- AJUSTES PARA COBERTURA ---
-            // Reducimos el tamaño de la celda a 110 (antes era 150)
-            // Esto forzará que haya más pegatinas y más juntas.
+
             var cellWidth:Int = 110; 
             var cellHeight:Int = 110;
-            
             var cols:Int = Math.ceil(FlxG.width / cellWidth) + 2;
             var rows:Int = Math.ceil(FlxG.height / cellHeight) + 2;
             
@@ -94,12 +90,8 @@ function createStickerTransition() {
             var positions:Array<{x:Float, y:Float}> = [];
             for (r in 0...rows) {
                 for (c in 0...cols) {
-                    // Posicionamiento con solapamiento
                     var baseX = (c * cellWidth) - 120;
                     var baseY = (r * cellHeight) - 120;
-
-                    // El Jitter ahora es menor que el tamaño de la celda 
-                    // para asegurar que no se alejen demasiado de su sector
                     var randomX = baseX + FlxG.random.float(-30, 30);
                     var randomY = baseY + FlxG.random.float(-30, 30);
 
@@ -115,13 +107,11 @@ function createStickerTransition() {
             for (i in 0...maxStickers) {
                 var graphic:String = pack[FlxG.random.int(0, pack.length - 1)];
                 var pos = positions[i];
-                var angle:Float = FlxG.random.float(-45, 45); // Ángulo un poco menos extremo
-                
-                // Variación de tamaño para rellenar huecos
+                var angle:Float = FlxG.random.float(-45, 45);
                 var randScale:Float = FlxG.random.float(0.8, 1.2);
-
                 var sticky:FlxSprite = newSticker(graphic, pos.x, pos.y, angle);
-                sticky.scale.set(randScale, randScale); // Aplicamos escala variada
+
+                sticky.scale.set(randScale, randScale);
                 sticky.updateHitbox();
                 sticky.visible = false;
                 stickerGrp.add(sticky);
@@ -130,7 +120,7 @@ function createStickerTransition() {
                     name: StringTools.replace(graphic, '.png', ''),
                     position: [sticky.x, sticky.y],
                     angle: sticky.angle,
-                    scale: randScale, // Guardamos la escala también
+                    scale: randScale,
                     order: indices[i]
                 });
             }
@@ -151,7 +141,6 @@ function createStickerTransition() {
             }
 
         } else {
-            // TRANS IN (Salida)
             var dataList:Array<Dynamic> = FlxG.save.data.stickerData;
             if (dataList != null) {
                 maxStickers = dataList.length;
@@ -161,7 +150,6 @@ function createStickerTransition() {
                     var data = dataList[i];
                     var sticky:FlxSprite = newSticker(data.name, data.position[0], data.position[1], data.angle);
                     
-                    // Aplicar la escala guardada
                     var savedScale:Float = (data.scale != null) ? data.scale : 0.8;
                     sticky.scale.set(savedScale, savedScale);
                     sticky.updateHitbox();
@@ -200,11 +188,13 @@ function createStickerTransition() {
     }
 
     function finishTrans() {
-        if (finishCallback != null)
-            finishCallback();
+        var func = finishCallback;
+        finishCallback = null; 
+
+        if (func != null)
+            func();
             
         new FlxTimer().start(0.01, function(tmr:FlxTimer) {
-        	finishCallback = null;
         	daTween = null;
 
         	if (transCamera != null) {

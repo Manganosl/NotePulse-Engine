@@ -1,10 +1,10 @@
 import flixel.FlxState;
 import backend.ExtraKeysHandler;
 import states.init.ScaleSimulationState;
-import backend.WeekData;
 import backend.Highscore;
 import states.menus.TitleState;
 import states.init.OutdatedState;
+import flixel.addons.transition.FlxTransitionableState;
 
 class Init extends FlxState {
 	var mustUpdate:Bool = false;
@@ -26,8 +26,10 @@ class Init extends FlxState {
 
 		ClientPrefs.loadPrefs();
 
-		if (ExtraKeysHandler.instance.data.scales == null)
-			MusicBeatState.switchState(new ScaleSimulationState());
+		if (ExtraKeysHandler.instance.data.scales == null) {
+			FlxTransitionableState.skipNextTransOut = true;
+			FlxG.switchState(new ScaleSimulationState());
+		}
 
 		#if CHECK_FOR_UPDATES
 		if(ClientPrefs.data.checkForUpdates) {
@@ -56,8 +58,10 @@ class Init extends FlxState {
 		Highscore.load();
 
 	    if (mustUpdate) {
+			FlxTransitionableState.skipNextTransOut = true;
 	    	FlxG.switchState(new OutdatedState());
 	    } else {
+			FlxTransitionableState.skipNextTransOut = true;
 	    	FlxG.switchState(new TitleState());
 	    }
 
