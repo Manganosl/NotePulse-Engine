@@ -70,7 +70,7 @@ final class NVHoldRenderer extends BaseRenderer<FlxSprite> {
 			arrowData.distance = 0;
 		}
 
-		final fullHeight = (arrow.frame.frame.height * arrow.scale.y * (Adapter.instance.getPixelStage() ? 8 : 1));
+		final fullHeight = (arrow.frame.frame.height * arrow.scale.y);
 		final clipRatio = (isHitten && realDistance < 0) 
 			? FlxMath.bound(1 + (realDistance / fullHeight), 0, 1) 
 			: 1;
