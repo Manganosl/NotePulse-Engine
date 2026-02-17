@@ -25,26 +25,21 @@ class CustomFadeTransition extends MusicBeatSubstate
 
     var transCamera:FlxCamera;
 
-    public function new(duration:Float, isTransIn:Bool)
-    {
+    public function new(duration:Float, isTransIn:Bool) {
         this.duration = duration;
         this.isTransIn = isTransIn;
         super();
     }
 
-    override function create()
-    {
+    override function create() {
         transCamera = new FlxCamera();
         transCamera.bgColor = 0x00000000;
         FlxG.cameras.add(transCamera, false);
         cameras = [transCamera];
 
-        if (ClientPrefs.data.trans == "Stickers")
-        {
+        if (ClientPrefs.data.trans == "Stickers") {
             createStickerTransition();
-        }
-        else
-        {
+        } else {
             shader = new MadnessTrans();
             shader.fade = isTransIn ? 0 : 1;
 
@@ -59,10 +54,8 @@ class CustomFadeTransition extends MusicBeatSubstate
                 daTween = null;
             }
 
-            daTween = FlxTween.tween(shader, {fade: isTransIn ? 1 : 0}, duration,
-            {
-                onComplete: function(twn:FlxTween)
-                {
+            daTween = FlxTween.tween(shader, {fade: isTransIn ? 1 : 0}, duration, {
+                onComplete: function(twn:FlxTween) {
                     finishTrans();
                 }
             });
@@ -71,116 +64,133 @@ class CustomFadeTransition extends MusicBeatSubstate
         super.create();
     }
 
-    function createStickerTransition()
-    {
+function createStickerTransition() {
         stickerGrp = new FlxTypedGroup<FlxSprite>();
         add(stickerGrp);
 
-        var packChoice:Int = FlxG.save.data.packChoice;
-        if (!isTransIn)
-        {
-            packChoice = FlxG.random.int(1, 3);
-            FlxG.save.data.packChoice = packChoice;
+        var path:String = 'assets/shared/images/stickers';
+        if (!FileSystem.exists(path)) {
+            finishTrans();
+            return;
         }
 
-        var path:String = 'assets/shared/images/stickers/pack ' + packChoice;
         var pack:Array<String> = FileSystem.readDirectory(path);
 
-        var xPos:Float = -100;
-        var yPos:Float = -100;
+        if (!isTransIn) {
+            FlxG.save.data.stickerData = [];
+            
+            // --- AJUSTES PARA COBERTURA ---
+            // Reducimos el tamaño de la celda a 110 (antes era 150)
+            // Esto forzará que haya más pegatinas y más juntas.
+            var cellWidth:Int = 110; 
+            var cellHeight:Int = 110;
+            
+            var cols:Int = Math.ceil(FlxG.width / cellWidth) + 2;
+            var rows:Int = Math.ceil(FlxG.height / cellHeight) + 2;
+            
+            maxStickers = cols * rows;
+            stickerTime = duration / maxStickers;
 
-        stickerTime = duration / maxStickers;
+            var positions:Array<{x:Float, y:Float}> = [];
+            for (r in 0...rows) {
+                for (c in 0...cols) {
+                    // Posicionamiento con solapamiento
+                    var baseX = (c * cellWidth) - 120;
+                    var baseY = (r * cellHeight) - 120;
 
-        if (!isTransIn)
-        {
-            FlxG.save.data.stickerHell = [];
+                    // El Jitter ahora es menor que el tamaño de la celda 
+                    // para asegurar que no se alejen demasiado de su sector
+                    var randomX = baseX + FlxG.random.float(-30, 30);
+                    var randomY = baseY + FlxG.random.float(-30, 30);
 
-            for (i in 0...maxStickers)
-            {
+                    positions.push({x: randomX, y: randomY});
+                }
+            }
+
+            FlxG.random.shuffle(positions);
+            var indices:Array<Int> = [];
+            for (i in 0...maxStickers) indices.push(i);
+            FlxG.random.shuffle(indices); 
+
+            for (i in 0...maxStickers) {
                 var graphic:String = pack[FlxG.random.int(0, pack.length - 1)];
-                var angle:Float = FlxG.random.float(-60, 70);
+                var pos = positions[i];
+                var angle:Float = FlxG.random.float(-45, 45); // Ángulo un poco menos extremo
+                
+                // Variación de tamaño para rellenar huecos
+                var randScale:Float = FlxG.random.float(0.8, 1.2);
 
-                var sticky:FlxSprite = newSticker(packChoice, graphic, xPos, yPos, angle);
+                var sticky:FlxSprite = newSticker(graphic, pos.x, pos.y, angle);
+                sticky.scale.set(randScale, randScale); // Aplicamos escala variada
+                sticky.updateHitbox();
                 sticky.visible = false;
                 stickerGrp.add(sticky);
 
-                if (xPos <= FlxG.width)
-                {
-                    xPos += sticky.width * 0.5;
-                    if (xPos >= FlxG.width)
-                    {
-                        if (yPos <= FlxG.height)
-                        {
-                            xPos = -100;
-                            yPos += FlxG.random.float(90, 140);
-                        }
-                    }
-                }
-
-                FlxG.save.data.stickerHell.push({
+                FlxG.save.data.stickerData.push({
                     name: StringTools.replace(graphic, '.png', ''),
                     position: [sticky.x, sticky.y],
-                    angle: sticky.angle
+                    angle: sticky.angle,
+                    scale: randScale, // Guardamos la escala también
+                    order: indices[i]
                 });
             }
-
             FlxG.save.flush();
 
-            for (i in 0...stickerGrp.members.length)
-            {
+            var stickerData:Array<Dynamic> = FlxG.save.data.stickerData;
+            for (i in 0...stickerData.length) {
+                var item = stickerData[i];
                 var sprite = stickerGrp.members[i];
-                new FlxTimer().start(stickerTime * i, function(tmr:FlxTimer)
-                {
+                
+                new FlxTimer().start(stickerTime * item.order, function(tmr:FlxTimer) {
                     sprite.visible = true;
-                    sprite.scale.set(0.85, 0.85);
-                    FlxTween.tween(sprite.scale, {x: 0.8, y: 0.8}, 0.1);
-                    FlxG.sound.play(Paths.sound('keys/keyClick' + FlxG.random.int(1, 9, [6])));
+                    var finalScale:Float = item.scale;
+                    sprite.scale.set(finalScale + 0.2, finalScale + 0.2);
+                    FlxTween.tween(sprite.scale, {x: finalScale, y: finalScale}, 0.1, {ease: FlxEase.backOut});
+                    FlxG.sound.play(Paths.sound('keys/keyClick' + FlxG.random.int(1, 9, [6])), 0.6);
                 });
             }
-        }
-        else
-        {
-            var dataList:Array<Dynamic> = FlxG.save.data.stickerHell;
 
-            for (i in 0...dataList.length)
-            {
-                var data = dataList[i];
+        } else {
+            // TRANS IN (Salida)
+            var dataList:Array<Dynamic> = FlxG.save.data.stickerData;
+            if (dataList != null) {
+                maxStickers = dataList.length;
+                stickerTime = duration / maxStickers;
 
-                var sticky:FlxSprite = newSticker(
-                    packChoice,
-                    data.name,
-                    data.position[0],
-                    data.position[1],
-                    data.angle
-                );
+                for (i in 0...dataList.length) {
+                    var data = dataList[i];
+                    var sticky:FlxSprite = newSticker(data.name, data.position[0], data.position[1], data.angle);
+                    
+                    // Aplicar la escala guardada
+                    var savedScale:Float = (data.scale != null) ? data.scale : 0.8;
+                    sticky.scale.set(savedScale, savedScale);
+                    sticky.updateHitbox();
+                    
+                    sticky.visible = true;
+                    stickerGrp.add(sticky);
 
-                sticky.visible = true;
-                stickerGrp.add(sticky);
-
-                new FlxTimer().start(stickerTime * i, function(tmr:FlxTimer)
-                {
-                    sticky.visible = false;
-                    FlxG.sound.play(Paths.sound('keys/keyClick' + FlxG.random.int(1, 9, [6])));
-                });
+                    new FlxTimer().start(stickerTime * data.order, function(tmr:FlxTimer) {
+                        if (sticky != null) sticky.visible = false;
+                        FlxG.sound.play(Paths.sound('keys/keyClick' + FlxG.random.int(1, 9, [6])), 0.6);
+                    });
+                }
             }
         }
 
-        new FlxTimer().start(duration + 0.1, function(tmr:FlxTimer)
-        {
+        new FlxTimer().start(duration + 0.2, function(tmr:FlxTimer) {
             finishTrans();
         });
     }
 
-    function newSticker(pack:Int, graphic:String, x:Float, y:Float, angle:Float):FlxSprite
-    {
+    function newSticker(graphic:String, x:Float, y:Float, angle:Float):FlxSprite {
         var name:String = StringTools.replace(graphic, '.png', '');
 
-        var sticker = new FlxSprite(x, y)
-            .loadGraphic(Paths.image('stickers/pack ' + pack + '/' + name));
+        var sticker = new FlxSprite(x, y).loadGraphic(Paths.image('stickers/' + name));
 
         sticker.scrollFactor.set(0, 0);
+        sticker.zoomFactor = 0;
 
-        sticker.scale.set(0.8 / transCamera.zoom, 0.8 / transCamera.zoom);
+        sticker.scale.set(0.8, 0.8);
 
         sticker.updateHitbox();
         sticker.antialiasing = ClientPrefs.data.antialiasing;
@@ -189,30 +199,28 @@ class CustomFadeTransition extends MusicBeatSubstate
         return sticker;
     }
 
-    function finishTrans()
-    {
+    function finishTrans() {
         if (finishCallback != null)
             finishCallback();
+            
+        new FlxTimer().start(0.01, function(tmr:FlxTimer) {
+        	finishCallback = null;
+        	daTween = null;
 
-        finishCallback = null;
-        daTween = null;
+        	if (transCamera != null) {
+            		FlxG.cameras.remove(transCamera, true);
+            		transCamera.destroy();
+            		transCamera = null;
+        	}
 
-        if (transCamera != null)
-        {
-            FlxG.cameras.remove(transCamera, true);
-            transCamera.destroy();
-            transCamera = null;
-        }
-
-        close();
+        	close();
+        });
     }
 
-    override function update(elapsed:Float)
-    {
+    override function update(elapsed:Float) {
         super.update(elapsed);
 
-        if (dont)
-        {
+        if (dont) {
             dont = false;
             finishTrans();
         }
