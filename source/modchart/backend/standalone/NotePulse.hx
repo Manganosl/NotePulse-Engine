@@ -1,14 +1,14 @@
 package modchart.backend.standalone;
 
-import backend.ClientPrefs;
-import backend.Conductor;
-import objects.Note;
-import objects.SustainSplash;
-import objects.NoteSplash;
-import objects.StrumNote as Strum;
-import states.PlayState;
-import states.editors.content.EditorPlayState;
-import states.editors.ModchartEditor;
+import funkin.backend.ClientPrefs;
+import funkin.backend.Conductor;
+import funkin.objects.Note;
+import funkin.objects.SustainSplash;
+import funkin.objects.NoteSplash;
+import funkin.objects.StrumNote as Strum;
+import funkin.states.PlayState;
+import funkin.states.editors.content.EditorPlayState;
+import funkin.states.editors.ModchartEditor;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -39,9 +39,9 @@ class NotePulse implements IAdapter {
 
 	public function getCurrentBeat():Float {
 		@:privateAccess
-		if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState')
+		if (Type.getClassName(Type.getClass(FlxG.state)) == 'funkin.states.PlayState')
 			return PlayState.instance.curDecBeat;
-		else if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.editors.ModchartEditor')
+		else if (Type.getClassName(Type.getClass(FlxG.state)) == 'funkin.states.editors.ModchartEditor')
 			return ModchartEditor.instance.curDecBeat;
 		else
 			return EditorPlayState.instance.curDecBeat;
@@ -161,18 +161,18 @@ class NotePulse implements IAdapter {
 	}
 
 	public function getArrowCamera():Array<FlxCamera> {
-		if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState')
+		if (Type.getClassName(Type.getClass(FlxG.state)) == 'funkin.states.PlayState')
 			return [PlayState.instance.camHUD];
-		else if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.editors.ModchartEditor')
+		else if (Type.getClassName(Type.getClass(FlxG.state)) == 'funkin.states.editors.ModchartEditor')
 			return [ModchartEditor.instance.camHUD];
 		else
 			return [EditorPlayState.instance.camHUD];
 	}
 
 	public function getCurrentScrollSpeed():Float {
-		if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.PlayState')
+		if (Type.getClassName(Type.getClass(FlxG.state)) == 'funkin.states.PlayState')
 			return PlayState.instance.songSpeed * .45;
-		else if (Type.getClassName(Type.getClass(FlxG.state)) == 'states.editors.ModchartEditor')
+		else if (Type.getClassName(Type.getClass(FlxG.state)) == 'funkin.states.editors.ModchartEditor')
 			return ModchartEditor.instance.songSpeed * .45;
 		else
 			return EditorPlayState.instance.songSpeed * .45;

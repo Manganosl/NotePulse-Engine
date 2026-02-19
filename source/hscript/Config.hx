@@ -3,14 +3,14 @@ package hscript;
 class Config {
 	public static final ALLOWED_CUSTOM_CLASSES = [
 		"flixel",
-		"backend",
-		"psychlua",
-		"objects",
-		"shaders",
-		"cutscenes",
+		"funkin.backend",
+		"funkin.psychlua",
+		"funkin.objects",
+		"funkin.shaders",
+		"funkin.cutscenes",
 	];
 	public static final ALLOWED_ABSTRACT_AND_ENUM = [
-		"backend",
+		"funkin.backend",
 		"flixel",
 		"openfl",
 		"haxe.xml",

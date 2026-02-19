@@ -8,7 +8,7 @@ import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
 import flixel.util.FlxDestroyUtil;
-import backend.utils.CustomShader;
+import funkin.backend.utils.CustomShader;
 
 /**
  * @author Zaphod

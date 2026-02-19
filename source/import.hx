@@ -1,8 +1,10 @@
 #if !macro
 //Discord API
 #if DISCORD_ALLOWED
-import backend.Discord;
+import funkin.backend.Discord;
 #end
+
+import funkin.Main;
 
 //FunkinModchart
 import modchart.Config;
@@ -25,7 +27,7 @@ import llua.Lua;
 #end
 
 #if ACHIEVEMENTS_ALLOWED
-import backend.Achievements;
+import funkin.backend.Achievements;
 #end
 
 #if sys
@@ -35,24 +37,24 @@ import sys.io.*;
 import js.html.*;
 #end
 
-import backend.Paths;
-import backend.Controls;
-import backend.utils.CoolUtil;
-import states.base.MusicBeatState;
-import states.base.MusicBeatSubstate;
-import backend.CustomFadeTransition;
-import backend.ClientPrefs;
-import backend.Conductor;
-import backend.BaseStage;
-import backend.Difficulty;
-import backend.Mods;
-import backend.PsychCamera;
+import funkin.backend.Paths;
+import funkin.backend.Controls;
+import funkin.backend.utils.CoolUtil;
+import funkin.states.base.MusicBeatState;
+import funkin.states.base.MusicBeatSubstate;
+import funkin.backend.CustomFadeTransition;
+import funkin.backend.ClientPrefs;
+import funkin.backend.Conductor;
+import funkin.backend.BaseStage;
+import funkin.backend.Difficulty;
+import funkin.backend.Mods;
+import funkin.backend.PsychCamera;
 
-import objects.Alphabet;
-import objects.BGSprite;
+import funkin.objects.Alphabet;
+import funkin.objects.BGSprite;
 
-import states.PlayState;
-import states.handlers.LoadingState;
+import funkin.states.PlayState;
+import funkin.states.handlers.LoadingState;
 
 #if flxanimate
 import flxanimate.*;
@@ -81,10 +83,10 @@ import openfl.ui.MouseCursor as OpenflCursor;
 using StringTools;
 
 #if PRETTY_TRACE
-import backend.Log;
-import backend.Log.error;
-import backend.Log.warn;
-import backend.Log.info;
+import funkin.backend.Log;
+import funkin.backend.Log.error;
+import funkin.backend.Log.warn;
+import funkin.backend.Log.info;
 #else
 import haxe.Log;
 #end

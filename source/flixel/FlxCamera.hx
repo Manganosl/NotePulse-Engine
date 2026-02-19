@@ -1016,7 +1016,7 @@ class FlxCamera extends FlxBasic
 	public function addShader(shader:Dynamic)
 	{
 		var filter:FlxRuntimeShader;
-		if(shader is backend.utils.CustomShader)
+		if(shader is funkin.backend.utils.CustomShader)
 			filter = shader.shader;
 		else if(shader is FlxRuntimeShader)
 			filter = shader;
@@ -1040,7 +1040,7 @@ class FlxCamera extends FlxBasic
 	public function removeShader(shaderInput:Dynamic):Bool
 	{
 		var shader:FlxRuntimeShader;
-		if(shaderInput is backend.utils.CustomShader)
+		if(shaderInput is funkin.backend.utils.CustomShader)
 			shader = shaderInput.shader;
 		else if(shaderInput is FlxRuntimeShader)
 			shader = shaderInput;

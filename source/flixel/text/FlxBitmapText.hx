@@ -14,7 +14,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.geom.ColorTransform;
 
-import backend.utils.CustomShader;
+import funkin.backend.utils.CustomShader;
 
 using flixel.util.FlxColorTransformUtil;
 using flixel.util.FlxUnicodeUtil;

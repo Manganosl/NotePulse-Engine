@@ -24,7 +24,7 @@ import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
-import backend.utils.CustomShader;
+import funkin.backend.utils.CustomShader;
 
 using flixel.util.FlxColorTransformUtil;
 
