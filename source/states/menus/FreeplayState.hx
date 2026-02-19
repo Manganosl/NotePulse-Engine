@@ -24,8 +24,10 @@ import haxe.Json;
 import openfl.Assets;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
+import openfl.filters.ShaderFilter;
 
 import shaders.ColorSwap;
+import shaders.ChromaticWarp;
 
 import states.menus.StoryMenuState;
 import states.MainMenuState;
@@ -48,6 +50,9 @@ class FreeplayState extends MusicBeatState
 	var lerpRating:Float = 0;
 	var intendedScore:Int = 0;
 	var intendedRating:Float = 0;
+
+	var daShader:ChromaticWarp;
+
 	var backdrop:flixel.addons.display.FlxBackdrop;
 	var titleText:FlxText;
 	var rankText:FlxText;
@@ -246,6 +251,10 @@ class FreeplayState extends MusicBeatState
 		changeSelection();
 		updateTexts();
 		super.create();
+
+		daShader = new ChromaticWarp();
+		daShader.distortion = 0.01;
+		FlxG.camera.setFilters([new ShaderFilter(daShader.shader)]);
 	}
 
 	override function closeSubState() {
@@ -475,6 +484,8 @@ class FreeplayState extends MusicBeatState
 			FlxTween.tween(playerText, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
 			FlxTween.tween(bottomBG, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
 			FlxTween.tween(bottomText, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
+			daShader.distortion = 0.5;
+			FlxTween.tween(daShader, {distortion: 0.1}, 1, {ease: FlxEase.sineInOut});
 			for (i in 0...iconArray.length)
 			{
 				FlxTween.tween(iconArray[i], {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
@@ -678,22 +689,17 @@ public function updateTexts(elapsed:Float = 0.0)
 	{
 		var item:Alphabet = grpSongs.members[i];
 		item.visible = item.active = true;
-
-		// Vertical position similar to OptionsScreen
 		var y:Float = ((FlxG.height - 120) / 2) + ((i - lerpSelected) * 135); 
-
-		// Horizontal offset based on vertical position
 		item.x = (-50 + (Math.abs(Math.cos((y + (135 / 2) - (FlxG.camera.scroll.y + (FlxG.height / 2))) / (FlxG.height * 1.25) * Math.PI)) * 150));
 
 		item.y = y;
 		velXtra = CoolUtil.fpsLerp(velXtra, 0, 0.01);
 		backdrop.velocity.set(50, 30+velXtra);
 
-		// Handle icon the same way, if needed
 		var icon:HealthIcon = iconArray[i];
 		icon.visible = icon.active = true;
-		icon.x = item.x - 60; // Adjust if you want icons to appear next to the item
-		icon.y = y + 20;      // Vertical offset tweak for icon positioning
+		icon.x = item.x - 60;
+		icon.y = y + 20;
 		
 		_lastVisibles.push(i);
 	}

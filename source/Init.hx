@@ -18,13 +18,16 @@ class Init extends FlxState {
 		#end
 		Mods.loadTopMod();
 
+		FlxG.save.bind('funkin', CoolUtil.getSavePath());
+		ClientPrefs.loadPrefs();
+
 		FlxG.fixedTimestep = false;
 		FlxG.game.focusLostFramerate = 60;
 		FlxG.keys.preventDefaultKeys = [TAB];
-
-		FlxG.save.bind('funkin', CoolUtil.getSavePath());
-
-		ClientPrefs.loadPrefs();
+		FlxG.mouse.visible = false;
+		FlxG.scaleMode = new backend.utils.helpers.FunkinRatioScaleMode();
+		FlxG.signals.preStateSwitch.add((cast FlxG.scaleMode : backend.utils.helpers.FunkinRatioScaleMode).resetSize);
+		FlxG.signals.postUpdate.add(handleDaKeys);
 
 		if (ExtraKeysHandler.instance.data.scales == null) {
 			FlxTransitionableState.skipNextTransOut = true;
@@ -64,8 +67,6 @@ class Init extends FlxState {
 			FlxTransitionableState.skipNextTransOut = true;
 	    	FlxG.switchState(new TitleState());
 	    }
-
-		FlxG.signals.postUpdate.add(handleDaKeys);
     }
 
 	function handleDaKeys(){
