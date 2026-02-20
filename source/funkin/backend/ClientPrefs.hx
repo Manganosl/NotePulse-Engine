@@ -37,7 +37,7 @@ import funkin.states.menus.TitleState;
 	public var devMode:Bool = false;
 	public var nvFMHolds:Bool = true;
 
-	public var trans:String = "Stickers";
+	public var transition:String = "Stickers";
 
 	public var arrowRGB:Array<Array<FlxColor>> = [
 		[0xFFC24B99, 0xFFFFFFFF, 0xFF3C1F56],

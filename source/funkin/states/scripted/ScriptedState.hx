@@ -32,11 +32,6 @@ class ScriptedState extends MusicBeatState
 		}
 
 		super.create();
-
-		//var fix:funkin.backend.CustomFadeTransition = new funkin.backend.CustomFadeTransition(0.6, false);
-		//funkin.backend.CustomFadeTransition.finishCallback = function(){
-		//	funkin.backend.CustomFadeTransition.dont = true;
-		//}
 		stagesFunc(function(stage:BaseStage) stage.createPost());
 		if (hscript != null)
 			callOnHScript('onCreatePost');

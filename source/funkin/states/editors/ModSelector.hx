@@ -1,3 +1,5 @@
+// Plan to make this a substate.
+
 package funkin.states.editors;
 
 import funkin.backend.ui.*;
@@ -94,8 +96,6 @@ class ModSelector extends MusicBeatState {
 
         FlxTween.cancelTweensOf(Main.fpsVar);
         FlxTween.tween(Main.fpsVar, {y: 105}, 1, {ease: FlxEase.circOut});
-
-        super.create();
     }
 
     var velXtra:Float = 0;

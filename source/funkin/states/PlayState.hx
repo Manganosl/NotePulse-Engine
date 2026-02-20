@@ -2828,7 +2828,7 @@ class PlayState extends MusicBeatState
 				opponentVocals.pause();
 			}
 			FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if(!tmr.finished) tmr.active = false);
-			FlxTween.globalManager.forEach(function(twn:FlxTween) if(!twn.finished && twn != CustomFadeTransition.daTween) twn.active = false);
+			FlxTween.globalManager.forEach(function(twn:FlxTween) if(!twn.finished && twn != CustomFadeTransition.transitionTween) twn.active = false);
 		}
 
 		super.openSubState(subState);
