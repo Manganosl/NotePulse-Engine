@@ -6,6 +6,7 @@ import funkin.backend.Rating;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
+import funkin.objects.PlayField;
 
 import flixel.util.FlxSort;
 import flixel.input.keyboard.FlxKey;
@@ -41,9 +42,9 @@ class EditorPlayState extends MusicBeatSubstate
 	var ratingsData:Array<Rating> = Rating.loadDefault();
 	
 	public var strumLineNotes:FlxTypedGroup<StrumNote>;
-	public var opponentStrums:FlxTypedGroup<StrumNote>;
-	public var gfStrums:FlxTypedGroup<StrumNote>;
-	public var playerStrums:FlxTypedGroup<StrumNote>;
+	public var opponentStrums:PlayField;
+	public var gfStrums:PlayField;
+	public var playerStrums:PlayField;
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 	
 	var combo:Int = 0;
@@ -140,9 +141,9 @@ class EditorPlayState extends MusicBeatSubstate
 		grpNoteSplashes.cameras = [camHUD];
 		splash.alpha = 0.000001; //cant make it invisible or it won't allow precaching
 
-		opponentStrums = new FlxTypedGroup<StrumNote>();
-		playerStrums = new FlxTypedGroup<StrumNote>();
-		gfStrums = new FlxTypedGroup<StrumNote>();
+		opponentStrums = new PlayField(0);
+		playerStrums = new PlayField(1);
+		gfStrums = new PlayField(2);
 		
 		generateStaticArrows(0);
 		generateStaticArrows(1);
@@ -151,7 +152,6 @@ class EditorPlayState extends MusicBeatSubstate
 			for (i in 0...gfStrums.length) {
 				gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
 			}
-			adaptStrumline(gfStrums);
 		}
 
 		/***************/
@@ -540,9 +540,20 @@ class EditorPlayState extends MusicBeatSubstate
 	{
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X;
 		var strumLineY:Float = ClientPrefs.data.downScroll ? (FlxG.height - 150) : 50;
-		for (i in 0...PlayState.SONG.mania + 1)
+
+		var playField:PlayField = null;
+		switch (player)
 		{
-			// FlxG.log.add(i);
+			case 1: playField = playerStrums;
+			case 2: playField = gfStrums;
+			default: playField = opponentStrums;
+		}
+
+		var i:Int = 0;
+		for (babyArrow in playField.members)
+		{
+			if (babyArrow == null) continue;
+
 			var targetAlpha:Float = 1;
 			if (player < 1)
 			{
@@ -550,53 +561,30 @@ class EditorPlayState extends MusicBeatSubstate
 				else if(ClientPrefs.data.middleScroll) targetAlpha = 0.35;
 			}
 
-			var babyArrow:StrumNote = new StrumNote(strumLineX, strumLineY, i, player);
+			babyArrow.x = strumLineX;
+			babyArrow.y = strumLineY;
 			babyArrow.downScroll = ClientPrefs.data.downScroll;
 			babyArrow.alpha = targetAlpha;
 
-			if (player == 1){
-				babyArrow.cpuControlled = (this.player == player ? false : true);
-				playerStrums.add(babyArrow);
-			} else if (player == 2){
-				babyArrow.cpuControlled = (this.player == player ? false : true);
-				gfStrums.add(babyArrow);
-			} else {
+			if (player != 1 && player != 2)
+			{
 				if(ClientPrefs.data.middleScroll)
 				{
 					babyArrow.x += 310;
-					if(i > 1) { //Up and Right
+					if(i > 1)
+					{
 						babyArrow.x += FlxG.width / 2 + 25;
 					}
 				}
-				babyArrow.cpuControlled = (this.player == player ? false : true);
-				opponentStrums.add(babyArrow);
 			}
 
+			babyArrow.cpuControlled = (this.player == player ? false : true);
 			babyArrow.cameras = [camHUD];
+
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
-		}
 
-		adaptStrumline(opponentStrums);
-		adaptStrumline(playerStrums);
-		if (PlayState.SONG.gfStrums) adaptStrumline(gfStrums);
-	}
-
-	public function adaptStrumline(strumline:FlxTypedGroup<StrumNote>) {
-		var strumLineWidth:Float = 0;
-		var strumLineIsBig:Bool = false;
-
-		for (note in strumline.members) strumLineWidth += note.width;
-		strumLineIsBig = strumLineWidth > StrumBoundaries.getBoundaryWidth().x;
-
-		while (strumLineIsBig) {
-			strumLineWidth = 0;
-			for (note in strumline.members) {
-				note.retryBound();
-				strumLineWidth += note.width;
-			}
-			Log.warn('Strumline is too big! Shrinking and retrying.');
-			strumLineIsBig = strumLineWidth > StrumBoundaries.getBoundaryWidth().x;
+			i++;
 		}
 	}
 

@@ -7,6 +7,7 @@ import funkin.backend.Song;
 import funkin.backend.StageData;
 
 import funkin.objects.Note;
+import funkin.objects.PlayField;
 import funkin.objects.StrumNote;
 
 import flixel.util.FlxSort;
@@ -57,9 +58,9 @@ class ModchartEditor extends MusicBeatState
 	var ratingsData:Array<Rating> = Rating.loadDefault();
 	
 	public var strumLineNotes:FlxTypedGroup<StrumNote>;
-	public var opponentStrums:FlxTypedGroup<StrumNote>;
-	public var gfStrums:FlxTypedGroup<StrumNote>;
-	public var playerStrums:FlxTypedGroup<StrumNote>;
+	public var opponentStrums:PlayField;
+	public var gfStrums:PlayField;
+	public var playerStrums:PlayField;
 	
 	var combo:Int = 0;
 	var lastRating:FlxSprite;
@@ -180,11 +181,11 @@ class ModchartEditor extends MusicBeatState
 		strumLineNotes.cameras = [camHUD];
 		add(strumLineNotes);
 
-		opponentStrums = new FlxTypedGroup<StrumNote>();
+		opponentStrums = new PlayField(0);
 		opponentStrums.cameras = [camHUD];
-		playerStrums = new FlxTypedGroup<StrumNote>();
+		playerStrums = new PlayField(1);
 		playerStrums.cameras = [camHUD];
-		gfStrums = new FlxTypedGroup<StrumNote>();
+		gfStrums = new PlayField(2);
 		gfStrums.cameras = [camHUD];
 		
 		generateStaticArrows(0);
@@ -194,7 +195,6 @@ class ModchartEditor extends MusicBeatState
 			for (i in 0...gfStrums.length) {
 				gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
 			}
-			adaptStrumline(gfStrums);
 		}
 
 		/***************/
@@ -1110,7 +1110,7 @@ class ModchartEditor extends MusicBeatState
 			var fakeCrochet:Float = (60 / PlayState.SONG.bpm) * 1000;
 			notes.forEachAlive(function(daNote:Note)
 			{
-				var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
+				var strumGroup:PlayField = playerStrums;
 				if(!daNote.mustPress) strumGroup = opponentStrums;
 				if(daNote.gfStrum) strumGroup = gfStrums;
 
@@ -1402,9 +1402,20 @@ class ModchartEditor extends MusicBeatState
 	{
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X;
 		var strumLineY:Float = ClientPrefs.data.downScroll ? (FlxG.height - 150) : 50;
-		for (i in 0...PlayState.SONG.mania + 1)
+
+		var playField:PlayField = null;
+		switch (player)
 		{
-			// FlxG.log.add(i);
+			case 1: playField = playerStrums;
+			case 2: playField = gfStrums;
+			default: playField = opponentStrums;
+		}
+
+		var i:Int = 0;
+		for (babyArrow in playField.members)
+		{
+			if (babyArrow == null) continue;
+
 			var targetAlpha:Float = 1;
 			if (player < 1)
 			{
@@ -1412,50 +1423,28 @@ class ModchartEditor extends MusicBeatState
 				else if(ClientPrefs.data.middleScroll) targetAlpha = 0.35;
 			}
 
-			var babyArrow:StrumNote = new StrumNote(strumLineX, strumLineY, i, player);
+			babyArrow.x = strumLineX;
+			babyArrow.y = strumLineY;
 			babyArrow.cameras = [camHUD];
 			babyArrow.downScroll = ClientPrefs.data.downScroll;
 			babyArrow.alpha = targetAlpha;
 
-			if (player == 1){
-				playerStrums.add(babyArrow);
-			} else if (player == 2){
-				gfStrums.add(babyArrow);
-			} else {
+			if (player != 1 && player != 2)
+			{
 				if(ClientPrefs.data.middleScroll)
 				{
 					babyArrow.x += 310;
-					if(i > 1) { //Up and Right
+					if(i > 1)
+					{
 						babyArrow.x += FlxG.width / 2 + 25;
 					}
 				}
-				opponentStrums.add(babyArrow);
 			}
 
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
-		}
 
-		adaptStrumline(opponentStrums);
-		adaptStrumline(playerStrums);
-		if (PlayState.SONG.gfStrums) adaptStrumline(gfStrums);
-	}
-
-	public function adaptStrumline(strumline:FlxTypedGroup<StrumNote>) {
-		var strumLineWidth:Float = 0;
-		var strumLineIsBig:Bool = false;
-
-		for (note in strumline.members) strumLineWidth += note.width;
-		strumLineIsBig = strumLineWidth > StrumBoundaries.getBoundaryWidth().x;
-
-		while (strumLineIsBig) {
-			strumLineWidth = 0;
-			for (note in strumline.members) {
-				note.retryBound();
-				strumLineWidth += note.width;
-			}
-			Log.warn('Strumline is too big! Shrinking and retrying.');
-			strumLineIsBig = strumLineWidth > StrumBoundaries.getBoundaryWidth().x;
+			i++;
 		}
 	}
 
