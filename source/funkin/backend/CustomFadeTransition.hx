@@ -30,4 +30,9 @@ class CustomFadeTransition extends MusicBeatSubstate {
 
         super.create();
     }
+
+    override function closeSubState() {
+        super.closeSubState();
+        close();
+    }
 }

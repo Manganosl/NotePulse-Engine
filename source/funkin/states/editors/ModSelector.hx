@@ -54,6 +54,7 @@ class ModSelector extends MusicBeatState {
     var uiGroup:FlxTypedGroup<Dynamic>;
 
     override public function create() {
+        super.create();
         bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
         bg.antialiasing = ClientPrefs.data.antialiasing;
         add(bg);
