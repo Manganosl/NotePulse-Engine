@@ -976,14 +976,14 @@ class PlayState extends MusicBeatState
 
 							if(!daNote.strum.cpuControlled)
 							{
-								if(cpuControlled && !daNote.blockHit && daNote.canBeHit && (daNote.isSustainNote || daNote.strumTime <= Conductor.songPosition)){
-									goodNoteHit(daNote);
+								if(daNote.strum.noteHitCallback != null && cpuControlled && !daNote.blockHit && daNote.canBeHit && (daNote.isSustainNote || daNote.strumTime <= Conductor.songPosition)){
+									daNote.strum.noteHitCallback(daNote);
 									notesLength = notes.length;
 									unspawnNotesLength = unspawnNotes.length;
 								}
 							}
-							else if (daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote){
-								opponentNoteHit(daNote);
+							else if (daNote.strum.noteHitCallback != null && daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote){
+								daNote.strum.noteHitCallback(daNote);
 								notesLength = notes.length;
 								unspawnNotesLength = unspawnNotes.length;
 							}
@@ -1004,8 +1004,8 @@ class PlayState extends MusicBeatState
 							// Kill extremely late notes and cause misses
 							if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
 							{
-								if (!daNote.strum.cpuControlled && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
-									noteMiss(daNote);
+								if (daNote.strum.noteMissCallback != null && !daNote.strum.cpuControlled && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
+									daNote.strum.noteMissCallback(daNote);
 
 								daNote.active = daNote.visible = false;
 								invalidateNote(daNote);
@@ -3096,12 +3096,23 @@ class PlayState extends MusicBeatState
 			else
 				babyArrow.alpha = targetAlpha;
 
-			if (player == 0)
+			if (player == 0){
 				babyArrow.cpuControlled = !isPlayerOpponent;
-			else if (player == 1)
+				if(!isPlayerOpponent) babyArrow.noteHitCallback = opponentNoteHit;
+				else {
+					babyArrow.noteHitCallback = goodNoteHit;
+					babyArrow.noteMissCallback = noteMiss;
+				}
+			} else if (player == 1){
 				babyArrow.cpuControlled = isPlayerOpponent;
-			else
+				if(!isPlayerOpponent) {
+					babyArrow.noteHitCallback = goodNoteHit;
+					babyArrow.noteMissCallback = noteMiss;
+				} else babyArrow.noteHitCallback = opponentNoteHit;
+			} else {
 				babyArrow.cpuControlled = true;
+				babyArrow.noteHitCallback = opponentNoteHit;
+			}
 
 			grpSustainSplashes.add(babyArrow.sustainSplash);
 
@@ -3453,7 +3464,7 @@ class PlayState extends MusicBeatState
 						}
 					}
 
-					noteMiss(note);
+					if(note.strum.noteMissCallback != null) note.strum.noteMissCallback(note);
 					if(!note.noteSplashData.disabled && !note.isSustainNote) spawnNoteSplashOnNote(note);
 					if(!note.isSustainNote) invalidateNote(note);
 					return;
@@ -3630,18 +3641,6 @@ class PlayState extends MusicBeatState
 		if(!keysPressed.contains(key)) keysPressed.push(key);
 
 		Conductor.songPosition = lastTime;
-
-		var sprs:Array<StrumNote> = [];
-		if(!playerStrums.members[key].cpuControlled) sprs.push(playerStrums.members[key]);
-		if(!opponentStrums.members[key].cpuControlled) sprs.push(opponentStrums.members[key]);
-		if(SONG.gfStrums) if(!gfStrums.members[key].cpuControlled) sprs.push(gfStrums.members[key]);
-		for(spr in sprs){		
-			if(strumsBlocked[key] != true && spr != null && spr.animation.curAnim.name != 'confirm')
-			{
-				spr.playAnim('pressed');
-				spr.resetAnim = 0;
-			}
-		}
 		callOnScripts('onKeyPress', [key]);
 	}
 
@@ -3658,18 +3657,6 @@ class PlayState extends MusicBeatState
 
 		var ret:Dynamic = callOnScripts('onKeyReleasePre', [key]);
 		if(ret == LuaUtils.Function_Stop) return;
-
-		var sprs:Array<StrumNote> = [];
-		if(!playerStrums.members[key].cpuControlled) sprs.push(playerStrums.members[key]);
-		if(!opponentStrums.members[key].cpuControlled) sprs.push(opponentStrums.members[key]);
-		if(SONG.gfStrums) if(!gfStrums.members[key].cpuControlled) sprs.push(gfStrums.members[key]);
-		for(spr in sprs){
-			if(spr != null)
-			{
-				spr.playAnim('static');
-				spr.resetAnim = 0;
-			}
-		}
 		callOnScripts('onKeyRelease', [key]);
 	}
 
