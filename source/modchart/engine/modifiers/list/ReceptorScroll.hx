@@ -8,13 +8,19 @@ import modchart.backend.core.VisualParameters;
 import modchart.backend.util.ModchartUtil;
 
 class ReceptorScroll extends Modifier {
+	public function new(pf) {
+		super(pf);
+
+		setPercent('receptorScrollSpeed', 1, -1);
+	}
+
 	override public function render(curPos:Vector3, params:ModifierParameters) {
 		final perc = getPercent('receptorScroll', params.player);
 
 		if (perc == 0)
 			return curPos;
 
-		final moveSpeed = Adapter.instance.getCurrentCrochet() * 4;
+		final moveSpeed = (Adapter.instance.getCurrentCrochet() * 4) / getPercent('receptorScrollSpeed', params.player);
 
 		var diff = -params.distance;
 		var songTime = Adapter.instance.getSongPosition();
@@ -38,7 +44,7 @@ class ReceptorScroll extends Modifier {
 		if (perc == 0)
 			return data;
 
-		final moveSpeed = Adapter.instance.getCurrentCrochet() * 4;
+		final moveSpeed = (Adapter.instance.getCurrentCrochet() * 4) / getPercent('receptorScrollSpeed', params.player);
 		var songTime = Adapter.instance.getSongPosition();
 		var currentCycle = Math.floor(songTime / moveSpeed) % 2;
 		var noteTime = songTime + params.distance;
