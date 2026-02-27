@@ -1323,6 +1323,7 @@ class ModchartEditor extends MusicBeatState
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 				swagNote.gfStrum = (songNotes[4] == true);
 				if(swagNote.gfStrum) swagNote.mustPress = false;
+				swagNote.playField = (swagNote.gfStrum ? gfStrums : (gottaHitNote ? playerStrums : opponentStrums));
 
 				swagNote.scrollFactor.set();
 
@@ -1345,6 +1346,7 @@ class ModchartEditor extends MusicBeatState
 						sustainNote.cameras = [camHUD];
 						sustainNote.parent = swagNote;
 						sustainNote.gfStrum = swagNote.gfStrum;
+						sustainNote.playField = swagNote.playField;
 						if(sustainNote.gfStrum) sustainNote.mustPress = false;
 						allNotes.push(sustainNote);
 						unspawnNotes.push(sustainNote);

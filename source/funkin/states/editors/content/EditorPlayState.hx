@@ -466,6 +466,7 @@ class EditorPlayState extends MusicBeatSubstate
 				if(swagNote.gfStrum) swagNote.mustPress = false;
 				swagNote.cameras = [camHUD];
 				swagNote.scrollFactor.set();
+				swagNote.playField = (swagNote.gfStrum ? gfStrums : (gottaHitNote ? playerStrums : opponentStrums));
 
 				unspawnNotes.push(swagNote);
 
@@ -485,6 +486,7 @@ class EditorPlayState extends MusicBeatSubstate
 						sustainNote.gfStrum = swagNote.gfStrum;
 						if(sustainNote.gfStrum) sustainNote.mustPress = false;
 						sustainNote.cameras = [camHUD];
+						sustainNote.playField = swagNote.playField;
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 
