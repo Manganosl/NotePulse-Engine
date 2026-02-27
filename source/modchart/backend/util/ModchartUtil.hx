@@ -32,7 +32,7 @@ using StringTools;
 	}
 
 	@:pure
-	inline public static function resolveCameras(playfield:modchart.engine.PlayField, item:FlxSprite):Array<FlxCamera> {
+	inline public static function resolveCameras(playfield:modchart.engine.ModPlayField, item:FlxSprite):Array<FlxCamera> {
 		@:privateAccess
 		var playfieldCameras = #if (flixel >= "5.7.0") playfield.getCameras() #else playfield._cameras #end;
 

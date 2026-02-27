@@ -2,11 +2,11 @@ package modchart.engine.modifiers.list;
 
 import modchart.backend.core.ArrowData;
 import modchart.backend.core.ModifierParameters;
-import modchart.engine.PlayField;
+import modchart.engine.ModPlayField;
 import modchart.engine.modifiers.list.PathModifier.PathNode;
 
 class ArrowShape extends PathModifier {
-	public function new(pf:PlayField) {
+	public function new(pf:ModPlayField) {
 		var path:Array<PathNode> = [];
 
 		for (line in ModchartUtil.coolTextFile('modchart/arrowShape.csv')) {

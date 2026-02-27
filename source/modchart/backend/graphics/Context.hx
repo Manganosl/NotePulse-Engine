@@ -2,17 +2,17 @@ package modchart.backend.graphics;
 
 import modchart.backend.graphics.renderers.*;
 import modchart.backend.math.View3D;
-import modchart.engine.PlayField;
+import modchart.engine.ModPlayField;
 
 class Context {
-	public var parent:PlayField;
+	public var parent:ModPlayField;
 	public var view:View3D;
 
 	public var arrowRenderer:ArrowRenderer;
 	public var holdRenderer:BaseRenderer<FlxSprite>;
 	public var pathRenderer:PathRenderer;
 
-	public function new(parent:PlayField) {
+	public function new(parent:ModPlayField) {
 		this.parent = parent;
 
 		arrowRenderer = new ArrowRenderer(parent);

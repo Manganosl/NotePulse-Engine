@@ -33,7 +33,7 @@ import openfl.geom.Rectangle;
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
-final class PlayField extends FlxSprite {
+final class ModPlayField extends FlxSprite {
 	public var context:Context;
 
 	public var events:EventManager;

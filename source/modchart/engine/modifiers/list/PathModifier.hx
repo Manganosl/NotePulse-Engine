@@ -5,7 +5,7 @@ import haxe.ds.Vector;
 import modchart.backend.core.ArrowData;
 import modchart.backend.core.ModifierParameters;
 import modchart.backend.util.ModchartUtil;
-import modchart.engine.PlayField;
+import modchart.engine.ModPlayField;
 
 /**
  * Manages path-based transformations for arrows.
@@ -28,7 +28,7 @@ class PathModifier extends Modifier {
 
 	public var pathOffset:Vector3 = new Vector3();
 
-	public function new(pf:PlayField, path:Array<PathNode>) {
+	public function new(pf:ModPlayField, path:Array<PathNode>) {
 		super(pf);
 
 		__pathBound = 1500;

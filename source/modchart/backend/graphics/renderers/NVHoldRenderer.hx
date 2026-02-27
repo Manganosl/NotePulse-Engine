@@ -17,7 +17,7 @@ final class NVHoldRenderer extends BaseRenderer<FlxSprite> {
     private var __rotateZ:Float = 0;
     private var __parentOutput:ModifierOutput;
 
-	public function new(instance:PlayField) {
+	public function new(instance:ModPlayField) {
 		super(instance);
 
 		instance.setPercent('dizzyHolds', 1, -1);

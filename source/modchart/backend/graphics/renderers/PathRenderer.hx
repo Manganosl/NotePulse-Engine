@@ -48,7 +48,7 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 		__lastDivisions = divisions;
 	}
 
-	public function new(parent:PlayField) {
+	public function new(parent:ModPlayField) {
 		super(parent);
 
 		__lineGraphic = FlxG.bitmap.create(1, 1, 0xFFFFFFFF, true);

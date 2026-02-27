@@ -11,7 +11,7 @@ import flixel.util.FlxSort;
 import haxe.ds.IntMap;
 import haxe.ds.Vector;
 import modchart.backend.graphics.renderers.*;
-import modchart.engine.PlayField;
+import modchart.engine.ModPlayField;
 import openfl.display.BlendMode;
 
 using modchart.backend.util.SortUtil;
@@ -53,7 +53,7 @@ class CtxRenderer {
 
 	var emptyVec:openfl.Vector<Int> = new openfl.Vector<Int>(8, true, [for (i in 0...8) 0]);
 
-	public function emit(items:Array<Array<Array<FlxSprite>>>, playfields:Array<PlayField>) {
+	public function emit(items:Array<Array<Array<FlxSprite>>>, playfields:Array<ModPlayField>) {
 		// used for preallocate
 		var playfieldCount = playfields.length;
 

@@ -30,7 +30,7 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 
 	var _indices:NativeVector<Int>;
 
-	public function new(parent:PlayField) {
+	public function new(parent:ModPlayField) {
 		super(parent);
 
 		parent.setPercent('dizzyHolds', 1, -1);

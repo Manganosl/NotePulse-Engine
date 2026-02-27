@@ -7,14 +7,14 @@ import flixel.math.FlxPoint;
 import openfl.geom.Matrix;
 // TODO: ahcer esto xd lololololololo pornopornoporn
 class Proxy extends FlxSprite {
-	public var source:PlayField;
+	public var source:ModPlayField;
 	public var playerSrc:Int = -1;
 
 	public var skew(default, null):FlxPoint = FlxPoint.get();
 
 	var _skewMatrix:Matrix = new Matrix();
 
-	public function new(source:PlayField) {
+	public function new(source:ModPlayField) {
 		this.source = source;
 
 		super();

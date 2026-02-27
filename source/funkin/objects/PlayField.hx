@@ -18,7 +18,9 @@ class PlayField extends FlxTypedGroup<StrumNote> {
         for (i in 0...PlayState.SONG.mania + 1) {
             var babyArrow:StrumNote = new StrumNote(0, 0, i, player);
 			babyArrow.playAnim("static", true);
+			babyArrow.parentField = this;
             add(babyArrow);
+			babyArrow.postAddedToGroup();
         }
         adaptStrumline();
 		keysArray = [];

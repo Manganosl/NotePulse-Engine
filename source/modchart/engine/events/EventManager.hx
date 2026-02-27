@@ -3,7 +3,7 @@ package modchart.engine.events;
 import haxe.ds.StringMap;
 import haxe.ds.Vector;
 import modchart.backend.util.ModchartUtil;
-import modchart.engine.PlayField;
+import modchart.engine.ModPlayField;
 import modchart.events.types.*;
 
 #if !openfl_debug
@@ -16,9 +16,9 @@ class EventManager {
 	private var eventList:Vector<Event> = new Vector<Event>(256);
 	private var eventCount:Int = 0;
 
-	private var pf:PlayField;
+	private var pf:ModPlayField;
 
-	public function new(pf:PlayField) {
+	public function new(pf:ModPlayField) {
 		this.pf = pf;
 	}
 

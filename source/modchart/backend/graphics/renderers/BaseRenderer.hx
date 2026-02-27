@@ -7,14 +7,14 @@ import flixel.util.FlxSort;
 
 @:allow(modchart.backend.graphics.CtxRenderer)
 class BaseRenderer<T:FlxBasic> extends FlxBasic {
-	private var parent:Null<PlayField>;
+	private var parent:Null<ModPlayField>;
 
 	private var view(get, never):View3D;
 
 	function get_view()
 		return parent.view;
 
-	public function new(parent:PlayField) {
+	public function new(parent:ModPlayField) {
 		super();
 
 		this.parent = parent;

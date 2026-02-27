@@ -26,7 +26,7 @@ import funkin.psychlua.LuaUtils;
  * - Rendering
  */
 @:allow(modchart.backend.ModifierGroup)
-@:access(modchart.engine.PlayField)
+@:access(modchart.engine.ModPlayField)
 #if !openfl_debug
 @:fileXml('tags="haxe,release"') @:noDebug
 #end
@@ -46,7 +46,7 @@ final class Manager extends FlxBasic {
 	/**
 	 * List of playfields managed by the Manager.
 	 */
-	public var playfields:Array<PlayField> = [];
+	public var playfields:Array<ModPlayField> = [];
 
 	private var renderer:CtxRenderer;
 
@@ -71,7 +71,7 @@ final class Manager extends FlxBasic {
 	 * @param func The function to apply to each playfield.
 	 * @param player Optionally, the specific player to target (-1 for all).
 	 */
-	public inline function iteratePlayfields(func:PlayField->Void, player:Int = -1) {
+	public inline function iteratePlayfields(func:ModPlayField->Void, player:Int = -1) {
 		// If there's only one playfield or a specific player is provided, apply the function directly
 		if (player != -1 && playfields[player] != null)
 			return func(playfields[player != -1 ? player : 0]);
@@ -428,12 +428,12 @@ final class Manager extends FlxBasic {
 	 * Creates and adds a new playfield to the Manager.
 	 */
 	public inline function addPlayfield()
-		playfields.push(new PlayField());
+		playfields.push(new ModPlayField());
 
 	/**
 	 * Adds a playfield to the Manager.
 	 */
-	public inline function appendPlayfield(playfield:PlayField)
+	public inline function appendPlayfield(playfield:ModPlayField)
 		playfields.push(playfield);
 
 	/**

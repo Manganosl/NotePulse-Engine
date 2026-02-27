@@ -54,9 +54,9 @@ final class ModifierGroup {
 	 *
 	 * When set, all stored modifiers are updated to reference the new `PlayField` instance.
 	 */
-	public var playfield(default, set):PlayField;
+	public var playfield(default, set):ModPlayField;
 
-	public function set_playfield(newPlayfield:PlayField) {
+	public function set_playfield(newPlayfield:ModPlayField) {
 		for (i in 0...__modifierCount) {
 			@:privateAccess __sortedModifiers[i].pf = newPlayfield;
 		}
@@ -78,7 +78,7 @@ final class ModifierGroup {
 		}
 	}
 
-	public function new(playfield:PlayField) {
+	public function new(playfield:ModPlayField) {
 		this.playfield = playfield;
 
 		__loadModifiers();

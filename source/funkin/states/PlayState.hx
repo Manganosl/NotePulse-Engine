@@ -967,12 +967,7 @@ class PlayState extends MusicBeatState
 						var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
 						notes.forEachAlive(function(daNote:Note)
 						{
-							var strumGroup:PlayField = playerStrums;
-							if(!daNote.mustPress) strumGroup = opponentStrums;
-							if(daNote.gfStrum) strumGroup = gfStrums;	
-
-							var strum:StrumNote = strumGroup.members[daNote.noteData];
-							daNote.followStrumNote(strum, fakeCrochet, songSpeed / playbackRate);
+							daNote.followStrumNote(fakeCrochet, songSpeed / playbackRate);
 
 							if(!daNote.strum.cpuControlled)
 							{
@@ -988,16 +983,16 @@ class PlayState extends MusicBeatState
 								unspawnNotesLength = unspawnNotes.length;
 							}
 
-							if(daNote.isSustainNote && strum.sustainReduce) daNote.clipToStrumNote(strum);
+							if(daNote.isSustainNote && daNote.strum.sustainReduce) daNote.clipToStrumNote();
 
-							if (daNote.isSustainNote && daNote.wasGoodHit && !strum.sustainSplash.updatedThisFrame) {
-								if (daNote.animation.curAnim.name.endsWith("holdend")) {
+							if (daNote.isSustainNote && daNote.wasGoodHit && !daNote.strum.sustainSplash.updatedThisFrame) {
+								if (daNote.isSustainEnd) {
 									if (Conductor.songPosition >= daNote.strumTime) {
-										if(!cpuControlled) strum.sustainSplash.hide(daNote.strum.cpuControlled);
-										else strum.sustainSplash.hide(true);
+										if(!cpuControlled) daNote.strum.sustainSplash.hide(daNote.strum.cpuControlled);
+										else daNote.strum.sustainSplash.hide(true);
 									}
 								} else {
-									strum.sustainSplash.show(daNote);
+									daNote.strum.sustainSplash.show(daNote);
 								}
 							}
 
@@ -1288,6 +1283,7 @@ class PlayState extends MusicBeatState
 				swagNote.gfStrum = (songNotes[4] == true);
 				if(swagNote.gfStrum) swagNote.mustPress = false;
 				if(swagNote.gfStrum || swagNote.gfNote) swagNote.characters = [gf];
+				swagNote.playField = (swagNote.gfStrum ? gfStrums : (gottaHitNote ? playerStrums : opponentStrums));
 
 				swagNote.scrollFactor.set();
 
@@ -1311,6 +1307,7 @@ class PlayState extends MusicBeatState
 						if(sustainNote.gfStrum || sustainNote.gfNote) sustainNote.characters = [gf];
 						sustainNote.scrollFactor.set();
 						sustainNote.parent = swagNote;
+						sustainNote.playField = swagNote.playField;
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 
@@ -3150,19 +3147,10 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	function strumPlayAnim(player:Int, id:Int, time:Float) {
-		var spr:StrumNote = null;
-		if(player == 0) {
-			spr = !isPlayerOpponent ? opponentStrums.members[id] : playerStrums.members[id];
-		} else if(player == 1) {
-			spr = !isPlayerOpponent ? playerStrums.members[id] : opponentStrums.members[id];
-		} else {
-			spr = gfStrums.members[id];
-		}	
-
-		if(spr != null) {
-			spr.playAnim('confirm', true);
-			spr.resetAnim = time;
+	function strumPlayAnim(strum:StrumNote, time:Float) {
+		if(strum != null) {
+			strum.playAnim('confirm', true);
+			strum.resetAnim = time;
 		}
 	}
 
@@ -3413,7 +3401,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if(opponentVocals.length <= 0) vocals.volume = 1;
-		strumPlayAnim(note.gfStrum ? 2 : 0, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
+		strumPlayAnim(note.strum, Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
 		note.hitByOpponent = true;
 		note.strum.rgbShader.r = note.rgbShader.r;
 		note.strum.rgbShader.g = note.rgbShader.g;
@@ -3546,7 +3534,7 @@ class PlayState extends MusicBeatState
 			note.strum.rgbShader.b = note.rgbShader.b;
 		}
 		else {
-			strumPlayAnim(1, Std.int(Math.abs(note.noteData)), Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
+			strumPlayAnim(note.strum, Conductor.stepCrochet * 1.25 / 1000 / playbackRate);
 			note.strum.rgbShader.r = note.rgbShader.r;
 			note.strum.rgbShader.g = note.rgbShader.g;
 			note.strum.rgbShader.b = note.rgbShader.b;
@@ -3621,14 +3609,14 @@ class PlayState extends MusicBeatState
 				if (doubleNote.noteData == funnyNote.noteData) {
 					if (Math.abs(doubleNote.strumTime - funnyNote.strumTime) < 1.0){
 						if(funnyNote.strum == doubleNote.strum) invalidateNote(doubleNote);
-						else goodNoteHit(doubleNote);
+						else doubleNote.strum.noteHitCallback(doubleNote);
 					} else if (doubleNote.strumTime < funnyNote.strumTime)
 					{
 						funnyNote = doubleNote;
 					}
 				}
 			}
-			goodNoteHit(funnyNote);
+			funnyNote.strum.noteHitCallback(funnyNote);
 		}
 		else if(shouldMiss)
 		{
@@ -3710,7 +3698,7 @@ class PlayState extends MusicBeatState
 						var released:Bool = !holdArray[n.noteData];
 
 						if (!released)
-							goodNoteHit(n);
+							n.strum.noteHitCallback(n);
 					}
 				}
 			}

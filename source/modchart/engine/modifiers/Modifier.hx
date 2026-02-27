@@ -6,7 +6,7 @@ import modchart.Manager;
 import modchart.backend.core.ArrowData;
 import modchart.backend.core.ModifierParameters;
 import modchart.backend.core.VisualParameters;
-import modchart.engine.PlayField;
+import modchart.engine.ModPlayField;
 
 using StringTools;
 
@@ -15,9 +15,9 @@ using StringTools;
 @:noDebug
 #end
 class Modifier {
-	private var pf:PlayField;
+	private var pf:ModPlayField;
 
-	public function new(pf:PlayField) {
+	public function new(pf:ModPlayField) {
 		this.pf = pf;
 	}
 

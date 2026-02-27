@@ -8,6 +8,7 @@ import funkin.shaders.RGBPalette;
 import funkin.shaders.RGBPalette.RGBShaderReference;
 
 import funkin.objects.StrumNote;
+import funkin.objects.PlayField;
 
 import flixel.math.FlxRect;
 
@@ -69,7 +70,8 @@ class Note extends FlxSkewedSprite
 		{div: 192/64, col: "G"}
 	];
 
-	public var strum:StrumNote = null;
+	@:isVar public var strum(get, set):StrumNote = null;
+	public var playField:PlayField = null;
 	public var row:Int = 0;
 	public var column:Int = 0; // Why both for the same thing? I'm dumb
 
@@ -184,8 +186,19 @@ class Note extends FlxSkewedSprite
 		return hitsoundForce ? hitsoundVolume : 0.0;
 	}
 	public var hitsound:String = 'hitsound';
-	
 	public var section:Int = 0;
+
+	private function get_strum():StrumNote {
+		if(playField == null) return null;
+		return playField.members[noteData];
+	}
+
+	private function set_strum(value:StrumNote):StrumNote {
+		if(playField == null) return null;
+		playField = strum.parentField;
+		noteData = strum.noteData;
+		return value;
+	}
 
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
@@ -581,34 +594,33 @@ class Note extends FlxSkewedSprite
 	}
 
 	private var lastDistance:Float = 0;
-	public function followStrumNote(myStrum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1)
+	public function followStrumNote(fakeCrochet:Float, songSpeed:Float = 1)
 	{
-		strum = myStrum;
-		var noteSpeed:Float = songSpeed * multSpeed * myStrum.noteSpeed;
-		var strumDir:Float = myStrum.direction + this.offsetDirection;
+		var noteSpeed:Float = songSpeed * multSpeed * strum.noteSpeed;
+		var strumDir:Float = strum.direction + this.offsetDirection;
 		
-		distance = getDistance(strumTime - Conductor.songPosition, noteSpeed, myStrum);
+		distance = getDistance(strumTime - Conductor.songPosition, noteSpeed, strum);
 		lastDistance = distance;
-		var scrollMult:Int = (myStrum.downScroll ? -1 : 1);
+		var scrollMult:Int = (strum.downScroll ? -1 : 1);
 		
 		if(copyAlpha)
-			alpha = myStrum.alpha * multAlpha;
+			alpha = strum.alpha * multAlpha;
 		
 		var angleDir:Float = strumDir * Math.PI / 180;
 		if(copyX)
-			x = myStrum.x + offsetX + Math.cos(angleDir) * distance;
+			x = strum.x + offsetX + Math.cos(angleDir) * distance;
 		if(copyY)
-			y = myStrum.y + offsetY + Math.sin(angleDir) * (followStrum ? distance : lastDistance) * scrollMult;
+			y = strum.y + offsetY + Math.sin(angleDir) * (followStrum ? distance : lastDistance) * scrollMult;
 		if (copyAngle)
-			angle = (isSustainNote ? strumDir - 90 : myStrum.angle) + offsetAngle;
+			angle = (isSustainNote ? strumDir - 90 : strum.angle) + offsetAngle;
 		
 		if (isSustainNote)
-			updateSustain(myStrum, noteSpeed);
+			updateSustain(noteSpeed);
 	}
 	
-	public function updateSustain(myStrum:StrumNote, noteSpeed:Float = 1) {
+	public function updateSustain(noteSpeed:Float = 1) {
 		if(!isSustainEnd && parent == null) {
-			scale.y = getDistance(sustainLength, noteSpeed, myStrum) / frameHeight;
+			scale.y = getDistance(sustainLength, noteSpeed, strum) / frameHeight;
 			updateHitbox();
 		}
 		if(isSustainEnd) {
@@ -617,17 +629,17 @@ class Note extends FlxSkewedSprite
 		origin.set(frameWidth * .5, 0);
 		offset.set();
 		
-		flipX = myStrum.downScroll;
-		x += (myStrum.width - frameWidth) * .5;
-		y += myStrum.height * .5;
-		if (myStrum.downScroll)
+		flipX = strum.downScroll;
+		x += (strum.width - frameWidth) * .5;
+		y += strum.height * .5;
+		if (strum.downScroll)
 			angle = 180 - angle;
 	}
 	public static function getDistance(time:Float, speed:Float, daStrum:StrumNote) {
 		return (0.45 * time * speed * daStrum.noteSpeed);
 	}
 
-	public function clipToStrumNote(myStrum:StrumNote)
+	public function clipToStrumNote()
 	{
 		if ((mustPress || !ignoreNote) && wasGoodHit) {
 			var clipDistance:Float = Math.max(-distance, 0);

@@ -5,6 +5,8 @@ import flixel.FlxBasic;
 import funkin.backend.ExtraKeysHandler;
 import funkin.backend.animation.PsychAnimationController;
 
+import funkin.objects.PlayField;
+
 import funkin.shaders.RGBPalette;
 import funkin.shaders.RGBPalette.RGBShaderReference;
 
@@ -24,6 +26,8 @@ class StrumNote extends FlxSkewedSprite
 	private var initialWidth:Float = 0;
 	public var sustainSplash:SustainSplash;
 	public var noteSpeed:Float = 1;
+
+	public var parentField:PlayField = null;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -154,17 +158,10 @@ class StrumNote extends FlxSkewedSprite
 		playAnim('static');
 		var padding:Float = 0;
 		var minPaddingStartThresh:Int = 4;
-		//if (PlayState.isPixelStage) minPaddingStartThresh = 3;
 		if (PlayState.SONG.mania > minPaddingStartThresh) {
 			padding = 4 * (PlayState.SONG.mania - minPaddingStartThresh);
 			if (padding > 8) padding = 8;
 		}
-		//trace(padding);
-
-		// x = StrumBoundaries.getMiddlePoint().x;
-		// x += ((Note.swagWidthUnscaled * trackedScale) - padding) * (-((PlayState.SONG.mania + 1) / 2) + noteData);
-		// x += 25;
-		// x += ((FlxG.width / 2) * player);
 		ID = noteData;
 
 		centerStrum(minPaddingStartThresh, padding);
