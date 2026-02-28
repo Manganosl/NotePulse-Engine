@@ -7,15 +7,15 @@ class Spooky extends BaseStage
 	override function create()
 	{
 		if(!ClientPrefs.data.lowQuality) {
-			halloweenBG = new BGSprite('halloween_bg', -200, -100, ['halloweem bg0', 'halloweem bg lightning strike']);
+			halloweenBG = new BGSprite('base_game/halloween_bg', -200, -100, ['halloweem bg0', 'halloweem bg lightning strike']);
 		} else {
-			halloweenBG = new BGSprite('halloween_bg_low', -200, -100);
+			halloweenBG = new BGSprite('base_game/halloween_bg_low', -200, -100);
 		}
 		add(halloweenBG);
 
 		//PRECACHE SOUNDS
-		Paths.sound('thunder_1');
-		Paths.sound('thunder_2');
+		Paths.sound('base_game/thunder_1');
+		Paths.sound('base_game/thunder_2');
 
 		//Monster cutscene
 		if (isStoryMode && !seenCutscene)
@@ -48,7 +48,7 @@ class Spooky extends BaseStage
 
 	function lightningStrikeShit():Void
 	{
-		FlxG.sound.play(Paths.soundRandom('thunder_', 1, 2));
+		FlxG.sound.play(Paths.soundRandom('base_game/thunder_', 1, 2));
 		if(!ClientPrefs.data.lowQuality) halloweenBG.animation.play('halloweem bg lightning strike');
 
 		lightningStrikeBeat = curBeat;
@@ -91,7 +91,7 @@ class Spooky extends BaseStage
 		FlxG.camera.focusOn(new FlxPoint(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100));
 
 		// character anims
-		FlxG.sound.play(Paths.soundRandom('thunder_', 1, 2));
+		FlxG.sound.play(Paths.soundRandom('base_game/thunder_', 1, 2));
 		if(gf != null) gf.playAnim('scared', true);
 		boyfriend.playAnim('scared', true);
 

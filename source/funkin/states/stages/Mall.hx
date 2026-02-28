@@ -10,33 +10,33 @@ class Mall extends BaseStage
 
 	override function create()
 	{
-		var bg:BGSprite = new BGSprite('christmas/bgWalls', -1000, -500, 0.2, 0.2);
+		var bg:BGSprite = new BGSprite('base_game/christmas/bgWalls', -1000, -500, 0.2, 0.2);
 		bg.setGraphicSize(Std.int(bg.width * 0.8));
 		bg.updateHitbox();
 		add(bg);
 
 		if(!ClientPrefs.data.lowQuality) {
-			upperBoppers = new BGSprite('christmas/upperBop', -240, -90, 0.33, 0.33, ['Upper Crowd Bob']);
+			upperBoppers = new BGSprite('base_game/christmas/upperBop', -240, -90, 0.33, 0.33, ['Upper Crowd Bob']);
 			upperBoppers.setGraphicSize(Std.int(upperBoppers.width * 0.85));
 			upperBoppers.updateHitbox();
 			add(upperBoppers);
 
-			var bgEscalator:BGSprite = new BGSprite('christmas/bgEscalator', -1100, -600, 0.3, 0.3);
+			var bgEscalator:BGSprite = new BGSprite('base_game/christmas/bgEscalator', -1100, -600, 0.3, 0.3);
 			bgEscalator.setGraphicSize(Std.int(bgEscalator.width * 0.9));
 			bgEscalator.updateHitbox();
 			add(bgEscalator);
 		}
 
-		var tree:BGSprite = new BGSprite('christmas/christmasTree', 370, -250, 0.40, 0.40);
+		var tree:BGSprite = new BGSprite('base_game/christmas/christmasTree', 370, -250, 0.40, 0.40);
 		add(tree);
 
 		bottomBoppers = new MallCrowd(-300, 140);
 		add(bottomBoppers);
 
-		var fgSnow:BGSprite = new BGSprite('christmas/fgSnow', -600, 700);
+		var fgSnow:BGSprite = new BGSprite('base_game/christmas/fgSnow', -600, 700);
 		add(fgSnow);
 
-		santa = new BGSprite('christmas/santa', -840, 150, 1, 1, ['santa idle in fear']);
+		santa = new BGSprite('base_game/christmas/santa', -840, 150, 1, 1, ['santa idle in fear']);
 		add(santa);
 		Paths.sound('Lights_Shut_off');
 		setDefaultGF('gf-christmas');
@@ -82,7 +82,7 @@ class Mall extends BaseStage
 		var nextSong:String = Paths.formatToSongPath(PlayState.storyPlaylist[1]);
 		if(nextSong == 'winter-horrorland')
 		{
-			FlxG.sound.play(Paths.sound('Lights_Shut_off'));
+			FlxG.sound.play(Paths.sound('base_game/Lights_Shut_off'));
 
 			var blackShit:FlxSprite = new FlxSprite(-FlxG.width * FlxG.camera.zoom,
 				-FlxG.height * FlxG.camera.zoom).makeGraphic(FlxG.width * 3, FlxG.height * 3, FlxColor.BLACK);

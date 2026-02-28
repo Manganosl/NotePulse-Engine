@@ -12,8 +12,7 @@ import flixel.system.ui.FlxSoundTray;
  *  Extends the default flixel soundtray, but with some art
  *  and lil polish!
  *
- *  Gets added to the game in Main.hx, right after FlxGame is new'd
- *  since it's a Sprite rather than Flixel related object
+ *  Gets added to the game using FunkinGame.hx
  */
 class FunkinSoundTray extends FlxSoundTray
 {
@@ -73,8 +72,6 @@ class FunkinSoundTray extends FlxSoundTray
 		volumeUpSound = 'soundtray/Volup';
 		volumeDownSound = 'soundtray/Voldown';
 		volumeMaxSound = 'soundtray/VolMAX';
-		
-		// trace("Custom tray added!");
 	}
 	
 	override public function update(MS:Float):Void

@@ -8,7 +8,6 @@ class SustainSplash extends FlxSkewedSprite {
 	public var strum:StrumNote;
 	public var shouldVisible:Bool = false;
 	public var modchart:Bool = PlayState.fModchart;
-	public var firstTime:Bool = true;
 	public var updatedThisFrame:Bool = false;
 
 	public var offsetX:Float = 0;
@@ -82,11 +81,6 @@ class SustainSplash extends FlxSkewedSprite {
 
 		if (animation.curAnim == null || animation.curAnim.name != "splash") {
 			animation.play("splash");
-			if (!firstTime) {
-				strum.playAnim("pressed", true);
-			} else {
-				firstTime = false;
-			}
 			center();
 		}
 	}

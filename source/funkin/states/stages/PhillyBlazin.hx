@@ -43,24 +43,24 @@ class PhillyBlazin extends BaseStage
 			scrollingSky.scrollFactor.set();
 			add(scrollingSky);
 
-			skyAdditive = new BGSprite('phillyBlazin/skyBlur', -600, -175, 0.0, 0.0);
+			skyAdditive = new BGSprite('base_game/phillyBlazin/skyBlur', -600, -175, 0.0, 0.0);
 			setupScale(skyAdditive);
 			skyAdditive.visible = false;
 			add(skyAdditive);
 			
-			lightning = new BGSprite('phillyBlazin/lightning', -50, -300, 0.0, 0.0, ['lightning0'], false);
+			lightning = new BGSprite('base_game/phillyBlazin/lightning', -50, -300, 0.0, 0.0, ['lightning0'], false);
 			setupScale(lightning);
 			lightning.visible = false;
 			add(lightning);
 		}
 		
-		var phillyForegroundCity:BGSprite = new BGSprite('phillyBlazin/streetBlur', -600, -175, 0.0, 0.0);
+		var phillyForegroundCity:BGSprite = new BGSprite('base_game/phillyBlazin/streetBlur', -600, -175, 0.0, 0.0);
 		setupScale(phillyForegroundCity);
 		add(phillyForegroundCity);
 		
 		if(!ClientPrefs.data.lowQuality)
 		{
-			foregroundMultiply = new BGSprite('phillyBlazin/streetBlur', -600, -175, 0.0, 0.0);
+			foregroundMultiply = new BGSprite('base_game/phillyBlazin/streetBlur', -600, -175, 0.0, 0.0);
 			setupScale(foregroundMultiply);
 			foregroundMultiply.blend = MULTIPLY;
 			foregroundMultiply.visible = false;

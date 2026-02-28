@@ -218,6 +218,7 @@ class NotePulse implements IAdapter {
 			PlayState.instance.grpSustainSplashes.forEachAlive(splash -> {
 				@:privateAccess
 				if (splash != null && splash.strum != null && splash.shouldVisible) {
+					splash.visible = true;
 					pspr[splash.strum.player][3].push(splash);
 				}
 			});

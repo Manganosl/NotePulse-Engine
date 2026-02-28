@@ -3112,7 +3112,6 @@ class PlayState extends MusicBeatState
 			}
 
 			grpSustainSplashes.add(babyArrow.sustainSplash);
-
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
 
