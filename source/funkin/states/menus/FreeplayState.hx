@@ -252,6 +252,9 @@ class FreeplayState extends MusicBeatState
 		updateTexts();
 		super.create();
 
+		FlxG.sound.music.stop();
+		FlxG.sound.playMusic(Paths.music("freeplayRandom"), 0);
+
 		daShader = new ChromaticWarp();
 		daShader.distortion = 0.01;
 		FlxG.camera.setFilters([new ShaderFilter(daShader.shader)]);
@@ -376,7 +379,7 @@ class FreeplayState extends MusicBeatState
 				player.playingMusic = false;
 				player.switchPlayMusic();
 
-				FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);
+				FlxG.sound.playMusic(Paths.music("freeplayRandom"), 0);
 				FlxTween.tween(FlxG.sound.music, {volume: 1}, 1);
 			}
 			else 
@@ -386,6 +389,8 @@ class FreeplayState extends MusicBeatState
 					colorTween.cancel();
 				}
 				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FlxG.sound.music.stop();
+				FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);
 				MusicBeatState.switchState(new funkin.states.MainMenuState());
 			}
 		}
@@ -706,13 +711,9 @@ public function updateTexts(elapsed:Float = 0.0)
 }
 
 
-	override function destroy():Void
-	{
+	override function destroy():Void {
 		super.destroy();
-
 		FlxG.autoPause = ClientPrefs.data.autoPause;
-		if (!FlxG.sound.music.playing)
-			FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic));
 	}	
 }
 
