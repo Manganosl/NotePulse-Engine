@@ -44,7 +44,7 @@
       "name": "hxcpp",
       "type": "git",
       "dir": null,
-      "ref": "new",
+      "ref": "master",
       "url": "https://github.com/CodenameCrew/cne-hxcpp"
     },
     {
