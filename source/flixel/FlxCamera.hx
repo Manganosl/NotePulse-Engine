@@ -46,7 +46,7 @@ private typedef FlxDrawItem = #if FLX_DRAW_QUADS flixel.graphics.tile.FlxDrawQua
  *         |-> `debugLayer:Sprite`    (this sprite is used in tile render mode for rendering debug info, like bounding boxes)
  */
 
-// Camera rotation borrowed from cne (https://github.com/CodenameCrew/cne-flixel/blob/dev/flixel/FlxCamera.hx)
+// Camera rotation borrowed (Stolen) from cne (https://github.com/CodenameCrew/cne-flixel/blob/dev/flixel/FlxCamera.hx)
 class FlxCamera extends FlxBasic
 {
 	/**

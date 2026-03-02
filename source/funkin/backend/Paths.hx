@@ -222,6 +222,22 @@ class Paths
 		return foldersToCheck;
 	}
 
+	/**
+	 *	Returns whether a given path exists.
+	 */
+	public static function exists(path:String, ?type:AssetType):Bool
+	{
+		var exists:Bool = false;
+		
+		#if MODS_ALLOWED
+		if (FileSystem.exists(path)) exists = true;
+		else
+		#end
+		if (OpenFlAssets.exists(path, type)) exists = true;
+		
+		return exists;
+	}
+
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 	static public function image(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxGraphic {
 		var bitmap:BitmapData = null;

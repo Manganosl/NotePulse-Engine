@@ -22,6 +22,7 @@ import flixel.addons.display.FlxRuntimeShader;
 #end
 
 import hxvlc.flixel.*;
+import funkin.objects.FunkinVideoSprite;
 
 import funkin.cutscenes.DialogueBoxPsych;
 
@@ -939,11 +940,44 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "makeVideoSprite", function(tag:String, videoName:String, ?x:Float, ?y:Float, ?camera:String, ?looped:Bool){
-			game.makeVideoSprite(tag, videoName, x, y, camera, looped);
+			if(game.variables.exists(tag)){
+				Log.error('Video sprite with tag "' + tag + '" already exists!');
+				return;
+			}
+
+			x ??= 0;
+			y ??= 0;
+			camera ??= 'camHUD';
+			looped ??= false;
+
+			var video = new FunkinVideoSprite(x, y);
+			video.antialiasing = ClientPrefs.data.antialiasing;
+			video.camera = LuaUtils.cameraFromString(camera);
+			video.load(Paths.video(videoName), looped ? ['input-repeat=65545'] : null);
+			if (!looped) {
+				video.bitmap.onEndReached.add(()->{
+					game.remove(video);
+					if(game.variables.exists(tag))
+						game.variables.remove(tag);
+				});
+			}
+			game.variables.set(tag, video);
+
+			if (!game.variables.exists(tag)) {
+				Log.error('Video sprite with tag "'+tag+'" doesn\'t exist!');
+				return;
+			}
+
+			game.add(game.variables.get(tag));
+			game.variables.get(tag).play();
 		});
 
 		Lua_helper.add_callback(lua, "precacheVideo", function(tag:String){
-			game.precacheVideo(tag);
+			var video = new FunkinVideoSprite();
+			video.antialiasing = ClientPrefs.data.antialiasing;
+			video.load(Paths.video(tag), null);
+			video.play();
+			video.destroy();
 		});
 
 		Lua_helper.add_callback(lua, "initNdll", function(tag:String, ndllPath:String, name:String, args:Int){

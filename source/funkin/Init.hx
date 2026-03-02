@@ -24,6 +24,10 @@ class Init extends FlxState {
 		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 		ClientPrefs.loadPrefs();
 
+		#if VIDEOS_ALLOWED
+		funkin.objects.FunkinVideoSprite.init();
+		#end
+
 		FlxG.fixedTimestep = false;
 		FlxG.game.focusLostFramerate = 60;
 		FlxG.keys.preventDefaultKeys = [TAB];

@@ -13,7 +13,7 @@ import lime.app.Application;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxSubState;
-import funkin.objects.VideoSprite;
+import funkin.objects.FunkinVideoSprite;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.util.FlxSort;
 import flixel.util.FlxStringUtil;
@@ -310,8 +310,6 @@ class PlayState extends MusicBeatState
 	var cc_currentPercent:Float = 1;
 	var cc_percentTween:FlxTween;
 
-	var videoSprites:Array<FlxVideoSprite> = [];
-
 	#if DISCORD_ALLOWED
 	// Discord RPC variables
 	var storyDifficultyText:String = "";
@@ -396,9 +394,6 @@ class PlayState extends MusicBeatState
 		playbackRate = value;
 		FlxG.animationTimeScale = value;
 		Conductor.safeZoneOffset = (ClientPrefs.data.safeFrames / 60) * 1000 * value;
-		#if VIDEOS_ALLOWED
-		if(videoCutscene != null && videoCutscene.videoSprite != null) videoCutscene.videoSprite.bitmap.rate = value;
-		#end
 		setOnScripts('playbackRate', playbackRate);
 		#else
 		playbackRate = 1.0; // ensuring -Crow
@@ -854,15 +849,6 @@ class PlayState extends MusicBeatState
 
 		if (controls.PAUSE && startedCountdown && canPause)
 		{
-			for (video in videoSprites) {
-        		video.pause();
-        		if (FlxG.signals.focusLost.has(video.pause)) {
-            		FlxG.signals.focusLost.remove(video.pause);
-        		}
-        		if (FlxG.signals.focusGained.has(video.resume)) {
-            		FlxG.signals.focusGained.remove(video.resume);
-        		}
-    		}
 			var ret:Dynamic = callOnScripts('onPause', null, true);
 			if(ret != LuaUtils.Function_Stop) {
 				openPauseMenu();
@@ -1080,14 +1066,6 @@ class PlayState extends MusicBeatState
 		#end
 
 		stagesFunc(function(stage:BaseStage) stage.destroy());
-
-		#if VIDEOS_ALLOWED
-		if(videoCutscene != null)
-		{
-			videoCutscene.destroy();
-			videoCutscene = null;
-		}
-		#end
 
 		if(vocals != null) vocals.stop();
 		if(opponentVocals != null) opponentVocals.stop();
@@ -1585,108 +1563,35 @@ class PlayState extends MusicBeatState
 
 	//// Video ////
 
-	public var videoCutscene:VideoSprite = null;
-	public function startVideo(name:String, forMidSong:Bool = false, canSkip:Bool = true, loop:Bool = false, playOnLoad:Bool = true)
-	{
+	public function startVideo(name:String):Void {
 		#if VIDEOS_ALLOWED
-		inCutscene = !forMidSong;
-		canPause = forMidSong;
-
-		var foundFile:Bool = false;
-		var fileName:String = Paths.video(name);
-
-		#if sys
-		if (FileSystem.exists(fileName))
-		#else
-		if (OpenFlAssets.exists(fileName))
-		#end
-		foundFile = true;
-
-		if (foundFile)
+		final fileName = Paths.video(name);
+		
+		if (Paths.exists(fileName, BINARY))
 		{
-			videoCutscene = new VideoSprite(fileName, forMidSong, canSkip, loop);
-			if(forMidSong) videoCutscene.videoSprite.bitmap.rate = playbackRate;
-
-			// Finish callback
-			if (!forMidSong)
-			{
-				function onVideoEnd()
-				{
-					if (!isDead && generatedMusic && PlayState.SONG.notes[Std.int(curStep / 16)] != null && !endingSong && !isCameraOnForcedPos)
-					{
-						moveCameraSection();
-						FlxG.camera.snapToTarget();
-					}
-					videoCutscene = null;
-					canPause = true;
-					inCutscene = false;
-					startAndEnd();
-				}
-				videoCutscene.finishCallback = onVideoEnd;
-				videoCutscene.onSkip = onVideoEnd;
-			}
-			if (GameOverSubstate.instance != null && isDead) GameOverSubstate.instance.add(videoCutscene);
-			else add(videoCutscene);
-
-			if (playOnLoad)
-				videoCutscene.play();
-			return videoCutscene;
-		}
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		else addTextToDebug("Video not found: " + fileName, FlxColor.RED);
-		#else
-		else FlxG.log.error("Video not found: " + fileName);
-		#end
-		#else
-		FlxG.log.warn('Platform not supported!');
-		startAndEnd();
-		#end
-		return null;
-	}
-
-	public function makeVideoSprite(tag:String, videoName:String, ?x:Float, ?y:Float, ?camera:String, ?looped:Bool){
-		if(variables.exists(tag)){
-			Log.error('Video sprite with tag "' + tag + '" already exists!');
+			inCutscene = true;
+			var bg = new flixel.system.FlxBGSprite();
+			bg.scrollFactor.set();
+			bg.cameras = [camHUD];
+			add(bg);
+			
+			var vid = new FlxVideo();
+			FlxG.addChildBelowMouse(vid);
+			vid.onEndReached.add(() -> {
+				remove(bg);
+				startAndEnd();
+				
+				FlxG.removeChild(vid);
+				vid.dispose();
+			});
+			vid.load(fileName);
+			vid.play();
 			return;
 		}
-
-		x ??= 0;
-    	y ??= 0;
-    	camera ??= 'camHUD';
-    	looped ??= false;
-
-		var video = new FlxVideoSprite(x, y);
-    	video.antialiasing = ClientPrefs.data.antialiasing;
-    	video.camera = LuaUtils.cameraFromString(camera);
-    	video.load(Paths.video(videoName), looped ? ['input-repeat=65545'] : null);
-    	if (!looped) {
-        	video.bitmap.onEndReached.add(()->{
-            	remove(video);
-				if(variables.exists(tag))
-					variables.remove(tag);
-            	videoSprites.remove(video);
-        	});
-    	}
-    	videoSprites.push(video);
-    	variables.set(tag, video);
-
-    	if (!variables.exists(tag)) {
-    	    Log.error('Video sprite with tag "'+tag+'" doesn\'t exist!');
-    	    return;
-   		}
-
-    	add(variables.get(tag));
-    	variables.get(tag).play();
-	}
-
-	public function precacheVideo(videoName:String){
-		var video = new FlxVideoSprite(0,0);
-    	video.antialiasing = ClientPrefs.data.antialiasing;
-    	video.load(Paths.video(videoName), null);
-    	videoSprites.push(video);
-		video.play();
-
-		remove(video);
+		else startAndEnd();
+		#else
+		startAndEnd();
+		#end
 	}
 
 	//// Events ////
@@ -2209,14 +2114,6 @@ class PlayState extends MusicBeatState
 				deathCounter++;
 
 				paused = true;
-
-				#if VIDEOS_ALLOWED
-				if(videoCutscene != null)
-				{
-					videoCutscene.destroy();
-					videoCutscene = null;
-				}
-				#end
 
 				persistentUpdate = false;
 				persistentDraw = false;
@@ -2825,6 +2722,10 @@ class PlayState extends MusicBeatState
 			}
 			FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if(!tmr.finished) tmr.active = false);
 			FlxTween.globalManager.forEach(function(twn:FlxTween) if(!twn.finished && twn != CustomFadeTransition.transitionTween) twn.active = false);
+
+			#if VIDEOS_ALLOWED
+			FunkinVideoSprite.forEachAlive((video) -> if (video.tiedToGame) video.pause());
+			#end
 		}
 
 		super.openSubState(subState);
@@ -2844,16 +2745,11 @@ class PlayState extends MusicBeatState
 			FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if(!tmr.finished) tmr.active = true);
 			FlxTween.globalManager.forEach(function(twn:FlxTween) if(!twn.finished) twn.active = true);
 
+			#if VIDEOS_ALLOWED
+			FunkinVideoSprite.forEachAlive((video) -> if (video.tiedToGame) video.resume());
+			#end
+
 			paused = false;
-			for (video in videoSprites) {
-        		video.resume();
-	        	if (!FlxG.signals.focusLost.has(video.pause)) {
-    	    	    FlxG.signals.focusLost.add(video.pause);
-        		}
-	        	if (!FlxG.signals.focusGained.has(video.resume)) {
-    	    	    FlxG.signals.focusGained.add(video.resume);
-        		}
-    		}
 			callOnScripts('onResume');
 			resetRPC(startTimer != null && startTimer.finished);
 		}
