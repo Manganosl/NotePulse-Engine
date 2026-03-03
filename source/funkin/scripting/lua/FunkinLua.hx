@@ -62,7 +62,7 @@ class FunkinLua {
 	public var closed:Bool = false;
 
 	#if HSCRIPT_ALLOWED
-	public var hscript:HaxeCode = null;
+	public var hscript:HaxeFunctions = null;
 	#end
 
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
@@ -1792,8 +1792,8 @@ class FunkinLua {
 
 		#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(lua); #end
 		#if HSCRIPT_ALLOWED 
-		if(this != null) this.hscript = new HaxeCode(this);
-		HaxeCode.implement(this);
+		if(this != null) this.hscript = new HaxeFunctions(this);
+		HaxeFunctions.implement(this);
 		#end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
 		#if flxanimate FlxAnimateFunctions.implement(this); #end
