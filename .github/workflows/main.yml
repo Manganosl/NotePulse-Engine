@@ -32,9 +32,11 @@ jobs:
           haxe -cp ./setup -D analyzer-optimize -main Main --interp
 
       - name: Build HXCPP
-        shell: cmd
-        working-directory: tools/hxcpp
-        run: haxe compile.hxml
+        shell: bash
+        run: |
+          HXCPP_PATH=$(haxelib libpath hxcpp)
+          cd "$HXCPP_PATH/tools/hxcpp"
+          haxe compile.hxml
 
       - name: Get Short SHA
         uses: benjlevesque/short-sha@v3.0
