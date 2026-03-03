@@ -33,9 +33,8 @@ jobs:
 
       - name: Build HXCPP
         shell: cmd
-        run: |
-          cd tools/hxcpp
-          haxe compile.hxml
+        working-directory: tools/hxcpp
+        run: haxe compile.hxml
 
       - name: Get Short SHA
         uses: benjlevesque/short-sha@v3.0
