@@ -175,7 +175,6 @@
 	<haxedef name="HXCPP_CPP17" />
 	<haxedef name="HXCPP_GC_GENERATIONAL" />
 	<haxedef name="HXCPP_GC_BIG_BLOCKS" />
-	<haxedef name="HXCPP_ALIGN_ALLOC" />
 	<haxedef name="HXCPP_FAST_LINK"/>
 	
 	<!--Disable deprecated warnings-->
