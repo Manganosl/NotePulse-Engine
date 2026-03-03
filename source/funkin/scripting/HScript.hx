@@ -1,4 +1,4 @@
-package funkin.psychlua;
+package funkin.scripting;
 
 #if HSCRIPT_ALLOWED
 import hscript.Expr.Error;
@@ -10,7 +10,6 @@ import haxe.PosInfos;
 import flixel.FlxG;
 import flixel.FlxBasic;
 import flixel.util.FlxColor;
-import funkin.psychlua.LuaUtils;
 import hscript.Types;
 #if LUA_ALLOWED
 import llua.Lua;
@@ -22,6 +21,8 @@ import sys.FileSystem;
 #else
 import openfl.utils.Assets;
 #end
+
+import funkin.scripting.lua.FunkinLua;
 
 /*
  * The class that handles haxe scripts. Based off of T-Bar Engine's HScript class & modified for use here!
@@ -86,7 +87,7 @@ class HScript implements HscriptInterface {
 		#end
 		"KeyValueArray" => hscript.Types.KeyValueArray,
 		"Main" => funkin.Main,
-		"LuaUtils" => funkin.psychlua.LuaUtils,
+		"LuaUtils" => funkin.scripting.LuaUtils,
 
 		// Modcharting
 		"Manager" => modchart.Manager,
@@ -149,7 +150,7 @@ class HScript implements HscriptInterface {
     public var scriptName:String;
 	public var modFolder:Null<String>;
 
-	public var subScripts:Array<funkin.psychlua.HScript> = [];
+	public var subScripts:Array<funkin.scripting.HScript> = [];
 
     public function new(path:String, ?_parentClass:Dynamic = null, ?_autoRunScript:Bool = true, ?_ignoreErrors:Bool = false) {
 		if(!_autoRunScript) return;
@@ -613,7 +614,7 @@ class HaxeCode extends HScript {
 
 		interp.variables.set('this', this);
 		interp.variables.set('Alphabet', funkin.objects.Alphabet);
-		interp.variables.set('CustomSubstate', funkin.psychlua.CustomSubstate);
+		interp.variables.set('CustomSubstate', funkin.scripting.CustomSubstate);
 
 		HScript.addHScriptExtras(interp, LuaUtils.isPlayStateScript(interp.scriptObject));
 

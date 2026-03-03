@@ -1,6 +1,8 @@
-package funkin.psychlua;
+package funkin.scripting;
 
 import flixel.FlxObject;
+
+import funkin.scripting.lua.FunkinLua;
 
 class CustomSubstate extends MusicBeatSubstate
 {

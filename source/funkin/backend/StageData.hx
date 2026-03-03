@@ -3,7 +3,7 @@ package funkin.backend;
 import openfl.utils.Assets;
 import haxe.Json;
 import funkin.backend.Song;
-import funkin.psychlua.ModchartSprite;
+import funkin.scripting.objects.ModchartSprite;
 
 typedef StageFile = {
 	var directory:String;

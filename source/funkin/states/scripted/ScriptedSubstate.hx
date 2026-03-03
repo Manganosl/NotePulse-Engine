@@ -1,7 +1,7 @@
 package funkin.states.scripted;
 
 import flixel.util.FlxColor;
-import funkin.psychlua.HScript;
+import funkin.scripting.HScript;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.text.FlxText;
 import flixel.FlxG;

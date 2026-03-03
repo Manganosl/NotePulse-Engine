@@ -1,4 +1,6 @@
-package funkin.psychlua;
+package funkin.scripting.lua.functions;
+
+import funkin.scripting.objects.*;
 
 //
 // This is simply where i store deprecated functions for it to be more organized.

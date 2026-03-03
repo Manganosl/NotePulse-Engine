@@ -1,5 +1,5 @@
 #if LUA_ALLOWED
-package funkin.psychlua;
+package funkin.scripting.lua;
 
 import funkin.backend.WeekData;
 
@@ -11,7 +11,7 @@ import funkin.objects.NoteSplash;
 import funkin.states.MainMenuState;
 import funkin.states.handlers.LoadingState;
 
-import funkin.psychlua.LuaUtils;
+import funkin.scripting.LuaUtils;
 
 class LoadingLua {
 	public var lua:State = null;

@@ -14,7 +14,7 @@ import openfl.events.IOErrorEvent;
 import flixel.util.FlxSort;
 import haxe.Json;
 import funkin.states.scripted.ScriptedState;
-import funkin.psychlua.GlobalHandler;
+import funkin.scripting.GlobalHandler;
 
 class ModSelector extends MusicBeatState {
     var exclusions:Array<String> = ["assets", "data", "fonts", "images", "music", "sounds", "videos", "ndlls", "scripts", "shaders", "characters", "songs", "stages", "weeks", "states", "custom_events", "custom_notetypes"];

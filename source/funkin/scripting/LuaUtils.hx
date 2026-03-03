@@ -1,7 +1,6 @@
-package funkin.psychlua;
+package funkin.scripting;
 
-import funkin.backend.WeekData;
-import funkin.objects.Character;
+import funkin.scripting.objects.*;
 
 import openfl.display.BlendMode;
 import Type.ValueType;

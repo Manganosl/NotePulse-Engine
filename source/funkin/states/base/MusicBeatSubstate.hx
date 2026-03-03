@@ -1,12 +1,12 @@
 package funkin.states.base;
 
 import flixel.FlxSubState;
-import funkin.psychlua.HScript;
-import funkin.psychlua.LuaUtils;
+import funkin.scripting.HScript;
+import funkin.scripting.LuaUtils;
 #if !flash
 import flixel.addons.display.FlxRuntimeShader;
 #end
-import funkin.psychlua.FunkinLua;
+import funkin.scripting.lua.FunkinLua;
 
 class MusicBeatSubstate extends FlxSubState
 {
@@ -16,14 +16,14 @@ class MusicBeatSubstate extends FlxSubState
 
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 	public function addTextToDebug(text:String, color:FlxColor, ?trace:Bool = false, ?type:String) {
-		var newText:funkin.psychlua.DebugLuaText = luaDebugGroup.recycle(funkin.psychlua.DebugLuaText);
+		var newText:funkin.scripting.lua.DebugLuaText = luaDebugGroup.recycle(funkin.scripting.lua.DebugLuaText);
 		newText.text = text;
 		newText.color = color;
 		newText.disableTime = 6;
 		newText.alpha = 1;
 		newText.setPosition(10, 8 - newText.height);
 
-		luaDebugGroup.forEachAlive(function(spr:funkin.psychlua.DebugLuaText) {
+		luaDebugGroup.forEachAlive(function(spr:funkin.scripting.lua.DebugLuaText) {
 			spr.y += newText.height + 2;
 		});
 		luaDebugGroup.add(newText);
@@ -115,7 +115,7 @@ class MusicBeatSubstate extends FlxSubState
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	private var luaDebugGroup:FlxTypedGroup<funkin.psychlua.DebugLuaText>;
+	private var luaDebugGroup:FlxTypedGroup<funkin.scripting.lua.DebugLuaText>;
 	#end
 
 	private var curStep:Int = 0;
@@ -136,7 +136,7 @@ class MusicBeatSubstate extends FlxSubState
 	override function create() {
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		if(luaDebugGroup == null){
-			luaDebugGroup = new FlxTypedGroup<funkin.psychlua.DebugLuaText>();
+			luaDebugGroup = new FlxTypedGroup<funkin.scripting.lua.DebugLuaText>();
 			//luaDebugGroup.cameras = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 			insert(99999999, luaDebugGroup);
 		}

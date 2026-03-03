@@ -1,5 +1,7 @@
 #if LUA_ALLOWED
-package funkin.psychlua;
+package funkin.scripting.lua;
+
+import funkin.scripting.lua.functions.*;
 
 import funkin.backend.WeekData;
 import funkin.backend.Highscore;
@@ -38,13 +40,13 @@ import funkin.states.menus.FreeplayState;
 import funkin.substates.PauseSubState;
 import funkin.substates.GameOverSubstate;
 
-import funkin.psychlua.LuaUtils;
-import funkin.psychlua.LuaUtils.LuaTweenOptions;
+import funkin.scripting.LuaUtils;
+import funkin.scripting.LuaUtils.LuaTweenOptions;
 #if HSCRIPT_ALLOWED
-import funkin.psychlua.HScript;
+import funkin.scripting.HScript;
 #end
-import funkin.psychlua.DebugLuaText;
-import funkin.psychlua.ModchartSprite;
+import funkin.scripting.lua.DebugLuaText;
+import funkin.scripting.objects.ModchartSprite;
 
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;

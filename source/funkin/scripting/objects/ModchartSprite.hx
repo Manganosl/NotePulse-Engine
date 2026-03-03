@@ -1,4 +1,4 @@
-package funkin.psychlua;
+package funkin.scripting.objects;
 
 import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxAxes;

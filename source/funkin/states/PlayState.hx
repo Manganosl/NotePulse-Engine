@@ -32,7 +32,7 @@ import funkin.states.scripted.ScriptedSubstate;
 import funkin.substates.PauseSubState;
 import funkin.substates.GameOverSubstate;
 
-import funkin.psychlua.ModchartSprite.ModchartBackdrop;
+import funkin.scripting.objects.ModchartSprite.ModchartBackdrop;
 
 import hxvlc.flixel.*;
 
@@ -41,10 +41,12 @@ import funkin.objects.*;
 import funkin.objects.SustainSplash;
 
 #if LUA_ALLOWED
-import funkin.psychlua.*;
+import funkin.scripting.lua.*;
+import funkin.scripting.*;
+import funkin.scripting.objects.*;
 #else
-import funkin.psychlua.LuaUtils;
-import funkin.psychlua.HScript;
+import funkin.scripting.LuaUtils;
+import funkin.scripting.HScript;
 #end
 
 #if HSCRIPT_ALLOWED
@@ -52,8 +54,6 @@ import flixel.FlxSprite;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 #end
-
-import funkin.shaders.CircleShader;
 
 import modchart.Manager;
 
@@ -301,14 +301,6 @@ class PlayState extends MusicBeatState
 	var canPause:Bool = true;
 	var freezeCamera:Bool = false;
 	var allowDebugKeys:Bool = true;
-
-	public var cc_startTimer:Int = 2;
-	var cc_upcoming:Array<Float> = [];
-	var cc_circle:FlxSprite;
-	var cc_shader:CircleShader;
-	var cc_takeTweenTime:Bool = true;
-	var cc_currentPercent:Float = 1;
-	var cc_percentTween:FlxTween;
 
 	#if DISCORD_ALLOWED
 	// Discord RPC variables
@@ -1032,11 +1024,6 @@ class PlayState extends MusicBeatState
 		setOnScripts('cameraX', camFollow.x);
 		setOnScripts('cameraY', camFollow.y);
 		setOnScripts('botPlay', cpuControlled);
-		
-		if(ClientPrefs.data.noteTimer){
-			cc_updateHUD(elapsed);
-			cc_updatePosition();
-		}
 
 		callOnScripts('onUpdatePost', [elapsed]);
 	}
@@ -1126,8 +1113,6 @@ class PlayState extends MusicBeatState
 		#end
 		setOnScripts('songLength', songLength);
 		callOnScripts('onSongStart');
-
-		if(ClientPrefs.data.noteTimer) createTimeCircle();
 	}
 
 	var debugNum:Int = 0;
@@ -2620,91 +2605,6 @@ class PlayState extends MusicBeatState
 		if(variables.exists(tag)) return variables.get(tag);
 		#end
 		return null;
-	}
-
-	//// Time Circle ////
-
-	private function cc_computeMiddleStrum():{x:Float, y:Float} {
-		var grp = !isPlayerOpponent ? playerStrums : opponentStrums;
-		if (grp == null || grp.members == null || grp.length <= 0) return {x: FlxG.width * 0.5, y: FlxG.height * 0.5};
-		var n = grp.length;
-		var x:Float = 0;
-		var y:Float = 0;
-		if (n % 2 == 0) {
-			var i1 = Std.int(n/2 - 1);
-			var i2 = Std.int(n/2);
-			x = (grp.members[i1].x + grp.members[i2].x) * 0.5;
-			y = (grp.members[i1].y + grp.members[i2].y) * 0.5;
-		} else {
-			var mid = Std.int(n/2);
-			x = grp.members[mid].x;
-			y = grp.members[mid].y;
-		}
-		return {x:x, y:y};
-	}
-
-	private function cc_startPercentTween(durationSec:Float) {
-		if (cc_percentTween != null) cc_percentTween.cancel();
-		var rate:Float = 1.0;
-		#if FLX_PITCH
-		if (FlxG.sound.music != null && FlxG.sound.music.pitch != 0) rate = FlxG.sound.music.pitch;
-		#end
-		var dur = Math.max(0.001, durationSec / rate);
-		cc_currentPercent = 1;
-		cc_percentTween = FlxTween.num(1, 0, dur, {ease: FlxEase.linear}, function(val:Float) {
-			cc_currentPercent = val;
-			if (cc_shader != null) cc_shader.percent.value = [cc_currentPercent];
-		});
-	}
-
-	private function cc_updateHUD(elapsed:Float) {
-		if (cc_circle == null) return;
-		if (cc_upcoming.length <= 0) { cc_circle.alpha = CoolUtil.fpsLerp(cc_circle.alpha, 0, elapsed * 8); return; }
-		var nextTime:Float = 1e30;
-		for (t in cc_upcoming) if (t < nextTime) nextTime = t;
-		var noteTimer:Float = nextTime - Conductor.songPosition;
-		var i = cc_upcoming.length - 1;
-		while (i >= 0) {
-			if (Conductor.songPosition >= cc_upcoming[i]) cc_upcoming.splice(i, 1);
-			i--;
-		}
-		if (noteTimer > 1000 * cc_startTimer) {
-			cc_circle.alpha = CoolUtil.fpsLerp(cc_circle.alpha, 1, elapsed * 32);
-			if (cc_takeTweenTime) {
-				cc_startPercentTween(noteTimer / 1000);
-				cc_takeTweenTime = false;
-			}
-		} else if (noteTimer < 1000) {
-			cc_circle.alpha = CoolUtil.fpsLerp(cc_circle.alpha, 0, elapsed * 8);
-			cc_takeTweenTime = true;
-		}
-	}
-
-	private function cc_updatePosition() {
-		if (cc_circle == null) return;
-		var pos = cc_computeMiddleStrum();
-		cc_circle.x = pos.x + 12.5;
-		cc_circle.y = pos.y + (!ClientPrefs.data.downScroll ? 128 : -128);
-	}
-
-	private function createTimeCircle(){
-		cc_upcoming = [];
-		for (note in unspawnNotes) {
-			if ((!isPlayerOpponent ? note.mustPress : !note.mustPress) && (!note.gfStrum)) cc_upcoming.push(note.strumTime);
-		}
-		if (cc_circle == null) {
-			cc_circle = new FlxSprite();
-			cc_circle.loadGraphic(Paths.image('circleThing'));
-			cc_circle.scrollFactor.set();
-			cc_circle.antialiasing = true;
-			cc_circle.scale.set(0.75, 0.75);
-			cc_shader = new CircleShader();
-			cc_shader.percent.value = [1.0];
-			cc_circle.shader = cc_shader;
-			cc_circle.cameras = [camHUD];
-			if(ClientPrefs.data.noteTimer) add(cc_circle);
-		}
-		cc_circle.alpha = 0;
 	}
 
 	//// Menus ////

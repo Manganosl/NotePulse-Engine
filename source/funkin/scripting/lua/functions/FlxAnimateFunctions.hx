@@ -1,4 +1,6 @@
-package funkin.psychlua;
+package funkin.scripting.lua.functions;
+
+import funkin.scripting.objects.*;
 
 import openfl.utils.Assets;
 

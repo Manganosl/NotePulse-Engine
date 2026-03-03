@@ -1,5 +1,7 @@
 #if LUA_ALLOWED
-package funkin.psychlua;
+package funkin.scripting;
+
+import funkin.scripting.lua.FunkinLua;
 
 class CallbackHandler
 {

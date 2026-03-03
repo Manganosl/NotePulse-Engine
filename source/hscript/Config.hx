@@ -4,7 +4,7 @@ class Config {
 	public static final ALLOWED_CUSTOM_CLASSES = [
 		"flixel",
 		"funkin.backend",
-		"funkin.psychlua",
+		"funkin.scripting.objects",
 		"funkin.objects",
 		"funkin.shaders",
 		"funkin.cutscenes",

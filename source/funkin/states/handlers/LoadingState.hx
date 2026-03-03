@@ -23,7 +23,7 @@ import sys.thread.Mutex;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 
-import funkin.psychlua.LoadingLua;
+import funkin.scripting.lua.LoadingLua;
 
 #if cpp
 @:headerCode('

@@ -1,7 +1,7 @@
 package funkin.states.scripted;
 
 import flixel.util.FlxColor;
-import funkin.psychlua.HScript;
+import funkin.scripting.HScript;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.text.FlxText;
 import flixel.FlxG;
@@ -68,7 +68,7 @@ class ScriptedState extends MusicBeatState
 		{
 			if (FlxG.keys.justPressed.SPACE){
 				Mods.modPack = null;
-				funkin.psychlua.GlobalHandler.stopGlobalHX();
+				funkin.scripting.GlobalHandler.stopGlobalHX();
 				MusicBeatState.switchState(new funkin.states.menus.TitleState());
 			}
 			return;

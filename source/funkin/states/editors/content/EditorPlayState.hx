@@ -20,7 +20,7 @@ import modchart.Config;
 
 import funkin.states.editors.ChartingState;
 
-import funkin.psychlua.LuaUtils;
+import funkin.scripting.LuaUtils;
 class EditorPlayState extends MusicBeatSubstate
 {
 	// Borrowed from original PlayState

@@ -1,4 +1,4 @@
-package funkin.psychlua;
+package funkin.scripting.lua;
 
 class DebugLuaText extends FlxText
 {

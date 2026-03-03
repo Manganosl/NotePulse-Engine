@@ -17,7 +17,7 @@ import modchart.engine.modifiers.list.*;
 import modchart.events.*;
 import modchart.events.types.*;
 
-import funkin.psychlua.LuaUtils;
+import funkin.scripting.LuaUtils;
 
 /**
  * This assembles the modchart components, including:

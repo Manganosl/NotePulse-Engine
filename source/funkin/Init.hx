@@ -84,7 +84,7 @@ class Init extends FlxState {
 			Mods.currentModDirectory = null;
 			Mods.currentLoadedMod = null;
 			Mods.modPack = null;
-			funkin.psychlua.GlobalHandler.stopGlobalHX();
+			funkin.scripting.GlobalHandler.stopGlobalHX();
 			MusicBeatState.switchState(new TitleState());
 		}
 	}

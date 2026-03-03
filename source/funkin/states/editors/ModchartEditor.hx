@@ -28,7 +28,7 @@ import funkin.states.editors.ChartingState;
 import funkin.states.editors.content.MetaNote.EventMetaNote;
 import funkin.states.editors.content.*;
 
-import funkin.psychlua.LuaUtils;
+import funkin.scripting.LuaUtils;
 class ModchartEditor extends MusicBeatState
 {
 	// Borrowed from original PlayState
