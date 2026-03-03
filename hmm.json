@@ -8,12 +8,12 @@
     {
       "name": "lime",
       "type": "haxelib",
-      "version": "8.0.1"
+      "version": "8.2.3"
     },
     {
       "name": "openfl",
       "type": "haxelib",
-      "version": "9.3.3"
+      "version": "9.4.2"
     },
       {
       "name": "nape-haxe4",
@@ -23,22 +23,17 @@
     {
       "name": "flixel",
       "type": "haxelib",
-      "version": "5.5.0"
+      "version": "5.6.2"
     },
     {
       "name": "flixel-addons",
       "type": "haxelib",
-      "version": "3.2.1"
-    },
-    {
-      "name": "flixel-tools",
-      "type": "haxelib",
-      "version": "1.5.1"
+      "version": "3.2.3"
     },
     {
       "name": "flixel-ui",
       "type": "haxelib",
-      "version": "2.5.0"
+      "version": "2.6.1"
     },
     {
       "name": "hxcpp",
@@ -76,7 +71,7 @@
       "name": "hxdiscord_rpc",
       "type": "git",
       "dir": null,
-      "ref": "main",
+      "ref": "old",
       "url": "https://github.com/CodenameCrew/cne-hxdiscord_rpc"
     },
     {
