@@ -18,6 +18,7 @@ class Config {
 	];
 	public static final DISALLOW_CUSTOM_CLASSES = [
 		"flixel.FlxGame",
+		"funkin.objects.debug",
 		"flixel.addons.ui.FlxUI9SliceSprite",
 		"flixel.addons.ui.FlxUIList",
 		"flixel.addons.ui.FlxUICursor",

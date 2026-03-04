@@ -22,20 +22,10 @@ import lime.app.Application;
 import lime.graphics.Image;
 #end
 
-//crash handler stuff
-#if !CRASH_HANDLER
-import openfl.events.UncaughtErrorEvent;
-import haxe.CallStack;
-import haxe.io.Path;
-import sys.FileSystem;
-import sys.io.File;
-import sys.io.Process;
-#end
-
 import funkin.backend.ExtraKeysHandler;
 
 #if linux
-@:cppInclude('./funkin/external/gamemode_client.h')
+@:cppInclude('./external/gamemode_client.h')
 @:cppFileCode('
 	#define GAMEMODE_AUTO
 ')
@@ -148,10 +138,6 @@ class Main extends Sprite
 		FlxG.mouse.visible = false;
 		#end
 		FlxG.mouse.useSystemCursor = true;
-		
-		#if !CRASH_HANDLER
-		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
-		#end
 
 		#if DISCORD_ALLOWED
 		DiscordClient.prepare();
@@ -177,50 +163,6 @@ class Main extends Sprite
 			sprite.__cacheBitmapData = null;
 		}
 	}
-
-	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
-	// very cool person for real they don't get enough credit for their work
-	#if !CRASH_HANDLER
-	function onCrash(e:UncaughtErrorEvent):Void
-	{
-		var errMsg:String = "";
-		var path:String;
-		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
-		var dateNow:String = Date.now().toString();
-
-		dateNow = dateNow.replace(" ", "_");
-		dateNow = dateNow.replace(":", "'");
-
-		path = "./crash/" + "NotepulseEngine_" + dateNow + ".txt";
-
-		for (stackItem in callStack)
-		{
-			switch (stackItem)
-			{
-				case FilePos(s, file, line, column):
-					errMsg += file + " (line " + line + ")\n";
-				default:
-					Log.error(stackItem);
-			}
-		}
-
-		errMsg += "\nUncaught Error: " + e.error + "\nIn case this wasn't caused by any modifications, report this error to NotePulse Engine: https://github.com/Manganosl/NotePulse-Engine\n\n> Crash Handler written by: sqirra-rng";
-
-		if (!FileSystem.exists("./crash/"))
-			FileSystem.createDirectory("./crash/");
-
-		File.saveContent(path, errMsg + "\n");
-
-		Log.error(errMsg);
-		Log.warn("Crash dump saved in " + Path.normalize(path));
-
-		Application.current.window.alert(errMsg, "Error!");
-		#if DISCORD_ALLOWED
-		DiscordClient.shutdown();
-		#end
-		Sys.exit(1);
-	}
-	#end
 
   	function handleDebugDisplayKeys():Void
   	{
