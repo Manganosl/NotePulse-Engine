@@ -1795,7 +1795,6 @@ class FunkinLua {
 		if(this != null) this.hscript = new HaxeFunctions(this);
 		HaxeFunctions.implement(this);
 		#end
-		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
 		#if flxanimate FlxAnimateFunctions.implement(this); #end
 		ReflectionFunctions.implement(this);
 		TextFunctions.implement(this);

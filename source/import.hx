@@ -26,10 +26,6 @@ import llua.*;
 import llua.Lua;
 #end
 
-#if ACHIEVEMENTS_ALLOWED
-import funkin.backend.Achievements;
-#end
-
 #if sys
 import sys.*;
 import sys.io.*;

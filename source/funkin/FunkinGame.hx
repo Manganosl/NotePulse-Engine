@@ -5,7 +5,7 @@ import haxe.CallStack;
 import haxe.Exception;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.util.FlxSignal.FlxTypedSignal;
-import funkin.objects.FunkinSoundTray;
+import funkin.objects.debug.FunkinSoundTray;
 
 class FunkinGame extends FlxGame
 {

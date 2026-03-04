@@ -1,7 +1,7 @@
-package funkin.debug;
+package funkin.objects.debug;
 
 import flixel.util.FlxStringUtil;
-import funkin.debug.stats.FunkinStatsGraph;
+import funkin.objects.debug.stats.FunkinStatsGraph;
 import funkin.backend.utils.MemoryUtil;
 import openfl.display.Shape;
 import openfl.display.Sprite;

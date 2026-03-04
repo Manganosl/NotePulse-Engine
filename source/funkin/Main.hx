@@ -4,7 +4,7 @@ package funkin;
 import android.content.Context;
 #end
 
-import funkin.debug.FunkinDebugDisplay;
+import funkin.objects.debug.FunkinDebugDisplay;
 
 import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
@@ -33,10 +33,6 @@ import sys.io.Process;
 #end
 
 import funkin.backend.ExtraKeysHandler;
-
-#if desktop
-import funkin.backend.ALSoftConfig; // Just to make sure DCE doesn't remove this, since it's not directly referenced anywhere else.
-#end
 
 #if linux
 @:cppInclude('./funkin/external/gamemode_client.h')
@@ -125,7 +121,6 @@ class Main extends Sprite
 		ExtraKeysHandler.instance = new ExtraKeysHandler();
 		ClientPrefs.loadDefaultKeys();
 
-		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 		addChild(new FunkinGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		#if !mobile
@@ -147,7 +142,6 @@ class Main extends Sprite
 
 		funkin.backend.utils.WindowUtil.setDarkMode();
 		funkin.backend.utils.WindowUtil.init();
-		funkin.backend.ALSoftConfig.init();
 
 		#if html5
 		FlxG.autoPause = false;

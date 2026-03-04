@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.objects.debug;
 
 import flixel.system.FlxAssets.FlxSoundAsset;
 

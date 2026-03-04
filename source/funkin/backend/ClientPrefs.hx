@@ -5,7 +5,7 @@ import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 import funkin.backend.utils.CoolUtil.*;
 
-import funkin.debug.FunkinDebugDisplay;
+import funkin.objects.debug.FunkinDebugDisplay;
 import funkin.states.menus.TitleState;
 
 // Add a variable here and it will get automatically saved
@@ -215,10 +215,6 @@ class ClientPrefs {
 			Reflect.setField(FlxG.save.data, key, Reflect.field(data, key));
 		}
 
-		#if ACHIEVEMENTS_ALLOWED
-		Achievements.save();
-		#end
-
 		FlxG.save.data.keyBinds = keyBinds;
 		FlxG.save.data.gamepadBinds = gamepadBinds;
 
@@ -227,10 +223,6 @@ class ClientPrefs {
 	}
 
 	public static function loadPrefs() {
-		#if ACHIEVEMENTS_ALLOWED
-		Achievements.load();
-		#end
-
 		for (key in Reflect.fields(data)) {
 			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key)) {
 				Reflect.setField(data, key, Reflect.field(FlxG.save.data, key));

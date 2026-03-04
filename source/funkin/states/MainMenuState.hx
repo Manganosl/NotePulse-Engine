@@ -32,7 +32,7 @@ class MainMenuState extends MusicBeatState
 		'freeplay'
 	];
 
-	var leftOption:String = #if ACHIEVEMENTS_ALLOWED 'achievements' #else null #end;
+	var leftOption:String = null;
 	var rightOption:String = 'options';
 
 	var magenta:FlxSprite;
@@ -136,16 +136,6 @@ class MainMenuState extends MusicBeatState
 		
 		changeItem();
 
-		#if ACHIEVEMENTS_ALLOWED
-		// Unlocks "Freaky on a Friday Night" achievement if it's a Friday and between 18:00 PM and 23:59 PM
-		var leDate = Date.now();
-		if (leDate.getDay() == 5 && leDate.getHours() >= 18)
-			Achievements.unlock('friday_night_play');
-
-		#if MODS_ALLOWED
-		Achievements.reloadList();
-		#end
-		#end
 		block = new FlxSprite().makeGraphic(1, 1, 0xFF000000);
 		block.scrollFactor.set();
 		block.scale.set(FlxG.width, FlxG.height);
@@ -316,18 +306,14 @@ class MainMenuState extends MusicBeatState
 						case CENTER:
 							option = optionShit[curSelected];
 							item = menuItems.members[curSelected];
-							FlxTween.tween(rightItem, {x: rightItem.x + 1000}, 0.6, {ease: FlxEase.quadOut});
-							FlxTween.tween(leftItem, {x: leftItem.x + -1000}, 0.6, {ease: FlxEase.quadOut});
 
 						case LEFT:
 							option = leftOption;
 							item = leftItem;
-							FlxTween.tween(rightItem, {x: rightItem.x + 1000}, 0.6, {ease: FlxEase.quadOut});
 
 						case RIGHT:
 							option = rightOption;
 							item = rightItem;
-							FlxTween.tween(leftItem, {x: leftItem.x + -1000}, 0.6, {ease: FlxEase.quadOut});
 					}
 
 					//FlxTween.tween(item, {y: item.y + -1500}, 0.6, {ease: FlxEase.backIn});
@@ -342,11 +328,6 @@ class MainMenuState extends MusicBeatState
 							#if MODS_ALLOWED
 							case 'mods':
 								MusicBeatState.switchState(new funkin.states.menus.ModsMenuState());
-							#end
-
-							#if ACHIEVEMENTS_ALLOWED
-							case 'achievements':
-								MusicBeatState.switchState(new funkin.states.menus.AchievementsMenuState());
 							#end
 
 							case 'credits':
