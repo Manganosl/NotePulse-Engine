@@ -1,20 +1,7 @@
 # ToDo
-- [X] Optimize holds when Modchart is imported
-- [X] Add LUA functions for modcharting
-- [X] Add splashes to Modcharting tools (Sustain splashes broke when updating libraries)
-- [X] Fix audio bugs (fixed i think??)
-- [X] Add FlxEmitter
-- [X] Making a decent results screen
-- [X] Fix Custom HScript States (It wasn't THAT hard)
-- [X] Remake OptionsState
-- [X] Change the UI on editors
-- [X] Fix ChartingState bugs (I think)
-- [X] Add options for **EVERYTHING** I've been adding
-- [X] Ndll support
-- [X] Fix modchartInstance.addPlayfield() causing a black screen
-- [X] Replace SScript => HScript Improved
-  - [X] Make sure (almost) all old scripts work after the change
-- [-] Maybe make a real modchart editor?
-- [X] Fix arrows not rendering in camGame when using FunkinModchart
-- [-] Fix sustains not rendering when rotate modifiers are added and a receptor is not in camHUD
-- [X] FunkinModchart Nightmare Vision hold rendering
+
+## 05/03/2026
+- [ ] Fix Notes fieldID and its crashes
+  - [ ] Weird FlxG.sound.music corruption when trying to play a base game song?
+  - [ ] Random crash when pressing a note (player or not). Crash points at the scripts call
+  - [ ] ChartingState not detecting itself notes correctly + Not saving correctly

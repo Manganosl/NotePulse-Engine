@@ -7,6 +7,8 @@ import openfl.events.KeyboardEvent;
 import funkin.states.PlayState;
 
 class PlayField extends FlxTypedGroup<StrumNote> {
+	public static var fields:Array<PlayField> = [];
+
     public var player:Int = 0;
 	private var keysArray:Array<String>;
 	public var notes:Array<Note>;
@@ -30,6 +32,8 @@ class PlayField extends FlxTypedGroup<StrumNote> {
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		FlxG.signals.stateSwitched.addOnce(removeListeners);
+
+		fields.push(this);
     }
 
 	override public function destroy() {

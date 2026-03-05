@@ -167,6 +167,29 @@ class Song
 		        }
 		    }
 		}
+		if (songJson.notes != null) {
+            var sections:Array<Dynamic> = cast songJson.notes;
+            for (section in sections) {
+                if (section == null || section.sectionNotes == null) continue;
+
+                var notes:Array<Dynamic> = cast section.sectionNotes;
+                var mustHit:Bool = section.mustHitSection;
+
+                for (note in notes) {
+                    if (note == null || note.length < 2) continue;
+                    if (!Std.isOfType(note[4], Int)) {
+                        if (note[4] == true) {
+                            note[4] = 2;
+                        } else {
+                            var col:Int = Std.parseInt('' + note[1]);
+                            var isPlayerNote:Bool = (col < 4) ? mustHit : !mustHit;
+
+                            note[4] = isPlayerNote ? 1 : 0;
+                        }
+                    }
+                }
+            }
+        }
 	}
 
 	public function new(song, notes, bpm)

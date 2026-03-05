@@ -789,13 +789,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					{
 						if(!press) continue;
 
-						if(!PlayState.SONG.notes[curSec].mustHitSection){
-							if(num <= PlayState.SONG.mania)
-								num += GRID_COLUMNS_PER_PLAYER;
-							else if(num <= GRID_COLUMNS_PER_PLAYER+PlayState.SONG.mania)
-								num -= GRID_COLUMNS_PER_PLAYER;
-						}
-
 						if(!PlayState.SONG.gfStrums && num > PlayState.SONG.mania+(GRID_COLUMNS_PER_PLAYER)) return;
 						var didDelete:Bool = false;
 						for (note in curRenderedNotes)
@@ -1263,10 +1256,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 						note.changeNoteData(lane+diff);
 
-						lane = note.songData[1];
-						if(PlayState.SONG.gfStrums && lane >= (GRID_COLUMNS_PER_PLAYER*2)) note.gfStrum = true;
-						else note.gfStrum = false;
-
 						positionNoteXByData(note);
 					}
 				}
@@ -1310,13 +1299,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				}
 				else if(FlxG.mouse.x >= gridBg.x && FlxG.mouse.x < gridBg.x + gridBg.width)
 				{
-					if(!PlayState.SONG.notes[curSec].mustHitSection){
-						if(noteData <= PlayState.SONG.mania && noteData != -1)
-							noteData += GRID_COLUMNS_PER_PLAYER;
-						else if(noteData <= GRID_COLUMNS_PER_PLAYER+PlayState.SONG.mania)
-							if(noteData != -1) noteData -= GRID_COLUMNS_PER_PLAYER;
-					}
-
 					if(!PlayState.SONG.gfStrums && noteData > PlayState.SONG.mania+(GRID_COLUMNS_PER_PLAYER)) return;
 
 					var closeNotes:Array<MetaNote> = curRenderedNotes.members.filter(function(note:MetaNote)
@@ -1500,14 +1482,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					if(vortexPlaying)
 					{
 						var num:Int = note.songData[1];
-						if(!PlayState.SONG.notes[curSec].mustHitSection){
-							if(num <= PlayState.SONG.mania)
-								num += GRID_COLUMNS_PER_PLAYER;
-							else if(num <= GRID_COLUMNS_PER_PLAYER+PlayState.SONG.mania)
-								num -= GRID_COLUMNS_PER_PLAYER;
-						}
-						var char:OurLittleFriend = note.mustPress ? (PlayState.SONG.notes[curSec].mustHitSection ? littleBF : littleDad) : (PlayState.SONG.notes[curSec].mustHitSection ? littleDad : littleBF);
-						if(note.gfNote || note.gfStrum) char = littleDad2;
+						var char:OurLittleFriend = (note.fieldID == 0 ? littleDad : (note.fieldID == 1 ? littleBF : littleDad2));
+						if(note.gfNote) char = littleDad2;
 						if (note.noteType != "No Animation"){
 							char.sing(ExtraKeysHandler.instance.data.animations[ExtraKeysHandler.instance.data.keys[PlayState.SONG.mania].notes[note.noteData]].sing, note);
 							char.resetAnim = Math.max(Conductor.stepCrochet * 1.25, note.sustainLength+500) / 1000 / playbackRate;
@@ -2193,19 +2169,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		var daStrumTime:Float = note[0];
 		var daNoteData:Int = Std.int(note[1] % GRID_COLUMNS_PER_PLAYER);
-		var gottaHitNote:Bool = (note[1] < GRID_COLUMNS_PER_PLAYER);
 
 		var swagNote:MetaNote = new MetaNote(daStrumTime, daNoteData, note);
-		swagNote.mustPress = gottaHitNote;
+		swagNote.fieldID = ((note[4] == null) ? Std.int(note[1] / GRID_COLUMNS_PER_PLAYER) : Std.int(note[4]));
+		swagNote.mustPress = (swagNote.fieldID == 1 ? true : false);
 		swagNote.setSustainLength(note[2], cachedSectionCrochets[secNum] / 4, curZoom);
-		swagNote.gfNote = (section.gfSection && gottaHitNote == section.mustHitSection);
-		if(note[4] != null)
-			swagNote.gfStrum = note[4];
-		if(note[1] >= GRID_COLUMNS_PER_PLAYER * 2)	{
-			swagNote.gfStrum = note[4] = true;
-		} else {
-			swagNote.gfStrum = note[4] = false;
-		}
+		swagNote.gfNote = (section.gfSection && swagNote.mustPress == section.mustHitSection);
 		swagNote.noteType = note[3];
 		swagNote.scrollFactor.x = 0;
 		var txt:FlxText = swagNote.findNoteTypeText(swagNote.noteType != null ? noteTypes.indexOf(swagNote.noteType) : 0);
@@ -2506,57 +2475,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	
 	function positionNoteXByData(note:MetaNote, ?data:Null<Int> = null)
 	{
-		if (data == null)
-			data = note.songData[1];
+		if(data == null) data = note.songData[1];
 
 		var noteX:Float = gridBg.x + (GRID_SIZE - note.width) / 2;
-		if (SHOW_EVENT_COLUMN)
-			noteX += GRID_SIZE;
+		if(SHOW_EVENT_COLUMN) noteX += GRID_SIZE;
 
-		var lane:Int = Std.int(data % GRID_COLUMNS_PER_PLAYER);
-		var groupIndex:Int = 0;
+		var daColumn:Int = ((data % GRID_COLUMNS_PER_PLAYER) + (GRID_COLUMNS_PER_PLAYER * note.fieldID));
 
-		if (note.gfStrum)
-		{
-			groupIndex = 2;
-		}
-		else
-		{
-			var sec:Int = 0;
-			for (i in 0...cachedSectionTimes.length)
-			{
-				if (i == cachedSectionTimes.length - 1 ||
-					(note.strumTime >= cachedSectionTimes[i] && note.strumTime < cachedSectionTimes[i + 1]))
-				{
-					sec = i;
-					break;
-				}
-			}
-
-			if (sec < 0) sec = 0;
-			if (sec >= PlayState.SONG.notes.length) sec = PlayState.SONG.notes.length - 1;
-
-			var section = PlayState.SONG.notes[sec];
-			if (section != null && section.mustHitSection)
-			{
-				groupIndex = note.mustPress ? 0 : 1;
-			}
-			else
-			{
-				groupIndex = note.mustPress ? 1 : 0;
-			}
-		}
-
-		if (groupIndex == 2)
-			note.gfStrum = true;
-
-		if (groupIndex >= GRID_PLAYERS) groupIndex = GRID_PLAYERS - 1;
-		if (groupIndex < 0) groupIndex = 0;
-		if (note.gfStrum)
-			groupIndex = 2;
-
-		noteX += GRID_SIZE * (groupIndex * GRID_COLUMNS_PER_PLAYER + lane);
-
+		noteX += GRID_SIZE * daColumn;
 		note.x = noteX;
 	}
 
@@ -2604,8 +2530,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		if(icons.length > 1)
 		{
-			var iconP1:HealthIcon = icons[0];
-			var iconP2:HealthIcon = icons[1];
+			var iconP1:HealthIcon = icons[1];
+			var iconP2:HealthIcon = icons[0];
 			var iconP3:HealthIcon = icons[2];
 			var mustHitSection:Bool = (curSecData != null && curSecData.mustHitSection == true);
 			var focusGF:Bool = (curSecData != null && curSecData.focusGF == true);
@@ -3177,7 +3103,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	function swapDaSection(pAm:Int){
 		var maxData:Int = GRID_COLUMNS_PER_PLAYER * pAm;
-		var gfStrumLimit = GRID_COLUMNS_PER_PLAYER * 2;
 		for (note in curRenderedNotes)
 		{
 			if(note != null && !note.isEvent)
@@ -3185,8 +3110,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				var data:Int = note.songData[1] + GRID_COLUMNS_PER_PLAYER;
 				if(data >= maxData) data -= maxData;
 				note.changeNoteData(data);
-				if(data >= gfStrumLimit) note.gfStrum = true;
-				else note.gfStrum = false;
 				positionNoteXByData(note);
 			}
 		}
@@ -3278,7 +3201,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			var sec = getCurChartSection();
 			if(sec != null) sec.mustHitSection = mustHitCheckBox.checked;
-			swapDaSection(2);
 			updateHeads(true);
 		});
 		gfSectionCheckBox = new PsychUICheckBox(objX + 100, objY, 'GF Section', 70, function()
@@ -4559,6 +4481,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			}
 
 			var arr:Array<Dynamic> = PlayState.SONG.notes[noteSec].sectionNotes;
+			note.songData[4] = note.songData[1] / GRID_COLUMNS_PER_PLAYER;
 			arr.push(note.songData);
 		}
 
@@ -4583,22 +4506,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		updateChartData();
 
 		for (section in PlayState.SONG.notes)
-		{
 			for (note in section.sectionNotes)
-			{
-				var lane:Int = note[1];
-				var gfStrum:Bool = false;
-
-				if (PlayState.SONG.gfStrums
-					&& lane >= (PlayState.SONG.mania + 1) * 2
-					&& lane <  (PlayState.SONG.mania + 1) * 3)
-				{
-					gfStrum = true;
-				}
-
-				note[4] = gfStrum;
-			}
-		}
+				note[4] = (note[1] / GRID_COLUMNS_PER_PLAYER);
 
 		if (PlayState.SONG.events != null && PlayState.SONG.events.length > 1)
 			PlayState.SONG.events.sort(sortByTime);

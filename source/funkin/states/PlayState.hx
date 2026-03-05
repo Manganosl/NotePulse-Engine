@@ -1220,23 +1220,23 @@ class PlayState extends MusicBeatState
 
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 				swagNote.row = Conductor.secsToRow(daStrumTime);
-				var rowArray = noteRows[gottaHitNote ? 0 : 1];
-				if(songNotes[4] == true) rowArray = noteRows[2];
-				if (rowArray[swagNote.row] == null) rowArray[swagNote.row] = [];
-				rowArray[swagNote.row].push(swagNote);
 				swagNote.mustPress = gottaHitNote;
 				swagNote.characters = (gottaHitNote ? [boyfriend] : [dad]);
 				swagNote.sustainLength = songNotes[2];
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<(SONG.mania + 1)));
 				swagNote.noteType = songNotes[3];
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
-				swagNote.gfStrum = (songNotes[4] == true);
+				final fieldID:Int = songNotes[4];
+				swagNote.playField = PlayField.fields[fieldID];
+				swagNote.gfStrum = (songNotes[4] == 2 ? true : false);
 				if(swagNote.gfStrum) swagNote.mustPress = false;
 				if(swagNote.gfStrum || swagNote.gfNote) swagNote.characters = [gf];
-				swagNote.playField = (swagNote.gfStrum ? gfStrums : (gottaHitNote ? playerStrums : opponentStrums));
 
 				swagNote.scrollFactor.set();
 
+				var rowArray = noteRows[fieldID];
+				if (rowArray[swagNote.row] == null) rowArray[swagNote.row] = [];
+				rowArray[swagNote.row].push(swagNote);
 				unspawnNotes.push(swagNote);
 
 				final susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
@@ -1249,15 +1249,13 @@ class PlayState extends MusicBeatState
 
 						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true);
 						sustainNote.mustPress = gottaHitNote;
-						sustainNote.characters = (gottaHitNote ? [boyfriend] : [dad]);
-						sustainNote.gfNote = (section.gfSection && (songNotes[1]<(SONG.mania + 1)));
+						sustainNote.characters = swagNote.characters;
+						sustainNote.gfNote = swagNote.gfNote;
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.gfStrum = swagNote.gfStrum;
-						if(sustainNote.gfStrum) sustainNote.mustPress = false;
-						if(sustainNote.gfStrum || sustainNote.gfNote) sustainNote.characters = [gf];
-						sustainNote.scrollFactor.set();
 						sustainNote.parent = swagNote;
 						sustainNote.playField = swagNote.playField;
+						sustainNote.scrollFactor.set();
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 
