@@ -1479,15 +1479,17 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						}
 					}
 
+					var num:Int = note.songData[1];
+					var fieldInt:Int = Std.int(num / GRID_COLUMNS_PER_PLAYER);
+					var char:OurLittleFriend = (fieldInt == 0 ? littleDad : (fieldInt == 1 ? littleBF : littleDad2));
+					if(note.gfNote) char = littleDad2;
+					if (note.noteType != "No Animation"){
+						char.sing(ExtraKeysHandler.instance.data.animations[ExtraKeysHandler.instance.data.keys[PlayState.SONG.mania].notes[note.noteData]].sing, note);
+						char.resetAnim = Math.max(Conductor.stepCrochet * 1.25, note.sustainLength+500) / 1000 / playbackRate;
+					}
+
 					if(vortexPlaying)
 					{
-						var num:Int = note.songData[1];
-						var char:OurLittleFriend = (note.fieldID == 0 ? littleDad : (note.fieldID == 1 ? littleBF : littleDad2));
-						if(note.gfNote) char = littleDad2;
-						if (note.noteType != "No Animation"){
-							char.sing(ExtraKeysHandler.instance.data.animations[ExtraKeysHandler.instance.data.keys[PlayState.SONG.mania].notes[note.noteData]].sing, note);
-							char.resetAnim = Math.max(Conductor.stepCrochet * 1.25, note.sustainLength+500) / 1000 / playbackRate;
-						}
 						var strumNote:StrumNote = strumLineNotes.members[num];
 						if(strumNote != null)
 						{
@@ -4480,7 +4482,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			}
 
 			var arr:Array<Dynamic> = PlayState.SONG.notes[noteSec].sectionNotes;
-			note.songData[4] = note.songData[1] / GRID_COLUMNS_PER_PLAYER;
+			note.songData[4] = Std.int(note.songData[1] / GRID_COLUMNS_PER_PLAYER);
 			arr.push(note.songData);
 		}
 
@@ -4503,10 +4505,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	public function saveChart(auto:Bool = true, dif:String = null)
 	{
 		updateChartData();
-
-		for (section in PlayState.SONG.notes)
-			for (note in section.sectionNotes)
-				note[4] = (note[1] / GRID_COLUMNS_PER_PLAYER);
 
 		PlayState.SONG.format = "notepulse";
 

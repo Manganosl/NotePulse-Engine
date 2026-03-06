@@ -32,6 +32,9 @@ class PlayField extends FlxTypedGroup<StrumNote> {
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		FlxG.signals.stateSwitched.addOnce(removeListeners);
+		FlxG.signals.stateSwitched.addOnce(function(){
+			fields = [];
+		});
 
 		fields.push(this);
     }

@@ -1239,6 +1239,9 @@ class PlayState extends MusicBeatState
 				rowArray[swagNote.row].push(swagNote);
 				unspawnNotes.push(swagNote);
 
+				if(swagNote.playField == null) trace("P null");
+				if(swagNote.noteData == -1) trace("N null");
+
 				final susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
 				final floorSus:Int = Math.floor(susLength);
 
