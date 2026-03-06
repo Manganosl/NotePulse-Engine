@@ -93,6 +93,11 @@ class Conductor
 		return lastChange;
 	}
 
+	public static function stepToSeconds(step:Float):Float {
+		var lastChange = getBPMFromStep(step);
+		return lastChange.songTime + ((step - lastChange.stepTime) / (lastChange.bpm / 60) / 4) * 1000; // TODO: make less shit and take BPM into account PROPERLY
+	}
+
 	public static function beatToSeconds(beat:Float): Float{
 		var step = beat * 4;
 		var lastChange = getBPMFromStep(step);

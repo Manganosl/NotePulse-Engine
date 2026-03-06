@@ -72,11 +72,10 @@ class Note extends FlxSkewedSprite
 
 	@:isVar public var strum(get, set):StrumNote = null;
 	public var playField:PlayField = null;
-	public var fieldID:Int;
 	public var row:Int = 0;
 	public var column:Int = 0; // Why both for the same thing? I'm dumb
 
-	public var characters:Array<Character> = null;
+	public var characters:Array<Character> = [];
 
 	public var modchartVisible:Bool = true;
 	public var followStrum:Bool = true;

@@ -151,9 +151,11 @@ class MetaNote extends Note {
     public var sustain:MetaSustain;
     public var chartY:Float = 0;
     public var chartNoteData:Int = 0;
+    public var fieldID:Int;
 
     public function new(time:Float, data:Int, songData:Array<Dynamic>) {
         super(time, data, null, false, true);
+        this.fieldID = Std.int(songData[1]);
         this.songData = songData;
         this.strumTime = time;
         this.chartNoteData = data;

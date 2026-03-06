@@ -1221,7 +1221,6 @@ class PlayState extends MusicBeatState
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 				swagNote.row = Conductor.secsToRow(daStrumTime);
 				swagNote.mustPress = gottaHitNote;
-				swagNote.characters = (gottaHitNote ? [boyfriend] : [dad]);
 				swagNote.sustainLength = songNotes[2];
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<(SONG.mania + 1)));
 				swagNote.noteType = songNotes[3];
@@ -1230,7 +1229,8 @@ class PlayState extends MusicBeatState
 				swagNote.playField = PlayField.fields[fieldID];
 				swagNote.gfStrum = (songNotes[4] == 2 ? true : false);
 				if(swagNote.gfStrum) swagNote.mustPress = false;
-				if(swagNote.gfStrum || swagNote.gfNote) swagNote.characters = [gf];
+				swagNote.characters = (fieldID == 0 ? [dad] : (fieldID == 1 ? [boyfriend] : [gf]));
+				if(swagNote.gfNote) swagNote.characters = [gf];
 
 				swagNote.scrollFactor.set();
 

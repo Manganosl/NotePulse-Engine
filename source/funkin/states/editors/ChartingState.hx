@@ -2168,10 +2168,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		var section = PlayState.SONG.notes[secNum];
 
 		var daStrumTime:Float = note[0];
+		var daID:Int = ((note[4] == null) ? Std.int(note[1] / GRID_COLUMNS_PER_PLAYER) : Std.int(note[4]));
+		note[1] = ((note[1] % GRID_COLUMNS_PER_PLAYER) + (daID * GRID_COLUMNS_PER_PLAYER));
 		var daNoteData:Int = Std.int(note[1] % GRID_COLUMNS_PER_PLAYER);
 
 		var swagNote:MetaNote = new MetaNote(daStrumTime, daNoteData, note);
-		swagNote.fieldID = ((note[4] == null) ? Std.int(note[1] / GRID_COLUMNS_PER_PLAYER) : Std.int(note[4]));
 		swagNote.mustPress = (swagNote.fieldID == 1 ? true : false);
 		swagNote.setSustainLength(note[2], cachedSectionCrochets[secNum] / 4, curZoom);
 		swagNote.gfNote = (section.gfSection && swagNote.mustPress == section.mustHitSection);
@@ -2480,9 +2481,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		var noteX:Float = gridBg.x + (GRID_SIZE - note.width) / 2;
 		if(SHOW_EVENT_COLUMN) noteX += GRID_SIZE;
 
-		var daColumn:Int = ((data % GRID_COLUMNS_PER_PLAYER) + (GRID_COLUMNS_PER_PLAYER * note.fieldID));
-
-		noteX += GRID_SIZE * daColumn;
+		noteX += GRID_SIZE * data;
 		note.x = noteX;
 	}
 
@@ -3341,7 +3340,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					if(i == side) continue;
 
 					var songDataCopy:Array<Dynamic> = note.songData.copy();
-					songDataCopy[1] = note.noteData + i * GRID_COLUMNS_PER_PLAYER;
+					songDataCopy[1] = note.noteData + note.fieldID * GRID_COLUMNS_PER_PLAYER;
 					var newNote = createNote(songDataCopy);
 					notes.push(newNote);
 					pushedNotes.push(newNote);
@@ -3846,7 +3845,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				upperBox.isMinimized = true;
 	
 				updateChartData();
-				fileDialog.save('events.json', PsychJsonPrinter.print({events: PlayState.SONG.events, format: 'psych_v1'}, ['events']),
+				fileDialog.save('events.json', PsychJsonPrinter.print({events: PlayState.SONG.events, format: 'notepulse'}, ['events']),
 					function() showOutput('Events saved successfully to: ${fileDialog.path}', false, true), null,
 					function() showOutput('Error on saving events!', true));
 			}, btnWid);
@@ -4508,6 +4507,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		for (section in PlayState.SONG.notes)
 			for (note in section.sectionNotes)
 				note[4] = (note[1] / GRID_COLUMNS_PER_PLAYER);
+
+		PlayState.SONG.format = "notepulse";
 
 		if (PlayState.SONG.events != null && PlayState.SONG.events.length > 1)
 			PlayState.SONG.events.sort(sortByTime);

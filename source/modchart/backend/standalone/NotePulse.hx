@@ -85,7 +85,7 @@ class NotePulse implements IAdapter {
 
 	public function getPlayerFromArrow(arrow:FlxSprite) {
 		if (arrow is Note)
-			return cast(arrow, Note).gfStrum ? 2 : cast(arrow, Note).mustPress ? 1 : 0;
+			return cast(arrow, Note).playField.player;
 		if (arrow is FlxSprite && arrow.extraData["linkStrum"] != null)
 			return cast(arrow, FlxSprite).extraData["linkStrum"].player;
 		if (arrow is Strum) @:privateAccess

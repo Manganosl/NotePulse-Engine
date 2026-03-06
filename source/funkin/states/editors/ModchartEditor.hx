@@ -1714,7 +1714,7 @@ class ModchartEditor extends MusicBeatState
 		}
 
 		if (PlayState.SONG.events != null && PlayState.SONG.events.length > 1)
-			PlayState.SONG.events.sort(ChartingState.sortByTime);
+			PlayState.SONG.events.sort(CoolUtil.sortByTime);
 
 		var json = {
 			"song": PlayState.SONG
