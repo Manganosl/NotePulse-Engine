@@ -342,6 +342,7 @@ class EditorPlayState extends MusicBeatSubstate
 	{
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
+		PlayField.fields = [];
 		FlxG.mouse.visible = true;
 		Config.RENDER_ARROW_PATHS = false;
 		if(PlayState.SONG.nativeModchart){ 
@@ -443,31 +444,26 @@ class EditorPlayState extends MusicBeatSubstate
 				if(daStrumTime < startPos) continue;
 
 				var daNoteData:Int = Std.int(songNotes[1] % (PlayState.SONG.mania + 1));
-				var gottaHitNote:Bool = section.mustHitSection;
-
-				if (songNotes[1] > PlayState.SONG.mania)
-				{
-					gottaHitNote = !section.mustHitSection;
-				}
-
 				var oldNote:Note;
 				if (unspawnNotes.length > 0)
 					oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 				else
 					oldNote = null;
 
-				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, this);
-				swagNote.mustPress = gottaHitNote;
+				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
+				swagNote.row = Conductor.secsToRow(daStrumTime);
 				swagNote.sustainLength = songNotes[2];
-				//swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
+				swagNote.gfNote = (section.gfSection && (songNotes[1]<(PlayState.SONG.mania + 1)));
 				swagNote.noteType = songNotes[3];
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
-				swagNote.gfStrum = (songNotes[4] == true);
+				final fieldID:Int = songNotes[4];
+				swagNote.mustPress = (fieldID == 0 ? false : (fieldID == 1 ? true : false));
+				swagNote.playField = PlayField.fields[fieldID];
+				swagNote.gfStrum = (songNotes[4] == 2 ? true : false);
 				if(swagNote.gfStrum) swagNote.mustPress = false;
-				swagNote.cameras = [camHUD];
-				swagNote.scrollFactor.set();
-				swagNote.playField = (swagNote.gfStrum ? gfStrums : (gottaHitNote ? playerStrums : opponentStrums));
 
+				swagNote.scrollFactor.set();
+				swagNote.cameras = [camHUD];
 				unspawnNotes.push(swagNote);
 
 				final susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
@@ -479,14 +475,14 @@ class EditorPlayState extends MusicBeatSubstate
 						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
 						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true, this);
-						sustainNote.mustPress = gottaHitNote;
+						sustainNote.mustPress = swagNote.mustPress;
+						sustainNote.gfNote = swagNote.gfNote;
 						sustainNote.noteType = swagNote.noteType;
-						sustainNote.scrollFactor.set();
-						sustainNote.parent = swagNote;
 						sustainNote.gfStrum = swagNote.gfStrum;
-						if(sustainNote.gfStrum) sustainNote.mustPress = false;
-						sustainNote.cameras = [camHUD];
+						sustainNote.parent = swagNote;
 						sustainNote.playField = swagNote.playField;
+						sustainNote.scrollFactor.set();
+						sustainNote.cameras = [camHUD];
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 
@@ -794,8 +790,7 @@ class EditorPlayState extends MusicBeatSubstate
 		}
 	}
 
-	private function keyPressed(key:Int)
-	{
+	private function keyPressed(key:Int) {
 		if(key < 0) return;
 
 		// more accurate hit time for the ratings?
@@ -837,39 +832,28 @@ class EditorPlayState extends MusicBeatSubstate
 		//more accurate hit time for the ratings? part 2 (Now that the calculations are done, go back to the time it was before for not causing a note stutter)
 		Conductor.songPosition = lastTime;
 
-		var sprs:Array<StrumNote> = [];
-		if(!playerStrums.members[key].cpuControlled) sprs.push(playerStrums.members[key]);
-		if(!opponentStrums.members[key].cpuControlled) sprs.push(opponentStrums.members[key]);
-		if(PlayState.SONG.gfStrums) if(!gfStrums.members[key].cpuControlled) sprs.push(gfStrums.members[key]);
-		for(spr in sprs){		
-			if(spr != null && spr.animation.curAnim.name != 'confirm')
-			{
-				spr.playAnim('pressed');
-				spr.resetAnim = 0;
+		for(field in PlayField.fields){
+			var note:StrumNote = field.members[key];
+			if (note != null && !note.cpuControlled && note.animation.curAnim.name != 'confirm') {
+				note.playAnim("pressed", true);
+				note.resetAnim = 0;
 			}
 		}
 	}
 
-	private function onKeyRelease(event:KeyboardEvent):Void
-	{
+	private function onKeyRelease(event:KeyboardEvent):Void {
 		var eventKey:FlxKey = event.keyCode;
 		var key:Int = PlayState.getKeyFromEvent(keysArray, eventKey);
-		//trace('Pressed: ' + eventKey);
-
 		if(!controls.controllerMode && key > -1) keyReleased(key);
 	}
 
-	private function keyReleased(key:Int)
-	{
-		var sprs:Array<StrumNote> = [];
-		if(!playerStrums.members[key].cpuControlled) sprs.push(playerStrums.members[key]);
-		if(!opponentStrums.members[key].cpuControlled) sprs.push(opponentStrums.members[key]);
-		if(PlayState.SONG.gfStrums) if(!gfStrums.members[key].cpuControlled) sprs.push(gfStrums.members[key]);
-		for(spr in sprs){
-			if(spr != null)
-			{
-				spr.playAnim('static');
-				spr.resetAnim = 0;
+	private function keyReleased(key:Int) {
+		for(field in PlayField.fields){
+			if(field == null) continue;
+			var note:StrumNote = field.members[key];
+			if (note != null && !note.cpuControlled) {
+				note.playAnim("static", true);
+				note.resetAnim = 0;
 			}
 		}
 	}

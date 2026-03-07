@@ -10,8 +10,7 @@ class PlayField extends FlxTypedGroup<StrumNote> {
 	public static var fields:Array<PlayField> = [];
 
     public var player:Int = 0;
-	private var keysArray:Array<String>;
-	public var notes:Array<Note>;
+	public var notes:Array<Note> = [];
 
     public function new(player:Int) {
         super();
@@ -25,13 +24,7 @@ class PlayField extends FlxTypedGroup<StrumNote> {
 			babyArrow.postAddedToGroup();
         }
         adaptStrumline();
-		keysArray = [];
-		for (i in 0...PlayState.SONG.mania + 1){
-			keysArray.push(PlayState.SONG.mania + '_key_$i');
-		}
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
-		FlxG.signals.stateSwitched.addOnce(removeListeners);
+
 		FlxG.signals.stateSwitched.addOnce(function(){
 			fields = [];
 		});
@@ -40,28 +33,8 @@ class PlayField extends FlxTypedGroup<StrumNote> {
     }
 
 	override public function destroy() {
+		fields.remove(this);
 		super.destroy();
-		removeListeners();
-	}
-
-	public function onKeyPress(event:KeyboardEvent) {
-		var eventKey:FlxKey = event.keyCode;
-		var key:Int = PlayState.getKeyFromEvent(keysArray, eventKey);
-		var note:StrumNote = members[key];
-		if (note != null && !note.cpuControlled) {
-			note.playAnim("pressed", true);
-			note.resetAnim = 0;
-		}
-	}
-
-	public function onKeyRelease(event:KeyboardEvent) {
-		var eventKey:FlxKey = event.keyCode;
-		var key:Int = PlayState.getKeyFromEvent(keysArray, eventKey);
-		var note:StrumNote = members[key];
-		if (note != null && !note.cpuControlled) {
-			note.playAnim("static", true);
-			note.resetAnim = 0;
-		}
 	}
 
 	public function adaptStrumline() {
@@ -79,13 +52,5 @@ class PlayField extends FlxTypedGroup<StrumNote> {
 			}
 			strumLineIsBig = strumLineWidth > StrumBoundaries.getBoundaryWidth().x;
 		}
-	}
-
-	private var removedListeners:Bool = false;
-	private function removeListeners() {
-		if(removedListeners) return;
-		removedListeners = true;
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 	}
 }

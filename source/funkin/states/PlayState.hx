@@ -1205,12 +1205,6 @@ class PlayState extends MusicBeatState
 			{
 				var daStrumTime:Float = songNotes[0];
 				var daNoteData:Int = Std.int(songNotes[1] % (SONG.mania + 1));
-				var gottaHitNote:Bool = section.mustHitSection;
-
-				if (songNotes[1] > SONG.mania)
-				{
-					gottaHitNote = !section.mustHitSection;
-				}
 
 				var oldNote:Note;
 				if (unspawnNotes.length > 0)
@@ -1220,12 +1214,12 @@ class PlayState extends MusicBeatState
 
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 				swagNote.row = Conductor.secsToRow(daStrumTime);
-				swagNote.mustPress = gottaHitNote;
 				swagNote.sustainLength = songNotes[2];
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<(SONG.mania + 1)));
 				swagNote.noteType = songNotes[3];
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 				final fieldID:Int = songNotes[4];
+				swagNote.mustPress = (fieldID == 0 ? false : (fieldID == 1 ? true : false));
 				swagNote.playField = PlayField.fields[fieldID];
 				swagNote.gfStrum = (songNotes[4] == 2 ? true : false);
 				if(swagNote.gfStrum) swagNote.mustPress = false;
@@ -1239,9 +1233,6 @@ class PlayState extends MusicBeatState
 				rowArray[swagNote.row].push(swagNote);
 				unspawnNotes.push(swagNote);
 
-				if(swagNote.playField == null) trace("P null");
-				if(swagNote.noteData == -1) trace("N null");
-
 				final susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
 				final floorSus:Int = Math.floor(susLength);
 
@@ -1251,7 +1242,7 @@ class PlayState extends MusicBeatState
 						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
 						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true);
-						sustainNote.mustPress = gottaHitNote;
+						sustainNote.mustPress = swagNote.mustPress;
 						sustainNote.characters = swagNote.characters;
 						sustainNote.gfNote = swagNote.gfNote;
 						sustainNote.noteType = swagNote.noteType;
@@ -3354,6 +3345,14 @@ class PlayState extends MusicBeatState
 		}
 
 		Conductor.songPosition = lastTime;
+
+		for(field in PlayField.fields){
+			var note:StrumNote = field.members[key];
+			if (note != null && !note.cpuControlled && note.animation.curAnim.name != 'confirm') {
+				note.playAnim("pressed", true);
+				note.resetAnim = 0;
+			}
+		}
 		callOnScripts('onKeyPress', [key]);
 	}
 
@@ -3370,6 +3369,16 @@ class PlayState extends MusicBeatState
 
 		var ret:Dynamic = callOnScripts('onKeyReleasePre', [key]);
 		if(ret == LuaUtils.Function_Stop) return;
+
+		for(field in PlayField.fields){
+			if(field == null) continue;
+			var note:StrumNote = field.members[key];
+			if (note != null && !note.cpuControlled) {
+				note.playAnim("static", true);
+				note.resetAnim = 0;
+			}
+		}
+
 		callOnScripts('onKeyRelease', [key]);
 	}
 

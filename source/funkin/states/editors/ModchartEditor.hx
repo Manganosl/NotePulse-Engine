@@ -1301,33 +1301,26 @@ class ModchartEditor extends MusicBeatState
 				if(daStrumTime < startPos) continue;
 
 				var daNoteData:Int = Std.int(songNotes[1] % (PlayState.SONG.mania + 1));
-				var gottaHitNote:Bool = section.mustHitSection;
-
-				if (songNotes[1] > PlayState.SONG.mania)
-				{
-					gottaHitNote = !section.mustHitSection;
-				}
-
 				var oldNote:Note;
 				if (unspawnNotes.length > 0)
 					oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 				else
 					oldNote = null;
 
-				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, this);
-				swagNote.cameras = [camHUD];
-				swagNote.mustPress = gottaHitNote;
+				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
+				swagNote.row = Conductor.secsToRow(daStrumTime);
 				swagNote.sustainLength = songNotes[2];
-				//swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
+				swagNote.gfNote = (section.gfSection && (songNotes[1]<(PlayState.SONG.mania + 1)));
 				swagNote.noteType = songNotes[3];
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
-				swagNote.gfStrum = (songNotes[4] == true);
+				final fieldID:Int = songNotes[4];
+				swagNote.mustPress = (fieldID == 0 ? false : (fieldID == 1 ? true : false));
+				swagNote.playField = PlayField.fields[fieldID];
+				swagNote.gfStrum = (songNotes[4] == 2 ? true : false);
 				if(swagNote.gfStrum) swagNote.mustPress = false;
-				swagNote.playField = (swagNote.gfStrum ? gfStrums : (gottaHitNote ? playerStrums : opponentStrums));
 
 				swagNote.scrollFactor.set();
-
-				allNotes.push(swagNote);
+				swagNote.cameras = [camHUD];
 				unspawnNotes.push(swagNote);
 
 				final susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
@@ -1339,16 +1332,14 @@ class ModchartEditor extends MusicBeatState
 						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
 						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true, this);
-						sustainNote.mustPress = gottaHitNote;
-						//sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
+						sustainNote.mustPress = swagNote.mustPress;
+						sustainNote.gfNote = swagNote.gfNote;
 						sustainNote.noteType = swagNote.noteType;
+						sustainNote.gfStrum = swagNote.gfStrum;
+						sustainNote.parent = swagNote;
+						sustainNote.playField = swagNote.playField;
 						sustainNote.scrollFactor.set();
 						sustainNote.cameras = [camHUD];
-						sustainNote.parent = swagNote;
-						sustainNote.gfStrum = swagNote.gfStrum;
-						sustainNote.playField = swagNote.playField;
-						if(sustainNote.gfStrum) sustainNote.mustPress = false;
-						allNotes.push(sustainNote);
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 

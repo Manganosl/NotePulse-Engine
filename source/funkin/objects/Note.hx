@@ -71,7 +71,7 @@ class Note extends FlxSkewedSprite
 	];
 
 	@:isVar public var strum(get, set):StrumNote = null;
-	public var playField:PlayField = null;
+	public var playField(default, set):PlayField = null;
 	public var row:Int = 0;
 	public var column:Int = 0; // Why both for the same thing? I'm dumb
 
@@ -198,6 +198,13 @@ class Note extends FlxSkewedSprite
 		playField = strum.parentField;
 		noteData = strum.noteData;
 		return value;
+	}
+
+	private function set_playField(value:PlayField):PlayField {
+		if(playField != null)
+			playField.notes.remove(this);
+		value.notes.push(this);
+		return playField = value;
 	}
 
 	private function set_multSpeed(value:Float):Float {
