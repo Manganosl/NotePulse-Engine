@@ -60,22 +60,12 @@ final class NVHoldRenderer extends BaseRenderer<FlxSprite> {
 		
 		var arrowData = getArrowParams(arrow);
 		final isEnd = Adapter.instance.isHoldEnd(arrow);
-		if (isEnd) {
-			arrowData.distance -= 1.0;
-		}
-
-		final realDistance = arrowData.distance;
+        var stepDuration = (Adapter.instance.getCurrentCrochet() / 3.7); 
+        
 		final isHitten = arrowData.hitten;
-		if (isHitten && realDistance < 0) {
+		if (isHitten && arrowData.distance < 0) {
 			arrowData.distance = 0;
 		}
-
-		final fullHeight = (arrow.frame.frame.height * arrow.scale.y);
-		final clipRatio = (isHitten && realDistance < 0) 
-			? FlxMath.bound(1 + (realDistance / fullHeight), 0, 1) 
-			: 1;
-
-		if (clipRatio <= 0.001) return null;
 
 		var basePos = ModchartUtil.getHalfPos();
 		basePos.x += Adapter.instance.getDefaultReceptorX(lane, player);
@@ -84,9 +74,10 @@ final class NVHoldRenderer extends BaseRenderer<FlxSprite> {
 		final output = parent.modifiers.getPath(basePos.clone(), arrowData);
 		if (output == null || (output.visuals.alpha * arrow.alpha <= 0)) return null;
 
-		var nextOutput = parent.modifiers.getPath(basePos.clone(), arrowData, 1, false, true);
+        var nextData = getArrowParams(arrow, stepDuration);
+        var nextOutput = parent.modifiers.getPath(basePos.clone(), nextData);
+        
 		var diff = nextOutput.pos.subtract(output.pos);
-
 		var velocity = diff.length; 
 
 		var unit = diff.clone();
@@ -95,15 +86,12 @@ final class NVHoldRenderer extends BaseRenderer<FlxSprite> {
 		var isDownscroll = Adapter.instance.getDownscroll(); 
 		var pathAngle = (unit.x == 0 && unit.y == 0) ? 0 : Math.atan2(unit.y, unit.x) * FlxAngle.TO_DEG - 90 + (isDownscroll ? 180 : 0);
 
-		var speedConstant = 0.5;
-		var scrollSpeed = Math.abs(Adapter.instance.getCurrentScrollSpeed());
-		var baseVelocity = scrollSpeed * speedConstant; 
-		var stretch = (velocity / baseVelocity) * speedConstant;
-
 		var planeWidth = arrow.frame.frame.width * arrow.scale.x * .5;
 
 		var y1:Float = 0;
-		var y2:Float = (fullHeight * clipRatio) * stretch; 
+		var y2:Float = velocity; 
+
+		if (isEnd) y2 = arrow.frame.frame.height * arrow.scale.y;
 
 		if (isDownscroll)
 			y2 = -y2;
