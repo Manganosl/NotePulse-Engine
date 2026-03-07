@@ -45,9 +45,9 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
-		var option:Option = new Option('NightmareVision Modchart Rendering', //Name
-			"If checked, modcharts made using FunkinModchart will use a different renderer for sustain notes, which will greatly improve performance.", //Description
-			'nvFMHolds',
+		var option:Option = new Option('Complex Sustain Modchart Rendering', //Name
+			"If checked, modcharts will use FunkinModchart's default sustain renderer. This has a really high impact on performance (Believe me, it's not worth it, reduces FPS way too much)", //Description
+			'complexFMHolds',
 			'bool');
 		addOption(option);
 

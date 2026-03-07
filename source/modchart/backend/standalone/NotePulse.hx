@@ -178,8 +178,8 @@ class NotePulse implements IAdapter {
 			return EditorPlayState.instance.songSpeed * .45;
 	}
 
-	public function getNVHoldsPref() {
-		return ClientPrefs.data.nvFMHolds;
+	public function getComplexHoldsPref() {
+		return ClientPrefs.data.complexFMHolds;
 	}
 
 	public function getArrowItems() {

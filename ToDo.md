@@ -6,4 +6,4 @@
 - [X] ChartingState not detecting itself notes correctly + Not saving correctly. **Fixed 06/03/2026**
 
 ## 07/03/2026
-- [ ] Fix Vanilla Hold Renderer clipRect
+- [X] Fix Simple Hold Renderer clipRect **Fixed 07/03/2026**

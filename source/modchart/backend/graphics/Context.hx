@@ -16,8 +16,8 @@ class Context {
 		this.parent = parent;
 
 		arrowRenderer = new ArrowRenderer(parent);
-		holdRenderer = new NVHoldRenderer(parent);
-		if(!Adapter.instance.getNVHoldsPref())
+		holdRenderer = new SimpleHoldRenderer(parent);
+		if(Adapter.instance.getComplexHoldsPref())
 			holdRenderer = new HoldRenderer(parent);
 		pathRenderer = new PathRenderer(parent);
 

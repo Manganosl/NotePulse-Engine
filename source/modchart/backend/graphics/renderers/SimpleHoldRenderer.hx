@@ -11,7 +11,7 @@ final helperVector = new Vector3();
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
-final class NVHoldRenderer extends BaseRenderer<FlxSprite> {
+final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
 	private var __rotateX:Float = 0;
     private var __rotateY:Float = 0;
     private var __rotateZ:Float = 0;
@@ -62,10 +62,18 @@ final class NVHoldRenderer extends BaseRenderer<FlxSprite> {
 		final isEnd = Adapter.instance.isHoldEnd(arrow);
         var stepDuration = (Adapter.instance.getCurrentCrochet() / 3.7); 
         
+		final realDistance = arrowData.distance;
 		final isHitten = arrowData.hitten;
-		if (isHitten && arrowData.distance < 0) {
+		if (isHitten && realDistance < 0) {
 			arrowData.distance = 0;
 		}
+
+		final fullHeight = (arrow.frame.frame.height * arrow.scale.y);
+		final clipRatio = (isHitten && realDistance < 0) 
+			? FlxMath.bound(1 + (realDistance / fullHeight), 0, 1) 
+			: 1;
+
+		if (clipRatio <= 0.001) return null;
 
 		var basePos = ModchartUtil.getHalfPos();
 		basePos.x += Adapter.instance.getDefaultReceptorX(lane, player);
@@ -89,9 +97,9 @@ final class NVHoldRenderer extends BaseRenderer<FlxSprite> {
 		var planeWidth = arrow.frame.frame.width * arrow.scale.x * .5;
 
 		var y1:Float = 0;
-		var y2:Float = velocity; 
+		var y2:Float = velocity * clipRatio; 
 
-		if (isEnd) y2 = arrow.frame.frame.height * arrow.scale.y;
+		if (isEnd) y2 = (arrow.frame.frame.height * arrow.scale.y) * clipRatio;
 
 		if (isDownscroll)
 			y2 = -y2;
