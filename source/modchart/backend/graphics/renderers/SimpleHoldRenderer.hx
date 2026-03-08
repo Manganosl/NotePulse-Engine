@@ -95,20 +95,23 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
 		var pathAngle = (unit.x == 0 && unit.y == 0) ? 0 : Math.atan2(unit.y, unit.x) * FlxAngle.TO_DEG - 90 + (isDownscroll ? 180 : 0);
 
 		var planeWidth = arrow.frame.frame.width * arrow.scale.x * .5;
+        var frameHeight = (isEnd ? (arrow.frame.frame.height * arrow.scale.y) : velocity);
 
-		var y1:Float = 0;
-		var y2:Float = velocity * clipRatio; 
+        var clipOffset = frameHeight * (1 - clipRatio);
 
-		if (isEnd) y2 = (arrow.frame.frame.height * arrow.scale.y) * clipRatio;
+        var y1:Float = clipOffset; 
+        var y2:Float = frameHeight;
 
-		if (isDownscroll)
-			y2 = -y2;
+        if (isDownscroll) {
+            y1 = -clipOffset;
+            y2 = -frameHeight;
+        }
 
-		if (arrow.flipY) {
-			var temp = y1;
-			y1 = y2;
-			y2 = temp;
-		}
+        if (arrow.flipY) {
+            var temp = y1;
+            y1 = y2;
+            y2 = temp;
+        }
 
 		var x1 = arrow.flipX ? planeWidth : -planeWidth;
 		var x2 = arrow.flipX ? -planeWidth : planeWidth;
