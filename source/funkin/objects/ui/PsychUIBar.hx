@@ -2,8 +2,7 @@ package funkin.objects.ui;
 
 import flixel.util.FlxSpriteUtil;
 
-class PsychUIBar extends FlxSpriteGroup
-{
+class PsychUIBar extends FlxSpriteGroup {
 	public static final CHANGE_EVENT = "slider_change";
 	public var bar:FlxSprite;
 	public var barFilled:FlxSprite;
@@ -19,8 +18,7 @@ class PsychUIBar extends FlxSpriteGroup
 	public var min(default, set):Float = -999;
 	public var max(default, set):Float = 999;
 	public var decimals(default, set):Int = 2;
-	public function new(x:Float = 0, y:Float = 0, callback:Float->Void, def:Float = 0, min:Float = -999, max:Float = 999, wid:Float = 200, mainColor:FlxColor = FlxColor.WHITE, handleColor:FlxColor = 0xFFAAAAAA)
-	{
+	public function new(x:Float = 0, y:Float = 0, callback:Float->Void, def:Float = 0, min:Float = -999, max:Float = 999, wid:Float = 200, mainColor:FlxColor = FlxColor.WHITE, handleColor:FlxColor = 0xFFAAAAAA){
 		super(x, y);
 		this.onChange = callback;
 
@@ -31,9 +29,9 @@ class PsychUIBar extends FlxSpriteGroup
 		add(bar);
 
 		barFilled = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
-        barFilled.scale.set(0, 5); // Empezará en 0
+        barFilled.scale.set(0, 5);
         barFilled.updateHitbox();
-        barFilled.color = 0xFF8000FF; // El color morado que usaste para el handle
+        barFilled.color = 0xFF8000FF;
         add(barFilled);
 
 		minText = new FlxText(0, 0, 80, '', 8);
@@ -69,8 +67,7 @@ class PsychUIBar extends FlxSpriteGroup
 	public var forceNextUpdate:Bool = false;
 	public var broadcastSliderEvent:Bool = true;
 	private var isPointer:Bool = false;
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float){
 		super.update(elapsed);
 
 		if(FlxG.mouse.overlaps(handle, camera)){
@@ -107,15 +104,14 @@ class PsychUIBar extends FlxSpriteGroup
 			movingHandle = false;
 	}
 
-	function _updatePositions() {
+	function _updatePositions(){
         minText.x = bar.x - minText.width/2;
         maxText.x = bar.x + bar.width - maxText.width/2;
         valueText.x = bar.x + bar.width/2 - valueText.width/2;
 
         labelText.x = bar.x + bar.width/2 - labelText.width/2;
         if(label.length > 0) bar.y = labelText.y + 24;
-        
-        // Sincronizar altura de barFilled con bar
+
         barFilled.y = bar.y;
 
         minText.y = maxText.y = valueText.y = bar.y + 12;
@@ -123,22 +119,15 @@ class PsychUIBar extends FlxSpriteGroup
         _updateHandleX();
     }
 
-    function _updateHandleX()
-    {
-        // Calculamos el porcentaje actual (0 a 1)
+    function _updateHandleX(){
         var percent = FlxMath.remapToRange(FlxMath.roundDecimal(value, decimals), min, max, 0, 1);
-        
-        // Posición del handle
         handle.x = bar.x - handle.width/2 + (percent * bar.width);
-
-        // Actualizamos el ancho de la barra izquierda (barFilled)
         barFilled.x = bar.x;
         barFilled.scale.x = percent * bar.width;
         barFilled.updateHitbox();
     }
 
-	function set_decimals(v:Int)
-	{
+	function set_decimals(v:Int){
 		decimals = v;
 		minText.text = Std.string(FlxMath.roundDecimal(min, decimals));
 		maxText.text = Std.string(FlxMath.roundDecimal(max, decimals));
@@ -148,8 +137,7 @@ class PsychUIBar extends FlxSpriteGroup
 		return decimals;
 	}
 
-	function set_min(v:Float)
-	{
+	function set_min(v:Float){
 		if(v > max) max = v;
 		min = v;
 		minText.text = Std.string(FlxMath.roundDecimal(min, decimals));
@@ -157,8 +145,7 @@ class PsychUIBar extends FlxSpriteGroup
 		return min;
 	}
 
-	function set_max(v:Float)
-	{
+	function set_max(v:Float){
 		if(v < min) min = v;
 		max = v;
 		maxText.text = Std.string(FlxMath.roundDecimal(max, decimals));
@@ -166,16 +153,14 @@ class PsychUIBar extends FlxSpriteGroup
 		return max;
 	}
 
-	public function set_value(v:Float)
-	{
+	public function set_value(v:Float){
 		value = Math.max(min, Math.min(max, v));
 		valueText.text = Std.string(FlxMath.roundDecimal(value, decimals));
 		_updateHandleX();
 		return value;
 	}
 
-	function set_label(v:String)
-	{
+	function set_label(v:String){
 		labelText.text = v;
 		_updatePositions();
 		return labelText.text;
