@@ -64,9 +64,6 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
         
 		final realDistance = arrowData.distance;
 		final isHitten = arrowData.hitten;
-		if (isHitten && realDistance < 0) {
-			arrowData.distance = 0;
-		}
 
 		final fullHeight = (arrow.frame.frame.height * arrow.scale.y);
 		final clipRatio = (isHitten && realDistance < 0) 

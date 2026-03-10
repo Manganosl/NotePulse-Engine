@@ -1316,6 +1316,7 @@ class ModchartEditor extends MusicBeatState
 
 				swagNote.scrollFactor.set();
 				swagNote.cameras = [camHUD];
+				allNotes.push(swagNote);
 				unspawnNotes.push(swagNote);
 
 				final susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
@@ -1335,6 +1336,7 @@ class ModchartEditor extends MusicBeatState
 						sustainNote.playField = swagNote.playField;
 						sustainNote.scrollFactor.set();
 						sustainNote.cameras = [camHUD];
+						allNotes.push(sustainNote);
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 

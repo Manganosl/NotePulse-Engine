@@ -6,8 +6,8 @@
 - [X] ChartingState not detecting itself notes correctly + Not saving correctly. **Fixed 06/03/2026**
 
 ## 07/03/2026
-- [X] Fix Simple Hold Renderer clipRect **Fixed 07/03/2026**
+- [X] Fix Simple Hold Renderer clipRect **Fixed 10/03/2026**
 
-## 10/03/2026
-- [ ] Fix Modchart Editor crashing.
-- [ ] Flx Notes not regenerating in Modchart Editor.
+## 08/03/2026
+- [X] Fix Modchart Editor crashing. **Fixed 10/03/2026**
+- [X] Flx Notes not regenerating in Modchart Editor. **Fixed 10/03/2026**
