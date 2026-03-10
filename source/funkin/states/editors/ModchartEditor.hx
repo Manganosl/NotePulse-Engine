@@ -2,7 +2,6 @@ package funkin.states.editors;
 
 import funkin.backend.Section;
 import funkin.backend.Rating;
-import funkin.backend.ui.*;
 import funkin.backend.Song;
 import funkin.backend.StageData;
 

@@ -2,7 +2,6 @@
 
 package funkin.states.editors;
 
-import funkin.backend.ui.*;
 import funkin.states.editors.content.Prompt;
 import funkin.backend.WeekData;
 import funkin.states.menus.FreeplayState.SongMetadata;

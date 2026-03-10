@@ -1,6 +1,5 @@
 package funkin.states.editors.content;
 
-import funkin.backend.ui.*;
 import openfl.filters.ShaderFilter;
 import funkin.states.editors.*;
 

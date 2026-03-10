@@ -1,9 +1,12 @@
-package funkin.backend.ui;
+package funkin.objects.ui;
 
-class PsychUISlider extends FlxSpriteGroup
+import flixel.util.FlxSpriteUtil;
+
+class PsychUIBar extends FlxSpriteGroup
 {
 	public static final CHANGE_EVENT = "slider_change";
 	public var bar:FlxSprite;
+	public var barFilled:FlxSprite;
 	public var minText:FlxText;
 	public var maxText:FlxText;
 	public var valueText:FlxText;
@@ -27,6 +30,12 @@ class PsychUISlider extends FlxSpriteGroup
 		bar.color = mainColor;
 		add(bar);
 
+		barFilled = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
+        barFilled.scale.set(0, 5); // Empezará en 0
+        barFilled.updateHitbox();
+        barFilled.color = 0xFF8000FF; // El color morado que usaste para el handle
+        add(barFilled);
+
 		minText = new FlxText(0, 0, 80, '', 8);
 		minText.alignment = CENTER;
 		minText.color = mainColor;
@@ -43,11 +52,10 @@ class PsychUISlider extends FlxSpriteGroup
 		labelText.alignment = CENTER;
 		add(labelText);
 
-		handle = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
-		handle.scale.set(5, 15);
-		handle.updateHitbox();
-		handle.color = handleColor;
-		add(handle);
+        handle = new FlxSprite().makeGraphic(20, 20, FlxColor.TRANSPARENT);
+        FlxSpriteUtil.drawCircle(handle, 10, 10, 10, 0xFF8000FF);
+        handle.updateHitbox();
+        add(handle);
 
 		this.min = min;
 		this.max = max;
@@ -99,22 +107,35 @@ class PsychUISlider extends FlxSpriteGroup
 			movingHandle = false;
 	}
 
-	function _updatePositions()
-	{
-		minText.x = bar.x - minText.width/2;
-		maxText.x = bar.x + bar.width - maxText.width/2;
-		valueText.x = bar.x + bar.width/2 - valueText.width/2;
+	function _updatePositions() {
+        minText.x = bar.x - minText.width/2;
+        maxText.x = bar.x + bar.width - maxText.width/2;
+        valueText.x = bar.x + bar.width/2 - valueText.width/2;
 
-		labelText.x = bar.x + bar.width/2 - labelText.width/2;
-		if(label.length > 0) bar.y = labelText.y + 24;
-		
-		minText.y = maxText.y = valueText.y = bar.y + 12;
+        labelText.x = bar.x + bar.width/2 - labelText.width/2;
+        if(label.length > 0) bar.y = labelText.y + 24;
+        
+        // Sincronizar altura de barFilled con bar
+        barFilled.y = bar.y;
 
-		_updateHandleX();
-	}
+        minText.y = maxText.y = valueText.y = bar.y + 12;
 
-	function _updateHandleX()
-		handle.x = bar.x - handle.width/2 + FlxMath.remapToRange(FlxMath.roundDecimal(value, decimals), min, max, 0, bar.width);
+        _updateHandleX();
+    }
+
+    function _updateHandleX()
+    {
+        // Calculamos el porcentaje actual (0 a 1)
+        var percent = FlxMath.remapToRange(FlxMath.roundDecimal(value, decimals), min, max, 0, 1);
+        
+        // Posición del handle
+        handle.x = bar.x - handle.width/2 + (percent * bar.width);
+
+        // Actualizamos el ancho de la barra izquierda (barFilled)
+        barFilled.x = bar.x;
+        barFilled.scale.x = percent * bar.width;
+        barFilled.updateHitbox();
+    }
 
 	function set_decimals(v:Int)
 	{

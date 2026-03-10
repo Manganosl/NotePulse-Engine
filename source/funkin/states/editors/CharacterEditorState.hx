@@ -15,7 +15,6 @@ import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import openfl.utils.Assets;
 import lime.system.Clipboard;
-import funkin.backend.ui.*;
 
 import funkin.objects.Character;
 import funkin.objects.HealthIcon;

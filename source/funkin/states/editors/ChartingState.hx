@@ -7,7 +7,6 @@ import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxStringUtil;
 import flixel.util.FlxDestroyUtil;
 import flixel.input.keyboard.FlxKey;
-import funkin.backend.ui.*;
 import funkin.backend.utils.WindowUtil;
 
 import lime.utils.Assets;

@@ -1,8 +1,6 @@
-package funkin.backend.ui;
+package funkin.objects.ui;
 
-import flixel.util.FlxSpriteUtil;
-
-class PsychUIBar extends FlxSpriteGroup
+class PsychUISlider extends FlxSpriteGroup
 {
 	public static final CHANGE_EVENT = "slider_change";
 	public var bar:FlxSprite;
@@ -45,10 +43,11 @@ class PsychUIBar extends FlxSpriteGroup
 		labelText.alignment = CENTER;
 		add(labelText);
 
-        handle = new FlxSprite().makeGraphic(20, 20, FlxColor.TRANSPARENT);
-        FlxSpriteUtil.drawCircle(handle, 10, 10, 10, 0xFF8000FF);
-        handle.updateHitbox();
-        add(handle);
+		handle = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
+		handle.scale.set(5, 15);
+		handle.updateHitbox();
+		handle.color = handleColor;
+		add(handle);
 
 		this.min = min;
 		this.max = max;

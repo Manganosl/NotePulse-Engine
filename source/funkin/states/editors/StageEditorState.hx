@@ -27,8 +27,6 @@ import flash.net.FileFilter;
 import funkin.states.editors.content.Prompt;
 import funkin.states.editors.content.PreloadListSubState;
 
-import funkin.backend.ui.*;
-
 class StageEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
 	final minZoom = 0.1;

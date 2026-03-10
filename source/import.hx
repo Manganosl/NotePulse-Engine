@@ -52,6 +52,8 @@ import funkin.objects.BGSprite;
 import funkin.states.PlayState;
 import funkin.states.handlers.LoadingState;
 
+import funkin.objects.ui.*;
+
 #if flxanimate
 import flxanimate.*;
 #end

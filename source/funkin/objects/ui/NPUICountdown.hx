@@ -1,13 +1,4 @@
-package funkin.backend.ui;
-
-import flixel.FlxSprite;
-import flixel.group.FlxSpriteGroup;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
-import flixel.FlxG;
-import flixel.tweens.FlxTween;
-import flixel.tweens.FlxEase;
-import flixel.input.mouse.FlxMouseEventManager;
+package funkin.objects.ui;
 
 class NPUICountdown extends FlxSpriteGroup
 {
