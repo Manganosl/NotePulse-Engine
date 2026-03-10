@@ -7,3 +7,7 @@
 
 ## 07/03/2026
 - [X] Fix Simple Hold Renderer clipRect **Fixed 07/03/2026**
+
+## 10/03/2026
+- [ ] Fix Modchart Editor crashing.
+- [ ] Flx Notes not regenerating in Modchart Editor.

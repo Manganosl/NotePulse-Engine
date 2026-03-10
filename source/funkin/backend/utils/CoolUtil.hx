@@ -15,6 +15,7 @@ class CoolUtil
 			index += interval;
 		}
 	}
+	
 	public static function sortByTime(Obj1:Dynamic, Obj2:Dynamic):Int
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
 

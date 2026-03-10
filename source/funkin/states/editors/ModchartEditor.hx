@@ -40,7 +40,7 @@ class ModchartEditor extends MusicBeatState
 	var gridBg:ChartingGridSprite;
 	var nextGridBg:ChartingGridSprite;
 
-	var songPosSlider:PsychUISlider;
+	var songPosSlider:PsychUIBar;
 
 	var finishTimer:FlxTimer = null;
 	var noteKillOffset:Float = 350;
@@ -260,7 +260,7 @@ class ModchartEditor extends MusicBeatState
 		add(thatBG);
 
 		var songLen:Float = (FlxG.sound.music != null ? FlxG.sound.music.length : 0.0001);
-		songPosSlider = new PsychUISlider(0, thatBG.y, function(v:Float)
+		songPosSlider = new PsychUIBar(0, thatBG.y, function(v:Float)
 		{
 			paused = true;
 			if(FlxG.sound.music != null)
@@ -273,15 +273,10 @@ class ModchartEditor extends MusicBeatState
 				seek(0);
 			}
 		}, Conductor.songPosition, 0, songLen, FlxG.width, 0xFF4D4D4D, FlxColor.WHITE);
-		songPosSlider.bar.scale.y = 15;
-		songPosSlider.bar.updateHitbox();
-		songPosSlider.handle.y = songPosSlider.bar.y;
-		songPosSlider.handle.updateHitbox();
 		songPosSlider.y = thatBG.y;
 		songPosSlider.valueText.visible = false;
 		songPosSlider.minText.visible = false;
 		songPosSlider.maxText.visible = false;
-		songPosSlider.bar.alpha = 0.5;
 		songPosSlider.scrollFactor.set(0, 0);
 		songPosSlider.cameras = [camUI];
 		add(songPosSlider);
