@@ -538,7 +538,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		reloadCharacterDropDown();
 		charDropDown.selectedLabel = _char;
 
+		var hsvTest:PsychUIHSVPicker = new PsychUIHSVPicker(100,100); ////////
+
 		tab_group.add(new FlxText(charDropDown.x, charDropDown.y - 18, 80, 'Character:'));
+		tab_group.add(hsvTest); //////
 		tab_group.add(check_player);
 		tab_group.add(reloadCharacter);
 		tab_group.add(templateCharacter);

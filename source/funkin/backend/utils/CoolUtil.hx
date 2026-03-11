@@ -8,6 +8,35 @@ import flixel.util.FlxSort;
 
 class CoolUtil
 {
+	public static function hsvToRgb(h:Float,s:Float,v:Float) {
+		var r:Float=0;
+		var g:Float=0;
+		var b:Float=0;
+
+		var i = Math.floor(h*6);
+		var f = h*6 - i;
+
+		var p = v*(1-s);
+		var q = v*(1-f*s);
+		var t = v*(1-(1-f)*s);
+
+		switch(i%6)
+		{
+			case 0: r=v; g=t; b=p;
+			case 1: r=q; g=v; b=p;
+			case 2: r=p; g=v; b=t;
+			case 3: r=p; g=q; b=v;
+			case 4: r=t; g=p; b=v;
+			case 5: r=v; g=p; b=q;
+		}
+
+		return {
+			r:Std.int(r*255),
+			g:Std.int(g*255),
+			b:Std.int(b*255)
+		};
+	}
+
 	public static function numericForInterval(start, end, interval, func) {
 		var index = start;
 		while(index < end){
