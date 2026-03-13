@@ -31,6 +31,8 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 	var hueHeight:Int = 16;
 	var buttonSize:Int = 22;
 
+    var hexField:PsychUIInputText;
+
 	public function new(x:Float,y:Float)
 	{
 		super(x,y);
@@ -47,18 +49,32 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 	}
 
 	function createBox(){
-		panelBG = new FlxSprite(0,bg.height+2).makeGraphic(svSize+8,svSize+hueHeight+12,FlxColor.BLACK);
+		panelBG = new FlxSprite(0, (bg.height + 2)).makeGraphic((svSize + 8), (svSize + hueHeight + 12), FlxColor.BLACK);
 		panelBG.alpha = 0.6;
 		panelBG.visible = false;
 		add(panelBG);
 
-		svSquare = new FlxSprite(4,bg.height+6);
+		svSquare = new FlxSprite(4, (bg.height + 6));
 		svSquare.visible = false;
 		add(svSquare);
 
-		hueBar = new FlxSprite(4,bg.height+svSize+8);
+		hueBar = new FlxSprite(4, (bg.height + svSize + 8));
 		hueBar.visible = false;
 		add(hueBar);
+
+        hexField = new PsychUIInputText(4, (hueBar.y + 8), Std.int(panelBG.width * 0.8));
+        hexField.filterMode = ONLY_HEXADECIMAL;
+        hexField.onChange = function(old:String, curString:String) {
+            var color:FlxColor = FlxColor.fromString('#' + curString);
+            hue = color.hue / 360;
+            sat = color.saturation;
+            val = color.brightness;
+                
+            updateSVSquare();
+            updateColor(false);
+            updateCursors();
+        };
+        add(hexField);
 
 		svCursor = new FlxSprite();
 		svCursor.makeGraphic(10,10,FlxColor.TRANSPARENT);
@@ -124,40 +140,33 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 		}
 	}
 
-	function toggleMenu(){
-		isOpen = !isOpen;
+    function toggleMenu() {
+        isOpen = !isOpen;
+        panelBG.visible = svSquare.visible = hueBar.visible = svCursor.visible = hueCursor.visible = hexField.visible = isOpen;
 
-		panelBG.visible = isOpen;
-		svSquare.visible = isOpen;
-		hueBar.visible = isOpen;
-		svCursor.visible = isOpen;
-		hueCursor.visible = isOpen;
+        if(isOpen) updateCursors();
+    }
 
-		updateCursors();
-	}
+    function closeMenu() {
+        isOpen = false;
+        panelBG.visible = svSquare.visible = hueBar.visible = svCursor.visible = hueCursor.visible = hexField.visible = false;
 
-	function closeMenu(){
-		isOpen = false;
+        dragSV = dragHue = false;
+    }
 
-		panelBG.visible = false;
-		svSquare.visible = false;
-		hueBar.visible = false;
-		svCursor.visible = false;
-		hueCursor.visible = false;
+    function updateColor(updateText:Bool = true) {
+        var rgb = CoolUtil.hsvToRgb(hue, sat, val);
+        var color:FlxColor = FlxColor.fromRGB(rgb.r, rgb.g, rgb.b);
 
-		dragSV = false;
-		dragHue = false;
-	}
+        value = [rgb.r, rgb.g, rgb.b];
+        preview.color = color;
 
-	function updateColor(){
-		var rgb = CoolUtil.hsvToRgb(hue,sat,val);
-
-		value = [rgb.r,rgb.g,rgb.b];
-		preview.color = FlxColor.fromRGB(rgb.r,rgb.g,rgb.b);
+        if(updateText)
+            hexField.text = color.toHexString(false, false); 
 
         if(onChange != null)
             onChange(value);
-	}
+    }
 
 	function updateCursors(){
 		svCursor.x = svSquare.x + sat * svSquare.width - svCursor.width/2;
