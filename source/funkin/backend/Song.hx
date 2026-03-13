@@ -24,6 +24,8 @@ typedef SwagSong =
 	var gfVersion:String;
 	var stage:String;
 
+	@:optional var lanes:Int;
+
 	@:optional var nativeModchart:Bool;
 	@:optional var playfields:Int;
 
@@ -124,6 +126,13 @@ class Song
 		}
 		if (songJson.mania == null){
         	songJson.mania = 3;
+    	}
+
+		if (songJson.lanes == null){
+			if(songJson.gfStrums != null && songJson.gfStrums == true)
+        		songJson.lanes = 3;
+			else
+				songJson.lanes = 2;
     	}
 
 		if (songJson.playfields == null){

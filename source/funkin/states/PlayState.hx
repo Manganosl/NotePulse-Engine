@@ -200,6 +200,8 @@ class PlayState extends MusicBeatState
 	public var opponentStrums:PlayField;
 	public var playerStrums:PlayField;
 	public var gfStrums:PlayField;
+	public var extraStrums:Array<PlayField> = [];
+
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 	public var grpSustainSplashes:FlxTypedGroup<SustainSplash>;
 
@@ -656,6 +658,11 @@ class PlayState extends MusicBeatState
 		opponentStrums = new PlayField(0);
 		playerStrums = new PlayField(1);
 		gfStrums = new PlayField(2);
+		if(SONG.lanes > 3){
+			for(lane in 0...(SONG.lanes-3)){
+				extraStrums[lane] = new PlayField(lane+3);
+			}
+		}
 
 		generateSong(SONG.song);
 
@@ -1344,22 +1351,24 @@ class PlayState extends MusicBeatState
 		if(ret != LuaUtils.Function_Stop) {
 			if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;
 
-			generateStaticArrows(0);
-			generateStaticArrows(1);
-			if(SONG.gfStrums) generateStaticArrows(2);
-			for (i in 0...playerStrums.length) {
+			for(i in 0...SONG.lanes)
+				generateStaticArrows(i);
+			for(i in 0...playerStrums.length){
 				setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
 				setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
 			}
-			for (i in 0...opponentStrums.length) {
+			for(i in 0...opponentStrums.length){
 				setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
 				setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
 			}
-			for (i in 0...gfStrums.length) {
+			for(i in 0...gfStrums.length){
 				gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
 				setOnScripts('defaultGfStrumX' + i, gfStrums.members[i].x);
 				setOnScripts('defaultGfStrumY' + i, gfStrums.members[i].y);
 			}
+			for(strums in extraStrums)
+				for(i in 0...strums.length)
+					strums.members[i].x = gfStrums.members[i].x;
 
 			startedCountdown = true;
 			Conductor.songPosition = -Conductor.crochet * 5;
@@ -2782,9 +2791,10 @@ class PlayState extends MusicBeatState
 		var playField:PlayField = null;
 		switch (player)
 		{
+			case 0: playField = opponentStrums;
 			case 1: playField = playerStrums;
 			case 2: playField = gfStrums;
-			default: playField = opponentStrums;
+			default: playField = extraStrums[player-3];
 		}
 
 		var i:Int = 0;
@@ -3829,7 +3839,7 @@ class PlayState extends MusicBeatState
 
 	inline function detectSectionTarget():String {
 		if (SONG.notes[curSection] != null) {
-			if (gf != null && (SONG.notes[curSection].gfSection || (SONG.notes[curSection].focusGF && SONG.gfStrums))) return 'gf';
+			if (gf != null && (SONG.notes[curSection].gfSection || SONG.notes[curSection].focusGF)) return 'gf';
 			return (SONG.notes[curSection].mustHitSection != true) ? 'dad' : 'boyfriend';
 		}
 		return camHitTarget;

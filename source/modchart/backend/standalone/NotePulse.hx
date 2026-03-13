@@ -102,7 +102,7 @@ class NotePulse implements IAdapter {
 	}
 
 	public function getPlayerCount():Int {
-		return if (PlayState.SONG.gfStrums) 3 else 2;
+		return PlayState.SONG.lanes;
 	}
 
 	public function getTimeFromArrow(arrow:FlxSprite) {
@@ -183,7 +183,12 @@ class NotePulse implements IAdapter {
 	}
 
 	public function getArrowItems() {
-		var pspr:Array<Array<Array<FlxSprite>>> = [[[], [], [], []], [[], [], [], []], [[], [], [], []]];
+		var pspr:Array<Array<Array<FlxSprite>>> = [];
+		var interpspr:Array<Array<FlxSprite>> = [];
+		while(interpspr.length != PlayState.SONG.mania+1)
+			interpspr.push([]);
+		while(pspr.length != PlayState.SONG.lanes)
+			pspr.push(interpspr);
 
 		if (Std.is(FlxG.state, PlayState)) {
 			@:privateAccess

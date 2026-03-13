@@ -45,6 +45,8 @@ class EditorPlayState extends MusicBeatSubstate
 	public var opponentStrums:PlayField;
 	public var gfStrums:PlayField;
 	public var playerStrums:PlayField;
+	public var extraStrums:Array<PlayField> = [];
+
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 	
 	var combo:Int = 0;
@@ -144,14 +146,21 @@ class EditorPlayState extends MusicBeatSubstate
 		opponentStrums = new PlayField(0);
 		playerStrums = new PlayField(1);
 		gfStrums = new PlayField(2);
-		
-		generateStaticArrows(0);
-		generateStaticArrows(1);
-		if (PlayState.SONG.gfStrums) {
-			generateStaticArrows(2);
-			for (i in 0...gfStrums.length) {
-				gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
+		if(PlayState.SONG.lanes > 3){
+			for(lane in 0...(PlayState.SONG.lanes-3)){
+				extraStrums[lane] = new PlayField(lane+3);
 			}
+		}
+		
+		for(i in 0...PlayState.SONG.lanes)
+			generateStaticArrows(i);
+
+		if(PlayState.SONG.lanes >= 3){
+			for(i in 0...gfStrums.length)
+				gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
+			for(strums in extraStrums)
+				for(i in 0...strums.length)
+					strums.members[i].x = gfStrums.members[i].x;
 		}
 
 		/***************/
@@ -461,6 +470,7 @@ class EditorPlayState extends MusicBeatSubstate
 				swagNote.playField = PlayField.fields[fieldID];
 				swagNote.gfStrum = (songNotes[4] == 2 ? true : false);
 				if(swagNote.gfStrum) swagNote.mustPress = false;
+				if(swagNote.strum.cpuControlled) swagNote.alpha = 0.2;
 
 				swagNote.scrollFactor.set();
 				swagNote.cameras = [camHUD];
@@ -483,6 +493,7 @@ class EditorPlayState extends MusicBeatSubstate
 						sustainNote.playField = swagNote.playField;
 						sustainNote.scrollFactor.set();
 						sustainNote.cameras = [camHUD];
+						if(sustainNote.strum.cpuControlled) sustainNote.alpha *= 0.2;
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 
@@ -537,9 +548,10 @@ class EditorPlayState extends MusicBeatSubstate
 		var playField:PlayField = null;
 		switch (player)
 		{
+			case 0: playField = opponentStrums;
 			case 1: playField = playerStrums;
 			case 2: playField = gfStrums;
-			default: playField = opponentStrums;
+			default: playField = extraStrums[player-3];
 		}
 
 		var i:Int = 0;
@@ -571,7 +583,9 @@ class EditorPlayState extends MusicBeatSubstate
 				}
 			}
 
-			babyArrow.cpuControlled = (this.player == player ? false : true);
+			var isCpu = (this.player == player ? false : true);
+			babyArrow.cpuControlled = isCpu;
+			if(isCpu) babyArrow.alpha = 0.2;
 			babyArrow.cameras = [camHUD];
 
 			strumLineNotes.add(babyArrow);

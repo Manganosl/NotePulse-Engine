@@ -2,10 +2,17 @@ package funkin.objects;
 
 class HealthIcon extends FlxSkewedSprite
 {
+	public var hasWinningSprite(default, set):Bool = false;
 	public var sprTracker:FlxSprite;
 	private var isOldIcon:Bool = false;
 	private var isPlayer:Bool = false;
 	private var char:String = '';
+
+	private function set_hasWinningSprite(value:Bool){
+		hasWinningSprite = value;
+		changeIcon(char);
+		return value;
+	}
 
 	public function new(char:String = 'bf', isPlayer:Bool = false, ?allowGPU:Bool = true)
 	{

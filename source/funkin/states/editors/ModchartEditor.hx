@@ -60,6 +60,7 @@ class ModchartEditor extends MusicBeatState
 	public var opponentStrums:PlayField;
 	public var gfStrums:PlayField;
 	public var playerStrums:PlayField;
+	public var extraStrums:Array<PlayField> = [];
 	
 	var combo:Int = 0;
 	var lastRating:FlxSprite;
@@ -186,14 +187,22 @@ class ModchartEditor extends MusicBeatState
 		playerStrums.cameras = [camHUD];
 		gfStrums = new PlayField(2);
 		gfStrums.cameras = [camHUD];
-		
-		generateStaticArrows(0);
-		generateStaticArrows(1);
-		if (PlayState.SONG.gfStrums) {
-			generateStaticArrows(2);
-			for (i in 0...gfStrums.length) {
-				gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
+		if(PlayState.SONG.lanes > 3){
+			for(lane in 0...(PlayState.SONG.lanes-3)){
+				extraStrums[lane] = new PlayField(lane+3);
+				extraStrums[lane].cameras = [camHUD];
 			}
+		}
+		
+		for(i in 0...PlayState.SONG.lanes)
+			generateStaticArrows(i);
+
+		if(PlayState.SONG.lanes >= 3){
+			for(i in 0...gfStrums.length)
+				gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
+			for(strums in extraStrums)
+				for(i in 0...strums.length)
+					strums.members[i].x = gfStrums.members[i].x;
 		}
 
 		/***************/
@@ -1682,23 +1691,7 @@ class ModchartEditor extends MusicBeatState
 
 	public function saveChart(auto:Bool = true, dif:String = null)
 	{
-		for (section in PlayState.SONG.notes)
-		{
-			for (note in section.sectionNotes)
-			{
-				var lane:Int = note[1];
-				var gfStrum:Bool = false;
-
-				if (PlayState.SONG.gfStrums
-					&& lane >= (PlayState.SONG.mania + 1) * 2
-					&& lane <  (PlayState.SONG.mania + 1) * 3)
-				{
-					gfStrum = true;
-				}
-
-				note[4] = gfStrum;
-			}
-		}
+		PlayState.SONG.format = "notepulse";
 
 		if (PlayState.SONG.events != null && PlayState.SONG.events.length > 1)
 			PlayState.SONG.events.sort(CoolUtil.sortByTime);
@@ -1718,7 +1711,7 @@ class ModchartEditor extends MusicBeatState
 
 			if (chartPath == null || chartPath == "")
 			{
-				showOutput('Failed to save events: Song.chartPath is null or empty', true);
+				showOutput('Failed to save chart: Song.chartPath is null or empty', true);
 				return;
 			}
 
@@ -1739,11 +1732,11 @@ class ModchartEditor extends MusicBeatState
 			try
 			{
 				sys.io.File.saveContent(chartPath, data.trim());
-				showOutput('Saved modchart events to: $chartPath', false, true);
+				showOutput('Saved to: $chartPath', false, true);
 			}
 			catch (e:Dynamic)
 			{
-				showOutput('Failed to save events: $e', true);
+				showOutput('Failed to save chart: $e', true);
 			}
 		}
 		else

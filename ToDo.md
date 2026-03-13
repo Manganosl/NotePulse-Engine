@@ -11,3 +11,7 @@
 ## 08/03/2026
 - [X] Fix Modchart Editor crashing. **Fixed 10/03/2026**
 - [X] Flx Notes not regenerating in Modchart Editor. **Fixed 10/03/2026**
+
+## 13/03/2026
+- [ ] Add winning health icons
+- [ ] Add animated health icons
