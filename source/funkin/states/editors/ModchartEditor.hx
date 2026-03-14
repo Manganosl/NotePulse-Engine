@@ -401,7 +401,7 @@ class ModchartEditor extends MusicBeatState
 
 		posY += 40;
 
-		playerStepper = new PsychUINumericStepper(posX, posY, 1, -1, -1, playfieldStepper.value*2, 0);
+		playerStepper = new PsychUINumericStepper(posX, posY, 1, -1, -1, (PlayState.SONG.lanes - 1), 0);
 		playerStepper.onValueChange = function() {
 			updateModEvV1();
 		};

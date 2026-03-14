@@ -1189,7 +1189,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		if(FlxG.mouse.x >= minX && FlxG.mouse.x < gridBg.x + gridBg.width)
 		{
-			if((!FlxG.mouse.overlaps(mainBox.bg) || !FlxG.mouse.overlaps(infoBox.bg))){
+			if((!FlxG.mouse.overlaps(mainBox.bg) && !FlxG.mouse.overlaps(infoBox.bg))){
 				Mouse.cursor = MouseCursor.CROSSHAIR;
 				isCrosshair = true;
 			}
@@ -2828,7 +2828,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		posY += 40;
 
-		playerStepper = new PsychUINumericStepper(posX, posY, 1, -1, -1, playfieldStepper.value*2, 0);
+		playerStepper = new PsychUINumericStepper(posX, posY, 1, -1, -1, (PlayState.SONG.lanes - 1), 0);
 		playerStepper.onValueChange = function() {
 			updateModEvV1();
 		};

@@ -135,7 +135,7 @@ class PlayState extends MusicBeatState
 	public var sickCount:Int = 0;
 	public var marvCount:Int = 0;
 
-	var noteRows:Array<Array<Array<Note>>> = [[], [], []];
+	var noteRows:Array<Array<Array<Note>>> = [];
 
 	public var boyfriendGroup:FlxSpriteGroup;
 	public var dadGroup:FlxSpriteGroup;
@@ -1205,6 +1205,9 @@ class PlayState extends MusicBeatState
 				for (i in 0...event[1].length)
 					makeEvent(event, i);
 		}
+
+		while(noteRows.length != PlayField.fields.length)
+			noteRows.push([]);
 
 		for (section in noteData)
 		{
