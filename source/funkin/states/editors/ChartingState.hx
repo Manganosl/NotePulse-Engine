@@ -965,7 +965,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					intendedCamZoom += 0.1;
 					iconDiff -= 1;
 				}
-				if(FlxG.keys.justPressed.MINUS && intendedCamZoom > 0.51){
+				if(FlxG.keys.justPressed.MINUS){
 					intendedCamZoom -= 0.1;
 					iconDiff += 1;
 				}
