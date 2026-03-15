@@ -53,7 +53,6 @@ class PsychUISlider extends FlxSpriteGroup
 		this.max = max;
 		this.value = def;
 		_updatePositions();
-		handle.y = bar.y + bar.height/2 - handle.height/2;
 		forceNextUpdate = true;
 	}
 
@@ -75,7 +74,7 @@ class PsychUISlider extends FlxSpriteGroup
 			isPointer = false;
 			Mouse.cursor = MouseCursor.DEFAULT;
 		}
-		
+
 		if(FlxG.mouse.justMoved || FlxG.mouse.justPressed || forceNextUpdate)
 		{
 			forceNextUpdate = false;
@@ -111,6 +110,7 @@ class PsychUISlider extends FlxSpriteGroup
 		minText.y = maxText.y = valueText.y = bar.y + 12;
 
 		_updateHandleX();
+		handle.y = bar.y + bar.height/2 - handle.height/2;
 	}
 
 	function _updateHandleX()
@@ -145,7 +145,7 @@ class PsychUISlider extends FlxSpriteGroup
 		return max;
 	}
 
-	public function set_value(v:Float)
+	function set_value(v:Float)
 	{
 		value = Math.max(min, Math.min(max, v));
 		valueText.text = Std.string(FlxMath.roundDecimal(value, decimals));
