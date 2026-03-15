@@ -60,7 +60,7 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
 		
 		var arrowData = getArrowParams(arrow);
 		final isEnd = Adapter.instance.isHoldEnd(arrow);
-        var stepDuration = (Adapter.instance.getCurrentCrochet() / 3.7); 
+        var stepDuration = (Adapter.instance.getStartCrochet() / 3.85); 
         
 		final realDistance = arrowData.distance;
 		final isHitten = arrowData.hitten;

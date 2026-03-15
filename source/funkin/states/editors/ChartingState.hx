@@ -1189,7 +1189,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		if(FlxG.mouse.x >= minX && FlxG.mouse.x < gridBg.x + gridBg.width)
 		{
-			if((!FlxG.mouse.overlaps(mainBox.bg) && !FlxG.mouse.overlaps(infoBox.bg))){
+			if((!FlxG.mouse.overlaps(mainBox.bg) && !FlxG.mouse.overlaps(infoBox.bg) && !FlxG.mouse.overlaps(upperBox.bg))){
 				Mouse.cursor = MouseCursor.CROSSHAIR;
 				isCrosshair = true;
 			}

@@ -14,6 +14,7 @@ interface IAdapter {
 	// public function getCrochet():Float           // Current beat crochet
 	public function getCurrentBeat():Float; // Current beat
 	public function getCurrentCrochet():Float; // Current beat
+	public function getStartCrochet():Float; // Current beat
 	public function getCurrentScrollSpeed():Float; // Current arrow scroll speed
 	public function getBeatFromStep(step:Float):Float;
 

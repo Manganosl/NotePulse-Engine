@@ -17,9 +17,11 @@ import modchart.Config;
 
 class NotePulse implements IAdapter {
 	private var __fCrochet:Float = 0;
+	private var startCrochet:Float = 0;
 	
 	public function onModchartingInitialization() {
 		__fCrochet = (Conductor.crochet + 8) / 4;
+		startCrochet = Conductor.crochet;
 		PlayState.fModchart = true;
 	}
 
@@ -49,6 +51,10 @@ class NotePulse implements IAdapter {
 
 	public function getCurrentCrochet():Float {
 		return Conductor.crochet;
+	}
+
+	public function getStartCrochet():Float {
+		return startCrochet;
 	}
 
 	public function getBeatFromStep(step:Float)
