@@ -1145,39 +1145,64 @@ class Parser {
 			push(tk);
 			mk(EClass(name, fields, extend, interfaces, nextIsFinal, nextIsPrivate), p1);
 
-		case "enum": // TODO: enum abstract 
+		case "enum":
+			var isAbstract = maybe(TId("abstract"));
 			var name = getIdent();
+			var underlyingType:CType = null;
+			
+			if(isAbstract) {
+				ensure(TPOpen);
+				if(allowTypes) {
+					underlyingType = parseType();
+					ensure(TPClose);
+				} else {
+					var t = token();
+					while(t != TPClose && t != TEof) {
+						t = token();
+					}
+				}
+			}
 
 			ensure(TBrOpen);
 
-			// TODO: optimize this
 			var fields:Array<EnumField> = [];
 			var fieldName:String = '';
 			var enumArgs:Array<Argument> = null;
-			//var tk = token();
+			var fieldValue:Expr = null;
 
 			while(!maybe(TBrClose)) {
 				var tk = token();
 
 				switch(tk) {
-					//case TBrClose:
-					//	break;
 					case TSemicolon | TComma:
 						if(fieldName.trim().length == 0) continue;
 						
 						fields.push({
 							name: fieldName,
-							args: enumArgs == null ? [] : enumArgs
+							args: enumArgs == null ? [] : enumArgs,
+							value: fieldValue
 						});
 						fieldName = '';
 						enumArgs = null;
+						fieldValue = null;
 					case TPOpen:
+						if(isAbstract) {
+							error(ECustom("Enum abstract fields cannot have parameters"), tokenMin, tokenMax);
+							break;
+						}
 						if(enumArgs != null) {
 							error(ECustom("Cannot have multiple argument lists in one enum constructor"), tokenMin, tokenMax);
 							break;
 						}
 						enumArgs = parseFunctionArgs(true);
+					case TOp("="):
+						if(!isAbstract) {
+							error(ECustom("Only enum abstract fields can have values"), tokenMin, tokenMax);
+							break;
+						}
+						fieldValue = parseExpr();
 					default:
+						if(tk.match(TId("var"))) continue;
 						if(fieldName.trim().length != 0) {
 							error(ECustom("Expected comma or semicolon"), tokenMin, tokenMax);
 							break;
@@ -1187,7 +1212,7 @@ class Parser {
 				}
 			}
 			
-			mk(EEnum({ name: name, fields: fields }, false), p1);
+			mk(EEnum({ name: name, fields: fields, underlyingType: underlyingType }, isAbstract), p1);
 		case "cast":
 			var tk = token();
 			var e:Expr = null;
