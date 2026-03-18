@@ -2518,11 +2518,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		var isGfSection:Bool = (curSecData != null && curSecData.gfSection == true);
 		if(_lastGfSection == isGfSection && _lastSec == curSec && !ignoreCheck) return; //optimization
 
-		var iconNum:Int;
-		//if(PlayState.SONG.gfStrums)
-		//	iconNum = GRID_PLAYERS-1;
-		//else
-			iconNum = GRID_PLAYERS;
+		var iconNum:Int = GRID_PLAYERS;
 		for (i in 0...iconNum)
 		{
 			var icon:HealthIcon = icons[i];

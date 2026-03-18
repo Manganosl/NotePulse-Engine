@@ -3093,11 +3093,11 @@ class PlayState extends MusicBeatState
 				
 					if (char.ghostsEnabled
 						&& !note.isSustainNote
-						&& noteRows[(note.gfNote || note.gfStrum) ? 2 : (note.mustPress ? 0 : 1)][note.row] != null
-						&& noteRows[(note.gfNote || note.gfStrum) ? 2 : (note.mustPress ? 0 : 1)][note.row].length > 1
+						&& noteRows[(note.playField.player)][note.row] != null
+						&& noteRows[(note.playField.player)][note.row].length > 1
 						&& note.noteType != "Ghost Note")
 					{
-						var chord = noteRows[(note.gfNote || note.gfStrum) ? 2 : (note.mustPress ? 0 : 1)][note.row];
+						var chord = noteRows[(note.playField.player)][note.row];
 						var animNote = chord[0];
 						var realAnim:String = singAnimation(Std.int(Math.abs(animNote.noteData))) + (altAnim == null ? "" : altAnim);
 
@@ -3208,11 +3208,11 @@ class PlayState extends MusicBeatState
 
 						if (char.ghostsEnabled
 							&& !note.isSustainNote
-							&& noteRows[(note.gfNote || note.gfStrum) ? 2 : (note.mustPress ? 0 : 1)][note.row] != null
-							&& noteRows[(note.gfNote || note.gfStrum) ? 2 : (note.mustPress ? 0 : 1)][note.row].length > 1
+							&& noteRows[(note.playField.player)][note.row] != null
+							&& noteRows[(note.playField.player)][note.row].length > 1
 							&& note.noteType != "Ghost Note")
 						{
-							var chord = noteRows[(note.gfNote || note.gfStrum) ? 2 : (note.mustPress ? 0 : 1)][note.row];
+							var chord = noteRows[(note.playField.player)][note.row];
 							var animNote = chord[0];
 							var realAnim:String = singAnimation(Std.int(Math.abs(animNote.noteData))) + note.animSuffix;
 
