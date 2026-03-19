@@ -683,18 +683,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var lastBeatHit:Int = 0;
 	var isCrosshair:Bool = false;
 	var intendedCamZoom:Float = 1;
-	var iconDiff:Int = 0;
 	override function update(elapsed:Float)
 	{
-		if(icons != null){
-			var iconX:Float = gridBg.x;
-			eventIcon.x = iconX + (GRID_SIZE * 0.5) - eventIcon.width/2;
-			iconX += GRID_SIZE;
-			for(icon in icons){
-				icon.x = CoolUtil.fpsLerp(icon.x, iconX + GRID_SIZE * ((GRID_COLUMNS_PER_PLAYER/2)-1) - (icon.width/2) + ((icon.width/2)*1.5)*iconDiff, 0.1);
-				iconX += GRID_SIZE * GRID_COLUMNS_PER_PLAYER;
-			}
-		}
 		FlxG.camera.zoom = CoolUtil.fpsLerp(FlxG.camera.zoom, intendedCamZoom, 0.1);
 		if(FlxG.mouse.justPressed || FlxG.mouse.justPressedRight || FlxG.mouse.justPressedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickDown'));
 		if(FlxG.mouse.justReleased || FlxG.mouse.justReleasedRight || FlxG.mouse.justReleasedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickUp'));
@@ -961,14 +951,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				FlxG.keys.justPressed.C || FlxG.keys.justPressed.V || FlxG.keys.justPressed.A || FlxG.keys.justPressed.S || FlxG.keys.justPressed.PLUS || FlxG.keys.justPressed.MINUS))
 			{
 				canContinue = false;
-				if(FlxG.keys.justPressed.PLUS && intendedCamZoom < 1.09){
+				if(FlxG.keys.justPressed.PLUS && intendedCamZoom < 1.09)
 					intendedCamZoom += 0.1;
-					iconDiff -= 1;
-				}
-				if(FlxG.keys.justPressed.MINUS){
+				if(FlxG.keys.justPressed.MINUS && intendedCamZoom > 0.41)
 					intendedCamZoom -= 0.1;
-					iconDiff += 1;
-				}
 				if(FlxG.keys.justPressed.S)
 					saveChart();
 				else if(FlxG.keys.justPressed.Z)
@@ -1542,9 +1528,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		FlxG.camera.scroll.y = scrollY;
 		lastFocus = PsychUIInputText.focusOn;
-
-		for(icon in icons)
-			icon.zoomFactor = 0.5;
 	}
 
 	function moveSelectedNotes(noteData:Int = 0, lastY:Float)
@@ -1948,7 +1931,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				eventIcon.alpha = 0.6;
 				eventIcon.setGraphicSize(30, 30);
 				eventIcon.updateHitbox();
-				eventIcon.zoomFactor = 0.5;
 				eventIcon.scrollFactor.set();
 				add(eventIcon);
             }
@@ -1962,7 +1944,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			mustHitIndicator = FlxSpriteUtil.drawTriangle(new FlxSprite(0, iconY - 20).makeGraphic(16, 16, FlxColor.TRANSPARENT), 0, 0, 16);
 			mustHitIndicator.scrollFactor.set();
 			mustHitIndicator.flipY = true;
-			mustHitIndicator.zoomFactor = 0.5;
 			mustHitIndicator.offset.x += mustHitIndicator.width/2;
 			add(mustHitIndicator);
 		}
@@ -1975,15 +1956,16 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				icon.y = iconY;
 				icon.alpha = 0.6;
 				icon.scrollFactor.set();
-				icon.zoomFactor = 0.5;
 				icon.scale.set(0.3, 0.3);
 				icon.updateHitbox();
 				icon.ID = i+1;
+				if(i == 0) icon.ID = 2;
+				if(i == 1) icon.ID = 1;
 				add(icon);
 				icons.push(icon);
             }
 
-            icons[i].x = iconX + GRID_SIZE * ((GRID_COLUMNS_PER_PLAYER/2)-1) - icons[i].width/2;
+            icons[i].x = iconX + GRID_SIZE * ((GRID_COLUMNS_PER_PLAYER/2)-1) - icons[i].width/1.5;
             icons[i].y = iconY;
 
             columns += GRID_COLUMNS_PER_PLAYER;
@@ -2542,11 +2524,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			}
 
 			if(focusGF)
-				mustHitIndicator.x = iconP3.x + iconP3.width/2 + GRID_SIZE;
+				if(GRID_PLAYERS >= 3) mustHitIndicator.x = iconP3.x + iconP3.width/1.5 + GRID_SIZE;
+				else mustHitIndicator.x = ((iconP1.x + iconP1.width/1.5) + (iconP2.x + iconP2.width/1.5)) / 2 + GRID_SIZE
 			else if(!mustHitSection)
-				mustHitIndicator.x = iconP2.x + iconP2.width/2 + GRID_SIZE;
+				mustHitIndicator.x = iconP2.x + iconP2.width/1.5 + GRID_SIZE;
 			else
-				mustHitIndicator.x = iconP1.x + iconP1.width/2 + GRID_SIZE;
+				mustHitIndicator.x = iconP1.x + iconP1.width/1.5 + GRID_SIZE;
 		}
 		_lastGfSection = isGfSection;
 		_lastSec = curSec;
@@ -3232,6 +3215,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			if(sec != null)
 			{
 				sec.focusGF = focusGFCheckBox.checked;
+				updateHeads(true);
 			}
 		});
 
