@@ -3600,7 +3600,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			loadSection();
 		};
 
-		lanesStepper = new PsychUINumericStepper(objX + 160, objY + 40, 1, PlayState.SONG.lanes, 2, 999, 0);
+		lanesStepper = new PsychUINumericStepper(objX + 140, objY + 40, 1, PlayState.SONG.lanes, 2, 999, 0);
 		lanesStepper.onValueChange = function(){
 			GRID_PLAYERS = PlayState.SONG.lanes = Std.int(lanesStepper.value);
 			createGrids();
@@ -3614,7 +3614,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			updateHeads(true);
 		}
 
-		audioOffsetStepper = new PsychUINumericStepper(objX + 150, objY+80, 1, 0, -500, 500, 0);
+		audioOffsetStepper = new PsychUINumericStepper(objX + 140, objY+80, 1, 0, -500, 500, 0);
 		audioOffsetStepper.onValueChange = function()
 		{
 			Reflect.setField(PlayState.SONG, "offset", audioOffsetStepper.value);
@@ -3663,14 +3663,15 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		});
 		
 		tab_group.add(new FlxText(stepperMania.x, stepperMania.y - 15, 80, 'Mania:'));
-		tab_group.add(stepperMania);
-		tab_group.add(lanesStepper);
 		tab_group.add(new FlxText(bpmStepper.x, bpmStepper.y - 15, 50, 'BPM:'));
 		tab_group.add(new FlxText(scrollSpeedStepper.x, scrollSpeedStepper.y - 15, 80, 'Scroll Speed:'));
 		tab_group.add(new FlxText(audioOffsetStepper.x, audioOffsetStepper.y - 15, 100, 'Audio Offset (ms):'));
+		tab_group.add(new FlxText(lanesStepper.x, lanesStepper.y - 15, 100, 'Strum Count:'));
+		tab_group.add(stepperMania);
 		tab_group.add(bpmStepper);
 		tab_group.add(scrollSpeedStepper);
 		tab_group.add(audioOffsetStepper);
+		tab_group.add(lanesStepper);
 
 		//dropdowns
 		tab_group.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 80, 'Stage:'));

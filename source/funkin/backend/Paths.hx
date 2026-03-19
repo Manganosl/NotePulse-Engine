@@ -135,6 +135,7 @@ class Paths
 
 	inline static function getLibraryPathForce(file:String, library:String, ?level:String)
 	{
+		if(library == "songs") return 'assets/$library/$file';
 		if(level == null) level = library;
 		var returnPath = '$library:assets/$level/$file';
 		return returnPath;
