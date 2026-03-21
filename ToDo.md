@@ -15,3 +15,7 @@
 ## 13/03/2026
 - [ ] Add winning health icons
 - [ ] Add animated health icons
+
+## 21/03/2026
+- [ ] Fix ghost animations not working correctly with characters using animation atlas.
+- [X] Reimplement multiatlas on characters. **Done 22/03/2026**

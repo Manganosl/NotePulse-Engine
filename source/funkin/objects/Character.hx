@@ -223,7 +223,7 @@ class Character extends FlxAnimate
 		}
 		else
 		{
-			if (!Paths.fileExists('images/${haxe.io.Path.withExtension(json.image, 'png')}', IMAGE))
+			if (!Paths.fileExists('images/${haxe.io.Path.withExtension(json.image.split(',')[0], 'png')}', IMAGE))
 			{
 				spriteType = TEXTURE_ATLAS;
 				isAnimateAtlas = true;
@@ -234,7 +234,7 @@ class Character extends FlxAnimate
 			{
 				spriteType = SPRITE;
 				isMultiAtlas = isAnimateAtlas = false;
-				frames = Paths.getAtlas(json.image);
+				frames = Paths.getMultiAtlas(json.image.split(','));
 			}
 			imageFile = json.image;
 		}
@@ -591,7 +591,7 @@ class Character extends FlxAnimate
 
 	public function playGhostAnim(ghostID = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0)
 	{
-		var ghost:FlxSprite = new FlxSprite();
+		var ghost:FlxSprite = new FlxAnimate();
 		ghost.scale.copyFrom(scale);
 		ghost.frames = frames;
 		ghost.animation.copyFrom(animation);
