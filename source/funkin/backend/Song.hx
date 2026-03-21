@@ -66,117 +66,120 @@ class Song
 	public var player2:String = 'dad';
 	public var gfVersion:String = 'gf';
 
-	private static function onLoadJson(songJson:Dynamic) // Convert old charts to newest format, or convert new format to old format?
-	{
-		convertedChart = false;
-		if(songJson.format == null)
-			throw new haxe.Exception('No chart format found!');
+	private static function onLoadJson(songJson:Dynamic){
+        convertedChart = false;
+        if(songJson.format == null)
+            throw new haxe.Exception('No chart format found!');
 
-		Log.info('Loaded ${songJson.format} Song!');
+        Log.info('Loaded ${songJson.format} Song!');
 
-		if(songJson.gfVersion == null)
-		{
-			songJson.gfVersion = songJson.player3;
-			songJson.player3 = null;
-		}
+        if(songJson.gfVersion == null)
+        {
+            songJson.gfVersion = songJson.player3;
+            songJson.player3 = null;
+        }
 
-		if(StringTools.startsWith(songJson.format, 'psych_v1')) {
-			convertedChart = true;
-			songJson.format = 'psych_v1';
+        if(StringTools.startsWith(songJson.format, 'psych_v1')) {
+            convertedChart = true;
+            songJson.format = 'psych_v1';
 
-			var characters:Array<String> = [songJson.player1, songJson.player2, songJson.gfVersion];
-			for (i in 0...characters.length)
-			{
-				switch(characters[i])
-				{
-					case 'pico-playable':
-						characters[i] = 'pico-player';
+            var characters:Array<String> = [songJson.player1, songJson.player2, songJson.gfVersion];
+            for (i in 0...characters.length)
+            {
+                switch(characters[i])
+                {
+                    case 'pico-playable':
+                        characters[i] = 'pico-player';
 
-					case 'tankman-playable':
-						characters[i] = 'tankman-player';
-				}
-			}
+                    case 'tankman-playable':
+                        characters[i] = 'tankman-player';
+                }
+            }
 
-			songJson.player1 = characters[0];
-			songJson.player2 = characters[1];
-			songJson.gfVersion = characters[2];
-		}
+            songJson.player1 = characters[0];
+            songJson.player2 = characters[1];
+            songJson.gfVersion = characters[2];
+        }
 
-		if(songJson.events == null && songJson.format == 'psych_legacy')
-		{
-			songJson.events = [];
-			for (secNum in 0...songJson.notes.length)
-			{
-				var sec:SwagSection = songJson.notes[secNum];
+        if(songJson.events == null && songJson.format == 'psych_legacy')
+        {
+            songJson.events = [];
+            for (secNum in 0...songJson.notes.length)
+            {
+                var sec:SwagSection = songJson.notes[secNum];
 
-				var i:Int = 0;
-				var notes:Array<Dynamic> = sec.sectionNotes;
-				var len:Int = notes.length;
-				while(i < len) {
-					var note:Array<Dynamic> = notes[i];
-					if(note[1] < 0) {
-						songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
-						notes.remove(note);
-						len = notes.length;
-						continue;
-					}
-					i++;
-				}
-			}
-		}
-		if (songJson.mania == null){
-        	songJson.mania = 3;
-    	}
+                var i:Int = 0;
+                var notes:Array<Dynamic> = sec.sectionNotes;
+                var len:Int = notes.length;
+                while(i < len) {
+                    var note:Array<Dynamic> = notes[i];
+                    if(note[1] < 0) {
+                        songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
+                        notes.remove(note);
+                        len = notes.length;
+                        continue;
+                    }
+                    i++;
+                }
+            }
+        }
 
-		if (songJson.lanes == null){
-			if(songJson.gfStrums != null && songJson.gfStrums == true)
-        		songJson.lanes = 3;
-			else
-				songJson.lanes = 2;
-    	}
+        if (songJson.mania == null){
+            songJson.mania = 3;
+        }
 
-		if (songJson.playfields == null){
-        	songJson.playfields = 1;
-    	}
-	
-		if (songJson.pixel4kTexture == null){
-        	if(songJson.mania == 3) songJson.pixel4kTexture = false;
-			else songJson.pixel4kTexture = true;
-    	}
+        var keyCount:Int = songJson.mania + 1;
 
-		if (songJson.nativeModchart == null || songJson.nativeModchart == false){
-        	songJson.nativeModchart = false;
-    	}
+        if (songJson.lanes == null){
+            if(songJson.gfStrums != null && songJson.gfStrums == true)
+                songJson.lanes = 3;
+            else
+                songJson.lanes = 2;
+        }
 
-		if (convertedChart && Std.is(songJson.notes, Array)) {
-		    var sections:Array<Dynamic> = cast songJson.notes;
+        if (songJson.playfields == null){
+            songJson.playfields = 1;
+        }
+    
+        if (songJson.pixel4kTexture == null){
+            if(songJson.mania == 3) songJson.pixel4kTexture = false;
+            else songJson.pixel4kTexture = true;
+        }
 
-		    for (section in sections) {
-		        if (
-		            section == null ||
-		            !Reflect.hasField(section, "sectionNotes") ||
-		            !Reflect.hasField(section, "mustHitSection")
-		        ) continue;
-				
-		        if (!section.mustHitSection) {
-		            var notes:Array<Dynamic> = cast section.sectionNotes;
-				
-		            for (note in notes) {
-		                if (note == null || note.length <= 1) continue;
-					
-		                var col:Int = Std.parseInt('' + note[1]);
-		                if (Math.isNaN(col)) continue;
-					
-		                if (col >= 0 && col <= 3) {
-		                    note[1] = col + 4;
-		                } else if (col >= 4 && col <= 7) {
-		                    note[1] = col - 4;
-		                }
-		            }
-		        }
-		    }
-		}
-		if (songJson.notes != null) {
+        if (songJson.nativeModchart == null || songJson.nativeModchart == false){
+            songJson.nativeModchart = false;
+        }
+
+        if (convertedChart && Std.is(songJson.notes, Array)) {
+            var sections:Array<Dynamic> = cast songJson.notes;
+
+            for (section in sections) {
+                if (
+                    section == null ||
+                    !Reflect.hasField(section, "sectionNotes") ||
+                    !Reflect.hasField(section, "mustHitSection")
+                ) continue;
+                
+                if (!section.mustHitSection) {
+                    var notes:Array<Dynamic> = cast section.sectionNotes;
+                
+                    for (note in notes) {
+                        if (note == null || note.length <= 1) continue;
+                    
+                        var col:Int = Std.parseInt('' + note[1]);
+                        if (Math.isNaN(col)) continue;
+                    
+                        if (col >= 0 && col < keyCount) {
+                            note[1] = col + keyCount;
+                        } else if (col >= keyCount && col < keyCount * 2) {
+                            note[1] = col - keyCount;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (songJson.notes != null) {
             var sections:Array<Dynamic> = cast songJson.notes;
             for (section in sections) {
                 if (section == null || section.sectionNotes == null) continue;
@@ -191,7 +194,7 @@ class Song
                             note[4] = 2;
                         } else {
                             var col:Int = Std.parseInt('' + note[1]);
-                            var isPlayerNote:Bool = (col < 4) ? mustHit : !mustHit;
+                            var isPlayerNote:Bool = (col < keyCount) ? mustHit : !mustHit;
 
                             note[4] = isPlayerNote ? 1 : 0;
                         }
@@ -199,7 +202,7 @@ class Song
                 }
             }
         }
-	}
+    }
 
 	public function new(song, notes, bpm)
 	{

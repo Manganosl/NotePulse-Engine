@@ -25,11 +25,11 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 	public var val:Float = 1;
 
 	public var value:Array<Int> = [255,255,255];
-    public var onChange:Array<Int>->Void;
+    public var onChange:Void->Void;
 
 	var svSize:Int = 120;
 	var hueHeight:Int = 16;
-	var buttonSize:Int = 22;
+	var buttonSize:Int = 33;
 
     var hexField:PsychUIInputText;
 
@@ -49,7 +49,7 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 	}
 
 	function createBox(){
-		panelBG = new FlxSprite(0, (bg.height + 2)).makeGraphic((svSize + 8), (svSize + hueHeight + 12), FlxColor.BLACK);
+		panelBG = new FlxSprite(0, (bg.height + 2)).makeGraphic((svSize + 8), (svSize + hueHeight + 50), FlxColor.BLACK);
 		panelBG.alpha = 0.6;
 		panelBG.visible = false;
 		add(panelBG);
@@ -62,8 +62,9 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 		hueBar.visible = false;
 		add(hueBar);
 
-        hexField = new PsychUIInputText(4, (hueBar.y + 8), Std.int(panelBG.width * 0.8));
+        hexField = new PsychUIInputText(4, (hueBar.y - 200), Std.int(panelBG.width * 0.9));
         hexField.filterMode = ONLY_HEXADECIMAL;
+		hexField.visible = false;
         hexField.onChange = function(old:String, curString:String) {
             var color:FlxColor = FlxColor.fromString('#' + curString);
             hue = color.hue / 360;
@@ -165,7 +166,7 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
             hexField.text = color.toHexString(false, false); 
 
         if(onChange != null)
-            onChange(value);
+            onChange();
     }
 
 	function updateCursors(){
@@ -207,5 +208,20 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 
 		svSquare.pixels = bmp;
 		svSquare.dirty = true;
+	}
+
+	public function setColorFromHex(hex:String):Void {
+		final lastValue = hexField.text;
+		if(lastValue == hex) return;
+		hexField.text = hex;
+
+        var color:FlxColor = FlxColor.fromString('#' + hex);
+        hue = color.hue / 360;
+        sat = color.saturation;
+        val = color.brightness;
+                
+        updateSVSquare();
+        updateColor(false);
+        updateCursors();
 	}
 }

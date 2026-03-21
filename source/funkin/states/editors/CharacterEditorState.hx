@@ -127,24 +127,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 				updatePointerPos();
 				unsavedProgress = true;
 			}
-			else if(sender == healthColorStepperR)
-			{
-				character.healthColorArray[0] = Math.round(healthColorStepperR.value);
-				updateHealthBar();
-				unsavedProgress = true;
-			}
-			else if(sender == healthColorStepperG)
-			{
-				character.healthColorArray[1] = Math.round(healthColorStepperG.value);
-				updateHealthBar();
-				unsavedProgress = true;
-			}
-			else if(sender == healthColorStepperB)
-			{
-				character.healthColorArray[2] = Math.round(healthColorStepperB.value);
-				updateHealthBar();
-				unsavedProgress = true;
-			}
 		}
 	}
 
@@ -538,10 +520,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		reloadCharacterDropDown();
 		charDropDown.selectedLabel = _char;
 
-		var hsvTest:PsychUIHSVPicker = new PsychUIHSVPicker(100,100); ////////
-
 		tab_group.add(new FlxText(charDropDown.x, charDropDown.y - 18, 80, 'Character:'));
-		tab_group.add(hsvTest); //////
 		tab_group.add(check_player);
 		tab_group.add(reloadCharacter);
 		tab_group.add(templateCharacter);
@@ -668,9 +647,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	var positionCameraYStepper:PsychUINumericStepper;
 	var flipXCheckBox:PsychUICheckBox;
 	var noAntialiasingCheckBox:PsychUICheckBox;
-	var healthColorStepperR:PsychUINumericStepper;
-	var healthColorStepperG:PsychUINumericStepper;
-	var healthColorStepperB:PsychUINumericStepper;
+	var healthColorHSV:PsychUIHSVPicker;
 	function addCharacterUI()
 	{
 		var tab_group = UI_CharacterBox.getTab('Character').menu;
@@ -729,9 +706,12 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			saveCharacter();
 		});
 
-		healthColorStepperR = new PsychUINumericStepper(singDurationStepper.x, saveCharacterButton.y, 20, character.healthColorArray[0], 0, 255, 0);
-		healthColorStepperG = new PsychUINumericStepper(singDurationStepper.x + 65, saveCharacterButton.y, 20, character.healthColorArray[1], 0, 255, 0);
-		healthColorStepperB = new PsychUINumericStepper(singDurationStepper.x + 130, saveCharacterButton.y, 20, character.healthColorArray[2], 0, 255, 0);
+		healthColorHSV = new PsychUIHSVPicker(singDurationStepper.x, saveCharacterButton.y - 5);
+		healthColorHSV.onChange = function() {
+			character.healthColorArray = healthColorHSV.value;
+			updateHealthBar();
+			unsavedProgress = true;
+		}
 
 		tab_group.add(new FlxText(15, imageInputText.y - 18, 100, 'Image file name:'));
 		tab_group.add(new FlxText(15, healthIconInputText.y - 18, 100, 'Health icon name:'));
@@ -740,7 +720,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		tab_group.add(new FlxText(15, scaleStepper.y - 18, 100, 'Scale:'));
 		tab_group.add(new FlxText(positionXStepper.x, positionXStepper.y - 18, 100, 'Character X/Y:'));
 		tab_group.add(new FlxText(positionCameraXStepper.x, positionCameraXStepper.y - 18, 100, 'Camera X/Y:'));
-		tab_group.add(new FlxText(healthColorStepperR.x, healthColorStepperR.y - 18, 100, 'Health Bar R/G/B:'));
 		tab_group.add(imageInputText);
 		tab_group.add(reloadImage);
 		tab_group.add(decideIconColor);
@@ -754,9 +733,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		tab_group.add(positionYStepper);
 		tab_group.add(positionCameraXStepper);
 		tab_group.add(positionCameraYStepper);
-		tab_group.add(healthColorStepperR);
-		tab_group.add(healthColorStepperG);
-		tab_group.add(healthColorStepperB);
+		tab_group.add(healthColorHSV);
 		tab_group.add(saveCharacterButton);
 	}
 
@@ -1081,11 +1058,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		}
 	}
 
-	inline function updateHealthBar()
-	{
-		healthColorStepperR.value = character.healthColorArray[0];
-		healthColorStepperG.value = character.healthColorArray[1];
-		healthColorStepperB.value = character.healthColorArray[2];
+	inline function updateHealthBar(){
+		var color:FlxColor = FlxColor.fromRGB(character.healthColorArray[0], character.healthColorArray[1], character.healthColorArray[2]);
+		healthColorHSV.setColorFromHex(color.toHexString(false, false));
 		healthBar.leftBar.color = healthBar.rightBar.color = FlxColor.fromRGB(character.healthColorArray[0], character.healthColorArray[1], character.healthColorArray[2]);
 		healthIcon.changeIcon(character.healthIcon, false);
 		updatePresence();
