@@ -54,9 +54,8 @@ import funkin.states.handlers.LoadingState;
 
 import funkin.objects.ui.*;
 
-#if flxanimate
-import flxanimate.*;
-#end
+import animate.*;
+
 
 //Flixel
 import flixel.sound.FlxSound;

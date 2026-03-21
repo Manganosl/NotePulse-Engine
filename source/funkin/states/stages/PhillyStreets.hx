@@ -391,7 +391,7 @@ class PhillyStreets extends BaseStage
 		else
 			abot.lookLeft();
 
-		if(finishInstantly) abot.eyes.anim.curFrame = abot.eyes.anim.length - 1;
+		if(finishInstantly) abot.eyes.anim.frameIndex = Std.int(abot.eyes.anim.numFrames - 1);
 	}
 
 	override function startSong()

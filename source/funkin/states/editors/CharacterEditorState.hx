@@ -352,7 +352,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 					if(animateGhost == null) //If I created the animateGhost on create() and you didn't load an atlas, it would crash the game on destroy, so we create it here
 					{
 						animateGhost = new FlxAnimate(ghost.x, ghost.y);
-						animateGhost.showPivot = false;
 						insert(members.indexOf(ghost), animateGhost);
 						animateGhost.active = false;
 					}
@@ -365,7 +364,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 					else
 						animateGhost.anim.addBySymbol('anim', myAnim.name, 0, false);
 
-					animateGhost.anim.play('anim', true, false, character.atlas.anim.curFrame);
+					animateGhost.anim.play('anim', true, false, character.anim.frameIndex);
 					animateGhost.anim.pause();
 
 					animateGhostImage = character.imageFile;
@@ -574,7 +573,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 					if(character.animOffsets.exists(animationInputText.text))
 					{
 						if(!character.isAnimateAtlas) character.animation.remove(animationInputText.text);
-						else @:privateAccess character.atlas.anim.animsMap.remove(animationInputText.text);
+						else @:privateAccess character.anim._animations.remove(animationInputText.text);
 					}
 					character.animationsArray.remove(anim);
 				}
@@ -602,7 +601,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 					if(character.animOffsets.exists(anim.anim))
 					{
 						if(!character.isAnimateAtlas) character.animation.remove(anim.anim);
-						else @:privateAccess character.atlas.anim.animsMap.remove(anim.anim);
+						else @:privateAccess character.anim._animations.remove(anim.anim);
 						character.animOffsets.remove(anim.anim);
 						character.animationsArray.remove(anim);
 					}
@@ -742,42 +741,37 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		var lastAnim:String = character.getAnimationName();
 		var anims:Array<AnimArray> = character.animationsArray.copy();
 
-		character.destroyAtlas();
 		character.isAnimateAtlas = false;
 		character.color = FlxColor.WHITE;
 		character.alpha = 1;
-
-		if(Paths.fileExists('images/' + character.imageFile + '/Animation.json', TEXT))
+		if (Paths.fileExists('images/' + character.imageFile + '/Animation.json', TEXT))
 		{
-			character.atlas = new FlxAnimate();
-			character.atlas.showPivot = false;
-			try
-			{
-				Paths.loadAnimateAtlas(character.atlas, character.imageFile);
-			}
-			catch(e:Dynamic)
-			{
-				FlxG.log.warn('Could not load atlas ${character.imageFile}: $e');
-			}
+			character.frames = Paths.getTextureAtlas(character.imageFile);
 			character.isAnimateAtlas = true;
 		}
-		else if(Paths.fileExists('images/' + character.imageFile + '.txt', TEXT)) character.frames = Paths.getPackerAtlas(character.imageFile);
-		else if(Paths.fileExists('images/' + character.imageFile + '.json', TEXT)) character.frames = Paths.getAsepriteAtlas(character.imageFile);
-		else character.frames = Paths.getSparrowAtlas(character.imageFile);
+		else if (Paths.fileExists('images/' + character.imageFile + '.txt', TEXT))
+			character.frames = Paths.getPackerAtlas(character.imageFile);
+		else if (Paths.fileExists('images/' + character.imageFile + '.json', TEXT))
+			character.frames = Paths.getAsepriteAtlas(character.imageFile);
+		else
+			character.frames = Paths.getSparrowAtlas(character.imageFile);
 
-		for (anim in anims) {
+		for (anim in anims)
+		{
 			var animAnim:String = '' + anim.anim;
 			var animName:String = '' + anim.name;
 			var animFps:Int = anim.fps;
-			var animLoop:Bool = !!anim.loop; //Bruh
+			var animLoop:Bool = !!anim.loop;
 			var animIndices:Array<Int> = anim.indices;
-			addAnimation(animAnim, animName, animFps, animLoop, animIndices);
+			addAnimation(animAnim, animName, animFps, animLoop, animIndices/*, anim.isFrameLabel*/);
 		}
 
-		if(anims.length > 0)
+		if (anims.length > 0)
 		{
-			if(lastAnim != '') character.playAnim(lastAnim, true);
-			else character.dance();
+			if (lastAnim != '')
+				character.playAnim(lastAnim, true);
+			else
+				character.dance();
 		}
 	}
 
@@ -962,8 +956,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			}
 			else
 			{
-				frames = character.atlas.anim.curFrame;
-				length = character.atlas.anim.length;
+				frames = character.anim.frameIndex;
+				length = character.anim.numFrames;
 			}
 
 			if(FlxG.keys.justPressed.A || FlxG.keys.justPressed.D || holdingFrameTime > 0.5)
@@ -976,7 +970,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 				{
 					frames = FlxMath.wrap(frames + Std.int(isLeft ? -shiftMult : shiftMult), 0, length-1);
 					if(!character.isAnimateAtlas) character.animation.curAnim.curFrame = frames;
-					else character.atlas.anim.curFrame = frames;
+					else character.anim.frameIndex = frames;
 					holdingFrameElapsed -= 0.1;
 				}
 			}
@@ -1140,9 +1134,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		else
 		{
 			if(indices != null && indices.length > 0)
-				character.atlas.anim.addBySymbolIndices(anim, name, indices, fps, loop);
+				character.anim.addBySymbolIndices(anim, name, indices, fps, loop);
 			else
-				character.atlas.anim.addBySymbol(anim, name, fps, loop);
+				character.anim.addBySymbol(anim, name, fps, loop);
 		}
 
 		if(!character.animOffsets.exists(anim))

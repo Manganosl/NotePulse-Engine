@@ -75,11 +75,11 @@
       "url": "https://github.com/CodenameCrew/cne-hxdiscord_rpc"
     },
     {
-      "name": "flxanimate",
+      "name": "flixel-animate",
       "type": "git",
       "dir": null,
-      "ref": "dev",
-      "url": "https://github.com/FunkinExtraKeys/flxanimate"
+      "ref": "605612ecfeeb47f27af34bceb9f841c28b936653",
+      "url": "https://github.com/MaybeMaru/flixel-animate"
     },
     {
       "name": "linc_luajit",

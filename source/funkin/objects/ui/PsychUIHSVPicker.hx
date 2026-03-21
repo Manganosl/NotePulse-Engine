@@ -221,7 +221,7 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
         val = color.brightness;
                 
         updateSVSquare();
-        updateColor(false);
+        updateColor(true);
         updateCursors();
 	}
 }

@@ -25,6 +25,8 @@ import haxe.Json;
 import funkin.backend.Mods;
 #end
 
+import animate.FlxAnimateFrames;
+
 class Paths
 {
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
@@ -133,7 +135,7 @@ class Paths
 		return if (library == "shared") getSharedPath(file); else getLibraryPathForce(file, library);
 	}
 
-	inline static function getLibraryPathForce(file:String, library:String, ?level:String)
+	static function getLibraryPathForce(file:String, library:String, ?level:String)
 	{
 		if(library == "songs") return 'assets/$library/$file';
 		if(level == null) level = library;
@@ -489,7 +491,7 @@ class Paths
 		return parentFrames;
 	}
 
-	inline static public function getSparrowAtlas(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
+	static public function getSparrowAtlas(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
 	{
 		var imageLoaded:FlxGraphic = image(key, library, allowGPU);
 		#if MODS_ALLOWED
@@ -504,7 +506,7 @@ class Paths
 		#end
 	}
 
-	inline static public function getPackerAtlas(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
+	static public function getPackerAtlas(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
 	{
 		var imageLoaded:FlxGraphic = image(key, library, allowGPU);
 		#if MODS_ALLOWED
@@ -519,7 +521,7 @@ class Paths
 		#end
 	}
 
-	inline static public function getAsepriteAtlas(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
+	static public function getAsepriteAtlas(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
 	{
 		var imageLoaded:FlxGraphic = image(key, library, allowGPU);
 		#if MODS_ALLOWED
@@ -534,7 +536,29 @@ class Paths
 		#end
 	}
 
-	inline static public function formatToSongPath(path:String) {
+	public static function getTextureAtlas(key:String, ?library:String = null, ?settings:FlxAnimateSettings):FlxAnimateFrames
+	{
+		var animateFolder:String = getPath('images/$key', library);
+		#if MODS_ALLOWED
+		var mdosExists:Bool = false;
+
+		var modsAnimate:String = modsImages(key);
+		if (FileSystem.exists(modsAnimate))
+			mdosExists = true;
+
+		if (settings == null)
+			settings = {};
+
+		if (settings.filterQuality == null && ClientPrefs.data.lowQuality)
+			settings.filterQuality = FilterQuality.LOW;
+		
+		return FlxAnimateFrames.fromAnimate(mdosExists ? modsAnimate : animateFolder, settings);
+		#else
+		return FlxAnimateFrames.fromAnimate(animateFolder, settings);
+		#end
+	}
+
+	static public function formatToSongPath(path:String) {
 		final invalidChars = ~/[~&;:<>#\s]/g;
 		final hideChars = ~/[.,'"%?!]/g;
 
@@ -645,7 +669,6 @@ class Paths
 	}
 	#end
 
-	#if flxanimate
 	public static function loadAnimateAtlas(spr:FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null)
 	{
 		var changedAnimJson = false;
@@ -712,19 +735,6 @@ class Paths
 		//trace(folderOrImg);
 		//trace(spriteJson);
 		//trace(animationJson);
-		spr.loadAtlasEx(folderOrImg, spriteJson, animationJson);
+		spr.frames = FlxAnimateFrames.fromAnimate(folderOrImg, spriteJson, animationJson);
 	}
-
-	/*private static function getContentFromFile(path:String):String
-	{
-		var onAssets:Bool = false;
-		var path:String = Paths.getPath(path, TEXT, true);
-		if(FileSystem.exists(path) || (onAssets = true && Assets.exists(path, TEXT)))
-		{
-			//trace('Found text: $path');
-			return !onAssets ? File.getContent(path) : Assets.getText(path);
-		}
-		return null;
-	}*/
-	#end
 }

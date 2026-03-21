@@ -144,7 +144,6 @@ class Tank extends BaseStage
 		//inCutscene = true; //this would stop the camera movement, oops
 
 		tankman = new FlxAnimate(dad.x + 419, dad.y + 225);
-		tankman.showPivot = false;
 		Paths.loadAnimateAtlas(tankman, 'cutscenes/tankman');
 		tankman.antialiasing = ClientPrefs.data.antialiasing;
 		addBehindDad(tankman);
@@ -263,7 +262,6 @@ class Tank extends BaseStage
 		Paths.sound('stressCutscene');
 
 		pico = new FlxAnimate(gf.x + 150, gf.y + 450);
-		pico.showPivot = false;
 		Paths.loadAnimateAtlas(pico, 'cutscenes/picoAppears');
 		pico.antialiasing = ClientPrefs.data.antialiasing;
 		pico.anim.addBySymbol('dance', 'GF Dancing at Gunpoint', 24, true);
@@ -301,17 +299,17 @@ class Tank extends BaseStage
 			FlxTween.tween(FlxG.camera, {zoom: 0.9 * 1.2 * 1.2}, 2.25, {ease: FlxEase.quadInOut});
 
 			pico.anim.play('dieBitch', true);
-			pico.anim.onComplete = function()
+			pico.anim.finishCallback = function(_)
 			{
 				pico.anim.play('picoAppears', true);
-				pico.anim.onComplete = function()
+				pico.anim.finishCallback = function(_)
 				{
 					pico.anim.play('picoEnd', true);
-					pico.anim.onComplete = function()
+					pico.anim.finishCallback = function(_)
 					{
 						gfGroup.alpha = 1;
 						pico.visible = false;
-						pico.anim.onComplete = null;
+						pico.anim.finishCallback = null;
 					}
 				};
 
