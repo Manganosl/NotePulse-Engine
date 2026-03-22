@@ -17,5 +17,5 @@
 - [ ] Add animated health icons
 
 ## 21/03/2026
-- [ ] Fix ghost animations not working correctly with characters using animation atlas.
+- [X] Fix ghost animations not working correctly with characters using texture atlas. **Fixed 22/03/2026**
 - [X] Reimplement multiatlas on characters. **Done 22/03/2026**

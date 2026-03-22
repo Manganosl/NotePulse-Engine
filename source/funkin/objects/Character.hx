@@ -589,12 +589,11 @@ class Character extends FlxAnimate
 		super.draw();
 	}
 
-	public function playGhostAnim(ghostID = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0)
-	{
-		var ghost:FlxSprite = new FlxAnimate();
+	public function playGhostAnim(ghostID = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0){
+		var ghost:FlxAnimate = new FlxAnimate();
 		ghost.scale.copyFrom(scale);
 		ghost.frames = frames;
-		ghost.animation.copyFrom(animation);
+		setupGhostAnims(ghost);
 		ghost.antialiasing = antialiasing;
 		ghost.x = x;
 		ghost.y = y;
@@ -610,19 +609,16 @@ class Character extends FlxAnimate
 
 		ghost.animation.play(animName, force, reversed, frame);
 
-		if (animOffsets.exists(animName))
-		{
+		if (animOffsets.exists(animName)){
 			var daOffset = animOffsets.get(animName);
 			ghost.offset.set(daOffset[0], daOffset[1]);
 		}
 
 		final direction:String = animName.substring(4).split('-')[0];
 
-		inline function resolveDir(xDir:Bool = false):Float
-		{
+		inline function resolveDir(xDir:Bool = false):Float {
 			var output:Float = 0;
-			switch (direction)
-			{
+			switch (direction){
 				case 'UP':
 					if (!xDir) output = -ghostDisplacement;
 				case 'DOWN':
@@ -641,15 +637,12 @@ class Character extends FlxAnimate
 		
 		doubleGhosts.push(ghost);
 		ghostTweenGrp.push(null);
-		var myIndex:Int = doubleGhosts.length - 1;
 
-		var twn:FlxTween = FlxTween.tween(ghost, {alpha: 0, x: moveX, y: moveY}, 0.75,
-		{
-			onComplete: (completedTween) ->
-			{
+		var myIndex:Int = doubleGhosts.length - 1;
+		var twn:FlxTween = FlxTween.tween(ghost, {alpha: 0, x: moveX, y: moveY}, 0.75, {
+			onComplete: (completedTween) -> {
 				var idx = doubleGhosts.indexOf(ghost);
-				if (idx >= 0)
-				{
+				if (idx >= 0){
 					var oldTween = ghostTweenGrp[idx];
 					if (oldTween != null) oldTween.cancel();
 					ghostTweenGrp.splice(idx, 1);
@@ -662,6 +655,38 @@ class Character extends FlxAnimate
 		});
 
 		ghostTweenGrp[myIndex] = twn;
+	}
+
+	public function setupGhostAnims(target:FlxAnimate){
+		if (animationsArray == null || animationsArray.length <= 0) return;
+
+		for (anim in animationsArray){
+			var animAnim:String = '' + anim.anim;
+			var animName:String = '' + anim.name;
+			var animFps:Int = anim.fps;
+			var animLoop:Bool = !!anim.loop;
+			var animIndices:Array<Int> = anim.indices;
+
+			switch (spriteType){
+				case TEXTURE_ATLAS:
+					if (anim.isFrameLabel){
+						if (animIndices != null && animIndices.length > 0)
+							target.anim.addByFrameLabelIndices(animAnim, animName, animIndices, animFps, animLoop);
+						else
+							target.anim.addByFrameLabel(animAnim, animName, animFps, animLoop);
+					} else {
+						if (animIndices != null && animIndices.length > 0)
+							target.anim.addBySymbolIndices(animAnim, animName, animIndices, animFps, animLoop);
+						else
+							target.anim.addBySymbol(animAnim, animName, animFps, animLoop);
+					}
+				default:
+					if (animIndices != null && animIndices.length > 0)
+						target.anim.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+					else
+						target.anim.addByPrefix(animAnim, animName, animFps, animLoop);
+			}
+		}
 	}
 
 	public override function destroy()
