@@ -1891,62 +1891,7 @@ class PlayState extends MusicBeatState
 						charType = Std.parseInt(value1);
 						if(Math.isNaN(charType)) charType = 0;
 				}
-
-				switch(charType) {
-					case 0:
-						if(boyfriend.curCharacter != value2) {
-							if(!boyfriendMap.exists(value2)) {
-								addCharacterToList(value2, charType);
-							}
-
-							var lastAlpha:Float = boyfriend.alpha;
-							boyfriend.alpha = 0.00001;
-							boyfriend = boyfriendMap.get(value2);
-							boyfriend.alpha = lastAlpha;
-							iconP1.changeIcon(boyfriend.healthIcon);
-						}
-						setOnScripts('boyfriendName', boyfriend.curCharacter);
-
-					case 1:
-						if(dad.curCharacter != value2) {
-							if(!dadMap.exists(value2)) {
-								addCharacterToList(value2, charType);
-							}
-
-							var wasGf:Bool = dad.curCharacter.startsWith('gf') || dad.curCharacter == 'gf';
-							var lastAlpha:Float = dad.alpha;
-							dad.alpha = 0.00001;
-							dad = dadMap.get(value2);
-							if(!dad.curCharacter.startsWith('gf') && dad.curCharacter != 'gf') {
-								if(wasGf && gf != null) {
-									gf.visible = true;
-								}
-							} else if(gf != null) {
-								gf.visible = false;
-							}
-							dad.alpha = lastAlpha;
-							iconP2.changeIcon(dad.healthIcon);
-						}
-						setOnScripts('dadName', dad.curCharacter);
-
-					case 2:
-						if(gf != null)
-						{
-							if(gf.curCharacter != value2)
-							{
-								if(!gfMap.exists(value2)) {
-									addCharacterToList(value2, charType);
-								}
-
-								var lastAlpha:Float = gf.alpha;
-								gf.alpha = 0.00001;
-								gf = gfMap.get(value2);
-								gf.alpha = lastAlpha;
-							}
-							setOnScripts('gfName', gf.curCharacter);
-						}
-				}
-				reloadHealthBarColors();
+				changeCharacter(value2, charType);
 
 			case 'Change Scroll Speed':
 				if (songSpeedType != "constant")
@@ -2665,6 +2610,64 @@ class PlayState extends MusicBeatState
 	}
 
 	//// Characters ////
+	
+	public function changeCharacter(charName:String, charType:Int){
+				switch(charType) {
+					case 0:
+						if(boyfriend.curCharacter != charName) {
+							if(!boyfriendMap.exists(charName)) {
+								addCharacterToList(charName, charType);
+							}
+
+							var lastAlpha:Float = boyfriend.alpha;
+							boyfriend.alpha = 0.00001;
+							boyfriend = boyfriendMap.get(charName);
+							boyfriend.alpha = lastAlpha;
+							iconP1.changeIcon(boyfriend.healthIcon);
+						}
+						setOnScripts('boyfriendName', boyfriend.curCharacter);
+
+					case 1:
+						if(dad.curCharacter != charName) {
+							if(!dadMap.exists(charName)) {
+								addCharacterToList(charName, charType);
+							}
+
+							var wasGf:Bool = dad.curCharacter.startsWith('gf') || dad.curCharacter == 'gf';
+							var lastAlpha:Float = dad.alpha;
+							dad.alpha = 0.00001;
+							dad = dadMap.get(charName);
+							if(!dad.curCharacter.startsWith('gf') && dad.curCharacter != 'gf') {
+								if(wasGf && gf != null) {
+									gf.visible = true;
+								}
+							} else if(gf != null) {
+								gf.visible = false;
+							}
+							dad.alpha = lastAlpha;
+							iconP2.changeIcon(dad.healthIcon);
+						}
+						setOnScripts('dadName', dad.curCharacter);
+
+					case 2:
+						if(gf != null)
+						{
+							if(gf.curCharacter != charName)
+							{
+								if(!gfMap.exists(charName)) {
+									addCharacterToList(charName, charType);
+								}
+
+								var lastAlpha:Float = gf.alpha;
+								gf.alpha = 0.00001;
+								gf = gfMap.get(charName);
+								gf.alpha = lastAlpha;
+							}
+							setOnScripts('gfName', gf.curCharacter);
+						}
+				}
+				reloadHealthBarColors();
+	}
 
 	public function getCharPosX(tag:String):Float {
 		switch(tag) {
