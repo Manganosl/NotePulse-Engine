@@ -12,18 +12,17 @@ final helperVector = new Vector3();
 @:noDebug
 #end
 final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
-	private var __rotateX:Float = 0;
+    private var __rotateX:Float = 0;
     private var __rotateY:Float = 0;
     private var __rotateZ:Float = 0;
     private var __parentOutput:ModifierOutput;
 
-	public function new(instance:ModPlayField) {
-		super(instance);
+    public function new(instance:ModPlayField) {
+        super(instance);
+        instance.setPercent('dizzyHolds', 1, -1);
+    }
 
-		instance.setPercent('dizzyHolds', 1, -1);
-	}
-
-	inline private function __rotateTail(pos:Vector3) {
+    inline private function __rotateTail(pos:Vector3) {
         if (__parentOutput == null || (__rotateX == 0 && __rotateY == 0 && __rotateZ == 0))
             return pos;
 
@@ -35,74 +34,72 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
         return this.view.transformVector(output, __parentOutput.pos);
     }
 
-	inline private function getGraphicVertices(planeWidth:Float, planeHeight:Float, flipX:Bool, flipY:Bool) {
-		var x1 = flipX ? planeWidth : -planeWidth;
-		var x2 = flipX ? -planeWidth : planeWidth;
-		var y1 = flipY ? planeHeight : -planeHeight;
-		var y2 = flipY ? -planeHeight : planeHeight;
+    inline private function getGraphicVertices(planeWidth:Float, planeHeight:Float, flipX:Bool, flipY:Bool) {
+        var x1 = flipX ? planeWidth : -planeWidth;
+        var x2 = flipX ? -planeWidth : planeWidth;
+        var y1 = flipY ? planeHeight : -planeHeight;
+        var y2 = flipY ? -planeHeight : planeHeight;
 
-		return [
-			x1, y1, // top left
-			x2, y1, // top right
-			x1, y2, // bottom left
-			x2, y2  // bottom right
-		];
-	}
+        return [
+            x1, y1, // top left
+            x2, y1, // top right
+            x1, y2, // bottom left
+            x2, y2  // bottom right
+        ];
+    }
 
-	var __lastOrient:Float = 0;
-	var __lastC2:Float = 0;
-	var __lastPlayer:Int = -1;
-	override public function prepare(arrow:FlxSprite):Null<DrawCommand> {
-		if (arrow.alpha <= 0) return null;
+    var __lastOrient:Float = 0;
+    var __lastC2:Float = 0;
+    var __lastPlayer:Int = -1;
+    
+    override public function prepare(arrow:FlxSprite):Null<DrawCommand> {
+        if (arrow.alpha <= 0) return null;
 
-		final player = Adapter.instance.getPlayerFromArrow(arrow);
-		final lane = Adapter.instance.getLaneFromArrow(arrow);
-		
-		var arrowData = getArrowParams(arrow);
-		final isEnd = Adapter.instance.isHoldEnd(arrow);
-        var stepDuration = (Adapter.instance.getStartCrochet() / 3.85); 
+        final adapter = Adapter.instance;
+        final arrowFrame = arrow.frame.frame;
         
-		final realDistance = arrowData.distance;
-		final isHitten = arrowData.hitten;
+        final player = adapter.getPlayerFromArrow(arrow);
+        final lane = adapter.getLaneFromArrow(arrow);
+        
+        var arrowData = getArrowParams(arrow);
+        final realDistance = arrowData.distance;
+        final isHitten = arrowData.hitten;
 
-		final fullHeight = (arrow.frame.frame.height * arrow.scale.y);
-		final clipRatio = (isHitten && realDistance < 0) 
-			? FlxMath.bound(1 + (realDistance / fullHeight), 0, 1) 
-			: 1;
+        final fullHeight = (arrowFrame.height * arrow.scale.y);
+        final clipRatio = (isHitten && realDistance < 0) 
+            ? FlxMath.bound(1 + (realDistance / fullHeight), 0, 1) 
+            : 1;
 
-		if (clipRatio <= 0.001) return null;
+        if (clipRatio <= 0.001) return null;
 
-		var basePos = ModchartUtil.getHalfPos();
-		basePos.x += Adapter.instance.getDefaultReceptorX(lane, player);
-		basePos.y += Adapter.instance.getDefaultReceptorY(lane, player);
+        var basePos = ModchartUtil.getHalfPos();
+        basePos.x += adapter.getDefaultReceptorX(lane, player);
+        basePos.y += adapter.getDefaultReceptorY(lane, player);
 
-		final output = parent.modifiers.getPath(basePos.clone(), arrowData);
-		if (output == null || (output.visuals.alpha * arrow.alpha <= 0)) return null;
+        final output = parent.modifiers.getPath(basePos.clone(), arrowData);
+        if (output == null || (output.visuals.alpha * arrow.alpha <= 0)) return null;
 
+        final stepDuration = (adapter.getStartCrochet() / 3.85); 
+        final isEnd = adapter.isHoldEnd(arrow);
+        
         var nextData = getArrowParams(arrow, stepDuration);
         var nextOutput = parent.modifiers.getPath(basePos.clone(), nextData);
         
-		var diff = nextOutput.pos.subtract(output.pos);
-		var velocity = diff.length; 
+        var diff = nextOutput.pos.subtract(output.pos);
+        
+        var velocity = Math.sqrt(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z); 
 
-		var unit = diff.clone();
-		unit.normalize();
+        final isDownscroll = adapter.getDownscroll(); 
+        
+        var pathAngle = (diff.x == 0 && diff.y == 0) ? 0 : Math.atan2(diff.y, diff.x) * FlxAngle.TO_DEG - 90 + (isDownscroll ? 180 : 0);
 
-		var isDownscroll = Adapter.instance.getDownscroll(); 
-		var pathAngle = (unit.x == 0 && unit.y == 0) ? 0 : Math.atan2(unit.y, unit.x) * FlxAngle.TO_DEG - 90 + (isDownscroll ? 180 : 0);
-
-		var planeWidth = arrow.frame.frame.width * arrow.scale.x * .5;
-        var frameHeight = (isEnd ? (arrow.frame.frame.height * arrow.scale.y) : velocity);
+        var planeWidth = arrowFrame.width * arrow.scale.x * 0.5;
+        var frameHeight = (isEnd ? fullHeight : velocity);
 
         var clipOffset = frameHeight * (1 - clipRatio);
 
-        var y1:Float = clipOffset; 
-        var y2:Float = frameHeight;
-
-        if (isDownscroll) {
-            y1 = -clipOffset;
-            y2 = -frameHeight;
-        }
+        var y1:Float = isDownscroll ? -clipOffset : clipOffset; 
+        var y2:Float = isDownscroll ? -frameHeight : frameHeight;
 
         if (arrow.flipY) {
             var temp = y1;
@@ -110,168 +107,117 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
             y2 = temp;
         }
 
-		var x1 = arrow.flipX ? planeWidth : -planeWidth;
-		var x2 = arrow.flipX ? -planeWidth : planeWidth;
+        var x1 = arrow.flipX ? planeWidth : -planeWidth;
+        var x2 = arrow.flipX ? -planeWidth : planeWidth;
 
-		var planeVertices = [
-			x1, y1, // top left
-			x2, y1, // top right
-			x1, y2, // bottom left
-			x2, y2  // bottom right
-		];
+        final zScale:Float = output.pos.z != 0 ? (1 / output.pos.z) : 1;
+        final scaleXMult = zScale * output.visuals.scaleX;
 
-		var projectionZ:NativeVector<Float> = new NativeVector(4);
-		final zScale:Float = output.pos.z != 0 ? (1 / output.pos.z) : 1;
-		var vertPointer = 0;
-		while (vertPointer < planeVertices.length) {
-			rotationVector.setTo(planeVertices[vertPointer], planeVertices[vertPointer + 1], 0);
-			var rotation = ModchartUtil.rotate3DVector(rotationVector, 0, 0, pathAngle);
-			rotation.x *= zScale * output.visuals.scaleX;
-			rotation.y *= zScale;
+        var projectionZ = new NativeVector<Float>(4);
+        var vertices = new NativeVector<Float>(8);
 
-			var view = new Vector3(rotation.x + output.pos.x, rotation.y + output.pos.y, output.pos.z);
-			
-			view.z *= 0.001;
-			final projection = (view.z != 0) ? this.view.transformVector(view) : view;
-			
-			planeVertices[vertPointer] = projection.x;
-			planeVertices[vertPointer + 1] = projection.y;
+        rotationVector.setTo(x1, y1, 0);
+        var rot = ModchartUtil.rotate3DVector(rotationVector, 0, 0, pathAngle);
+        var view = new Vector3(rot.x * scaleXMult + output.pos.x, rot.y * zScale + output.pos.y, output.pos.z);
+        view.z *= 0.001;
+        var proj = (view.z != 0) ? this.view.transformVector(view) : view;
+        vertices[0] = proj.x; vertices[1] = proj.y;
+        projectionZ[0] = proj.z > 0.0001 ? proj.z : 0.0001;
 
-			projectionZ[Math.floor(vertPointer / 2)] = Math.max(0.0001, projection.z);
-			vertPointer += 2;
-		}
+        rotationVector.setTo(x2, y1, 0);
+        rot = ModchartUtil.rotate3DVector(rotationVector, 0, 0, pathAngle);
+        view = new Vector3(rot.x * scaleXMult + output.pos.x, rot.y * zScale + output.pos.y, output.pos.z);
+        view.z *= 0.001;
+        proj = (view.z != 0) ? this.view.transformVector(view) : view;
+        vertices[2] = proj.x; vertices[3] = proj.y;
+        projectionZ[1] = proj.z > 0.0001 ? proj.z : 0.0001;
 
-		var vertices = new NativeVector<Float>(8);
-		// top left
-		vertices[0] = planeVertices[0];
-		vertices[1] = planeVertices[1];
-		// top right
-		vertices[2] = planeVertices[2];
-		vertices[3] = planeVertices[3];
+        rotationVector.setTo(x1, y2, 0);
+        rot = ModchartUtil.rotate3DVector(rotationVector, 0, 0, pathAngle);
+        view = new Vector3(rot.x * scaleXMult + output.pos.x, rot.y * zScale + output.pos.y, output.pos.z);
+        view.z *= 0.001;
+        proj = (view.z != 0) ? this.view.transformVector(view) : view;
+        vertices[4] = proj.x; vertices[5] = proj.y;
+        projectionZ[2] = proj.z > 0.0001 ? proj.z : 0.0001;
 
-		// botton left
-		vertices[4] = planeVertices[4];
-		vertices[5] = planeVertices[5];
-		// bottom right
-		vertices[6] = planeVertices[6];
-		vertices[7] = planeVertices[7];
+        rotationVector.setTo(x2, y2, 0);
+        rot = ModchartUtil.rotate3DVector(rotationVector, 0, 0, pathAngle);
+        view = new Vector3(rot.x * scaleXMult + output.pos.x, rot.y * zScale + output.pos.y, output.pos.z);
+        view.z *= 0.001;
+        proj = (view.z != 0) ? this.view.transformVector(view) : view;
+        vertices[6] = proj.x; vertices[7] = proj.y;
+        projectionZ[3] = proj.z > 0.0001 ? proj.z : 0.0001;
 
-		final uvRectangle = arrow.frame.uv;
-		var uvData = new NativeVector<Float>(12);
-		var k = 0;
+        final uvRectangle = arrow.frame.uv;
+        var uvData = new NativeVector<Float>(12);
+        var k = 0;
 
-		#if (flixel == "6.1.0")
-		// top left
-		uvData[k++] = uvRectangle.left;
-		uvData[k++] = uvRectangle.right;
-		uvData[k++] = 1 / projectionZ[0];
-		// top right
-		uvData[k++] = uvRectangle.top;
-		uvData[k++] = uvRectangle.right;
-		uvData[k++] = 1 / projectionZ[1];
-		// bottom left
-		uvData[k++] = uvRectangle.top;
-		uvData[k++] = uvRectangle.bottom;
-		uvData[k++] = 1 / projectionZ[2];
-		// bottom right
-		uvData[k++] = uvRectangle.left;
-		uvData[k++] = uvRectangle.bottom;
-		uvData[k++] = 1 / projectionZ[3];
-		#elseif (flixel >= "6.1.1")
-		// top left
-		uvData[k++] = uvRectangle.left;
-		uvData[k++] = uvRectangle.top;
-		uvData[k++] = 1 / projectionZ[0];
-		// top right
-		uvData[k++] = uvRectangle.right;
-		uvData[k++] = uvRectangle.top;
-		uvData[k++] = 1 / projectionZ[1];
-		// bottom left
-		uvData[k++] = uvRectangle.left;
-		uvData[k++] = uvRectangle.bottom;
-		uvData[k++] = 1 / projectionZ[2];
-		// bottom right
-		uvData[k++] = uvRectangle.right;
-		uvData[k++] = uvRectangle.bottom;
-		uvData[k++] = 1 / projectionZ[3];
-		#else
-		// top left
-		uvData[k++] = uvRectangle.x;
-		uvData[k++] = uvRectangle.y;
-		uvData[k++] = 1 / projectionZ[0];
-		// top right
-		uvData[k++] = uvRectangle.width;
-		uvData[k++] = uvRectangle.y;
-		uvData[k++] = 1 / projectionZ[1];
-		// bottom left
-		uvData[k++] = uvRectangle.x;
-		uvData[k++] = uvRectangle.height;
-		uvData[k++] = 1 / projectionZ[2];
-		// bottom right
-		uvData[k++] = uvRectangle.width;
-		uvData[k++] = uvRectangle.height;
-		uvData[k++] = 1 / projectionZ[3];
-		#end
+        #if (flixel == "6.1.0")
+        uvData[k++] = uvRectangle.left; uvData[k++] = uvRectangle.right; uvData[k++] = 1 / projectionZ[0];
+        uvData[k++] = uvRectangle.top; uvData[k++] = uvRectangle.right; uvData[k++] = 1 / projectionZ[1];
+        uvData[k++] = uvRectangle.top; uvData[k++] = uvRectangle.bottom; uvData[k++] = 1 / projectionZ[2];
+        uvData[k++] = uvRectangle.left; uvData[k++] = uvRectangle.bottom; uvData[k++] = 1 / projectionZ[3];
+        #elseif (flixel >= "6.1.1")
+        uvData[k++] = uvRectangle.left; uvData[k++] = uvRectangle.top; uvData[k++] = 1 / projectionZ[0];
+        uvData[k++] = uvRectangle.right; uvData[k++] = uvRectangle.top; uvData[k++] = 1 / projectionZ[1];
+        uvData[k++] = uvRectangle.left; uvData[k++] = uvRectangle.bottom; uvData[k++] = 1 / projectionZ[2];
+        uvData[k++] = uvRectangle.right; uvData[k++] = uvRectangle.bottom; uvData[k++] = 1 / projectionZ[3];
+        #else
+        uvData[k++] = uvRectangle.x; uvData[k++] = uvRectangle.y; uvData[k++] = 1 / projectionZ[0];
+        uvData[k++] = uvRectangle.width; uvData[k++] = uvRectangle.y; uvData[k++] = 1 / projectionZ[1];
+        uvData[k++] = uvRectangle.x; uvData[k++] = uvRectangle.height; uvData[k++] = 1 / projectionZ[2];
+        uvData[k++] = uvRectangle.width; uvData[k++] = uvRectangle.height; uvData[k++] = 1 / projectionZ[3];
+        #end
 
-		var indices = new NativeVector<Int>(6);
+        var indices = new NativeVector<Int>(6);
+        indices[0] = 0; indices[1] = 1; indices[2] = 2;
+        indices[3] = 1; indices[4] = 3; indices[5] = 2;
 
-		// triangle 1
-		indices[0] = 0;
-		indices[1] = 1;
-		indices[2] = 2;
+        final absGlow = output.visuals.glow * 255;
+        final negGlow = 1 - output.visuals.glow;
 
-		// triangle 2
-		indices[3] = 1;
-		indices[4] = 3;
-		indices[5] = 2;
+        if ((arrow.alpha * output.visuals.alpha) <= 0)
+            return null;
 
-		final absGlow = output.visuals.glow * 255;
-		final negGlow = 1 - output.visuals.glow;
+        var color = new ColorTransform(
+            negGlow, negGlow, negGlow, arrow.alpha * output.visuals.alpha, 
+            Math.round(output.visuals.glowR * absGlow), Math.round(output.visuals.glowG * absGlow), Math.round(output.visuals.glowB * absGlow)
+        );
 
-		if ((arrow.alpha * output.visuals.alpha) <= 0)
-			return null;
+        return {
+            parent: arrow,
+            graphic: arrow.graphic,
+            antialiasing: arrow.antialiasing,
+            blend: arrow.blend,
+            cameras: ModchartUtil.resolveCameras(parent, arrow),
+            shader: arrow.shader,
+            vertices: vertices,
+            uvs: uvData,
+            indices: indices,
+            color: color,
+            isColored: color.hasRGBMultipliers() || color.alphaMultiplier != 1,
+            hasColorOffsets: color.hasRGBAOffsets()
+        };
+    }
 
-		var color = new ColorTransform(negGlow, negGlow, negGlow, arrow.alpha * output.visuals.alpha, Math.round(output.visuals.glowR * absGlow),
-			Math.round(output.visuals.glowG * absGlow), Math.round(output.visuals.glowB * absGlow));
+    inline private function getArrowParams(arrow:FlxSprite, posOff:Float = 0):ArrowData {
+        final adapter = Adapter.instance;
+        final player = adapter.getPlayerFromArrow(arrow);
+        final lane = adapter.getLaneFromArrow(arrow);
 
-		// make the instruction
-		var dc:DrawCommand = {
-			parent: arrow,
-			graphic: arrow.graphic,
-			antialiasing: arrow.antialiasing,
-			blend: arrow.blend,
-			cameras: ModchartUtil.resolveCameras(parent, arrow),
-			shader: arrow.shader,
+        final centered2 = (player == __lastPlayer) ? __lastC2 : (__lastC2 = parent.getPercent('centered2', player));
+        final timeC2 = FlxG.height * 0.25 * centered2;
+        final hitTime = adapter.getTimeFromArrow(arrow);
 
-			vertices: vertices,
-			uvs: uvData,
-			indices: indices,
-			color: color,
-			isColored: color.hasRGBMultipliers() || color.alphaMultiplier != 1,
-			hasColorOffsets: color.hasRGBAOffsets()
-		};
-		return dc;
-	}
+        var pos = (hitTime - adapter.getSongPosition()) + posOff + timeC2;
 
-	inline private function getArrowParams(arrow:FlxSprite, posOff:Float = 0):ArrowData {
-		final player = Adapter.instance.getPlayerFromArrow(arrow);
-		final lane = Adapter.instance.getLaneFromArrow(arrow);
-
-		final centered2 = (player == __lastPlayer) ? __lastC2 : (__lastC2 = parent.getPercent('centered2', player));
-		final timeC2 = FlxG.height * 0.25 * centered2;
-		final hitTime = Adapter.instance.getTimeFromArrow(arrow);
-
-		var pos = (hitTime - Adapter.instance.getSongPosition()) + posOff;
-
-		pos += timeC2;
-
-		return {
-			hitTime: hitTime + posOff + timeC2,
-			distance: pos,
-			lane: lane,
-			player: player,
-			hitten: Adapter.instance.arrowHit(arrow),
-			isTapArrow: true
-		};
-	}
+        return {
+            hitTime: hitTime + posOff + timeC2,
+            distance: pos,
+            lane: lane,
+            player: player,
+            hitten: adapter.arrowHit(arrow),
+            isTapArrow: true
+        };
+    }
 }

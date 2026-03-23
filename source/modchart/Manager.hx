@@ -48,6 +48,11 @@ final class Manager extends FlxBasic {
 	 */
 	public var playfields:Array<ModPlayField> = [];
 
+	/**
+	 * List of playfields managed by the Manager.
+	 */
+	public var proxies:Array<Proxy> = [];
+
 	private var renderer:CtxRenderer;
 
 	public function new() {
@@ -425,16 +430,25 @@ final class Manager extends FlxBasic {
 		repeater(beat, length, func, field);
 
 	/**
-	 * Creates and adds a new playfield to the Manager.
+	 * Creates and adds a new playfield to the list.
 	 */
 	public inline function addPlayfield()
-		playfields.push(new ModPlayField());
+		appendPlayfield(new ModPlayField());
 
 	/**
-	 * Adds a playfield to the Manager.
+	 * Adds a playfield to the list.
 	 */
-	public inline function appendPlayfield(playfield:ModPlayField)
+	public inline function appendPlayfield(playfield:ModPlayField) {
+		playfield.ID = playfields.length;
 		playfields.push(playfield);
+	}
+
+	/**
+	 * Adds a proxy to the list.
+	 */
+	public inline function appendProxy(proxy:Proxy) {
+		proxies.push(proxy);
+	}
 
 	/**
 	 * Updates all playfields in the game loop.
@@ -455,7 +469,7 @@ final class Manager extends FlxBasic {
 
 		if (playerItems == null)
 			return;
-		renderer.emit(playerItems, playfields);
+		renderer.emit(playerItems, playfields, proxies);
 	}
 
 	/**

@@ -106,12 +106,9 @@ final class ModifierGroup {
 		if (!allowVis && !allowPos)
 			return {pos: pos, visuals: visuals};
 
-		final songPos = Adapter.instance.getSongPosition();
-		final beat = Adapter.instance.getCurrentBeat();
-
 		final args:ModifierParameters = {
-			songTime: songPos,
-			curBeat: beat,
+			songTime: ModPlayField.songPos,
+			curBeat: ModPlayField.beat,
 			hitTime: data.hitTime + posDiff,
 			distance: data.distance + posDiff,
 			lane: data.lane,

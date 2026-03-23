@@ -45,11 +45,62 @@ final class ModPlayField extends FlxSprite {
 
 	var _skewMatrix:Matrix = new Matrix();
 
+	@:allow(modchart.engine.Proxy)
+	@:allow(modchart.backend.graphics.CtxRenderer)
+	var _proxies:Array<Proxy> = [];
+
+	@:allow(modchart.engine.Proxy)
+	@:allow(modchart.backend.graphics.CtxRenderer)
+	var _indexedProxies:Array<Array<Proxy>> = [];
+
+	@:allow(modchart.engine.Proxy)
+	@:allow(modchart.backend.graphics.CtxRenderer)
+	function _appendProxy(proxy:Proxy) {
+		if (_proxies.contains(proxy))
+			return;
+		_proxies.push(proxy);
+
+		// so 0 are the global player proxies
+		_indexedProxies[1 + proxy.sourcePlayer].push(proxy);
+	}
+
+	@:allow(modchart.engine.Proxy)
+	@:allow(modchart.backend.graphics.CtxRenderer)
+	function _removeProxy(proxy:Proxy) {
+		if (_proxies.contains(proxy))
+			return;
+		_proxies.remove(proxy);
+
+		// so 0 are the global player proxies
+		_indexedProxies[1 + proxy.sourcePlayer].remove(proxy);
+	}
+
+	@:allow(modchart.engine.Proxy)
+	@:allow(modchart.backend.graphics.CtxRenderer)
+	function _swapProxy(proxy:Proxy) {
+		if (_proxies.contains(proxy))
+			return;
+
+		// so 0 are the global player proxies
+		@:privateAccess
+		_indexedProxies[1 + proxy.__lastSrcPlayer].remove(proxy);
+		_indexedProxies[1 + proxy.sourcePlayer].push(proxy);
+	}
+
 	function get_view()
 		return context.view;
 
+	public static var beat:Float = 0;
+	public static var songPos:Float = 0;
+
 	public function new() {
 		super();
+
+		// allocate 16 players... why would u need more anyways
+		_indexedProxies.resize(16);
+		for (i in 0...16) {
+			_indexedProxies[i] = [];
+		}
 
 		moves = false;
 
@@ -209,7 +260,9 @@ final class ModPlayField extends FlxSprite {
 
 	override function update(elapsed:Float):Void {
 		// Update Event Timeline
-		events.update(Adapter.instance.getCurrentBeat());
+		beat = Adapter.instance.getCurrentBeat();
+		songPos = Adapter.instance.getSongPosition(); // Do it once every frame rather than 100 per frame, right?
+		events.update(beat);
 
 		updateNodes();
 
@@ -220,11 +273,6 @@ final class ModPlayField extends FlxSprite {
 
 	override public function destroy() {
 		super.destroy();
-	}
-
-	private function getVisibility(obj:flixel.FlxObject) {
-		@:bypassAccessor obj.visible = false;
-		return obj._fmVisible;
 	}
 
 	private function transformCmd(cmd:DrawCommand) {
