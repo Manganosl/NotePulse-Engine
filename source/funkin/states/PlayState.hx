@@ -1037,7 +1037,7 @@ class PlayState extends MusicBeatState
 		for (script in hscriptArray)
 			if(script != null)
 			{
-				script.call('onDestroy');
+				script.call('onDestroy', []);
 				script.stop();
 				script = null;
 			}

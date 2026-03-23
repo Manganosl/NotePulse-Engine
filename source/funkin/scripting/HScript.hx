@@ -10,9 +10,12 @@ import haxe.PosInfos;
 import flixel.FlxG;
 import flixel.FlxBasic;
 import flixel.util.FlxColor;
+import funkin.scripting.LuaUtils;
 #if LUA_ALLOWED
 import llua.Lua;
 #end
+
+import funkin.scripting.lua.FunkinLua;
 
 #if sys
 import sys.io.File;
@@ -21,16 +24,14 @@ import sys.FileSystem;
 import openfl.utils.Assets;
 #end
 
-import funkin.scripting.lua.FunkinLua;
-
 /*
- * The class that handles haxe scripts. Based off of T-Bar Engine's HScript class & modified for use here!
+ * The class that handles haxe scripts. The code was built off some mod's code, so props to them!
  */
 using StringTools;
 interface HscriptInterface {
     public var scriptName:String;
     public function set(variable:String, data:Dynamic):Void;
-    public function call(func:String, ?args:Array<Dynamic>):Dynamic;
+    public function call(func:String, args:Array<Dynamic>):Dynamic;
     public function stop():Void;
 }
 
@@ -38,11 +39,10 @@ interface HscriptInterface {
 class HScript implements HscriptInterface {
 
 	/*
-	 * All the default classes pre-imported into every haxe script / runHaxeCode.
+	 * All the classes pre-imported into every haxe script / runHaxeCode.
 	 * These variables are free to be edited to allow for custom pre-imported classes.
 	 */
     public static var classes:Map<String, Dynamic> = [
-		//Base level haxe classes. Not recommended to edit these!
 		"Math" 						=> Math, 
 		"Std" 						=> Std,
 		"StringTools" 				=> StringTools,
@@ -154,18 +154,25 @@ class HScript implements HscriptInterface {
     public var interp:Interp;
     public var expr:Expr;
 
-	public var variables(get, set):Map<String, Dynamic>;
+	public var variables(get, never):Map<String, Dynamic>;
 	public function get_variables() return interp.variables;
-	public function set_variables(val:Map<String, Dynamic>) {
-		interp.variables = val;
-		return val;
-	}
 
     public var scriptName:String;
 	public var modFolder:Null<String>;
 
+	//Scripts attached to this script. You can make some goofy chains with this.
 	public var subScripts:Array<funkin.scripting.HScript> = [];
 
+	/**
+	 * Creates a new haxe script instance that runs interpreted haxe code.
+	 *
+	 * @param	path			The path to the haxe script.
+	 *							NOTE: This does not support direct code strings. See the
+	 *							`HaxeCode` class for a version supporting code strings.
+	 * @param	_parentClass	The parent state instance this script will be assigned to. 
+	 * @param	_autoRunScript	(This is used internally by `HaxeCode` and is not recommened to use)
+	 * @param  	_ignoreErrors	Whether the script should ignore the critical error popup if an error is found.
+	 */
     public function new(path:String, ?_parentClass:Dynamic = null, ?_autoRunScript:Bool = true, ?_ignoreErrors:Bool = false) {
 		if(!_autoRunScript) return;
 
@@ -191,21 +198,16 @@ class HScript implements HscriptInterface {
 
 			this.setParent((_parentClass != null ? _parentClass : LuaUtils.getHScriptParent()));
 			addHScriptExtras(this.interp, LuaUtils.isPlayStateScript(interp.scriptObject));
-			
+
 			interp.variables.set("getModSetting", function(saveTag:String, ?modName:String = null) {
 				if(modName == null) {
 					if(this.modFolder == null) {
-						HScript.onHaxeTrace('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', this.interp, "error");
+						Log.error('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!');
 						return null;
 					}
 					modName = this.modFolder;
 				}
 				return LuaUtils.getModSetting(saveTag, modName);
-			});
-
-			interp.variables.set("debugPrint", function(text:Dynamic = "", ?color:FlxColor = null) {
-				PlayState.instance.addTextToDebug(text, (color ?? FlxColor.WHITE));
-				HScript.onHaxeTrace(text, this.interp);
 			});
 
 			interp.execute(expr);
@@ -282,6 +284,7 @@ class HScript implements HscriptInterface {
 				});
 			}
 		}
+
 		obj.variables.set("controls", Controls.instance);
 
 		obj.variables.set("window", lime.app.Application.current.window);
@@ -291,6 +294,31 @@ class HScript implements HscriptInterface {
 		obj.variables.set("Function_StopHScript", LuaUtils.Function_StopHScript);
 		obj.variables.set("Function_StopLua", LuaUtils.Function_StopLua);
 		obj.variables.set("Function_StopAll", LuaUtils.Function_StopAll);
+
+		//TODO: replace this with "$type". This should work for now
+		obj.variables.set("__type__", function(target:Dynamic):String {
+			return switch(Type.typeof(target)) {
+				case TInt: "Int";
+				case TFloat: "Float";
+				case TBool: "Bool";
+				case TObject: "Object";
+				case TFunction: "Function";
+				case TClass(clsInst): //also houses "String". TODO: Support for scripted classes & enums
+					Type.getClassName(clsInst);
+				case TEnum(enmInst):
+					Type.getEnumName(enmInst);
+				case TUnknown: "Unknown";
+				default: "Null";
+			}
+		});
+
+		obj.variables.set("debugPrint", function(text:Dynamic = "", color:FlxColor = null) {
+			#if(LUA_ALLOWED || HSCRIPT_ALLOWED)
+			if(FlxG.state is PlayState)
+				PlayState.instance.addTextToDebug(text, (color == null ? FlxColor.WHITE : color));
+			else #end
+				Log.hxTrace(text);
+		});
 
 		//other variables
 		obj.variables.set('keyboardJustPressed', function(name:String) return Reflect.getProperty(FlxG.keys.justPressed, name));
@@ -366,25 +394,14 @@ class HScript implements HscriptInterface {
 			return false;
 		});
 
-		//TODO: replace this with "$type". This should work for now
-		obj.variables.set("__type__", function(target:Dynamic):String {
-			return switch(Type.typeof(target)) {
-				case TInt: "Int";
-				case TFloat: "Float";
-				case TBool: "Bool";
-				case TObject: "Object";
-				case TFunction: "Function";
-				case TClass(clsInst): //also houses "String"
-					Type.getClassName(clsInst);
-				case TEnum(enmInst):
-					Type.getEnumName(enmInst);
-				case TUnknown: "Unknown";
-				default: "Null";
-			}
-		});
-
 		obj.variables.set("state", FlxG.state);
 		obj.variables.set('buildTarget', LuaUtils.getBuildTarget());
+		obj.variables.set("engine", {
+			title: openfl.Lib.application.meta["name"],
+			file: openfl.Lib.application.meta["file"],
+			version: openfl.Lib.application.meta["version"],
+			dimensions: {width: 1280, height: 720}
+		});
 
 		#if LUA_ALLOWED
 		obj.variables.set("createGlobalCallback", function(name:String, func:Dynamic) {
@@ -400,16 +417,12 @@ class HScript implements HscriptInterface {
 
 		obj.variables.set("createCallback", function(name:String, func:Dynamic, ?lua:FunkinLua) {
 			if(lua == null) {
-				HScript.onHaxeTrace('createCallback: no script was found or 3rd argument was null!', obj, "error");
+				Log.error('createCallback: no script was found or 3rd argument was null!');
 				return false;
 			}
 
 			lua.addLocalCallback(name, func);
 			return true;
-		});
-
-		obj.variables.set("debugPrint", function(text:Dynamic = "", ?color:FlxColor = null) {
-			MusicBeatState.getState().addTextToDebug(text, (color ?? FlxColor.WHITE));
 		});
 		#end
 	}
@@ -515,7 +528,7 @@ class HScript implements HscriptInterface {
 			return true;
 		}
 
-		HScript.onHaxeTrace('Path "$scriptPath" does not exist!', this.interp, "error");
+		Log.error('Path "$scriptPath" does not exist!');
 		return false;
 	}
 
@@ -524,7 +537,7 @@ class HScript implements HscriptInterface {
 		parser.allowJSON = parser.allowMetadata = parser.allowTypes = parser.allowRegex = true;
 		parser.preprocessorValues = LuaUtils.preprocessors;
 	}
- 
+
 	public function initInterp() {
 		interp = new Interp();
 		interp.allowStaticVariables = interp.allowPublicVariables = true;
@@ -545,7 +558,16 @@ class HScript implements HscriptInterface {
 			case ":noDebug": this.interp.errorHandler = (e) -> {};
 			case ":noLibraries": this._librariesAllowed = false;
 
-			case ":include":
+			/* //Useless
+			case ":allowJSON":
+				switch(args[0].e) {
+					case EIdent(id): this.parser.allowJSON = (id.trim() == "true");
+					default: //nothing
+				}
+				return null;
+			*/
+
+			case ":include": //legacy importScript from older versions
 				var _isAbsolute:Bool = false;
 				if(args.length > 1) _isAbsolute = switch(args[1].e) { case EIdent(abs): (abs.trim() == "true"); default: false; }
 
@@ -576,20 +598,12 @@ class HScript implements HscriptInterface {
 	public function set(variable:String, data:Dynamic)
 		if(interp != null) interp.variables.set(variable, data);
 
-	public function call(func:String, ?args:Array<Dynamic>):Dynamic {
-		try {
-			if (interp == null) return null;
+	public function call(func:String, args:Array<Dynamic>):Dynamic {
+		if(interp == null) return null;
 
-			var functionVar = interp.variables.get(func);
-			if (functionVar == null || !Reflect.isFunction(functionVar)) return null;
-
-			return (args != null && args.length > 0)
-				? Reflect.callMethod(null, functionVar, args)
-				: functionVar();
-		} catch (e:Dynamic) {
-			MusicBeatState.getState().addTextToDebug(Printer.errorToString(e), FlxColor.RED, true, "error");
-			return null;
-		}
+		var functionVar = interp.variables.get(func);
+		if(functionVar == null || !Reflect.isFunction(functionVar)) return null;
+		return (args != null && args.length > 0) ? Reflect.callMethod(null, functionVar, args) : functionVar();
 	}
 }
 

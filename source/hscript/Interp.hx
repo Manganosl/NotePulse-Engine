@@ -184,7 +184,7 @@ class Interp {
 			var v = el.shift();
 			if (el.length > 0)
 				inf.customParams = el;
-			Log.hxTrace(Std.string(v), inf);
+			haxe.Log.trace(Std.string(v), inf);
 		}));
 	}
 
@@ -570,7 +570,7 @@ class Interp {
 				throw e;
 			return null;
 		} catch(e) {
-			Log.error(e);
+			trace(e);
 		}
 		return null;
 	}
@@ -594,21 +594,14 @@ class Interp {
 		}
 	}
 
-	public inline function error(e:#if hscriptPos ErrorDef #else Error #end, rethrow:Bool = false):Dynamic {
-		#if hscriptPos
-		var e = new Error(e, curExpr.pmin, curExpr.pmax, curExpr.origin, curExpr.line);
-		#end
-
-		if (errorHandler != null) {
-			errorHandler(e);
-			return null;
-		}
+	public inline function error(e:#if hscriptPos ErrorDef #else Error #end, rethrow = false):Dynamic {
+		#if hscriptPos var e = new Error(e, curExpr.pmin, curExpr.pmax, curExpr.origin, curExpr.line); #end
 
 		if (rethrow)
 			this.rethrow(e);
 		else
 			throw e;
-
+		
 		return null;
 	}
 
@@ -618,7 +611,7 @@ class Interp {
 		if(warnHandler != null)
 			warnHandler(e);
 		else
-			Log.warn(Printer.errorToString(e));
+			trace('[ Warning ] ${Printer.errorToString(e)}');
 	}
 
 	inline function rethrow(e:Dynamic):Void {
@@ -696,10 +689,6 @@ class Interp {
 				return UnsafeReflect.getProperty(scriptObject, 'get_$id')();
 			}
 		}
-		var cl = Type.resolveClass(id);
-		if(cl != null) return cl;
-		var en = Type.resolveEnum(id);
-		if(en != null) return en;
 		if (doException)
 			error(EUnknownVariable(id));
 		return null;
@@ -860,104 +849,70 @@ class Interp {
 				}
 				return null;
 
-			case EEnum(en, isAbstract):
-				if(isAbstract) {
-					var enumObj:Dynamic = {};
-					var enumType:String = 'Int';
-					if(en.underlyingType != null) {
-						enumType = switch(en.underlyingType) {
-							case CTPath(path, _):
-								path.join(".");
-							default:
-								''; // ???
+			case EEnum(en, _): // TODO: enum abstracts
+				var enumThingy:HEnum = {};
+				var enumName = en.name;
+				var enumFields = en.fields;
+				for (i => ef in enumFields) {
+					var fieldName = ef.name;
+					
+					if(ef.args.length < 1) {
+						var enumValue:HEnumValue = {
+							enumName: enumName,
+							fieldName: fieldName,
+							index: i,
+							args: []
 						}
+
+						enumThingy.setEnum(fieldName, enumValue);
 					}
-					var enumName = en.name;
-					var enumFields = en.fields;
-					// TODO: incremental implicit int value from previous value
-					// i.e.
-					/*
-					enum abstract Numeric(Int) {
-						var Zero; // implicit value: 0
-						var Ten = 10;
-						var Eleven; // implicit value: 11
-					}
-					*/
-					for (i => ef in enumFields) {
-						var fieldName = ef.name;
-						var fieldValue:Dynamic = ef.value != null ? expr(ef.value) : switch(enumType) {
-							case 'Int': i;
-							case 'String': fieldName;
-							default: null;
+					else {
+						var params = ef.args;
+						var hasOpt = false, minParams = 0;
+						for (p in params) {
+							if (p.opt)
+								hasOpt = true;
+							else
+								minParams++;
 						}
-						//var fieldValue:Dynamic = ef.value != null ? exprReturn(ef.value) : i;
-						UnsafeReflect.setField(enumObj, fieldName, fieldValue);
-					}
-					variables.set(enumName, enumObj);
-				} else {
-					var enumThingy:HEnum = {};
-					var enumName = en.name;
-					var enumFields = en.fields;
-					for (i => ef in enumFields) {
-						var fieldName = ef.name;
-						
-						if(ef.args.length < 1) {
-							var enumValue:HEnumValue = {
+							
+						var f = function(args:Array<Dynamic>):HEnumValue {
+							if (((args == null) ? 0 : args.length) != params.length) {
+								if (args.length < minParams) {
+									var str = "Invalid number of parameters. Got " + args.length + ", required " + minParams;
+									if (enumName != null)
+										str += " for enum '" + enumName + "'";
+									error(ECustom(str));
+								}
+								// make sure mandatory args are forced
+								var args2 = [];
+								var extraParams = args.length - minParams;
+								var pos = 0;
+								for (p in params)
+									if (p.opt) {
+										if (extraParams > 0) {
+											args2.push(args[pos++]);
+											extraParams--;
+										} else
+											args2.push(null);
+									} else
+										args2.push(args[pos++]);
+								args = args2;
+							}
+							return {
 								enumName: enumName,
 								fieldName: fieldName,
 								index: i,
-								args: []
-							}
-
-							enumThingy.setEnum(fieldName, enumValue);
-						}
-						else {
-							var params = ef.args;
-							var hasOpt = false, minParams = 0;
-							for (p in params) {
-								if (p.opt)
-									hasOpt = true;
-								else
-									minParams++;
-							}
-								
-							var f = function(args:Array<Dynamic>):HEnumValue {
-								if (((args == null) ? 0 : args.length) != params.length) {
-									if (args.length < minParams) {
-										var str = "Invalid number of parameters. Got " + args.length + ", required " + minParams;
-										if (enumName != null)
-											str += " for enum '" + enumName + "'";
-										error(ECustom(str));
-									}
-									var args2 = [];
-									var extraParams = args.length - minParams;
-									var pos = 0;
-									for (p in params)
-										if (p.opt) {
-											if (extraParams > 0) {
-												args2.push(args[pos++]);
-												extraParams--;
-											} else
-												args2.push(null);
-										} else
-											args2.push(args[pos++]);
-									args = args2;
-								}
-								return {
-									enumName: enumName,
-									fieldName: fieldName,
-									index: i,
-									args: args
-								};
+								args: args
 							};
-							var f = Reflect.makeVarArgs(f);
+						};
+						var f = Reflect.makeVarArgs(f);
 
-							enumThingy.setEnum(fieldName, f);
-						}
+						enumThingy.setEnum(fieldName, f);
 					}
-
-					variables.set(en.name, enumThingy);
 				}
+
+				variables.set(en.name, enumThingy);
 			case ECast(e, _): // TODO
 				return expr(e);
 			case ERegex(e, f):
@@ -1015,33 +970,9 @@ class Interp {
 				restore(old);
 				return v;
 			case EField(e, f, s):
-				var field:Null<Dynamic>;
-				try {
-					field = expr(e);
-				} catch(exc:Dynamic) {
-					var path = getExprPath(e);
-					if(path != null) {
-						var fullPath = path + "." + f;
-						var cl = Type.resolveClass(fullPath);
-						if(cl != null) return cl;
-						var en = Type.resolveEnum(fullPath);
-						if(en != null) return en;
-						if(s) return null;
-						error(EUnknownVariable(path));
-					}
-					throw exc;
-				}
-				if(field == null) {
-					var path = getExprPath(e);
-					if(path != null) {
-						var fullPath = path + "." + f;
-						var cl = Type.resolveClass(fullPath);
-						if(cl != null) return cl;
-						var en = Type.resolveEnum(fullPath);
-						if(en != null) return en;
-					}
-					if(s) return null;
-				}
+				var field = expr(e);
+				if(s && field == null)
+					return null;
 				return get(field, f);
 			case EBinop(op, e1, e2):
 				var fop = binops.get(op);
@@ -1529,20 +1460,6 @@ class Interp {
 					cls = Type.getClass(o);
 				cls != null ? Type.getClassName(cls) : null;
 		};
-	}
-
-	function getExprPath(e:Expr):Null<String> {
-		switch(Tools.expr(e)) {
-			case EIdent(id):
-				return id;
-			case EField(e2, f, _):
-				var parent = getExprPath(e2);
-				if(parent != null)
-					return parent + "." + f;
-				return null;
-			default:
-				return null;
-		}
 	}
 
 	function get(o:Dynamic, f:String):Dynamic {

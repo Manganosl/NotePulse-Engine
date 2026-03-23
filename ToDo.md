@@ -19,3 +19,7 @@
 ## 21/03/2026
 - [X] Fix ghost animations not working correctly with characters using texture atlas. **Fixed 22/03/2026**
 - [X] Reimplement multiatlas on characters. **Done 22/03/2026**
+
+## 23/03/2026
+- [ ] Improve HScript error handler (Script path, line of the error and specific error, not always Null Object Reference)
+- [ ] Reimplement Enum Abstracts to HScript.
