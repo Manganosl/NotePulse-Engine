@@ -12,6 +12,48 @@ class PlayField extends FlxTypedGroup<StrumNote> {
     public var player:Int = 0;
 	public var notes:Array<Note> = [];
 
+	public var inControl(null, set):Bool;
+	public var downScroll(null, set):Bool;
+	public var direction(null, set):Float;
+	public var cpuControlled(null, set):Bool;
+	public var noteHitCallback(null, set):Note->Void;
+	public var noteMissCallback(null, set):Note->Void;
+	public var noteSpeed(null, set):Float;
+	public var texture(null, set):String;
+
+	function set_inControl(value:Bool){
+		for(strum in members) strum.inControl = value;
+		return value;
+	}
+	function set_downScroll(value:Bool){
+		for(strum in members) strum.downScroll = value;
+		return value;
+	}
+	function set_direction(value:Float){
+		for(strum in members) strum.direction = value;
+		return value;
+	}
+	function set_cpuControlled(value:Bool){
+		for(strum in members) strum.cpuControlled = value;
+		return value;
+	}
+	function set_noteHitCallback(value:Note->Void){
+		for(strum in members) strum.noteHitCallback = value;
+		return value;
+	}
+	function set_noteMissCallback(value:Note->Void){
+		for(strum in members) strum.noteMissCallback = value;
+		return value;
+	}
+	function set_noteSpeed(value:Float){
+		for(strum in members) strum.noteSpeed = value;
+		return value;
+	}
+	function set_texture(value:String){
+		for(strum in members) strum.texture = value;
+		return value;
+	}
+
     public function new(player:Int) {
         super();
         this.player = player;

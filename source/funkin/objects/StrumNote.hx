@@ -18,6 +18,7 @@ class StrumNote extends FlxSkewedSprite
 	public var direction:Float = 90;
 	public var downScroll:Bool = false;
 	public var cpuControlled:Bool = true;
+	public var inControl:Bool = true;
 	public var noteHitCallback:Note->Void;
 	public var noteMissCallback:Note->Void;
 	public var sustainReduce:Bool = true;

@@ -79,19 +79,30 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
         final output = parent.modifiers.getPath(basePos.clone(), arrowData);
         if (output == null || (output.visuals.alpha * arrow.alpha <= 0)) return null;
 
-        final stepDuration = (adapter.getStartCrochet() / 3.85); 
         final isEnd = adapter.isHoldEnd(arrow);
         
-        var nextData = getArrowParams(arrow, stepDuration);
-        var nextOutput = parent.modifiers.getPath(basePos.clone(), nextData);
-        
-        var diff = nextOutput.pos.subtract(output.pos);
+        var diff:Vector3;
+        var nextNote = adapter.getNextNote(arrow);
+        var isCached:Bool = false;
+
+        if (nextNote != null && nextNote.extraData.exists('cachedModPos')) {
+            var nextPos:Vector3 = nextNote.extraData.get('cachedModPos');
+            diff = output.pos.subtract(nextPos);
+            isCached = true;
+        } else {
+            final stepDuration = (adapter.getStartCrochet() / 3.85); 
+            var nextData = getArrowParams(arrow, stepDuration);
+            var nextOutput = parent.modifiers.getPath(basePos.clone(), nextData);
+            diff = nextOutput.pos.subtract(output.pos);
+        }
+
+        arrow.extraData.set('cachedModPos', output.pos);
         
         var velocity = Math.sqrt(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z); 
 
         final isDownscroll = adapter.getDownscroll(); 
         
-        var pathAngle = (diff.x == 0 && diff.y == 0) ? 0 : Math.atan2(diff.y, diff.x) * FlxAngle.TO_DEG - 90 + (isDownscroll ? 180 : 0);
+        var pathAngle = (diff.x == 0 && diff.y == 0) ? 0 : Math.atan2(diff.y, diff.x) * FlxAngle.TO_DEG - 90 + (isDownscroll ? 180 : 0) + (isCached ? 180 : 0);
 
         var planeWidth = arrowFrame.width * arrow.scale.x * 0.5;
         var frameHeight = (isEnd ? fullHeight : velocity);

@@ -2,6 +2,7 @@ package modchart.backend.standalone;
 
 import flixel.FlxCamera;
 import flixel.FlxSprite;
+import funkin.objects.Note;
 import haxe.ds.Vector;
 
 interface IAdapter {
@@ -26,6 +27,8 @@ interface IAdapter {
 	public function isHoldEnd(sprite:FlxSprite):Bool; // If its the hold end
 	public function arrowHit(sprite:FlxSprite):Bool; // If the arrow was hitted
 	public function getHoldParentTime(sprite:FlxSprite):Float;
+	public function getPrevNote(note:FlxSprite):Note;
+	public function getNextNote(note:FlxSprite):Note;
 
 	/**
 	 * Get the individual hold fragment length.

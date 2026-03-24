@@ -3313,7 +3313,6 @@ class PlayState extends MusicBeatState
 
 	//// Keys ////
 
-	public var strumsBlocked:Array<Bool> = [];
 	private function onKeyPress(event:KeyboardEvent):Void
 	{
 
@@ -3341,7 +3340,7 @@ class PlayState extends MusicBeatState
 		if(Conductor.songPosition >= 0) Conductor.songPosition = FlxG.sound.music.time;
 
 		var plrInputNotes:Array<Note> = notes.members.filter(function(n:Note):Bool {
-			var canHit:Bool = !strumsBlocked[n.noteData] && n.canBeHit && !n.strum.cpuControlled && !n.tooLate && !n.wasGoodHit && !n.blockHit;
+			var canHit:Bool = n.strum.inControl && n.canBeHit && !n.strum.cpuControlled && !n.tooLate && !n.wasGoodHit && !n.blockHit;
 			return n != null && canHit && !n.isSustainNote && n.noteData == key;
 		});
 		plrInputNotes.sort(sortHitNotes);
@@ -3443,14 +3442,13 @@ class PlayState extends MusicBeatState
 
 		if(controls.controllerMode && pressArray.contains(true))
 			for (i in 0...pressArray.length)
-				if(pressArray[i] && strumsBlocked[i] != true)
-					keyPressed(i);
+				if(pressArray[i]) keyPressed(i);
 
 		if (startedCountdown && !inCutscene && generatedMusic)
 		{
 			if (notes.length > 0) {
 				for (n in notes) {
-					var canHit:Bool = (n != null && !strumsBlocked[n.noteData] && n.canBeHit
+					var canHit:Bool = (n != null && n.strum.inControl && n.canBeHit
 						&& !n.strum.cpuControlled && !n.tooLate && !n.wasGoodHit && !n.blockHit);
 
 					if (guitarHeroSustains)
@@ -3466,10 +3464,9 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if((controls.controllerMode || strumsBlocked.contains(true)) && releaseArray.contains(true))
+		if((controls.controllerMode) && releaseArray.contains(true))
 			for (i in 0...releaseArray.length)
-				if(releaseArray[i] || strumsBlocked[i] == true)
-					keyReleased(i);
+				if(releaseArray[i]) keyReleased(i);
 	}
 
 	//// Ratings | Score ////

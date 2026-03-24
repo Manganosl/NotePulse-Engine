@@ -103,6 +103,14 @@ class NotePulse implements IAdapter {
 		return 0;
 	}
 
+	public function getPrevNote(arrow:FlxSprite){
+		return cast(arrow, Note).prevNote;
+	}
+
+	public function getNextNote(arrow:FlxSprite){
+		return cast(arrow, Note).nextNote;
+	}
+
 	public function getKeyCount(?player:Int = 0):Int {
 		return PlayState.SONG.mania + 1;
 	}

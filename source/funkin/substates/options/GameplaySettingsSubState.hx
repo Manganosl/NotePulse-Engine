@@ -1,5 +1,7 @@
 package funkin.substates.options;
 
+import funkin.objects.PlayField;
+
 class GameplaySettingsSubState extends BaseOptionsMenu
 {
 	public function new()
