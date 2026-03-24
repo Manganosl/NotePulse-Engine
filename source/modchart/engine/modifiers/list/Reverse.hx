@@ -10,88 +10,83 @@ import modchart.backend.util.ModchartUtil;
 // Default modifier
 // Handles scroll speed, scroll angle and reverse modifiers
 class Reverse extends Modifier {
-	public function new(pf) {
-		super(pf);
+    public function new(pf) {
+        super(pf);
+        setPercent('xmod', 1, -1);
+    }
 
-		setPercent('xmod', 1, -1);
-	}
+    public function getReverseValue(dir:Int, player:Int) {
+        var kNum = getKeyCount();
+        var val:Float = 0;
 
-	public function getReverseValue(dir:Int, player:Int) {
-		var kNum = getKeyCount();
-		var val:Float = 0;
-		if (dir >= Math.floor(kNum * 0.5))
-			val = val + getPercent("split", player);
+        if (dir >= (kNum >> 1))
+            val += getPercent("split", player);
 
-		if ((dir % 2) == 1)
-			val = val + getPercent("alternate", player);
+        if ((dir & 1) != 0)
+            val += getPercent("alternate", player);
 
-		var first = kNum * 0.25;
-		var last = kNum - 1 - first;
+        var first = kNum * 0.25;
+        if (dir >= first && dir <= kNum - 1 - first)
+            val += getPercent("cross", player);
 
-		if (dir >= first && dir <= last)
-			val = val + getPercent("cross", player);
+        val += getPercent('reverse', player) + getPercent('reverse$dir', player);
 
-		val = val + getPercent('reverse', player) + getPercent("reverse" + Std.string(dir), player);
+        if (getPercent("unboundedReverse", player) == 0) {
+            val %= 2;
+            if (val > 1)
+                val = 2 - val;
+        }
 
-		if (getPercent("unboundedReverse", player) == 0) {
-			val %= 2;
-			if (val > 1)
-				val = 2 - val;
-		}
+        if (Adapter.instance.getDownscroll())
+            val = 1 - val;
 
-		// downscroll
-		if (Adapter.instance.getDownscroll())
-			val = 1 - val;
-		return val;
-	}
+        return val;
+    }
 
-	override public function render(curPos:Vector3, params:ModifierParameters) {
-		var player = params.player;
-		var initialY = Adapter.instance.getDefaultReceptorY(params.lane, player) + ARROW_SIZEDIV2;
-		var reversePerc = getReverseValue(params.lane, player);
-		var shift = FlxMath.lerp(initialY, HEIGHT - initialY, reversePerc);
+    override public function render(curPos:Vector3, params:ModifierParameters) {
+        var player = params.player;
+        var initialY = Adapter.instance.getDefaultReceptorY(params.lane, player) + ARROW_SIZEDIV2;
+        var reversePerc = getReverseValue(params.lane, player);
 
-		var centerPercent = getPercent('centered', params.player);
-		shift = FlxMath.lerp(shift, (HEIGHT * 0.5) - ARROW_SIZEDIV2, centerPercent);
+        var shift = initialY + reversePerc * (HEIGHT - 2 * initialY);
 
-		var distance = params.distance;
+        var centerPercent = getPercent('centered', player);
+        shift += centerPercent * ((HEIGHT * 0.5) - ARROW_SIZEDIV2 - shift);
 
-		distance *= Adapter.instance.getCurrentScrollSpeed();
+        var distance = params.distance * Adapter.instance.getCurrentScrollSpeed();
 
-		var scroll = new Vector3(0, FlxMath.lerp(distance, -distance, reversePerc));
-		scroll = applyScrollMods(scroll, params);
+        var scroll = new Vector3(0, distance * (1 - 2 * reversePerc));
+        scroll = applyScrollMods(scroll, params);
 
-		curPos.x = curPos.x + scroll.x;
-		curPos.y = shift + scroll.y;
-		curPos.z = curPos.z + scroll.z;
+        curPos.x += scroll.x;
+        curPos.y = shift + scroll.y;
+        curPos.z += scroll.z;
 
-		return curPos;
-	}
+        return curPos;
+    }
 
-	function applyScrollMods(scroll:Vector3, params:ModifierParameters) {
-		var player = params.player;
-		var laneStr = Std.string(params.lane);
+    function applyScrollMods(scroll:Vector3, params:ModifierParameters) {
+        var player = params.player;
+        var laneStr = '${params.lane}';
 
-		var totalXMod = getPercent('xmod', player) + getPercent('xmod' + laneStr, player);
-		scroll.y *= totalXMod;
+        scroll.y *= getPercent('xmod', player) + getPercent('xmod$laneStr', player);
 
-		var angleX = getPercent('scrollAngleX', player) + getPercent('scrollAngleX' + laneStr, player);
-		var angleY = getPercent('scrollAngleY', player) + getPercent('scrollAngleY' + laneStr, player);
-		var angleZ = getPercent('scrollAngleZ', player) + getPercent('scrollAngleZ' + laneStr, player);
+        var angleX = getPercent('scrollAngleX', player) + getPercent('scrollAngleX$laneStr', player);
+        var angleY = getPercent('scrollAngleY', player) + getPercent('scrollAngleY$laneStr', player);
+        var angleZ = getPercent('scrollAngleZ', player) + getPercent('scrollAngleZ$laneStr', player);
 
-		var totalPeriod = getPercent('curvedScrollPeriod', player) + getPercent('curvedScrollPeriod' + laneStr, player);
-		final shift:Float = params.distance * 0.25 * (1 + totalPeriod);
+        var shift = params.distance * 0.25 * (1 + getPercent('curvedScrollPeriod', player) + getPercent('curvedScrollPeriod$laneStr', player));
 
-		angleX += shift * (getPercent('curvedScrollX', player) + getPercent('curvedScrollX' + laneStr, player));
-		angleY += shift * (getPercent('curvedScrollY', player) + getPercent('curvedScrollY' + laneStr, player));
-		angleZ += shift * (getPercent('curvedScrollZ', player) + getPercent('curvedScrollZ' + laneStr, player));
+        angleX += shift * (getPercent('curvedScrollX', player) + getPercent('curvedScrollX$laneStr', player));
+        angleY += shift * (getPercent('curvedScrollY', player) + getPercent('curvedScrollY$laneStr', player));
+        angleZ += shift * (getPercent('curvedScrollZ', player) + getPercent('curvedScrollZ$laneStr', player));
 
-		if (angleX == 0 && angleZ == 0)
-			return scroll;
+        if (angleX == 0 && angleZ == 0)
+            return scroll;
 
-		return ModchartUtil.rotate3DVector(scroll, angleX, angleY, angleZ);
-	}
+        return ModchartUtil.rotate3DVector(scroll, angleX, angleY, angleZ);
+    }
 
-	override public function shouldRun(params:ModifierParameters):Bool
-		return true;
+    override public function shouldRun(params:ModifierParameters):Bool
+        return true;
 }

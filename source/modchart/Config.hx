@@ -67,7 +67,7 @@ class Config {
 		APPLY_ALPHA: true,
 		APPLY_DEPTH: true,
 		APPLY_SCALE: false,
-		RESOLUTION: 1,
+		RESOLUTION: 0.5,
 		LENGTH: 0
 	};
 
