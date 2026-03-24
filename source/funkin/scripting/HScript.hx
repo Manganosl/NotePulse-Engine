@@ -286,7 +286,10 @@ class HScript implements HscriptInterface {
 		}
 
 		obj.variables.set("controls", Controls.instance);
-
+		obj.variables.set("trace", function(str:String, ?posInf:PosInfos){
+			if(posInf == null) posInf = obj.posInfos();
+			Log.hxTrace(str, posInf);
+		});
 		obj.variables.set("window", lime.app.Application.current.window);
 
 		obj.variables.set("Function_Stop", LuaUtils.Function_Stop);
@@ -461,7 +464,6 @@ class HScript implements HscriptInterface {
 
     public static function onHaxeTrace(v:Dynamic, ?interpreter:Interp, ?level:String = "trace") {
 		var posInfos = (interpreter != null ? interpreter.posInfos() : {fileName: "hscript", lineNumber: 0, className: null, methodName: null});
-
 		#if PRETTY_TRACE
 		switch(level.toLowerCase()) {
 			case "error":
@@ -480,7 +482,7 @@ class HScript implements HscriptInterface {
 
     function onError(e:Error) {
 		#if PRETTY_TRACE
-		MusicBeatState.getState().addTextToDebug(Printer.errorToString(e), FlxColor.RED, false);
+		MusicBeatState.getState().addTextToDebug(getErrorMessage(e), FlxColor.RED, false);
 		var pos:PosInfos = {fileName: e.origin, lineNumber: e.line, className: null, methodName: null};
 		error(getErrorMessage(e), pos);
 		#else
@@ -489,14 +491,12 @@ class HScript implements HscriptInterface {
     }
 
 	function onWarn(e:Error) {
-		var posInfos = interp.posInfos();
-
 		#if PRETTY_TRACE
-		MusicBeatState.getState().addTextToDebug(Printer.errorToString(e), FlxColor.YELLOW, false);
+		MusicBeatState.getState().addTextToDebug(getErrorMessage(e), FlxColor.YELLOW, false);
 		var pos:PosInfos = {fileName: e.origin, lineNumber: e.line, className: null, methodName: null};
 		warn(getErrorMessage(e), pos);
 		#else
-		trace(Printer.errorToString(e), {fileName: posInfos.fileName, lineNumber: posInfos.lineNumber, className: null, methodName: null});
+		trace(getErrorMessage(e), {fileName: posInfos.fileName, lineNumber: posInfos.lineNumber, className: null, methodName: null});
 		#end
 	}
 

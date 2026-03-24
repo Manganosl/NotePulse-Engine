@@ -430,6 +430,13 @@ class PlayState extends MusicBeatState
 
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
+
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		if(luaDebugGroup == null){
+			luaDebugGroup = new FlxTypedGroup<funkin.scripting.lua.DebugLuaText>();
+			insert(99999999, luaDebugGroup);
+		}
+		#end
 		
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		grpSustainSplashes = new FlxTypedGroup<SustainSplash>();
