@@ -1688,20 +1688,25 @@ class PlayState extends MusicBeatState
 				if(value2 != null && value2 != '') {
 					args = value2.split(',');
 				}
-				for (hscript in hscriptArray) {
-					hscript.call(value1, args);
+				try {
+					for (hscript in hscriptArray) {
+						hscript.call(value1, args);
 
-					if (hscript.variables.exists(value1)) {
-						var func = hscript.variables.get(value1);
+						if (hscript.variables.exists(value1)) {
+							var func = hscript.variables.get(value1);
+							if (func != null && Reflect.isFunction(func))
+								Reflect.callMethod(null, func, args);
+						}
+					}
+
+					if (HScript.staticVariables.exists(value1)) {
+						var func = HScript.staticVariables.get(value1);
 						if (func != null && Reflect.isFunction(func))
 							Reflect.callMethod(null, func, args);
 					}
-				}
-
-				if (HScript.staticVariables.exists(value1)) {
-					var func = HScript.staticVariables.get(value1);
-					if (func != null && Reflect.isFunction(func))
-						Reflect.callMethod(null, func, args);
+				} catch(e) {
+					addTextToDebug('ERROR on HScript Call event: ${e.toString()}', FlxColor.RED, false);
+					Log.error('HScript Call event: ${e.toString().split(": ").slice(1).join(": ")}');
 				}
 			/*case 'Change Mania':
 				var parsed = Std.parseInt(value1);

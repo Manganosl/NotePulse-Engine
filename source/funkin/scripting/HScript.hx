@@ -484,7 +484,7 @@ class HScript implements HscriptInterface {
 		#if PRETTY_TRACE
 		MusicBeatState.getState().addTextToDebug(getErrorMessage(e), FlxColor.RED, false);
 		var pos:PosInfos = {fileName: e.origin, lineNumber: e.line, className: null, methodName: null};
-		error(getErrorMessage(e), pos);
+		error(getErrorMessage(e).split(": ").slice(1).join(": "), pos);
 		#else
 		trace(e);
 		#end
