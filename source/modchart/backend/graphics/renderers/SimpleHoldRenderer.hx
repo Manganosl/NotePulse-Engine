@@ -53,9 +53,11 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
     var __lastPlayer:Int = -1;
     
     override public function prepare(arrow:FlxSprite):Null<DrawCommand> {
-        if (arrow.alpha <= 0) return null;
-
         final adapter = Adapter.instance;
+
+        if (arrow.alpha <= 0 || (adapter.getPrevNote(arrow).extraData["FMisOnScreen"] != null && adapter.getPrevNote(arrow).extraData["FMisOnScreen"] == false))
+            return null;
+
         final arrowFrame = arrow.frame.frame;
         
         final player = adapter.getPlayerFromArrow(arrow);
@@ -184,6 +186,22 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
         indices[0] = 0; indices[1] = 1; indices[2] = 2;
         indices[3] = 1; indices[4] = 3; indices[5] = 2;
 
+        var resolvedCameras = ModchartUtil.resolveCameras(parent, arrow);
+
+        var minX = Math.min(Math.min(vertices[0], vertices[2]), Math.min(vertices[4], vertices[6]));
+        var maxX = Math.max(Math.max(vertices[0], vertices[2]), Math.max(vertices[4], vertices[6]));
+        var minY = Math.min(Math.min(vertices[1], vertices[3]), Math.min(vertices[5], vertices[7]));
+        var maxY = Math.max(Math.max(vertices[1], vertices[3]), Math.max(vertices[5], vertices[7]));
+
+        for (cam in resolvedCameras) {
+            if (maxX >= 0 && minX <= cam.width && maxY >= 0 && minY <= cam.height) {
+                arrow.extraData["FMisOnScreen"] = true;
+                break;
+            } else arrow.extraData["FMisOnScreen"] = false;
+        }
+
+        if (!arrow.extraData["FMisOnScreen"]) return null;
+
         final absGlow = output.visuals.glow * 255;
         final negGlow = 1 - output.visuals.glow;
 
@@ -200,7 +218,7 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
             graphic: arrow.graphic,
             antialiasing: arrow.antialiasing,
             blend: arrow.blend,
-            cameras: ModchartUtil.resolveCameras(parent, arrow),
+            cameras: resolvedCameras,
             shader: arrow.shader,
             vertices: vertices,
             uvs: uvData,
