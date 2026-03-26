@@ -107,8 +107,8 @@ final class ModifierGroup {
 			return {pos: pos, visuals: visuals};
 
 		final args:ModifierParameters = {
-			songTime: ModPlayField.songPos,
-			curBeat: ModPlayField.beat,
+			songTime: Conductor.songPosition,
+			curBeat: Conductor.curDecBeat,
 			hitTime: data.hitTime + posDiff,
 			distance: data.distance + posDiff,
 			lane: data.lane,
@@ -236,7 +236,7 @@ final class ModifierGroup {
 
 	@:noCompletion
 	inline private function __getPercentTemplate():Vector<Float> {
-		final vector = new Vector<Float>(Adapter.instance.getPlayerCount());
+		final vector = new Vector<Float>(PlayState.SONG.lanes);
 		for (i in 0...vector.length)
 			vector[i] = 0;
 		return vector;

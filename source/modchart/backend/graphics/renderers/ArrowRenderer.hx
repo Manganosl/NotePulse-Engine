@@ -44,11 +44,11 @@ final class ArrowRenderer extends BaseRenderer<FlxSprite> {
 
 		final arrowPosition = helperVector;
 
-		final player = Adapter.instance.getPlayerFromArrow(arrow);
+		final player = Adapter.getPlayerFromArrow(arrow);
 
 		// setup the position
-		var arrowTime = Adapter.instance.getTimeFromArrow(arrow);
-		var songPos = Adapter.instance.getSongPosition();
+		var arrowTime = Adapter.getTimeFromArrow(arrow);
+		var songPos = Conductor.songPosition;
 		var arrowDiff = arrowTime - songPos;
 
 		final canUseLast = player == __lastPlayer;
@@ -57,33 +57,33 @@ final class ArrowRenderer extends BaseRenderer<FlxSprite> {
 		final orient = canUseLast ? __lastOrient : (__lastOrient = parent.getPercent('orient', player));
 
 		// apply centered 2 (aka centered path)
-		if (Adapter.instance.isTapNote(arrow)) {
+		if (arrow is Note) {
 			arrowDiff += FlxG.height * 0.25 * centered2;
 		} else {
 			arrowTime = songPos + (FlxG.height * 0.25 * centered2);
 			arrowDiff = arrowTime - songPos;
 		}
 		if(arrow.extraData != null && arrow.extraData["linkStrum"] != null)
-			arrowDiff += arrow.extraData["linkStrum"].height/Adapter.instance.getCurrentScrollSpeed();
+			arrowDiff += arrow.extraData["linkStrum"].height / Adapter.getCurrentScrollSpeed();
 		var arrowData:ArrowData = {
 			hitTime: arrowTime,
 			distance: arrowDiff,
-			lane: Adapter.instance.getLaneFromArrow(arrow),
+			lane: Adapter.getLaneFromArrow(arrow),
 			player: player,
-			isTapArrow: Adapter.instance.isTapNote(arrow)
+			isTapArrow: (arrow is Note)
 		};
 
-		arrowPosition.setTo(Adapter.instance.getDefaultReceptorX(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2,
-			Adapter.instance.getDefaultReceptorY(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2, 0);
+		arrowPosition.setTo(Adapter.getDefaultReceptorX(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2,
+			Adapter.getDefaultReceptorY(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2, 0);
 
 		final output = parent.modifiers.getPath(arrowPosition, arrowData);
 		arrowPosition.copyFrom(output.pos.clone());
 
 		// internal mods
 		if (orient != 0) {
-			final nextOutput = parent.modifiers.getPath(new Vector3(Adapter.instance.getDefaultReceptorX(arrowData.lane, arrowData.player)
+			final nextOutput = parent.modifiers.getPath(new Vector3(Adapter.getDefaultReceptorX(arrowData.lane, arrowData.player)
 				+ Manager.ARROW_SIZEDIV2,
-				Adapter.instance.getDefaultReceptorY(arrowData.lane, arrowData.player)
+				Adapter.getDefaultReceptorY(arrowData.lane, arrowData.player)
 				+ Manager.ARROW_SIZEDIV2),
 				arrowData, 1, false, true);
 			final thisPos = output.pos;

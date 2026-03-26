@@ -9,16 +9,14 @@ class Context {
 	public var view:View3D;
 
 	public var arrowRenderer:ArrowRenderer;
-	public var holdRenderer:BaseRenderer<FlxSprite>;
+	public var holdRenderer:HoldRenderer;
 	public var pathRenderer:PathRenderer;
 
 	public function new(parent:ModPlayField) {
 		this.parent = parent;
 
 		arrowRenderer = new ArrowRenderer(parent);
-		holdRenderer = new SimpleHoldRenderer(parent);
-		if(Adapter.instance.getComplexHoldsPref())
-			holdRenderer = new HoldRenderer(parent);
+		holdRenderer = new HoldRenderer(parent);
 		pathRenderer = new PathRenderer(parent);
 
 		view = new View3D();

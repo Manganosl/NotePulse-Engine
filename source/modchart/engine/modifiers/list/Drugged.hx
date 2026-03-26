@@ -14,7 +14,7 @@ class Drugged extends Modifier {
 		var x = (params.distance * 0.009) + (params.lane * 0.125);
 		var y = 0.;
 		y = sin(x * frequency);
-		var t = 0.01 * (-Adapter.instance.getSongPosition() * 0.0025 * 130.0);
+		var t = 0.01 * (-Conductor.songPosition * 0.0025 * 130.0);
 		y += sin(x * frequency * 2.1 + t) * 4.5;
 		y += sin(x * frequency * 1.72 + t * 1.121) * 4.0;
 		y += sin(x * frequency * 2.221 + t * 0.437) * 5.0;
@@ -35,7 +35,7 @@ class Drugged extends Modifier {
 		var x = (params.distance * 0.025) + (params.lane * 0.3);
 		var y = 0.;
 		y = sin(x * frequency);
-		var t = 0.01 * (-Adapter.instance.getSongPosition() * 0.005 * 130.0);
+		var t = 0.01 * (-Conductor.songPosition * 0.005 * 130.0);
 		y += sin(x * frequency * 2.1 + t) * 4.5;
 		y += sin(x * frequency * 1.72 + t * 1.121) * 4.0;
 		y += sin(x * frequency * 2.221 + t * 0.437) * 5.0;

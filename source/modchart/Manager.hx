@@ -61,8 +61,7 @@ final class Manager extends FlxBasic {
 		instance = this;
 		renderer = new CtxRenderer();
 
-		Adapter.init();
-		Adapter.instance.onModchartingInitialization();
+		Adapter.onModchartingInitialization();
 
 		addPlayfield();
 	}
@@ -465,7 +464,7 @@ final class Manager extends FlxBasic {
 	 * Draws all playfields.
 	 */
 	override function draw():Void {
-		var playerItems:Array<Array<Array<FlxSprite>>> = Adapter.instance.getArrowItems();
+		var playerItems:Array<Array<Array<FlxSprite>>> = Adapter.getArrowItems();
 
 		if (playerItems == null)
 			return;
@@ -477,8 +476,6 @@ final class Manager extends FlxBasic {
 	 */
 	override function destroy():Void {
 		super.destroy();
-
-		Adapter.instance.onModchartingDispose();
 
 		iteratePlayfields(pf -> {
 			pf.destroy();

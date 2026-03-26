@@ -51,22 +51,22 @@ class Modifier {
 	}
 
 	private inline function getKeyCount(player:Int = 0):Int {
-		return Adapter.instance.getKeyCount();
+		return PlayState.SONG.mania + 1;
 	}
 
 	private inline function getPlayerCount():Int {
-		return Adapter.instance.getPlayerCount();
+		return PlayState.SONG.lanes;
 	}
 
 	// Helpers Functions
 	private inline function getScrollSpeed():Float
-		return Adapter.instance.getCurrentScrollSpeed();
+		return Adapter.getCurrentScrollSpeed();
 
 	public inline function getReceptorY(lane:Int, player:Int)
-		return Adapter.instance.getDefaultReceptorY(lane, player);
+		return Adapter.getDefaultReceptorY(lane, player);
 
 	public inline function getReceptorX(lane:Int, player:Int)
-		return Adapter.instance.getDefaultReceptorX(lane, player);
+		return Adapter.getDefaultReceptorX(lane, player);
 
 	private var WIDTH:Float = FlxG.width;
 	private var HEIGHT:Float = FlxG.height;

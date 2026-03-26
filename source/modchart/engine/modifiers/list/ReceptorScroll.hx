@@ -20,10 +20,10 @@ class ReceptorScroll extends Modifier {
 		if (perc == 0)
 			return curPos;
 
-		final moveSpeed = (Adapter.instance.getCurrentCrochet() * 4) / getPercent('receptorScrollSpeed', params.player);
+		final moveSpeed = (Conductor.crochet * 4) / getPercent('receptorScrollSpeed', params.player);
 
 		var diff = -params.distance;
-		var songTime = Adapter.instance.getSongPosition();
+		var songTime = Conductor.songPosition;
 		var vDiff = -(diff - songTime) / moveSpeed;
 		var reversed = Math.floor(vDiff) % 2 == 0;
 
@@ -44,8 +44,8 @@ class ReceptorScroll extends Modifier {
 		if (perc == 0)
 			return data;
 
-		final moveSpeed = (Adapter.instance.getCurrentCrochet() * 4) / getPercent('receptorScrollSpeed', params.player);
-		var songTime = Adapter.instance.getSongPosition();
+		final moveSpeed = (Conductor.crochet * 4) / getPercent('receptorScrollSpeed', params.player);
+		var songTime = Conductor.songPosition;
 		var currentCycle = Math.floor(songTime / moveSpeed) % 2;
 		var noteTime = songTime + params.distance;
 		var noteCycle = Math.floor(noteTime / moveSpeed) % 2;

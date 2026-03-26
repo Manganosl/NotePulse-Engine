@@ -37,7 +37,7 @@ class Reverse extends Modifier {
                 val = 2 - val;
         }
 
-        if (Adapter.instance.getDownscroll())
+        if (ClientPrefs.data.downScroll)
             val = 1 - val;
 
         return val;
@@ -45,7 +45,7 @@ class Reverse extends Modifier {
 
     override public function render(curPos:Vector3, params:ModifierParameters) {
         var player = params.player;
-        var initialY = Adapter.instance.getDefaultReceptorY(params.lane, player) + ARROW_SIZEDIV2;
+        var initialY = Adapter.getDefaultReceptorY(params.lane, player) + ARROW_SIZEDIV2;
         var reversePerc = getReverseValue(params.lane, player);
 
         var shift = initialY + reversePerc * (HEIGHT - 2 * initialY);
@@ -53,7 +53,7 @@ class Reverse extends Modifier {
         var centerPercent = getPercent('centered', player);
         shift += centerPercent * ((HEIGHT * 0.5) - ARROW_SIZEDIV2 - shift);
 
-        var distance = params.distance * Adapter.instance.getCurrentScrollSpeed();
+        var distance = params.distance * Adapter.getCurrentScrollSpeed();
 
         var scroll = new Vector3(0, distance * (1 - 2 * reversePerc));
         scroll = applyScrollMods(scroll, params);

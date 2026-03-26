@@ -62,8 +62,8 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 
 	// the entry sprite should be A RECEPTOR / STRUM !!
 	override public function prepare(item:FlxSprite):Null<DrawCommand> {
-		final lane = Adapter.instance.getLaneFromArrow(item);
-		final fn = Adapter.instance.getPlayerFromArrow(item);
+		final lane = Adapter.getLaneFromArrow(item);
+		final fn = Adapter.getPlayerFromArrow(item);
 
 		final canUseLast = fn == __lastPlayer;
 
@@ -80,7 +80,7 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 		final divisions = Std.int(15 * Config.ARROW_PATHS_CONFIG.RESOLUTION);
 		final limit = 1800 + Config.ARROW_PATHS_CONFIG.LENGTH;
 		final interval = limit / divisions;
-		final songPos = Adapter.instance.getSongPosition();
+		final songPos = Conductor.songPosition;
 
 		final segs = divisions - 1;
 		final vertices = new NativeVector<Float>(segs * 8);
@@ -88,7 +88,7 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 		var vi = 0, vertCount = 0;
 
 		var lastOutput:ModifierOutput = null;
-		pathVector.setTo(Adapter.instance.getDefaultReceptorX(lane, fn), Adapter.instance.getDefaultReceptorY(lane, fn), 0);
+		pathVector.setTo(Adapter.getDefaultReceptorX(lane, fn), Adapter.getDefaultReceptorY(lane, fn), 0);
 		pathVector.incrementBy(ModchartUtil.getHalfPos());
 
 		final colored = Config.ARROW_PATHS_CONFIG.APPLY_COLOR;

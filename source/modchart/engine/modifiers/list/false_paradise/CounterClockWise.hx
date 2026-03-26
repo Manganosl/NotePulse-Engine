@@ -11,7 +11,7 @@ class CounterClockWise extends Modifier {
 		var centerY = HEIGHT * .5;
 		var radiusOffset = ARROW_SIZE * (params.lane - 1.5);
 
-		var crochet = Adapter.instance.getCurrentCrochet();
+		var crochet = Conductor.crochet;
 
 		var radius = 200 + radiusOffset * cos(strumTime / crochet * .25 / 16 * Math.PI);
 		var outX = centerX + cos(strumTime / crochet / 4 * Math.PI) * radius;

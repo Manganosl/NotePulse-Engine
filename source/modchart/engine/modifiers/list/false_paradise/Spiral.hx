@@ -11,7 +11,7 @@ class Spiral extends Modifier {
 		var centerX = WIDTH * .5;
 		var centerY = HEIGHT * .5;
 		var radiusOffset = -params.distance * .25;
-		var crochet = Adapter.instance.getCurrentCrochet();
+		var crochet = Conductor.crochet;
 		var radius = radiusOffset + getPercent('spiralDist', player) * params.lane;
 		var outX = centerX + cos(-params.distance / crochet * PI + params.curBeat * (PI * .25)) * radius;
 		var outY = centerY + sin(-params.distance / crochet * PI - params.curBeat * (PI * .25)) * radius;

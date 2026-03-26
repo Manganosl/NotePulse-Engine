@@ -90,9 +90,6 @@ final class ModPlayField extends FlxSprite {
 	function get_view()
 		return context.view;
 
-	public static var beat:Float = 0;
-	public static var songPos:Float = 0;
-
 	public function new() {
 		super();
 
@@ -150,7 +147,7 @@ final class ModPlayField extends FlxSprite {
 
 	public inline function set(name:String, beat:Float, value:Float, player:Int = -1):Void {
 		if (player == -1) {
-			for (curField in 0...Adapter.instance.getPlayerCount())
+			for (curField in 0...PlayState.SONG.lanes)
 				set(name, beat, value, curField);
 			return;
 		}
@@ -160,7 +157,7 @@ final class ModPlayField extends FlxSprite {
 
 	public inline function ease(name:String, beat:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1):Void {
 		if (player == -1) {
-			for (curField in 0...Adapter.instance.getPlayerCount())
+			for (curField in 0...PlayState.SONG.lanes)
 				ease(name, beat, length, value, easeFunc, curField);
 			return;
 		}
@@ -170,7 +167,7 @@ final class ModPlayField extends FlxSprite {
 
 	public inline function add(name:String, beat:Float, length:Float, addition:Float = 1, easeFunc:EaseFunction, player:Int = -1):Void {
 		if (player == -1) {
-			for (curField in 0...Adapter.instance.getPlayerCount())
+			for (curField in 0...PlayState.SONG.lanes)
 				add(name, beat, length, addition, easeFunc, curField);
 			return;
 		}
@@ -182,7 +179,7 @@ final class ModPlayField extends FlxSprite {
 		var addition = getPercent(name, player == -1 ? 0 : player);
 		var value = addition + valueToAdd;
 		if (player == -1) {
-			for (curField in 0...Adapter.instance.getPlayerCount())
+			for (curField in 0...PlayState.SONG.lanes)
 				set(name, beat, value, curField);
 			return;
 		}
@@ -226,7 +223,7 @@ final class ModPlayField extends FlxSprite {
 	// and u made a ease on drunk and u made a ease on the node
 	// input, the eases may overlap, causing visuals issues.
 	public function updateNodes() {
-		for (player in 0...Adapter.instance.getPlayerCount()) {
+		for (player in 0...PlayState.SONG.lanes) {
 			final it = nodes.iterator();
 			final n = it.next;
 			final h = it.hasNext;
@@ -259,10 +256,8 @@ final class ModPlayField extends FlxSprite {
 	}
 
 	override function update(elapsed:Float):Void {
-		// Update Event Timeline
-		beat = Adapter.instance.getCurrentBeat();
-		songPos = Adapter.instance.getSongPosition(); // Do it once every frame rather than 100 per frame, right?
-		events.update(beat);
+		// Update Event Timeline// Do it once every frame rather than 100 per frame, right?
+		events.update(Conductor.curDecBeat);
 
 		updateNodes();
 

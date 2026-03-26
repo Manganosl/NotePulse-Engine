@@ -18,7 +18,7 @@ class Radionic extends Modifier {
 
 		final reverse = pf.modifiers.modifiers.get('reverse');
 
-		final angle = ((1 / Adapter.instance.getCurrentCrochet()) * ((params.songTime + params.distance) * Math.PI * .25) + (Math.PI * params.player));
+		final angle = ((1 / Conductor.crochet) * ((params.songTime + params.distance) * Math.PI * .25) + (Math.PI * params.player));
 		final offsetX = pos.x - getReceptorX(params.lane, params.player);
 		final offsetY = reverse != null ? (pos.y - reverse.render(pos, params).y) : 0;
 

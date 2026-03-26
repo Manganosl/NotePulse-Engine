@@ -43,7 +43,7 @@ using StringTools;
 		// fallback to def arrow cameras
 		if (cameras == null || cameras.length == 0) {
 			if (playfieldCameras == null || playfieldCameras.length == 0)
-				cameras = Adapter.instance.getArrowCamera();
+				cameras = Adapter.getArrowCamera();
 			else
 				cameras = playfieldCameras;
 		}
