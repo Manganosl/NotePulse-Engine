@@ -1,6 +1,10 @@
 package funkin.states.stages.objects;
 
-import funkin.backend.SpectralAnalyzerEx;
+import funkin.objects.Bar;
+
+#if funkin.vis
+import funkin.vis.dsp.SpectralAnalyzer;
+#end
 
 class ABotSpeaker extends FlxSpriteGroup
 {
@@ -14,14 +18,18 @@ class ABotSpeaker extends FlxSpriteGroup
 	public var eyes:FlxAnimate;
 	public var speaker:FlxAnimate;
 
-	var analyzer:SpectralAnalyzerEx;
+	#if funkin.vis
+	var analyzer:SpectralAnalyzer;
+	#end
 	var volumes:Array<Float> = [];
 
 	public var snd(default, set):FlxSound;
 	function set_snd(changed:FlxSound)
 	{
 		snd = changed;
+		#if funkin.vis
 		initAnalyzer();
+		#end
 		return snd;
 	}
 
@@ -61,7 +69,7 @@ class ABotSpeaker extends FlxSpriteGroup
 		add(eyeBg);
 
 		eyes = new FlxAnimate(-10, 230);
-		Paths.loadAnimateAtlas(eyes, 'base_game/abot/systemEyes');
+		eyes.frames = Paths.getTextureAtlas('base_game/abot/systemEyes');
 		eyes.anim.addBySymbolIndices('lookleft', 'a bot eyes lookin', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], 24, false);
 		eyes.anim.addBySymbolIndices('lookright', 'a bot eyes lookin', [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35], 24, false);
 		eyes.anim.play('lookright', true);
@@ -69,7 +77,7 @@ class ABotSpeaker extends FlxSpriteGroup
 		add(eyes);
 
 		speaker = new FlxAnimate(-65, -10);
-		Paths.loadAnimateAtlas(speaker, 'base_game/abot/abotSystem');
+		speaker.frames = Paths.getTextureAtlas('base_game/abot/abotSystem');
 		speaker.anim.addBySymbol('anim', 'Abot System', 24, false);
 		speaker.anim.play('anim', true);
 		speaker.anim.frameIndex = speaker.anim.numFrames - 1;
@@ -77,14 +85,15 @@ class ABotSpeaker extends FlxSpriteGroup
 		add(speaker);
 	}
 
+	#if funkin.vis
+	var levels:Array<Bar>;
 	var levelMax:Int = 0;
 	override function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
 		if(analyzer == null) return;
 
-		//var levels = analyzer.getLevels(); //this has a memory leak, so i made my own function for it
-		var levels = analyzer.recycledLevels();
+		levels = analyzer.getLevels(levels);
 		var oldLevelMax = levelMax;
 		levelMax = 0;
 		for (i in 0...Std.int(Math.min(vizSprites.length, levels.length)))
@@ -103,16 +112,18 @@ class ABotSpeaker extends FlxSpriteGroup
 				beatHit();
 		}
 	}
+	#end
 
 	public function beatHit()
 	{
 		speaker.anim.play('anim', true);
 	}
 
+	#if funkin.vis
 	public function initAnalyzer()
 	{
 		@:privateAccess
-		analyzer = new SpectralAnalyzerEx(snd._channel.__audioSource, 7, 0.1, 40);
+		analyzer = new SpectralAnalyzer(snd._channel.__audioSource, 7, 0.1, 40);
 	
 		#if desktop
 		// On desktop it uses FFT stuff that isn't as optimized as the direct browser stuff we use on HTML5
@@ -120,6 +131,7 @@ class ABotSpeaker extends FlxSpriteGroup
 		analyzer.fftN = 256;
 		#end
 	}
+	#end
 
 	var lookingAtRight:Bool = true;
 	public function lookLeft()

@@ -357,7 +357,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 					}
 
 					if(animateGhost == null || animateGhostImage != character.imageFile)
-						Paths.loadAnimateAtlas(animateGhost, character.imageFile);
+						animateGhost.frames = Paths.getTextureAtlas(character.imageFile);
 					
 					if(myAnim.indices != null && myAnim.indices.length > 0)
 						animateGhost.anim.addBySymbolIndices('anim', myAnim.name, myAnim.indices, 0, false);

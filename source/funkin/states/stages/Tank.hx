@@ -144,7 +144,7 @@ class Tank extends BaseStage
 		//inCutscene = true; //this would stop the camera movement, oops
 
 		tankman = new FlxAnimate(dad.x + 419, dad.y + 225);
-		Paths.loadAnimateAtlas(tankman, 'cutscenes/tankman');
+		tankman.frames = Paths.getTextureAtlas('base_game/cutscenes/tankman');
 		tankman.antialiasing = ClientPrefs.data.antialiasing;
 		addBehindDad(tankman);
 		cutsceneHandler.push(tankman);
@@ -262,7 +262,7 @@ class Tank extends BaseStage
 		Paths.sound('stressCutscene');
 
 		pico = new FlxAnimate(gf.x + 150, gf.y + 450);
-		Paths.loadAnimateAtlas(pico, 'cutscenes/picoAppears');
+		pico.frames = Paths.getTextureAtlas('base_game/cutscenes/picoAppears');
 		pico.antialiasing = ClientPrefs.data.antialiasing;
 		pico.anim.addBySymbol('dance', 'GF Dancing at Gunpoint', 24, true);
 		pico.anim.addBySymbol('dieBitch', 'GF Time to Die sequence', 24, false);

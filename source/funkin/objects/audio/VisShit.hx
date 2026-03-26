@@ -3,7 +3,7 @@ package funkin.objects.audio;
 import flixel.math.FlxMath;
 import flixel.sound.FlxSound;
 
-import funkin.objects.audio.dsp.FFT;
+import funkin.vis.dsp.FFT;
 
 import lime.utils.Int16Array;
 
