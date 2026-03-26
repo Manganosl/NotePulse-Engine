@@ -10,6 +10,8 @@ import funkin.shaders.RGBPalette.RGBShaderReference;
 import funkin.objects.StrumNote;
 import funkin.objects.PlayField;
 
+import modchart.backend.math.Vector3;
+
 import flixel.math.FlxRect;
 
 using StringTools;
@@ -69,6 +71,9 @@ class Note extends FlxSkewedSprite
 		{div: 192/48, col: "C"},
 		{div: 192/64, col: "G"}
 	];
+
+	private var modchartNotOnScreen:Array<Bool> = [];
+	private var modchartCachedModPos:Array<Vector3> = [];
 
 	@:isVar public var strum(get, set):StrumNote = null;
 	public var playField(default, set):PlayField = null;

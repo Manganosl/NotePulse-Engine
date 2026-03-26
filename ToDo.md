@@ -23,3 +23,6 @@
 ## 23/03/2026
 - [X] Improve HScript error handler (Script path, line of the error and specific error, not always Null Object Reference)
 - [X] Reimplement Enum Abstracts to Interp.
+
+## 26/03/2026
+- [ ] FM remove adapter and integrate it completely (Since FM is not updating anymore)

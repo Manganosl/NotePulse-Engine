@@ -819,6 +819,9 @@ class PlayState extends MusicBeatState
 		super.create();
 		Paths.clearUnusedMemory();
 
+		if (songName != 'tutorial')
+			camZooming = true;
+
 		if(eventNotes.length < 1) checkEventNote();
 	}
 

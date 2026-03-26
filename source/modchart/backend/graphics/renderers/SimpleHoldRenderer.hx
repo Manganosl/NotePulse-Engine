@@ -1,5 +1,7 @@
 package modchart.backend.graphics.renderers;
 
+import funkin.objects.Note;
+
 using flixel.util.FlxColorTransformUtil;
 
 final matrix:Matrix = new Matrix();
@@ -17,8 +19,11 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
     private var __rotateZ:Float = 0;
     private var __parentOutput:ModifierOutput;
 
+    private var __instanceID:Int;
+
     public function new(instance:ModPlayField) {
         super(instance);
+        __instanceID = instance.ID;
         instance.setPercent('dizzyHolds', 1, -1);
     }
 
@@ -53,10 +58,16 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
     var __lastPlayer:Int = -1;
     
     override public function prepare(arrow:FlxSprite):Null<DrawCommand> {
-        final adapter = Adapter.instance;
+        if (arrow.alpha <= 0) return null;
 
-        if (arrow.alpha <= 0 || (adapter.getPrevNote(arrow).extraData["FMisOnScreen"] != null && adapter.getPrevNote(arrow).extraData["FMisOnScreen"] == false))
+        final adapter = Adapter.instance;
+        var prevNote = adapter.getPrevNote(arrow);
+        var castedArrow = cast(arrow, Note);
+        @:privateAccess
+        if(prevNote.modchartNotOnScreen[__instanceID]){
+            castedArrow.modchartNotOnScreen[__instanceID] = false;
             return null;
+        }
 
         final arrowFrame = arrow.frame.frame;
         
@@ -87,8 +98,9 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
         var nextNote = adapter.getNextNote(arrow);
         var isCached:Bool = false;
 
-        if (nextNote != null && nextNote.extraData.exists('cachedModPos')) {
-            var nextPos:Vector3 = nextNote.extraData.get('cachedModPos');
+        @:privateAccess
+        if (nextNote != null && nextNote.modchartCachedModPos[__instanceID] != null) {
+            var nextPos:Vector3 = nextNote.modchartCachedModPos[__instanceID];
             diff = output.pos.subtract(nextPos);
             isCached = true;
         } else {
@@ -194,13 +206,22 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
         var maxY = Math.max(Math.max(vertices[1], vertices[3]), Math.max(vertices[5], vertices[7]));
 
         for (cam in resolvedCameras) {
-            if (maxX >= 0 && minX <= cam.width && maxY >= 0 && minY <= cam.height) {
-                arrow.extraData["FMisOnScreen"] = true;
+            var viewWidth = cam.width / cam.zoom;
+            var viewHeight = cam.height / cam.zoom;
+            var marginX = (cam.width - viewWidth) / 2;
+            var marginY = (cam.height - viewHeight) / 2;
+
+            @:privateAccess
+            if (maxX >= marginX && minX <= cam.width - marginX && maxY >= marginY && minY <= cam.height - marginY) {
+                castedArrow.modchartNotOnScreen[__instanceID] = false;
                 break;
-            } else arrow.extraData["FMisOnScreen"] = false;
+            } else {
+                castedArrow.modchartNotOnScreen[__instanceID] = true;
+            }
         }
 
-        if (!arrow.extraData["FMisOnScreen"]) return null;
+        @:privateAccess
+        if (castedArrow.modchartNotOnScreen[__instanceID]) return null;
 
         final absGlow = output.visuals.glow * 255;
         final negGlow = 1 - output.visuals.glow;
