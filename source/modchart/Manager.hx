@@ -300,6 +300,18 @@ final class Manager extends FlxBasic {
 		set(name, stepToBeat(step), value, player, field);
 
 	/**
+	 * Sets a modifier at a specific step.
+	 *
+	 * @param step The step at which the value should be set.
+	 * @param name The name of the modifier.
+	 * @param value The percent to set.
+	 * @param player Optionally, the player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function queueSetP(step:Float, name:String, value:Float, player:Int = -1, field:Int = -1)
+		set(name, stepToBeat(step), value / 100, player, field);
+
+	/**
 	 * Sets a modifier at a specific beat.
 	 *
 	 * @param beat The beat at which the value should be set.
@@ -340,6 +352,38 @@ final class Manager extends FlxBasic {
 			set(name, beat, startVal, player, field);
 
 		ease(name, beat, length, value, easeFunc, player, field);
+	}
+
+
+	/**
+	 * Applies easing to a modifier using step timing.
+	 *
+	 * @param step The step at which to start easing.
+	 * @param endStep The step at which easing ends.
+	 * @param name The name of the modifier.
+	 * @param value The final percent after easing.
+	 * @param easeFunc The easing function to use.
+	 * @param player Optionally, the player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 * @param startVal Optional starting value override.
+	 */
+	public function queueEaseP(step:Float, endStep:Float, name:String, value:Float, style:Any, player:Int = -1, field:Int = -1, ?startVal:Float)
+	{
+		var beat = stepToBeat(step);
+		var length = stepToBeat(endStep - step);
+
+		var easeFunc:EaseFunction = FlxEase.linear;
+
+		if (style == null) {}
+		else if (style is String)
+			easeFunc = LuaUtils.getTweenEaseByString(style);
+		else if (Reflect.isFunction(style))
+			easeFunc = style;
+
+		if (startVal != null)
+			set(name, beat, startVal, player, field);
+
+		ease(name, beat, length, value / 100, easeFunc, player, field);
 	}
 
 	/**

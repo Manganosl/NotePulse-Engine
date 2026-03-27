@@ -36,7 +36,7 @@ class DynamicModifier extends Modifier {
 	 * to avoid modifying the original data. This ensures that if the functions return `null`,
 	 * the original values will not be altered, preventing unintended changes.
 	 */
-	public var nullSafety:Bool = true;
+	public var nullSafety:Bool = false;
 
 	private var __skipRender:Bool = false;
 	private var __skipVisuals:Bool = false;

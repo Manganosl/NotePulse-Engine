@@ -325,7 +325,7 @@ class PlayState extends MusicBeatState
 	public var startCallback:Void->Void = null;
 	public var endCallback:Void->Void = null;
 
-	public var manager:Manager;
+	public var modManager:Manager;
 
 	//// Sets ////
 
@@ -1193,13 +1193,13 @@ class PlayState extends MusicBeatState
 		noteData = songData.notes;
 
 		if(SONG.nativeModchart){
-			manager = new Manager();
-			add(manager);
+			modManager = new Manager();
+			add(modManager);
 
 			var fields = 1;
 			while(fields != SONG.playfields){
 				fields++;
-				manager.addPlayfield();
+				modManager.addPlayfield();
 			}
 		}
 
@@ -1635,11 +1635,11 @@ class PlayState extends MusicBeatState
 					var ease = FlxEase.linear;
 					if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
 					switch(info[0]){
-						case "Add Modifier": manager.addModifier(info[1], Std.parseInt(info[6]));
-						case "Ease": manager.ease(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "Set": manager.set(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "EaseAdd": manager.add(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "SetAdd": manager.setAdd(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "Add Modifier": modManager.addModifier(info[1], Std.parseInt(info[6]));
+						case "Ease": modManager.ease(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "Set": modManager.set(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "EaseAdd": modManager.add(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "SetAdd": modManager.setAdd(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
 					}
 				}
 		}
