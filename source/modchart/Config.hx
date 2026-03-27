@@ -29,17 +29,6 @@ class Config {
 	public static var ROTATION_ORDER:RotationOrder = Z_Y_X;
 
 	/**
-	 * Optimizes the rendering of hold arrows.
-	 *
-	 * Theoretically, this makes calculations twice as fast by reducing redundant computations.
-	 * However, it is not recommended for complex modcharts, as it may cause holds to look waggy,
-	 * especially when using modifiers that use rotation or complex path operations>
-	 *
-	 * Default: `false` (Regular hold rendering).
-	 */
-	public static var OPTIMIZE_HOLDS:Bool = false;
-
-	/**
 	 * Scales the Z-axis values.
 	 *
 	 * This value is used to multiply the Z coordinate, effectively scaling depth.
@@ -70,23 +59,6 @@ class Config {
 		RESOLUTION: 0.5,
 		LENGTH: 0
 	};
-
-	/**
-	 * Scales the hold end size.
-	 * 
-	 * Default: `1` (no scaling applied).
-	 */
-	public static var HOLD_END_SCALE:Float = 1;
-
-	/**
-	 * Prevents scaling the hold ends. (Some people doens't like that lol)
-	 * 
-	 * **WARNING**: Performance may be affected if there's too much
-	 * hold arrows at screen. (it basicly uses one extra `getPath()` call)
-	 * 
-	 * Default: `false`
-	 */
-	public static var PREVENT_SCALED_HOLD_END:Bool = false;
 
 	/**
 	 * Enables or disables column-specific modifiers.
