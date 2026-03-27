@@ -16,8 +16,12 @@ import modchart.Config;
 
 class Adapter {
 	public static var startCrochet:Float = 0;
+	private static var isPlayState:Bool = false;
+	private static var isModchartEditor:Bool = false;
 	
 	public static function onModchartingInitialization() {
+		isPlayState = Std.is(FlxG.state, PlayState);
+		isModchartEditor = Std.is(FlxG.state, ModchartEditor);
 		startCrochet = Conductor.crochet;
 		PlayState.fModchart = true;
 	}
@@ -57,9 +61,6 @@ class Adapter {
 	}
 
 	inline static function getStrumFromInfo(lane:Int, player:Int) {
-		var isPlayState:Bool = Std.is(FlxG.state, PlayState);
-		var isModchartEditor:Bool = Std.is(FlxG.state, ModchartEditor);
-
 		var group = if (isPlayState) {
 			if (player == 0) PlayState.instance.opponentStrums else PlayState.instance.playerStrums;
 		} else if (isModchartEditor) {
@@ -90,18 +91,18 @@ class Adapter {
 	}
 
 	public static function getArrowCamera():Array<FlxCamera> {
-		if (Type.getClassName(Type.getClass(FlxG.state)) == 'funkin.states.PlayState')
+		if (isPlayState)
 			return [PlayState.instance.camHUD];
-		else if (Type.getClassName(Type.getClass(FlxG.state)) == 'funkin.states.editors.ModchartEditor')
+		else if (isModchartEditor)
 			return [ModchartEditor.instance.camHUD];
 		else
 			return [EditorPlayState.instance.camHUD];
 	}
 
 	public static function getCurrentScrollSpeed():Float {
-		if (Type.getClassName(Type.getClass(FlxG.state)) == 'funkin.states.PlayState')
+		if (isPlayState)
 			return PlayState.instance.songSpeed * .45;
-		else if (Type.getClassName(Type.getClass(FlxG.state)) == 'funkin.states.editors.ModchartEditor')
+		else if (isModchartEditor)
 			return ModchartEditor.instance.songSpeed * .45;
 		else
 			return EditorPlayState.instance.songSpeed * .45;
@@ -115,7 +116,7 @@ class Adapter {
 		while(pspr.length != PlayState.SONG.lanes)
 			pspr.push(interpspr);
 
-		if (Std.is(FlxG.state, PlayState)) {
+		if (isPlayState) {
 			@:privateAccess
 			PlayState.instance.strumLineNotes.forEachAlive(strumNote -> {
 				pspr[strumNote.player][0].push(strumNote);
@@ -152,7 +153,7 @@ class Adapter {
 					pspr[splash.strum.player][3].push(splash);
 				}
 			});
-		} else if (Std.is(FlxG.state, ModchartEditor)) {
+		} else if (isModchartEditor) {
 			@:privateAccess
 			ModchartEditor.instance.strumLineNotes.forEachAlive(strumNote -> {
 				pspr[strumNote.player][0].push(strumNote);
