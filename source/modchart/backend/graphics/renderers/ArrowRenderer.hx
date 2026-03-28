@@ -1,5 +1,8 @@
 package modchart.backend.graphics.renderers;
 
+import funkin.objects.AttachedSprite;
+import modchart.backend.util.ModchartableSprite;
+
 using flixel.util.FlxColorTransformUtil;
 
 final matrix:Matrix = new Matrix();
@@ -63,8 +66,15 @@ final class ArrowRenderer extends BaseRenderer<FlxSprite> {
 			arrowTime = songPos + (FlxG.height * 0.25 * centered2);
 			arrowDiff = arrowTime - songPos;
 		}
-		if(arrow.extraData != null && arrow.extraData["linkStrum"] != null)
-			arrowDiff += arrow.extraData["linkStrum"].height / Adapter.getCurrentScrollSpeed();
+
+		var castedArrow:ModchartableSprite = null;
+		if(arrow is ModchartableSprite) castedArrow = cast(arrow, ModchartableSprite);
+		if(arrow is AttachedSprite) castedArrow = cast(arrow, ModchartableSprite);
+		@:privateAccess
+		if(castedArrow != null && castedArrow.modchartIsRating && castedArrow.parentArrow != null) {
+			arrowDiff += castedArrow.parentArrow.height / Adapter.getCurrentScrollSpeed();
+		}
+
 		var arrowData:ArrowData = {
 			hitTime: arrowTime,
 			distance: arrowDiff,

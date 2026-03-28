@@ -56,6 +56,7 @@ import flixel.tweens.FlxEase;
 #end
 
 import modchart.Manager;
+import modchart.backend.util.ModchartableSprite;
 
 /**
  * This is where all the Gameplay stuff happens and is managed
@@ -3681,7 +3682,8 @@ class PlayState extends MusicBeatState
 		var scaX:Float = (linkStrum.scale.x*0.6)+0.085;
 		var scaY:Float = (linkStrum.scale.y*0.6)+0.085;
 
-		var rating:FlxSprite = new FlxSprite();
+		var rating:ModchartableSprite = new ModchartableSprite();
+		@:privateAccess rating.modchartIsRating = true;
 		rating.loadGraphic(Paths.image(uiPrefix + daRating.image + uiSuffix));
 		rating.x = baseX;
 		rating.y = baseY;
@@ -3690,7 +3692,7 @@ class PlayState extends MusicBeatState
 		rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
 		rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
 		rating.visible = (!ClientPrefs.data.hideHud && showRating);
-		rating.extraData["linkStrum"] = linkStrum;
+		@:privateAccess rating.parentArrow = linkStrum;
 
 		if(camMode == "HUD") {
 			rating.x += ClientPrefs.data.comboOffset[0];
@@ -3698,27 +3700,28 @@ class PlayState extends MusicBeatState
 		}
 		rating.antialiasing = antialias;
 
-		var earlyLateSpr:FlxSprite = null;
+		var earlyLateSpr:AttachedSprite = null;
 		var earlyLateType:String = null;
 		var earlyLateThreshold:Float = 20;
 
 		if (absNoteDiff > earlyLateThreshold && daRating.image != "epic"){
 			if (noteDiff < 0) earlyLateType = "late"; else earlyLateType = "early";
 
-			earlyLateSpr = new FlxSprite();
+			earlyLateSpr = new AttachedSprite();
+			@:privateAccess rating.modchartIsRating = true;
 			earlyLateSpr.loadGraphic(Paths.image(earlyLateType));
-			earlyLateSpr.x = baseX;
-			earlyLateSpr.y = baseY;
+			earlyLateSpr.sprTracker = rating;
+			@:privateAccess rating.babySprite = earlyLateSpr;
 			earlyLateSpr.cameras = ratingCamArr;
 			earlyLateSpr.antialiasing = ClientPrefs.data.antialiasing;
 			earlyLateSpr.alpha = 1;
-			earlyLateSpr.extraData["linkStrum"] = linkStrum;
+			@:privateAccess earlyLateSpr.parentArrow = linkStrum;
 			if(ClientPrefs.data.ratingCam == "Bellow Note"){
 				earlyLateSpr.scale.set(scaX/(PlayState.isPixelStage ? daPixelZoom : 1), scaY/(PlayState.isPixelStage ? daPixelZoom : 1));
 			}
 			comboGroup.add(earlyLateSpr);
 
-			FlxTween.tween(earlyLateSpr, {alpha: 0, y: earlyLateSpr.y - 30}, 0.5 / playbackRate, {
+			FlxTween.tween(earlyLateSpr, {alpha: 0}, 0.5 / playbackRate, {
 				onComplete: function(twn:FlxTween) earlyLateSpr.destroy()
 			});
 		}

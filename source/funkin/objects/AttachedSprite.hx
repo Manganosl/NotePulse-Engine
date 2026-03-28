@@ -1,6 +1,8 @@
 package funkin.objects;
 
-class AttachedSprite extends FlxSprite
+import modchart.backend.util.ModchartableSprite;
+
+class AttachedSprite extends ModchartableSprite
 {
 	public var sprTracker:FlxSprite;
 	public var xAdd:Float = 0;

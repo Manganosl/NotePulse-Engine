@@ -5,6 +5,8 @@ import funkin.backend.animation.PsychAnimationController;
 
 import funkin.shaders.RGBPalette;
 
+import modchart.backend.util.ModchartableSprite;
+
 import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.frames.FlxFrame;
 
@@ -15,8 +17,7 @@ typedef NoteSplashConfig = {
 	offsets:Array<Array<Float>>
 }
 
-class NoteSplash extends FlxSkewedSprite
-{
+class NoteSplash extends ModchartableSprite {
 	public var rgbShader:PixelSplashShaderRef;
 	private var idleAnim:String;
 	private var _textureLoaded:String = null;

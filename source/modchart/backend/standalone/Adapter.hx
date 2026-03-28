@@ -4,6 +4,8 @@ import funkin.backend.ClientPrefs;
 import funkin.backend.Conductor;
 import funkin.objects.Note;
 import funkin.objects.SustainSplash;
+import funkin.objects.AttachedSprite;
+import modchart.backend.util.ModchartableSprite;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote as Strum;
 import funkin.states.PlayState;
@@ -29,28 +31,32 @@ class Adapter {
 	public static function getLaneFromArrow(arrow:FlxSprite) {
 		if (arrow is Note)
 			return cast(arrow, Note).noteData;
-		if (arrow is FlxSprite && arrow.extraData["linkStrum"] != null)
-			return cast(arrow, FlxSprite).extraData["linkStrum"].noteData;
+		else if (arrow is AttachedSprite) @:privateAccess
+			return cast(arrow, AttachedSprite).parentArrow.noteData;
 		else if (arrow is Strum) @:privateAccess
 			return cast(arrow, Strum).noteData;
-		if (arrow is NoteSplash) @:privateAccess
+		else if (arrow is NoteSplash) @:privateAccess
 			return cast(arrow, NoteSplash).babyArrow.noteData;
-		if (arrow is SustainSplash) @:privateAccess
+		else if (arrow is SustainSplash) @:privateAccess
 			return cast(arrow, SustainSplash).strum.noteData;
+		else if (arrow is ModchartableSprite) @:privateAccess
+			return cast(arrow, ModchartableSprite).parentArrow.noteData;
 		return 0;
 	}
 
 	public static function getPlayerFromArrow(arrow:FlxSprite) {
 		if (arrow is Note)
 			return cast(arrow, Note).playField.player;
-		if (arrow is FlxSprite && arrow.extraData["linkStrum"] != null)
-			return cast(arrow, FlxSprite).extraData["linkStrum"].player;
-		if (arrow is Strum) @:privateAccess
+		else if (arrow is AttachedSprite) @:privateAccess
+			return cast(arrow, AttachedSprite).parentArrow.player;
+		else if (arrow is Strum) @:privateAccess
 			return cast(arrow, Strum).player;
-		if (arrow is NoteSplash) @:privateAccess
+		else if (arrow is NoteSplash) @:privateAccess
 			return cast(arrow, NoteSplash).babyArrow.player;
-		if (arrow is SustainSplash) @:privateAccess
+		else if (arrow is SustainSplash) @:privateAccess
 			return cast(arrow, SustainSplash).strum.player;
+		else if (arrow is ModchartableSprite) @:privateAccess
+			return cast(arrow, ModchartableSprite).parentArrow.player;
 		return 0;
 	}
 
@@ -124,10 +130,15 @@ class Adapter {
 
 			if (ClientPrefs.data.ratingCam == "Bellow Note") {
 				PlayState.instance.comboGroup.forEachAlive(comboSprite -> {
+					var castedCombo = null;
+					if (comboSprite is ModchartableSprite)
+				 		castedCombo = cast(comboSprite, ModchartableSprite);
 					@:privateAccess
-					if (comboSprite != null && comboSprite.extraData["linkStrum"] != null) {
-						final player = comboSprite.extraData["linkStrum"].player;
-						pspr[player][0].push(comboSprite);
+					if (castedCombo != null && castedCombo.modchartIsRating) {
+						final player = castedCombo.parentArrow.player;
+						pspr[player][0].push(castedCombo);
+						if(castedCombo.babySprite != null)
+							pspr[player][0].push(castedCombo.babySprite);
 					}
 				});
 			}

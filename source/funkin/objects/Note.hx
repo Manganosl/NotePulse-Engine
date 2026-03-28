@@ -10,9 +10,9 @@ import funkin.shaders.RGBPalette.RGBShaderReference;
 import funkin.objects.StrumNote;
 import funkin.objects.PlayField;
 
-import modchart.backend.math.Vector3;
-
 import flixel.math.FlxRect;
+
+import modchart.backend.util.ModchartableSprite;
 
 using StringTools;
 
@@ -35,8 +35,7 @@ typedef NoteSplashData = {
 	a:Float
 }
 
-class Note extends FlxSkewedSprite
-{
+class Note extends ModchartableSprite {
 	//This is needed for the hardcoded note types to appear on the Chart Editor,
 	//It's also used for backwards compatibility with 0.1 - 0.3.2 charts.
 	public static final defaultNoteTypes:Array<String> = [
@@ -71,9 +70,6 @@ class Note extends FlxSkewedSprite
 		{div: 192/48, col: "C"},
 		{div: 192/64, col: "G"}
 	];
-
-	private var modchartNotOnScreen:Array<Bool> = [];
-	private var modchartCachedModPos:Array<Vector3> = [];
 
 	@:isVar public var strum(get, set):StrumNote = null;
 	public var playField(default, set):PlayField = null;

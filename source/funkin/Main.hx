@@ -132,6 +132,7 @@ class Main extends Sprite
 
 		funkin.backend.utils.WindowUtil.setDarkMode();
 		funkin.backend.utils.WindowUtil.init();
+		funkin.backend.Log.init();
 
 		#if html5
 		FlxG.autoPause = false;
