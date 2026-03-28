@@ -45,12 +45,6 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
-		var option:Option = new Option('Complex Sustain Modchart Rendering', //Name
-			"If checked, modcharts will use FunkinModchart's default sustain renderer. This has a really high impact on performance. \n(Believe me, it's not worth it, reduces FPS way too much)", //Description
-			'complexFMHolds',
-			'bool');
-		addOption(option);
-
 		#if !html5 //Apparently other framerates isn't correctly supported on Browser? Probably it has some V-Sync shit enabled by default, idk
 		var option:Option = new Option('Framerate',
 			"Pretty self explanatory, isn't it?",

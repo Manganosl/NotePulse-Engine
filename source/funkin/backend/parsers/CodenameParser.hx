@@ -3,7 +3,7 @@ package funkin.backend.parsers;
 import haxe.Json;
 
 class CodenameParser {
-public static function characterParse(xmlText:String):String {
+    public static function characterParse(xmlText:String):String {
         var xml = Xml.parse(xmlText).firstElement();
         var find = function(name:String):String {
             if (xml.exists(name)) return xml.get(name);
