@@ -7,7 +7,7 @@ import flixel.util.FlxColor;
 
 import funkin.objects.audio.SpectogramSprite.SPECDIRECTION;
 import funkin.objects.audio.VisShit.CurAudioInfo;
-import modchart.backend.util.MeshRender;
+import funkin.game.modchart.backend.util.MeshRender;
 
 import lime.utils.Int16Array;
 

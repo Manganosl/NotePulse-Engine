@@ -1,6 +1,6 @@
 package funkin.states.menus;
 
-import funkin.backend.WeekData;
+import funkin.data.WeekData;
 import funkin.backend.Mods;
 
 import flixel.ui.FlxButton;

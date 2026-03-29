@@ -5,7 +5,7 @@ import funkin.backend.animation.PsychAnimationController;
 
 import funkin.shaders.RGBPalette;
 
-import modchart.backend.util.ModchartableSprite;
+import funkin.game.modchart.backend.util.ModchartableSprite;
 
 import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.frames.FlxFrame;

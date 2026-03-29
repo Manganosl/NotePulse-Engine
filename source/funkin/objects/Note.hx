@@ -12,7 +12,7 @@ import funkin.objects.PlayField;
 
 import flixel.math.FlxRect;
 
-import modchart.backend.util.ModchartableSprite;
+import funkin.game.modchart.backend.util.ModchartableSprite;
 
 using StringTools;
 

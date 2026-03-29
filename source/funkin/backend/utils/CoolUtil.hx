@@ -5,6 +5,7 @@ import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 import funkin.states.menus.FreeplayState.SongMetadata;
 import flixel.util.FlxSort;
+import funkin.data.WeekData;
 
 class CoolUtil
 {

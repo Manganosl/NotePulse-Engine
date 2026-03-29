@@ -3,9 +3,9 @@ package funkin.scripting.lua;
 
 import funkin.scripting.lua.functions.*;
 
-import funkin.backend.WeekData;
-import funkin.backend.Highscore;
-import funkin.backend.Song;
+import funkin.data.WeekData;
+import funkin.data.Highscore;
+import funkin.data.Song;
 
 import openfl.Lib;
 import flixel.util.FlxAxes;
@@ -18,7 +18,7 @@ import flixel.addons.transition.FlxTransitionableState;
 import funkin.backend.utils.NdllUtil;
 import lime.app.Application;
 
-import modchart.Manager;
+import funkin.game.modchart.Manager;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
@@ -26,7 +26,7 @@ import flixel.addons.display.FlxRuntimeShader;
 import hxvlc.flixel.*;
 import funkin.objects.FunkinVideoSprite;
 
-import funkin.cutscenes.DialogueBoxPsych;
+import funkin.game.cutscenes.DialogueBoxPsych;
 
 import funkin.objects.StrumNote;
 import funkin.objects.Note;

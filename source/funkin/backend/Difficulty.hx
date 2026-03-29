@@ -1,5 +1,7 @@
 package funkin.backend;
 
+import funkin.data.WeekData;
+
 class Difficulty
 {
 	public static var defaultList(default, never):Array<String> = [

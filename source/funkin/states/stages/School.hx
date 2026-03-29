@@ -2,7 +2,7 @@ package funkin.states.stages;
 
 import funkin.states.stages.objects.*;
 import funkin.substates.GameOverSubstate;
-import funkin.cutscenes.DialogueBox;
+import funkin.game.cutscenes.DialogueBox;
 
 import openfl.utils.Assets as OpenFlAssets;
 

@@ -20,12 +20,12 @@ import js.html.*;
 #end
 
 import funkin.backend.Paths;
-import funkin.backend.Controls;
+import funkin.data.Controls;
 import funkin.backend.utils.CoolUtil;
 import funkin.states.base.MusicBeatState;
 import funkin.states.base.MusicBeatSubstate;
 import funkin.backend.CustomFadeTransition;
-import funkin.backend.ClientPrefs;
+import funkin.data.ClientPrefs;
 import funkin.backend.Conductor;
 import funkin.backend.BaseStage;
 import funkin.backend.Difficulty;

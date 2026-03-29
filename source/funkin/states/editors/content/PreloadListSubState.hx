@@ -6,7 +6,7 @@ import flash.net.FileFilter;
 import funkin.objects.ui.PsychUIEventHandler.PsychUIEvent;
 import funkin.objects.ui.PsychUIRadioGroup.PsychUIRadioItem;
 
-import funkin.backend.StageData;
+import funkin.data.StageData;
 import funkin.states.editors.content.FileDialogHandler;
 
 class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent

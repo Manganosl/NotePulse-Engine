@@ -1,7 +1,7 @@
 package funkin.states.options;
 
 import funkin.states.MainMenuState;
-import funkin.backend.StageData;
+import funkin.data.StageData;
 
 class OptionsState extends MusicBeatState
 {

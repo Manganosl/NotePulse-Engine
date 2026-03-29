@@ -1,7 +1,7 @@
 package funkin.states.stages;
 
 import funkin.states.stages.objects.*;
-import funkin.cutscenes.CutsceneHandler;
+import funkin.game.cutscenes.CutsceneHandler;
 import funkin.substates.GameOverSubstate;
 import funkin.objects.Character;
 

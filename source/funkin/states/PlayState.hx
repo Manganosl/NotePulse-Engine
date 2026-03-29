@@ -2,12 +2,12 @@ package funkin.states;
 
 import funkin.objects.StrumNote.KeybindShowcase;
 import funkin.backend.ExtraKeysHandler;
-import funkin.backend.Highscore;
-import funkin.backend.StageData;
-import funkin.backend.WeekData;
-import funkin.backend.Song;
-import funkin.backend.Section;
-import funkin.backend.Rating;
+import funkin.data.Highscore;
+import funkin.data.StageData;
+import funkin.data.WeekData;
+import funkin.data.Song;
+import funkin.data.Section;
+import funkin.game.Rating;
 import lime.app.Application;
 
 import flixel.FlxBasic;
@@ -21,7 +21,7 @@ import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
 
-import funkin.cutscenes.DialogueBoxPsych;
+import funkin.game.cutscenes.DialogueBoxPsych;
 
 import funkin.states.menus.StoryMenuState;
 import funkin.states.editors.ChartingState;
@@ -50,13 +50,12 @@ import funkin.scripting.HScript;
 #end
 
 #if HSCRIPT_ALLOWED
-import flixel.FlxSprite;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 #end
 
-import modchart.Manager;
-import modchart.backend.util.ModchartableSprite;
+import funkin.game.modchart.Manager;
+import funkin.game.modchart.backend.util.ModchartableSprite;
 
 /**
  * This is where all the Gameplay stuff happens and is managed

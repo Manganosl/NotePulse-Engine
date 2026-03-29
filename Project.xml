@@ -107,12 +107,12 @@
 	<!--FunkinModchart-->
 	<haxedef name="funkin-modchart" />
 	<haxedef name="FM_ENGINE" value="NOTEPULSE"/>
-	<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
+	<haxeflag name="--macro" value="funkin.game.modchart.backend.macros.Macro.includeFiles()"/>
 	<assets path="source/assets/modchart/arrowShape.csv" rename="modchart/arrowShape.csv" embed="true" />
 	<assets path="source/assets/modchart/eyeShape.csv" rename="modchart/eyeShape.csv" embed="true" />
-    <haxeflag name="--macro" value="addMetadata('@:build(modchart.backend.macros.Macro.buildFlxCamera())','flixel.FlxCamera')"/>
-    <haxeflag name="--macro" value="addMetadata('@:build(modchart.backend.macros.Macro.buildFlxDrawTrianglesItem())','flixel.graphics.tile.FlxDrawTrianglesItem')"/>
-    <haxeflag name="--macro" value="addMetadata('@:build(modchart.backend.macros.Macro.addModchartStorage())','flixel.FlxBasic')"/>
+    <haxeflag name="--macro" value="addMetadata('@:build(funkin.game.modchart.backend.macros.Macro.buildFlxCamera())','flixel.FlxCamera')"/>
+    <haxeflag name="--macro" value="addMetadata('@:build(funkin.game.modchart.backend.macros.Macro.buildFlxDrawTrianglesItem())','flixel.graphics.tile.FlxDrawTrianglesItem')"/>
+    <haxeflag name="--macro" value="addMetadata('@:build(funkin.game.modchart.backend.macros.Macro.addModchartStorage())','flixel.FlxBasic')"/>
 
 	<!--Psych stuff needed-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>

@@ -14,8 +14,8 @@ import haxe.Json;
 
 import funkin.objects.TypedAlphabet;
 
-import funkin.cutscenes.DialogueBoxPsych;
-import funkin.cutscenes.DialogueCharacter;
+import funkin.game.cutscenes.DialogueBoxPsych;
+import funkin.game.cutscenes.DialogueCharacter;
 
 class DialogueEditorState extends MusicBeatState
 {

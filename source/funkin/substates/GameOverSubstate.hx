@@ -1,6 +1,6 @@
 package funkin.substates;
 
-import funkin.backend.WeekData;
+import funkin.data.WeekData;
 
 import funkin.objects.Character;
 import flixel.FlxObject;

@@ -1,6 +1,6 @@
 package funkin.states.options;
 
-import funkin.backend.StageData;
+import funkin.data.StageData;
 import funkin.objects.Character;
 import funkin.objects.Bar;
 import flixel.addons.display.shapes.FlxShapeCircle;

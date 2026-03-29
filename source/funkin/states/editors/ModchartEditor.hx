@@ -1,9 +1,9 @@
 package funkin.states.editors;
 
-import funkin.backend.Section;
-import funkin.backend.Rating;
-import funkin.backend.Song;
-import funkin.backend.StageData;
+import funkin.data.Section;
+import funkin.game.Rating;
+import funkin.data.Song;
+import funkin.data.StageData;
 
 import funkin.objects.Note;
 import funkin.objects.PlayField;
@@ -19,8 +19,8 @@ import openfl.events.IOErrorEvent;
 import haxe.Json;
 import funkin.objects.Character;
 
-import modchart.Manager;
-import modchart.Config;
+import funkin.game.modchart.Manager;
+import funkin.game.modchart.Config;
 
 import funkin.states.editors.ChartingState;
 

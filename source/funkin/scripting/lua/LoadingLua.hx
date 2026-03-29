@@ -1,7 +1,7 @@
 #if LUA_ALLOWED
 package funkin.scripting.lua;
 
-import funkin.backend.WeekData;
+import funkin.data.WeekData;
 
 import hxvlc.flixel.*;
 

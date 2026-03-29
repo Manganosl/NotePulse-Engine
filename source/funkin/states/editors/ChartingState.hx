@@ -24,10 +24,10 @@ import funkin.states.editors.content.MetaNote;
 import funkin.states.editors.content.Prompt;
 import funkin.states.editors.content.*;
 
-import funkin.backend.Song;
-import funkin.backend.StageData;
+import funkin.data.Song;
+import funkin.data.StageData;
 import funkin.backend.Difficulty;
-import funkin.backend.Section;
+import funkin.data.Section;
 import funkin.backend.ExtraKeysHandler;
 import funkin.backend.parsers.CodenameParser;
 

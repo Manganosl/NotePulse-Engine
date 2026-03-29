@@ -16,8 +16,8 @@ import lime.system.Clipboard;
 
 import funkin.objects.TypedAlphabet;
 
-import funkin.cutscenes.DialogueBoxPsych;
-import funkin.cutscenes.DialogueCharacter;
+import funkin.game.cutscenes.DialogueBoxPsych;
+import funkin.game.cutscenes.DialogueCharacter;
 
 class DialogueCharacterEditorState extends MusicBeatState
 {

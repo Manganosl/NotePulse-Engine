@@ -89,7 +89,7 @@ class HScript implements HscriptInterface {
 		"FunkinVideoSprite"			=> funkin.objects.FunkinVideoSprite,
 		"HealthIcon"				=> funkin.objects.HealthIcon,
 		"Alphabet"					=> funkin.objects.Alphabet,
-		"ClientPrefs" 				=> funkin.backend.ClientPrefs,
+		"ClientPrefs" 				=> funkin.data.ClientPrefs,
 		"Conductor" 				=> funkin.backend.Conductor,
 		"Paths" 					=> funkin.backend.Paths,
 		#if PRETTY_TRACE "Log" 		=> funkin.backend.Log, #end
@@ -98,11 +98,9 @@ class HScript implements HscriptInterface {
 		"CustomShader" 				=> funkin.backend.utils.CustomShader,
 		"NdllUtil" 					=> funkin.backend.utils.NdllUtil,
 		"LuaUtils" 					=> funkin.scripting.LuaUtils,
-
-		// Modcharting
-		"Manager" 					=> modchart.Manager,
-		"ModPlayField" 				=> modchart.engine.ModPlayField,
-		"Event" 					=> modchart.engine.events.Event,
+		"Manager" 					=> funkin.game.modchart.Manager,
+		"ModPlayField" 				=> funkin.game.modchart.engine.ModPlayField,
+		"Event" 					=> funkin.game.modchart.engine.events.Event,
 
 		// Away3D
 		#if(away3d && AWAY3D_ALLOWED)

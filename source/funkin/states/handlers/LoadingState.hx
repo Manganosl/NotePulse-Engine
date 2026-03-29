@@ -13,8 +13,8 @@ import flixel.FlxState;
 
 import flash.media.Sound;
 
-import funkin.backend.Song;
-import funkin.backend.StageData;
+import funkin.data.Song;
+import funkin.data.StageData;
 import funkin.backend.parsers.CodenameParser;
 
 import sys.thread.Thread;

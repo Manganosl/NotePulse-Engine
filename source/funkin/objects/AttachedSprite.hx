@@ -1,6 +1,6 @@
 package funkin.objects;
 
-import modchart.backend.util.ModchartableSprite;
+import funkin.game.modchart.backend.util.ModchartableSprite;
 
 class AttachedSprite extends ModchartableSprite
 {

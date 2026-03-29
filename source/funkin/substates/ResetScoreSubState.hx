@@ -1,7 +1,7 @@
 package funkin.substates;
 
-import funkin.backend.WeekData;
-import funkin.backend.Highscore;
+import funkin.data.WeekData;
+import funkin.data.Highscore;
 
 import funkin.objects.HealthIcon;
 

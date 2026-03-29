@@ -1,8 +1,8 @@
 package funkin.states.menus;
 
-import funkin.backend.WeekData;
-import funkin.backend.Highscore;
-import funkin.backend.Song;
+import funkin.data.WeekData;
+import funkin.data.Highscore;
+import funkin.data.Song;
 
 import flixel.group.FlxGroup;
 import flixel.graphics.FlxGraphic;

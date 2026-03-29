@@ -3,7 +3,7 @@
 package funkin.states.editors;
 
 import funkin.states.editors.content.Prompt;
-import funkin.backend.WeekData;
+import funkin.data.WeekData;
 import funkin.states.menus.FreeplayState.SongMetadata;
 import funkin.objects.HealthIcon;
 import funkin.objects.AttachedSprite;
@@ -272,8 +272,8 @@ class ModSelector extends MusicBeatState {
                             PlayState.storyWeek = currentSong.week;
                             var weekName = WeekData.weeksList[currentSong.week];
                             WeekData.setDirectoryFromWeek(WeekData.weeksLoaded.get(weekName));
-                            var formated = funkin.backend.Highscore.formatSong(currentSong.songName.toLowerCase(), curDifficulty);
-                            PlayState.SONG = funkin.backend.Song.loadFromJson(formated, currentSong.songName.toLowerCase());
+                            var formated = funkin.data.Highscore.formatSong(currentSong.songName.toLowerCase(), curDifficulty);
+                            PlayState.SONG = funkin.data.Song.loadFromJson(formated, currentSong.songName.toLowerCase());
                             if (goto == funkin.states.editors.ModchartEditor)
                                 try LoadingState.loadAndSwitchState(new funkin.states.editors.ModchartEditor(), false);
                             else

@@ -1,7 +1,7 @@
 package funkin.substates.options;
 
 import funkin.backend.ExtraKeysHandler;
-import funkin.backend.Song.SwagSong;
+import funkin.data.Song.SwagSong;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.display.shapes.FlxShapeCircle;

@@ -11,7 +11,7 @@ import funkin.states.stages.objects.*;
 
 import funkin.objects.Note;
 
-import funkin.cutscenes.CutsceneHandler;
+import funkin.game.cutscenes.CutsceneHandler;
 
 enum NeneState
 {

@@ -1,6 +1,6 @@
 package funkin.states.editors;
 
-import funkin.backend.StageData;
+import funkin.data.StageData;
 import funkin.objects.Character;
 import funkin.scripting.LuaUtils;
 

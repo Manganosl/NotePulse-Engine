@@ -1,7 +1,7 @@
 package funkin.states.editors.content;
 
-import funkin.backend.Section;
-import funkin.backend.Rating;
+import funkin.data.Section;
+import funkin.game.Rating;
 
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
@@ -15,8 +15,8 @@ import openfl.events.KeyboardEvent;
 import haxe.Json;
 import funkin.objects.Character;
 
-import modchart.Manager;
-import modchart.Config;
+import funkin.game.modchart.Manager;
+import funkin.game.modchart.Config;
 
 import funkin.states.editors.ChartingState;
 

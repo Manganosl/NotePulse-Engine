@@ -3,7 +3,7 @@ package funkin;
 import flixel.FlxState;
 import funkin.backend.ExtraKeysHandler;
 import funkin.states.init.ScaleSimulationState;
-import funkin.backend.Highscore;
+import funkin.data.Highscore;
 import funkin.states.menus.TitleState;
 import funkin.states.init.OutdatedState;
 import funkin.backend.utils.helpers.FunkinRatioScaleMode;

@@ -1,6 +1,6 @@
 package funkin.states.editors;
 
-import funkin.backend.WeekData;
+import funkin.data.WeekData;
 
 import openfl.utils.Assets;
 import flixel.addons.ui.FlxInputText;
