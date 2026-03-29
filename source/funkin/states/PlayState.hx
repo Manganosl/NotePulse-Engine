@@ -3708,14 +3708,15 @@ class PlayState extends MusicBeatState
 			if (noteDiff < 0) earlyLateType = "late"; else earlyLateType = "early";
 
 			earlyLateSpr = new AttachedSprite();
-			@:privateAccess rating.modchartIsRating = true;
 			earlyLateSpr.loadGraphic(Paths.image(earlyLateType));
+			earlyLateSpr.copyAlpha = false;
 			earlyLateSpr.sprTracker = rating;
-			@:privateAccess rating.babySprite = earlyLateSpr;
 			earlyLateSpr.cameras = ratingCamArr;
 			earlyLateSpr.antialiasing = ClientPrefs.data.antialiasing;
 			earlyLateSpr.alpha = 1;
 			@:privateAccess earlyLateSpr.parentArrow = linkStrum;
+			@:privateAccess rating.babySprite = earlyLateSpr;
+			@:privateAccess earlyLateSpr.modchartIsRating = true;
 			if(ClientPrefs.data.ratingCam == "Bellow Note"){
 				earlyLateSpr.scale.set(scaX/(PlayState.isPixelStage ? daPixelZoom : 1), scaY/(PlayState.isPixelStage ? daPixelZoom : 1));
 			}

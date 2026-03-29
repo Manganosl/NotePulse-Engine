@@ -67,9 +67,7 @@ final class ArrowRenderer extends BaseRenderer<FlxSprite> {
 			arrowDiff = arrowTime - songPos;
 		}
 
-		var castedArrow:ModchartableSprite = null;
-		if(arrow is ModchartableSprite) castedArrow = cast(arrow, ModchartableSprite);
-		if(arrow is AttachedSprite) castedArrow = cast(arrow, ModchartableSprite);
+		var castedArrow:ModchartableSprite = Adapter.getCastedSprite(arrow);
 		@:privateAccess
 		if(castedArrow != null && castedArrow.modchartIsRating && castedArrow.parentArrow != null) {
 			arrowDiff += castedArrow.parentArrow.height / Adapter.getCurrentScrollSpeed();

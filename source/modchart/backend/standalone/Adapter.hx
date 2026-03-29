@@ -44,6 +44,22 @@ class Adapter {
 		return 0;
 	}
 
+	public static function getCastedSprite(arrow:FlxSprite):Dynamic {
+		if (arrow is Note)
+			return cast(arrow, Note);
+		else if (arrow is AttachedSprite)
+			return cast(arrow, AttachedSprite);
+		else if (arrow is Strum)
+			return cast(arrow, Strum);
+		else if (arrow is NoteSplash)
+			return cast(arrow, NoteSplash);
+		else if (arrow is SustainSplash)
+			return cast(arrow, SustainSplash);
+		else if (arrow is ModchartableSprite)
+			return cast(arrow, ModchartableSprite);
+		return null;
+	}
+
 	public static function getPlayerFromArrow(arrow:FlxSprite) {
 		if (arrow is Note)
 			return cast(arrow, Note).playField.player;
