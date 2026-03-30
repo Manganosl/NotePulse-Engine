@@ -26,8 +26,8 @@ import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.filters.ShaderFilter;
 
-import funkin.shaders.ColorSwap;
-import funkin.shaders.ChromaticWarp;
+import funkin.game.shaders.ColorSwap;
+import funkin.game.shaders.ChromaticWarp;
 
 import funkin.states.menus.StoryMenuState;
 import funkin.states.MainMenuState;

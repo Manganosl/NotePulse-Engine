@@ -8,8 +8,8 @@ import funkin.backend.animation.PsychAnimationController;
 
 import funkin.objects.PlayField;
 
-import funkin.shaders.RGBPalette;
-import funkin.shaders.RGBPalette.RGBShaderReference;
+import funkin.game.shaders.RGBPalette;
+import funkin.game.shaders.RGBPalette.RGBShaderReference;
 
 class StrumNote extends ModchartableSprite {
 	public var rgbShader:RGBShaderReference;

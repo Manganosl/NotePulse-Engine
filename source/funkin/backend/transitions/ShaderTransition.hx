@@ -2,7 +2,7 @@ package funkin.backend.transitions;
 
 import funkin.backend.CustomFadeTransition;
 import openfl.filters.ShaderFilter;
-import funkin.shaders.MadnessTrans;
+import funkin.game.shaders.MadnessTrans;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.tweens.FlxTween;

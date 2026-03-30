@@ -1,4 +1,4 @@
-package funkin.shaders;
+package funkin.game.shaders;
 
 import flixel.system.FlxAssets.FlxShader;
 import openfl.display.BitmapData;

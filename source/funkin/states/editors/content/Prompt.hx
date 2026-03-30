@@ -3,6 +3,8 @@ package funkin.states.editors.content;
 import openfl.filters.ShaderFilter;
 import funkin.states.editors.*;
 
+import funkin.game.shaders.BlurShader;
+
 import flixel.util.FlxDestroyUtil;
 
 // Exit confirmation prompt used on all editors, for convenience
@@ -86,10 +88,10 @@ class BasePrompt extends MusicBeatSubstate
 	public var titleText:FlxText;
 
 	public var promptCam:FlxCamera;
-	var blurShader:funkin.shaders.BlurShader;
+	var blurShader:BlurShader;
 	override function create()
 	{
-		blurShader = new funkin.shaders.BlurShader();
+		blurShader = new BlurShader();
 		for(cam in FlxG.cameras.list)
 		{
 			if(cam.filters == null)
@@ -161,7 +163,7 @@ class BasePrompt extends MusicBeatSubstate
 			{
 				if(cam.filters != null)
 				{
-					cam.filters = [for (f in cam.filters) if (!(f is ShaderFilter && cast(f, ShaderFilter).shader is funkin.shaders.BlurShader)) f];
+					cam.filters = [for (f in cam.filters) if (!(f is ShaderFilter && cast(f, ShaderFilter).shader is BlurShader)) f];
 					if (cam.filters.length == 0) cam.filters = null;
 				}
 			}

@@ -12,7 +12,7 @@ import openfl.Assets;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 
-import funkin.shaders.ColorSwap;
+import funkin.game.shaders.ColorSwap;
 
 import funkin.states.menus.StoryMenuState;
 import funkin.states.MainMenuState;

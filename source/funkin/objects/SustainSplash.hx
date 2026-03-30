@@ -1,7 +1,7 @@
 package funkin.objects;
 
 import funkin.objects.NoteSplash.PixelSplashShaderRef;
-import funkin.shaders.RGBPalette;
+import funkin.game.shaders.RGBPalette;
 
 class SustainSplash extends FlxSkewedSprite {
 	public var rgbShader:PixelSplashShaderRef;

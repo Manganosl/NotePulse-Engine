@@ -3,7 +3,7 @@ package funkin.objects;
 import funkin.backend.ExtraKeysHandler;
 import funkin.backend.animation.PsychAnimationController;
 
-import funkin.shaders.RGBPalette;
+import funkin.game.shaders.RGBPalette;
 
 import funkin.game.modchart.backend.util.ModchartableSprite;
 

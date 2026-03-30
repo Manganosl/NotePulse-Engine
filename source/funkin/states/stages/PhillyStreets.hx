@@ -1,7 +1,7 @@
 package funkin.states.stages;
 
 import openfl.filters.ShaderFilter;
-import funkin.shaders.RainShader;
+import funkin.game.shaders.RainShader;
 
 import flixel.addons.display.FlxTiledSprite;
 import flixel.graphics.frames.FlxAtlasFrames;

@@ -4,8 +4,8 @@ import funkin.backend.ExtraKeysHandler;
 import funkin.backend.animation.PsychAnimationController;
 import funkin.backend.NoteTypesConfig;
 
-import funkin.shaders.RGBPalette;
-import funkin.shaders.RGBPalette.RGBShaderReference;
+import funkin.game.shaders.RGBPalette;
+import funkin.game.shaders.RGBPalette.RGBShaderReference;
 
 import funkin.objects.StrumNote;
 import funkin.objects.PlayField;

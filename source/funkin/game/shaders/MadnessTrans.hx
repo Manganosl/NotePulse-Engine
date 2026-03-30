@@ -1,4 +1,4 @@
-package funkin.shaders;
+package funkin.game.shaders;
 
 import flixel.graphics.tile.FlxGraphicsShader;
 

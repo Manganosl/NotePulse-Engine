@@ -11,7 +11,7 @@ import flixel.util.FlxGradient;
 import funkin.objects.StrumNote;
 import funkin.objects.Note;
 
-import funkin.shaders.RGBPalette.RGBShaderReference;
+import funkin.game.shaders.RGBPalette.RGBShaderReference;
 
 class NotesSubState extends MusicBeatSubstate
 {
