@@ -47,7 +47,7 @@ class CustomShader extends FlxRuntimeShader implements IHScriptCustomBehaviour {
 
         if (frag == null && vert == null) {
             #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-            addTextToDebug('Missing shader $shaderName .frag AND .vert files!', FlxColor.RED, true, "error");
+            MusicBeatState.getState().addTextToDebug('Missing shader $shaderName .frag AND .vert files!', FlxColor.RED, true, "error");
             #else
             Log.error('Missing shader $shaderName .frag AND .vert files!');
             #end
