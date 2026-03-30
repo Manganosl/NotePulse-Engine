@@ -15,6 +15,8 @@ import funkin.scripting.HScript;
 import flixel.addons.display.FlxRuntimeShader;
 #end
 
+import funkin.backend.utils.CustomShader;
+
 class MusicBeatState extends FlxUIState
 {
 	#if (!flash && sys)
@@ -360,72 +362,40 @@ class MusicBeatState extends FlxUIState
 	}
 	#end
 
-	#if (!flash && sys)
 	public function createRuntimeShader(name:String):FlxRuntimeShader
 	{
 		if(!ClientPrefs.data.shaders) return new FlxRuntimeShader();
 
-		#if (!flash && MODS_ALLOWED && sys)
-		if(!runtimeShaders.exists(name) && !initLuaShader(name))
-		{
-			Log.error('Shader $name is missing!');
-			return new FlxRuntimeShader();
-		}
-
-		var arr:Array<String> = runtimeShaders.get(name);
-		var daShader:FlxRuntimeShader = new FlxRuntimeShader(arr[0], arr[1]);
-		return daShader;
+		#if (!flash && sys)
+		return new CustomShader(name);
 		#else
 		Log.error("Platform unsupported for Runtime Shaders!");
-		return null;
+		return new FlxRuntimeShader();
 		#end
 	}
 
-	public function initLuaShader(name:String, ?glslVersion:Int = 120)
+	public function initLuaShader(name:String, ?glslVersion:Int = 120):Bool
 	{
 		if(!ClientPrefs.data.shaders) return false;
 
+		if(CustomShader.shaderCache.exists(name)) return true;
+
 		#if (MODS_ALLOWED && !flash && sys)
-		if(runtimeShaders.exists(name))
-		{
-			Log.warn('Shader $name was already initialized!');
+		var tempShader = new CustomShader(name);
+	
+		if (CustomShader.shaderCache.exists(name))
 			return true;
-		}
 
-		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'shaders/'))
-		{
-			var frag:String = folder + name + '.frag';
-			var vert:String = folder + name + '.vert';
-			var found:Bool = false;
-			if(FileSystem.exists(frag))
-			{
-				frag = File.getContent(frag);
-				found = true;
-			}
-			else frag = null;
-
-			if(FileSystem.exists(vert))
-			{
-				vert = File.getContent(vert);
-				found = true;
-			}
-			else vert = null;
-
-			if(found)
-			{
-				runtimeShaders.set(name, [frag, vert]);
-				return true;
-			}
-		}
-			#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-			addTextToDebug('Missing shader $name .frag AND .vert files!', FlxColor.RED, true, "error");
-			#else
-			Log.error('Missing shader $name .frag AND .vert files!');
-			#end
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		addTextToDebug('Missing shader $name .frag AND .vert files!', FlxColor.RED, true, "error");
+		#else
+		Log.error('Missing shader $name .frag AND .vert files!');
+		#end
+		
 		#else
 		Log.error('This platform doesn\'t support Runtime Shaders!');
 		#end
+
 		return false;
 	}
-	#end
 }
