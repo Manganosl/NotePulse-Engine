@@ -28,6 +28,11 @@ class Adapter {
 		PlayState.fModchart = true;
 	}
 
+	public static function getHoldParentTime(arrow:FlxSprite) {
+		final note:Note = cast arrow;
+		return note.parent.strumTime;
+	}
+
 	public static function getLaneFromArrow(arrow:FlxSprite) {
 		if (arrow is Note)
 			return cast(arrow, Note).noteData;

@@ -1,9 +1,10 @@
 package funkin.objects;
 
 import funkin.objects.NoteSplash.PixelSplashShaderRef;
+import funkin.game.modchart.backend.util.ModchartableSprite;
 import funkin.game.shaders.RGBPalette;
 
-class SustainSplash extends FlxSkewedSprite {
+class SustainSplash extends ModchartableSprite {
 	public var rgbShader:PixelSplashShaderRef;
 	public var strum:StrumNote;
 	public var shouldVisible:Bool = false;
@@ -91,6 +92,7 @@ class SustainSplash extends FlxSkewedSprite {
 		modchart = PlayState.fModchart;	
 
 		if (animation.curAnim != null && animation.curAnim.finished) {
+			animation.curAnim.frameRate = Math.floor(24 / 100 * PlayState.SONG.bpm);
 			switch (animation.curAnim.name) {
 				case "cover":
 					animation.play("loop");
