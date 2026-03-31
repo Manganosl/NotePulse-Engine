@@ -969,10 +969,8 @@ class PlayState extends MusicBeatState
 
 							if (daNote.isSustainNote && daNote.wasGoodHit && !daNote.strum.sustainSplash.updatedThisFrame) {
 								if (daNote.isSustainEnd) {
-									if (Conductor.songPosition >= daNote.strumTime) {
-										if(!cpuControlled) daNote.strum.sustainSplash.hide(daNote.strum.cpuControlled);
-										else daNote.strum.sustainSplash.hide(true);
-									}
+									if(!cpuControlled) daNote.strum.sustainSplash.hide(daNote.strum.cpuControlled);
+									else daNote.strum.sustainSplash.hide(true);
 								} else {
 									daNote.strum.sustainSplash.show(daNote);
 								}

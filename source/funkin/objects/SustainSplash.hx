@@ -78,6 +78,7 @@ class SustainSplash extends ModchartableSprite {
 		if (miss) {
 			if (!modchart) visible = false;
 			shouldVisible = false;
+			return;
 		}
 
 		if (animation.curAnim == null || animation.curAnim.name != "splash") {
@@ -92,7 +93,6 @@ class SustainSplash extends ModchartableSprite {
 		modchart = PlayState.fModchart;	
 
 		if (animation.curAnim != null && animation.curAnim.finished) {
-			animation.curAnim.frameRate = Math.floor(24 / 100 * PlayState.SONG.bpm);
 			switch (animation.curAnim.name) {
 				case "cover":
 					animation.play("loop");
