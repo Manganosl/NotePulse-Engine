@@ -14,11 +14,6 @@ final helperVector = new Vector3();
 @:noDebug
 #end
 final class HoldRenderer extends BaseRenderer<FlxSprite> {
-    private var __rotateX:Float = 0;
-    private var __rotateY:Float = 0;
-    private var __rotateZ:Float = 0;
-    private var __parentOutput:ModifierOutput;
-
     private var __instanceID:Int;
 
     public function new(instance:ModPlayField) {
@@ -27,38 +22,10 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
         instance.setPercent('dizzyHolds', 1, -1);
     }
 
-    inline private function __rotateTail(pos:Vector3) {
-        if (__parentOutput == null || (__rotateX == 0 && __rotateY == 0 && __rotateZ == 0))
-            return pos;
-
-        var tailFactor = pos.subtract(__parentOutput.pos);
-        tailFactor = ModchartUtil.rotate3DVector(tailFactor, __rotateX, __rotateY, __rotateZ);
-        var output = __parentOutput.pos.add(tailFactor);
-        
-        output.z *= 0.001 * Config.Z_SCALE;
-        return this.view.transformVector(output, __parentOutput.pos);
-    }
-
-    inline private function getGraphicVertices(planeWidth:Float, planeHeight:Float, flipX:Bool, flipY:Bool) {
-        var x1 = flipX ? planeWidth : -planeWidth;
-        var x2 = flipX ? -planeWidth : planeWidth;
-        var y1 = flipY ? planeHeight : -planeHeight;
-        var y2 = flipY ? -planeHeight : planeHeight;
-
-        return [
-            x1, y1, // top left
-            x2, y1, // top right
-            x1, y2, // bottom left
-            x2, y2  // bottom right
-        ];
-    }
-
-    var __lastOrient:Float = 0;
     var __lastC2:Float = 0;
     var __lastPlayer:Int = -1;
-    
     override public function prepare(arrow:FlxSprite):Null<DrawCommand> {
-        if (arrow.alpha <= 0) return null;
+        if (arrow.alpha <= 0 || (arrow.clipRect != null && arrow.clipRect.height <= 0)) return null;
 
         var castedArrow = cast(arrow, Note);
         @:privateAccess
@@ -77,11 +44,6 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
         final isHitten = arrowData.hitten;
 
         final fullHeight = (arrowFrame.height * arrow.scale.y);
-        final clipRatio = (isHitten && realDistance < 0) 
-            ? FlxMath.bound(1 + (realDistance / fullHeight), 0, 1) 
-            : 1;
-
-        if (clipRatio <= 0.001) return null;
 
         var basePos = ModchartUtil.getHalfPos();
         basePos.x += Adapter.getDefaultReceptorX(lane, player);
@@ -99,7 +61,7 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
             diff = output.pos.subtract(nextPos);
             isCached = true;
         } else {
-            final stepDuration = (Adapter.startCrochet / 3.85); 
+            final stepDuration = (Adapter.startCrochet / 3.8); 
             var nextData = getArrowParams(castedArrow, stepDuration);
             var nextOutput = parent.modifiers.getPath(basePos.clone(), nextData);
             diff = nextOutput.pos.subtract(output.pos);
@@ -114,15 +76,38 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
         var planeWidth = arrowFrame.width * arrow.scale.x * 0.5;
         var frameHeight = (castedArrow.isSustainEnd ? fullHeight : velocity);
 
-        var clipOffset = frameHeight * (1 - clipRatio);
-
-        var y1:Float = ClientPrefs.data.downScroll ? -clipOffset : clipOffset; 
+        var y1:Float = 0; 
         var y2:Float = ClientPrefs.data.downScroll ? -frameHeight : frameHeight;
+
+        final uvRectangle = arrow.frame.uv;
+        var uvTop:Float = #if (flixel < "6.1.1" && flixel != "6.1.0") uvRectangle.y #else uvRectangle.top #end;
+        var uvBottom:Float = #if (flixel < "6.1.1" && flixel != "6.1.0") uvRectangle.height #else uvRectangle.bottom #end;
+
+        if (arrow.clipRect != null) {
+            var clipY:Float = Math.max(0, arrow.clipRect.y);
+            var clipHeight:Float = Math.min(arrowFrame.height, arrow.clipRect.height);
+            
+            var t1 = clipY / arrowFrame.height;
+            var t2 = (clipY + clipHeight) / arrowFrame.height;
+
+            var oldUVTop = uvTop;
+            var oldUVBottom = uvBottom;
+            uvTop = oldUVTop + (oldUVBottom - oldUVTop) * t1;
+            uvBottom = oldUVTop + (oldUVBottom - oldUVTop) * t2;
+
+            var oldY1 = y1;
+            var oldY2 = y2;
+            y1 = oldY1 + (oldY2 - oldY1) * t1;
+            y2 = oldY1 + (oldY2 - oldY1) * t2;
+        }
 
         if (arrow.flipY) {
             var temp = y1;
             y1 = y2;
             y2 = temp;
+            var tempUV = uvTop;
+            uvTop = uvBottom;
+            uvBottom = tempUV;
         }
 
         var x1 = arrow.flipX ? planeWidth : -planeWidth;
@@ -166,25 +151,24 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
         vertices[6] = proj.x; vertices[7] = proj.y;
         projectionZ[3] = proj.z > 0.0001 ? proj.z : 0.0001;
 
-        final uvRectangle = arrow.frame.uv;
         var uvData = new NativeVector<Float>(12);
         var k = 0;
 
         #if (flixel == "6.1.0")
-        uvData[k++] = uvRectangle.left; uvData[k++] = uvRectangle.right; uvData[k++] = 1 / projectionZ[0];
-        uvData[k++] = uvRectangle.top; uvData[k++] = uvRectangle.right; uvData[k++] = 1 / projectionZ[1];
-        uvData[k++] = uvRectangle.top; uvData[k++] = uvRectangle.bottom; uvData[k++] = 1 / projectionZ[2];
-        uvData[k++] = uvRectangle.left; uvData[k++] = uvRectangle.bottom; uvData[k++] = 1 / projectionZ[3];
+        uvData[k++] = uvRectangle.left; uvData[k++] = uvTop; uvData[k++] = 1 / projectionZ[0];
+        uvData[k++] = uvRectangle.right; uvData[k++] = uvTop; uvData[k++] = 1 / projectionZ[1];
+        uvData[k++] = uvRectangle.left; uvData[k++] = uvBottom; uvData[k++] = 1 / projectionZ[2];
+        uvData[k++] = uvRectangle.right; uvData[k++] = uvBottom; uvData[k++] = 1 / projectionZ[3];
         #elseif (flixel >= "6.1.1")
-        uvData[k++] = uvRectangle.left; uvData[k++] = uvRectangle.top; uvData[k++] = 1 / projectionZ[0];
-        uvData[k++] = uvRectangle.right; uvData[k++] = uvRectangle.top; uvData[k++] = 1 / projectionZ[1];
-        uvData[k++] = uvRectangle.left; uvData[k++] = uvRectangle.bottom; uvData[k++] = 1 / projectionZ[2];
-        uvData[k++] = uvRectangle.right; uvData[k++] = uvRectangle.bottom; uvData[k++] = 1 / projectionZ[3];
+        uvData[k++] = uvRectangle.left; uvData[k++] = uvTop; uvData[k++] = 1 / projectionZ[0];
+        uvData[k++] = uvRectangle.right; uvData[k++] = uvTop; uvData[k++] = 1 / projectionZ[1];
+        uvData[k++] = uvRectangle.left; uvData[k++] = uvBottom; uvData[k++] = 1 / projectionZ[2];
+        uvData[k++] = uvRectangle.right; uvData[k++] = uvBottom; uvData[k++] = 1 / projectionZ[3];
         #else
-        uvData[k++] = uvRectangle.x; uvData[k++] = uvRectangle.y; uvData[k++] = 1 / projectionZ[0];
-        uvData[k++] = uvRectangle.width; uvData[k++] = uvRectangle.y; uvData[k++] = 1 / projectionZ[1];
-        uvData[k++] = uvRectangle.x; uvData[k++] = uvRectangle.height; uvData[k++] = 1 / projectionZ[2];
-        uvData[k++] = uvRectangle.width; uvData[k++] = uvRectangle.height; uvData[k++] = 1 / projectionZ[3];
+        uvData[k++] = uvRectangle.x; uvData[k++] = uvTop; uvData[k++] = 1 / projectionZ[0];
+        uvData[k++] = uvRectangle.width; uvData[k++] = uvTop; uvData[k++] = 1 / projectionZ[1];
+        uvData[k++] = uvRectangle.x; uvData[k++] = uvBottom; uvData[k++] = 1 / projectionZ[2];
+        uvData[k++] = uvRectangle.width; uvData[k++] = uvBottom; uvData[k++] = 1 / projectionZ[3];
         #end
 
         var indices = new NativeVector<Int>(6);
