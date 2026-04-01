@@ -1,4 +1,4 @@
-package funkin.game.modchart.engine.modifiers.list.false_paradise;
+package funkin.game.modchart.engine.modifiers.list;
 
 import flixel.math.FlxMath;
 
