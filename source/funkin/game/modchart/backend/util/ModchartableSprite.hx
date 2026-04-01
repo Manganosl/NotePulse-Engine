@@ -5,7 +5,7 @@ import funkin.game.modchart.backend.math.Vector3;
 
 /**
  * Normal FlxSkewedSprite with variables to contain modchart-specific data.
- * These variables can be accessed with the `@:privateAccess`.
+ * These variables can be accessed with `@:privateAccess`.
  */
 class ModchartableSprite extends FlxSkewedSprite {
     private var parentArrow:StrumNote = null;
@@ -13,6 +13,5 @@ class ModchartableSprite extends FlxSkewedSprite {
 
     private var modchartIsRating:Bool = false;
 
-	private var modchartNotOnScreen:Array<Bool> = [];
 	private var modchartCachedModPos:Array<Vector3> = [];
 }

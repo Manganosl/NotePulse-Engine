@@ -28,11 +28,6 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
         if (arrow.alpha <= 0 || (arrow.clipRect != null && arrow.clipRect.height <= 0)) return null;
 
         var castedArrow = cast(arrow, Note);
-        @:privateAccess
-        if(castedArrow.prevNote.modchartNotOnScreen[__instanceID]){
-            castedArrow.modchartNotOnScreen[__instanceID] = false;
-            return null;
-        }
 
         final arrowFrame = arrow.frame.frame;
         
@@ -182,24 +177,6 @@ final class SimpleHoldRenderer extends BaseRenderer<FlxSprite> {
         var maxX = Math.max(Math.max(vertices[0], vertices[2]), Math.max(vertices[4], vertices[6]));
         var minY = Math.min(Math.min(vertices[1], vertices[3]), Math.min(vertices[5], vertices[7]));
         var maxY = Math.max(Math.max(vertices[1], vertices[3]), Math.max(vertices[5], vertices[7]));
-
-        for (cam in resolvedCameras) {
-            var viewWidth = cam.width / cam.zoom;
-            var viewHeight = cam.height / cam.zoom;
-            var marginX = (cam.width - viewWidth) / 2;
-            var marginY = (cam.height - viewHeight) / 2;
-
-            @:privateAccess
-            if (maxX >= marginX && minX <= cam.width - marginX && maxY >= marginY && minY <= cam.height - marginY) {
-                castedArrow.modchartNotOnScreen[__instanceID] = false;
-                break;
-            } else {
-                castedArrow.modchartNotOnScreen[__instanceID] = true;
-            }
-        }
-
-        @:privateAccess
-        if (castedArrow.modchartNotOnScreen[__instanceID]) return null;
 
         final absGlow = output.visuals.glow * 255;
         final negGlow = 1 - output.visuals.glow;

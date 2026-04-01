@@ -1,35 +1,76 @@
-package funkin.game.modchart.engine.modifiers.list;
+package funkin.game.modchart.engine.modifiers.list.false_paradise;
 
-import funkin.game.modchart.backend.core.ArrowData;
-import funkin.game.modchart.backend.core.ModifierParameters;
-import funkin.game.modchart.engine.ModPlayField;
-import funkin.game.modchart.engine.modifiers.list.PathModifier.PathNode;
+import flixel.math.FlxMath;
 
-class ArrowShape extends PathModifier {
-	public function new(pf:ModPlayField) {
-		var path:Array<PathNode> = [];
+private class TimeVector extends Vector3D {
+	public var startDist = 0.0;
+	public var endDist = 0.0;
+	public var next:TimeVector;
+}
 
-		for (line in ModchartUtil.coolTextFile('modchart/arrowShape.csv')) {
-			var coords = line.split(';');
-			path.push({
-				x: Std.parseFloat(coords[0]) * 200,
-				y: Std.parseFloat(coords[1]) * 200,
-				z: Std.parseFloat(coords[2]) * 200
-			});
+class ArrowShape extends Modifier {
+	var _path:List<TimeVector>;
+	var _pathDistance:Float = 0;
+
+	static inline var SCALE:Float = 200;
+
+	function CalculatePathDistances(path:List<TimeVector>) {
+		var iterator = path.iterator();
+		var last = iterator.next();
+		last.startDist = 0;
+		var dist = 0.0;
+		var iteratorHasNext = iterator.hasNext;
+		var iteratorNext = iterator.next;
+		while (iteratorHasNext()) {
+			var current = iteratorNext();
+			var differential = current.subtract(last);
+			dist += differential.length;
+			current.startDist = dist;
+			last.next = current;
+			last.endDist = current.startDist;
+			last = current;
 		}
-
-		super(pf, path);
-
-		pathOffset.setTo(WIDTH * 0.5, HEIGHT * 0.5 + 280, 0);
+		return dist;
 	}
 
-	override function render(pos:Vector3, params:ModifierParameters) {
-		var perc = getPercent('arrowshape', params.player);
+	function GetPointAlongPath(distance:Float):Null<Vector3> {
+		for (vec in _path) {
+			if (FlxMath.inBounds(distance, vec.startDist, vec.endDist) && vec.next != null) {
+				var ratio = (distance - vec.startDist) / vec.next.subtract(vec).length;
+				return ModchartUtil.lerpVector3D(vec, vec.next, ratio);
+			}
+		}
+		return _path.first();
+	}
+
+	function LoadPath():List<TimeVector> {
+		var file = ModchartUtil.coolTextFile('modchart/arrowShape.csv');
+		var path = new List<TimeVector>();
+		for (line in file) {
+			var coords = line.split(';');
+			var vec = new TimeVector(Std.parseFloat(coords[0]), Std.parseFloat(coords[1]), Std.parseFloat(coords[2]), Std.parseFloat(coords[3]));
+			vec.scaleBy(SCALE);
+			path.add(vec);
+		}
+		_pathDistance = CalculatePathDistances(path);
+		return path;
+	}
+
+	override public function render(curPos:Vector3, params:ModifierParameters) {
+		if (_path == null)
+			_path = LoadPath();
+
+		final perc = getPercent('ArrowShape', params.player);
 
 		if (perc == 0)
-			return pos;
+			return curPos;
 
-		pathOffset.z = pos.z;
-		return computePath(pos, params, perc);
+		var path = GetPointAlongPath(params.distance / 1500.0 * _pathDistance);
+
+		return ModchartUtil.lerpVector3D(curPos,
+			path.add(new Vector3(WIDTH * .5, HEIGHT * .5 + 280, params.lane * getPercent('ArrowShapeOffset', params.player) + curPos.z)), perc);
 	}
+
+	override public function shouldRun(params:ModifierParameters):Bool
+		return true;
 }
