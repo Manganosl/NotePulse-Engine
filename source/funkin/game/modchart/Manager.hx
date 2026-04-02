@@ -115,10 +115,10 @@ final class Manager extends FlxBasic {
 	 * @param field Optionally, the specific playfield to target.
 	 */
 	public inline function setPercent(name:String, value:Float, player:Int = -1, field:Int = -1)
-		iteratePlayfields((pf) -> pf.setPercent(name, value, player), field);
+		iteratePlayfields((pf) -> pf.setPercent(name, value, (swapPlayers ? (player == 0 ? 1 : (player == 1 ? 0 : player)) : player)), field);
 
 	public inline function setCurrentValue(name:String, value:Float, player:Int = -1, field:Int = -1)
-		iteratePlayfields((pf) -> {pf.setPercent(name, value, player);}, field);
+		iteratePlayfields((pf) -> pf.setPercent(name, value, (swapPlayers ? (player == 0 ? 1 : (player == 1 ? 0 : player)) : player)), field);
 
 	/**
 	 * Sets the percent for a specific modifier for all playfields or a specific one.
@@ -129,7 +129,7 @@ final class Manager extends FlxBasic {
 	 * @param field Optionally, the specific playfield to target.
 	 */
 	public inline function setValue(name:String, value:Float, player:Int = -1, field:Int = -1)
-		iteratePlayfields((pf) -> pf.setPercent(name, value, player), field);
+		iteratePlayfields((pf) -> pf.setPercent(name, value, (swapPlayers ? (player == 0 ? 1 : (player == 1 ? 0 : player)) : player)), field);
 
 	/**
 	 * Gets the percent for a specific modifier.
@@ -167,7 +167,7 @@ final class Manager extends FlxBasic {
 	 * @param field Optionally, the specific playfield to target.
 	 */
 	public inline function set(name:String, beat:Float, value:Float, player:Int = -1, field:Int = -1)
-		iteratePlayfields((pf) -> pf.set(name, beat, value, player), field);
+		iteratePlayfields((pf) -> pf.set(name, beat, value, (swapPlayers ? (player == 0 ? 1 : (player == 1 ? 0 : player)) : player)), field);
 
 	/**
 	 * Applies easing to a modifier using beats.
@@ -181,7 +181,7 @@ final class Manager extends FlxBasic {
 	 * @param field Optionally, the specific playfield to target.
 	 */
 	public inline function ease(name:String, beat:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
-		iteratePlayfields((pf) -> pf.ease(name, beat, length, value, easeFunc, player), field);
+		iteratePlayfields((pf) -> pf.ease(name, beat, length, value, easeFunc, (swapPlayers ? (player == 0 ? 1 : (player == 1 ? 0 : player)) : player)), field);
 
 	/**
 	 * Adds easing to a modifier using beats.
@@ -195,7 +195,7 @@ final class Manager extends FlxBasic {
 	 * @param field Optionally, the specific playfield to target.
 	 */
 	public inline function add(name:String, beat:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
-		iteratePlayfields((pf) -> pf.add(name, beat, length, value, easeFunc, player), field);
+		iteratePlayfields((pf) -> pf.add(name, beat, length, value, easeFunc, (swapPlayers ? (player == 0 ? 1 : (player == 1 ? 0 : player)) : player)), field);
 
 	/**
 	 * Sets and adds a value to a modifier using beats.
@@ -207,7 +207,7 @@ final class Manager extends FlxBasic {
 	 * @param field Optionally, the specific playfield to target.
 	 */
 	public inline function setAdd(name:String, beat:Float, value:Float, player:Int = -1, field:Int = -1)
-		iteratePlayfields((pf) -> pf.setAdd(name, beat, value, player), field);
+		iteratePlayfields((pf) -> pf.setAdd(name, beat, value, (swapPlayers ? (player == 0 ? 1 : (player == 1 ? 0 : player)) : player)), field);
 
 	/**
 	 * Sets a specific value at a certain step for all playfields or a specific one.
@@ -219,7 +219,7 @@ final class Manager extends FlxBasic {
 	 * @param field Optionally, the specific playfield to target.
 	 */
 	public inline function setS(name:String, step:Float, value:Float, player:Int = -1, field:Int = -1)
-		iteratePlayfields((pf) -> pf.set(name, stepToBeat(step), value, player), field);
+		iteratePlayfields((pf) -> pf.set(name, stepToBeat(step), value, (swapPlayers ? (player == 0 ? 1 : (player == 1 ? 0 : player)) : player)), field);
 
 	/**
 	 * Applies easing to a modifier using steps.
@@ -233,7 +233,7 @@ final class Manager extends FlxBasic {
 	 * @param field Optionally, the specific playfield to target.
 	 */
 	public inline function easeS(name:String, step:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
-		iteratePlayfields((pf) -> pf.ease(name, stepToBeat(step), stepToBeat(length), value, easeFunc, player), field);
+		iteratePlayfields((pf) -> pf.ease(name, stepToBeat(step), stepToBeat(length), value, easeFunc, (swapPlayers ? (player == 0 ? 1 : (player == 1 ? 0 : player)) : player)), field);
 
 	/**
 	 * Adds easing to a modifier using steps.
@@ -247,7 +247,7 @@ final class Manager extends FlxBasic {
 	 * @param field Optionally, the specific playfield to target.
 	 */
 	public inline function addS(name:String, step:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
-		iteratePlayfields((pf) -> pf.add(name, stepToBeat(step), stepToBeat(length), value, easeFunc, player), field);
+		iteratePlayfields((pf) -> pf.add(name, stepToBeat(step), stepToBeat(length), value, easeFunc, (swapPlayers ? (player == 0 ? 1 : (player == 1 ? 0 : player)) : player)), field);
 
 	/**
 	 * Sets and adds a value to a modifier using steps.
@@ -259,7 +259,7 @@ final class Manager extends FlxBasic {
 	 * @param field Optionally, the specific playfield to target.
 	 */
 	public inline function setAddS(name:String, step:Float, value:Float, player:Int = -1, field:Int = -1)
-		iteratePlayfields((pf) -> pf.setAdd(name, stepToBeat(step), value, player), field);
+		iteratePlayfields((pf) -> pf.setAdd(name, stepToBeat(step), value, (swapPlayers ? (player == 0 ? 1 : (player == 1 ? 0 : player)) : player)), field);
 
 	/**
 	 * Adds a repeater event for all playfields or a specific one.
