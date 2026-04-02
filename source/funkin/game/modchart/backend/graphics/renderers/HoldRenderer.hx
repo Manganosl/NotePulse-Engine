@@ -20,6 +20,7 @@ private final class HoldSegment {
 }
 
 final __matrix:Matrix = new Matrix();
+final __holdUnitUp:Vector3 = new Vector3(0, 1, 0);
 
 #if !openfl_debug
 @:fileXml('tags="haxe,release"')
@@ -81,8 +82,7 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 		final zScale:Float = curPoint.z != 0 ? (1 / curPoint.z) : 1;
 		curPoint.z = 0;
 
-		// before this, bc it fails with optimiz eholds too
-		var unit:Vector3 = new Vector3(0, 1, 0);
+		var unit:Vector3 = __holdUnitUp;
 
 		var quad0 = new Vector3(-unit.y * size, unit.x * size);
 		var quad1 = new Vector3(unit.y * size, -unit.x * size);

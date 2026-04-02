@@ -22,7 +22,7 @@ class EaseEvent extends Event {
 
 		this.target = target;
 
-		super(beat, (_) -> {}, parent, true);
+		super(beat, (_, beat) -> {}, parent, true);
 
 		type = EASE;
 	}

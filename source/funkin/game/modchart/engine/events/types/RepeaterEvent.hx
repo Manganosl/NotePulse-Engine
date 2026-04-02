@@ -3,7 +3,7 @@ package funkin.game.modchart.engine.events.types;
 class RepeaterEvent extends Event {
 	var end:Float;
 
-	public function new(beat:Float, length:Float, callback:Event->Void, parent:EventManager) {
+	public function new(beat:Float, length:Float, callback:(Event, Float) -> Void, parent:EventManager) {
 		super(beat, callback, parent);
 
 		end = beat + length;
@@ -15,7 +15,7 @@ class RepeaterEvent extends Event {
 			return;
 
 		if (curBeat < end) {
-			callback(this);
+			callback(this, curBeat);
 			fired = false;
 		} else if (curBeat >= end) {
 			fired = true;

@@ -14,7 +14,7 @@ class Event {
 
 	public var prev:Event = null;
 
-	public var callback:Event->Void;
+	public var callback:(Event, Float) -> Void;
 	public var parent:EventManager;
 
 	private var mercy:Bool = false;
@@ -23,7 +23,7 @@ class Event {
 
 	public var active:Bool = false;
 
-	public function new(beat:Float, callback:Event->Void, parent:EventManager, ?mercy:Bool = false) {
+	public function new(beat:Float, callback:(Event, Float) -> Void, parent:EventManager, ?mercy:Bool = false) {
 		this.beat = beat;
 		this.callback = callback;
 		this.mercy = mercy;
@@ -33,7 +33,7 @@ class Event {
 
 	public function update(curBeat:Float) {
 		if (curBeat >= beat && callback != null) {
-			callback(this);
+			callback(this, curBeat);
 
 			fired = !mercy;
 

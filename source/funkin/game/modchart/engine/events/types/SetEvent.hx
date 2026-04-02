@@ -6,7 +6,7 @@ class SetEvent extends Event {
 		this.target = target;
 		this.player = player;
 
-		super(beat, (_) -> {
+		super(beat, (_, beat) -> {
 			setModPercent(mod, target, player);
 		}, parent);
 		type = SET;

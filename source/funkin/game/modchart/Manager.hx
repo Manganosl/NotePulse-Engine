@@ -55,6 +55,8 @@ final class Manager extends FlxBasic {
 
 	private var renderer:CtxRenderer;
 
+	public var swapPlayers:Bool = false;
+
 	public function new() {
 		super();
 
@@ -113,6 +115,20 @@ final class Manager extends FlxBasic {
 	 * @param field Optionally, the specific playfield to target.
 	 */
 	public inline function setPercent(name:String, value:Float, player:Int = -1, field:Int = -1)
+		iteratePlayfields((pf) -> pf.setPercent(name, value, player), field);
+
+	public inline function setCurrentValue(name:String, value:Float, player:Int = -1, field:Int = -1)
+		iteratePlayfields((pf) -> {pf.setPercent(name, value, player);}, field);
+
+	/**
+	 * Sets the percent for a specific modifier for all playfields or a specific one.
+	 *
+	 * @param name The name of the modifier.
+	 * @param value The percent value to set.
+	 * @param player Optionally, the player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function setValue(name:String, value:Float, player:Int = -1, field:Int = -1)
 		iteratePlayfields((pf) -> pf.setPercent(name, value, player), field);
 
 	/**
@@ -253,8 +269,8 @@ final class Manager extends FlxBasic {
 	 * @param callback The callback function to execute.
 	 * @param field Optionally, the specific playfield to target.
 	 */
-	public inline function repeater(beat:Float, length:Float, callback:Event->Void, field:Int = -1)
-		iteratePlayfields((pf) -> pf.repeater(beat, length, callback), field);
+	public inline function repeater(beat:Float, length:Float, callback:(Event, Float) -> Void, field:Int = -1)
+        iteratePlayfields((pf) -> pf.repeater(beat, length, callback), field);
 
 	/**
 	 * Adds a callback event for all playfields or a specific one.
@@ -263,8 +279,8 @@ final class Manager extends FlxBasic {
 	 * @param callback The callback function to execute.
 	 * @param field Optionally, the specific playfield to target.
 	 */
-	public inline function callback(beat:Float, callback:Event->Void, field:Int = -1)
-		iteratePlayfields((pf) -> pf.callback(beat, callback), field);
+	public inline function callback(beat:Float, callback:(Event, Float) -> Void, field:Int = -1)
+        iteratePlayfields((pf) -> pf.callback(beat, callback), field);
 
 	/**
 	 * Creates a node linking inputs and outputs to a function.
@@ -446,8 +462,8 @@ final class Manager extends FlxBasic {
 	 * @param func The callback function.
 	 * @param field Optionally, the specific playfield to target.
 	 */
-	public inline function queueFuncOnce(step:Float, func:Event->Void, field:Int = -1)
-		callback(stepToBeat(step), func, field);
+	public inline function queueFuncOnce(step:Float, func:(Event, Float) -> Void, field:Int = -1)
+        callback(stepToBeat(step), (ev, beat) -> func(ev, beat * 4), field);
 
 	/**
 	 * Adds a repeating callback between steps.
@@ -457,20 +473,20 @@ final class Manager extends FlxBasic {
 	 * @param func The callback function.
 	 * @param field Optionally, the specific playfield to target.
 	 */
-	public inline function queueFunc(step:Float, endStep:Float, func:Event->Void, field:Int = -1)
-		repeater(stepToBeat(step), stepToBeat(endStep - step), func, field);
+	public inline function queueFunc(step:Float, endStep:Float, func:(Event, Float) -> Void, field:Int = -1)
+        repeater(stepToBeat(step), stepToBeat(endStep - step), (ev, beat) -> func(ev, beat * 4), field);
 
 	/**
 	 * Adds a repeating callback between beats.
 	 */
-	public inline function queueFuncB(beat:Float, endBeat:Float, func:Event->Void, field:Int = -1)
-		repeater(beat, endBeat - beat, func, field);
+	public inline function queueFuncB(beat:Float, endBeat:Float, func:(Event, Float) -> Void, field:Int = -1)
+        repeater(beat, endBeat - beat, func, field);
 
 	/**
 	 * Adds a repeating callback using beat and length.
 	 */
-	public inline function queueFuncLB(beat:Float, length:Float, func:Event->Void, field:Int = -1)
-		repeater(beat, length, func, field);
+	public inline function queueFuncLB(beat:Float, length:Float, func:(Event, Float) -> Void, field:Int = -1)
+        repeater(beat, length, func, field);
 
 	/**
 	 * Creates and adds a new playfield to the list.

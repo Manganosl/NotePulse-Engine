@@ -187,10 +187,10 @@ final class ModPlayField extends FlxSprite {
 		addEvent(new SetEvent(name.toLowerCase(), beat, value, player, events));
 	}
 
-	public inline function repeater(beat:Float, length:Float, callback:Event->Void):Void
+	public inline function repeater(beat:Float, length:Float, callback:(Event, Float) -> Void):Void
 		addEvent(new RepeaterEvent(beat, length, callback, events));
 
-	public inline function callback(beat:Float, callback:Event->Void):Void
+	public inline function callback(beat:Float, callback:(Event, Float) -> Void):Void
 		addEvent(new Event(beat, callback, events));
 
 	public inline function alias(name:String, alias:String) {
