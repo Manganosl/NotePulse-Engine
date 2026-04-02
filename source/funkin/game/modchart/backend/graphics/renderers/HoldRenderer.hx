@@ -1,5 +1,7 @@
 package funkin.game.modchart.backend.graphics.renderers;
 
+import funkin.objects.Note;
+
 using flixel.util.FlxColorTransformUtil;
 
 typedef HoldSegmentOutput = {
@@ -56,10 +58,10 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 	 * @see https://en.wikipedia.org/wiki/Unit_circle
 	 */
 	@:noCompletion
-	inline private function getHoldSegment(hold:FlxSprite, basePos:Vector3, params:ArrowData, doClip:Bool = true):HoldSegmentOutput {
+	inline private function getHoldSegment(hold:Note, basePos:Vector3, params:ArrowData, doClip:Bool = true):HoldSegmentOutput {
 		@:privateAccess
 		var holdTime = params.hitTime;
-		var parentTime = Adapter.getHoldParentTime(hold);
+		var parentTime = hold.parent.strumTime;
 		var clipped = false;
 
 		var holdDistance = params.distance;
@@ -187,12 +189,12 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 
 		updateIndices(HOLD_SUBDIVISIONS);
 
-		final player = Adapter.getPlayerFromArrow(item);
-		final lane = Adapter.getLaneFromArrow(item);
+		final player = castedArrow.playField.player;
+		final lane = castedArrow.noteData;
 
 		basePos = ModchartUtil.getHalfPos();
-		basePos.x += Adapter.getDefaultReceptorX(lane, player);
-		basePos.y += Adapter.getDefaultReceptorY(lane, player);
+		basePos.x += castedArrow.strum.x;
+		basePos.y += castedArrow.strum.y;
 
 		var vertices = new NativeVector(8 * HOLD_SUBDIVISIONS);
 		var transfTotal = new NativeVector<ColorTransform>(HOLD_SUBDIVISIONS);
@@ -214,7 +216,7 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 		__rotateY = canUseLast ? __lastRY : (__lastRY = parent.getPercent('holdRotateY', player));
 		__rotateZ = canUseLast ? __lastRZ : (__lastRZ = parent.getPercent('holdRotateZ', player));
 
-		var parentTime = Adapter.getHoldParentTime(item);
+		var parentTime = castedArrow.parent.strumTime;
 		var parentData:ArrowData = {
 			hitTime: parentTime,
 			// this fixed the clipping gaps
@@ -246,25 +248,25 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 			var out1:HoldSegmentOutput;
 			var out2:HoldSegmentOutput;
 
-			out1 = firstIteration ? getHoldSegment(item, basePos, lastData != null ? lastData : getArrowParams(castedArrow, holdTimeProgress)) : lastSegment;
-			out2 = getHoldSegment(item, basePos, (lastData = getArrowParams(castedArrow, holdTimeProgress + (holdTimeInterval * timeScale))));
+			out1 = firstIteration ? getHoldSegment(castedArrow, basePos, lastData != null ? lastData : getArrowParams(castedArrow, holdTimeProgress)) : lastSegment;
+			out2 = getHoldSegment(castedArrow, basePos, (lastData = getArrowParams(castedArrow, holdTimeProgress + (holdTimeInterval * timeScale))));
 
 			if (firstIteration) {
 				item._z = out1.depth;
 
 				if (isHoldEnd) {
 					if (out1.clipped) {
-						final rawStart = getHoldSegment(item, basePos, getArrowParams(castedArrow, holdTimeProgress), false);
-						final rawEnd = out2.clipped ? getHoldSegment(item, basePos, getArrowParams(castedArrow, holdTimeProgress + holdTimeInterval), false) : out2;
+						final rawStart = getHoldSegment(castedArrow, basePos, getArrowParams(castedArrow, holdTimeProgress), false);
+						final rawEnd = out2.clipped ? getHoldSegment(castedArrow, basePos, getArrowParams(castedArrow, holdTimeProgress + holdTimeInterval), false) : out2;
 
 						final rawLength = (rawEnd.origin - rawStart.origin).length;
 						if (rawLength > 0) {
 							timeScale = (holdHeight / HOLD_SUBDIVISIONS) / rawLength;
-							out2 = getHoldSegment(item, basePos, (lastData = getArrowParams(castedArrow, holdTimeInterval * timeScale)));
+							out2 = getHoldSegment(castedArrow, basePos, (lastData = getArrowParams(castedArrow, holdTimeInterval * timeScale)));
 						}
 					} else {
 						timeScale = (holdHeight / HOLD_SUBDIVISIONS) / Math.max(0, (out2.origin - out1.origin).length);
-						out2 = getHoldSegment(item, basePos, (lastData = getArrowParams(castedArrow, holdTimeInterval * timeScale)));
+						out2 = getHoldSegment(castedArrow, basePos, (lastData = getArrowParams(castedArrow, holdTimeInterval * timeScale)));
 					}
 				}
 			}
@@ -326,11 +328,11 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 	}
 
 	inline private function getArrowParams(arrow:Note, posOff:Float = 0):ArrowData {
-		final player = Adapter.getPlayerFromArrow(arrow);
-		final lane = Adapter.getLaneFromArrow(arrow);
+		final player = arrow.playField.player;
+		final lane = arrow.noteData;
 
 		final timeC2 = flixel.FlxG.height * 0.25 * __centered2;
-		final hitTime = Adapter.getTimeFromArrow(arrow);
+		final hitTime = arrow.strumTime;
 
 		var pos = (hitTime - Conductor.songPosition) + posOff;
 
