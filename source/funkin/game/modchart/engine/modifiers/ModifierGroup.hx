@@ -162,7 +162,8 @@ final class ModifierGroup {
 	public inline function setPercent(name:String, value:Float, player:Int = -1) {
 		final key = name.toLowerCase();
 
-		final possiblePercs = percents.get(key);
+		// No .toLowerCase() — PercentArray.__hashKey is now case-insensitive internally.
+		final possiblePercs = percents.get(name);
 		final generate = possiblePercs == null;
 		final percs = generate ? __getPercentTemplate() : possiblePercs;
 
@@ -174,11 +175,12 @@ final class ModifierGroup {
 
 		// if the percent list already was generated, we dont need to set it again
 		if (generate)
-			percents.set(key, percs);
+			percents.set(name, percs);
 	}
 
 	public inline function getPercent(name:String, player:Int):Float {
-		final percs = percents.get(name.toLowerCase());
+		// No .toLowerCase() — PercentArray.__hashKey is now case-insensitive internally.
+		final percs = percents.get(name);
 
 		if (percs != null)
 			return percs[player];
@@ -242,7 +244,7 @@ final class ModifierGroup {
 		return vector;
 	}
 
-	inline private function __findID(str:String) {
-		@:privateAccess percents.__hashKey(str.toLowerCase());
+	inline private function __findID(str:String):Int {
+		return @:privateAccess percents.__hashKey(str.toLowerCase());
 	}
 }

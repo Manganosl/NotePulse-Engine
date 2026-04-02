@@ -26,6 +26,32 @@ class CtxRenderer {
 	var queue:Vector<DrawCommand>;
 	var count:Int = 0;
 
+	// Adaptive hold-subdivision tracking.
+	private var __targetSubdivisions:Int = 4;
+	private var __fpsSum:Float = 0;
+	private var __fpsFrames:Int = 0;
+	private var __lastStamp:Float = 0;
+	static inline final FPS_WINDOW:Int = 30;
+
+	private function updateAdaptiveSubdivisions():Void {
+		final now = haxe.Timer.stamp();
+		final delta = now - __lastStamp;
+		__lastStamp = now;
+		if (delta <= 0 || delta > 1) return;
+		__fpsSum += 1.0 / delta;
+		__fpsFrames++;
+		if (__fpsFrames >= FPS_WINDOW) {
+			final avgFps = __fpsSum / __fpsFrames;
+			if (avgFps < 45 && __targetSubdivisions > 1)
+				__targetSubdivisions--;
+			else if (avgFps >= 57 && __targetSubdivisions < 8)
+				__targetSubdivisions++;
+			Adapter.setHoldSubdivisions(__targetSubdivisions);
+			__fpsSum = 0;
+			__fpsFrames = 0;
+		}
+	}
+
 	public function alloc(n:Int) {
 		queue = new Vector<DrawCommand>(n);
 		count = 0;
@@ -55,6 +81,8 @@ class CtxRenderer {
 	var emptyVec:openfl.Vector<Int> = new openfl.Vector<Int>(8, true, [for (i in 0...8) 0]);
 
 	public function emit(items:Array<Array<Array<FlxSprite>>>, playfields:Array<ModPlayField>, proxies:Array<Proxy>) {
+		updateAdaptiveSubdivisions();
+
 		// used for preallocate
 		var playfieldCount = playfields.length;
 

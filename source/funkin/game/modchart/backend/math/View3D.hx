@@ -81,6 +81,8 @@ final class View3D {
 	private var __right:Vector3 = new Vector3();
 	private var __up:Vector3 = new Vector3();
 	private var __dirtyCamera:Bool = true;
+	// Pre-allocated default origin to avoid construction on every transformVector call.
+	private var __defaultOrigin:Vector3 = new Vector3();
 
 	public function new() {
 		fov = Math.PI / 2;
@@ -158,18 +160,32 @@ final class View3D {
 	 */
 	public inline function transformVector(vector:Vector3, ?origin:Null<Vector3>):Vector3 {
 		if (origin == null) {
-			origin = new Vector3(FlxG.width * 0.5, FlxG.height * 0.5);
+			__defaultOrigin.x = FlxG.width * 0.5;
+			__defaultOrigin.y = FlxG.height * 0.5;
+			__defaultOrigin.z = 0;
+			origin = __defaultOrigin;
 		}
 
 		var world = useCamera ? applyViewTransform(vector) : vector;
-		var translation = world - origin;
 
-		final projectedZ = __depthScale * Math.min(translation.z - 1, 0) + __depthOffset;
+		final tx = world.x - origin.x;
+		final ty = world.y - origin.y;
+		final tz = world.z - origin.z;
 
-		final projectedFov = (__tanHalfFov / projectedZ);
+		final projectedZ = __depthScale * Math.min(tz - 1, 0) + __depthOffset;
 
-		translation.setTo(translation.x * projectedFov, translation.y * projectedFov, projectedZ);
+		// Degenerate projection guard — prevents divide-by-zero artifacts.
+		if (projectedZ < 0.01) {
+			world.z = 1e9;
+			return world;
+		}
 
-		return translation += origin;
+		final projectedFov = __tanHalfFov / projectedZ;
+
+		world.x = tx * projectedFov + origin.x;
+		world.y = ty * projectedFov + origin.y;
+		world.z = projectedZ + origin.z;
+
+		return world;
 	}
 }

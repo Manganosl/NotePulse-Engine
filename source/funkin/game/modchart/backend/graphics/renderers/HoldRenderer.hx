@@ -183,7 +183,7 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 		Manager.HOLD_SIZE = item.width;
 		Manager.HOLD_SIZEDIV2 = item.width * .5;
 
-		final HOLD_SUBDIVISIONS = 4;
+		final HOLD_SUBDIVISIONS = Adapter.getHoldSubdivisions();
 
 		updateIndices(HOLD_SUBDIVISIONS);
 

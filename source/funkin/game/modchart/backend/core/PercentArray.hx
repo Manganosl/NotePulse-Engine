@@ -15,14 +15,16 @@ final class PercentArray {
 		vector = new Vector<Vector<Float>>(Std.int(Math.pow(2, 16))); // preallocate by max 16-bit integer
 	}
 
-	// hash the key to a 16-bit integer
-	@:noDebug @:noCompletion inline private function __hashKey(key:String):Int {
+	// Hash the key to a 16-bit integer.
+	// Case-insensitive inline (A-Z → a-z) to avoid String.toLowerCase() allocation.
+	@:noDebug @:noCompletion inline public function __hashKey(key:String):Int {
 		var hash:Int = 0;
 		var len = key.length;
 		for (i in 0...len) {
-			hash = hash * 31 + StringTools.unsafeCodeAt(key, i);
+			var c = StringTools.unsafeCodeAt(key, i);
+			if (c >= 65 && c <= 90) c += 32; // A-Z → a-z, no alloc
+			hash = hash * 31 + c;
 		}
-
 		return hash & 0xFFFF; // 16-bit hash
 	}
 

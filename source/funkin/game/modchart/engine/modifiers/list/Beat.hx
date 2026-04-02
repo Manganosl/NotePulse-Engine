@@ -6,11 +6,27 @@ import funkin.game.modchart.backend.core.ArrowData;
 import funkin.game.modchart.backend.core.ModifierParameters;
 
 class Beat extends Modifier {
+	// Pre-computed IDs indexed by axisIdx (0='', 1='x', 2='y', 3='z') to avoid Std.string(lane) allocations.
+	static final AXES = ['', 'x', 'y', 'z'];
+
+	var beatAmtIDs:Array<Int>;
+	var beatAmtLaneIDs:Array<Array<Int>>;
+	var beatSpeedIDs:Array<Int>;
+	var beatOffsetIDs:Array<Int>;
+	var beatMultIDs:Array<Int>;
+
 	public function new(pf) {
 		super(pf);
 
-		for (x in ['x', 'y', 'z', ''])
+		for (x in AXES)
 			setPercent('beat${x}Speed', 1);
+
+		final maxKeys = 16;
+		beatAmtIDs = [for (a in AXES) findID('beat' + a)];
+		beatAmtLaneIDs = [for (a in AXES) [for (l in 0...maxKeys) findID('beat' + a + l)]];
+		beatSpeedIDs = [for (a in AXES) findID('beat' + a + 'Speed')];
+		beatOffsetIDs = [for (a in AXES) findID('beat' + a + 'Offset')];
+		beatMultIDs = [for (a in AXES) findID('beat' + a + 'Mult')];
 	}
 
 	static final fAccelTime:Float = 0.2;
@@ -46,39 +62,37 @@ class Beat extends Modifier {
 		return 20 * fAmount * cos(params.distance * 0.01 * mult);
 	}
 
+	// axisIdx: 0='' 1='x' 2='y' 3='z'; realAxisIdx: 0=x 1=y 2=z
 	@:dox(hide)
-	@:noCompletion private inline function computeBeat(curPos:Vector3, params:ModifierParameters, axis:String, realAxis:String) {
-		final receptorName = Std.string(params.lane);
+	@:noCompletion private inline function computeBeat(curPos:Vector3, params:ModifierParameters, axisIdx:Int, realAxisIdx:Int) {
+		final lane = params.lane;
 		final player = params.player;
 
-		final amount = getPercent('beat' + axis, player) + getPercent('beat' + axis + receptorName, player);
+		var amount = getUnsafe(beatAmtIDs[axisIdx], player);
+		if (Config.COLUMN_SPECIFIC_MODIFIERS)
+			amount += getUnsafe(beatAmtLaneIDs[axisIdx][lane], player);
 
 		if (amount == 0)
 			return curPos;
 
-		final speed = 1 * getPercent('beat' + axis + 'Speed', player);
-		final offset = getPercent('beat' + axis + 'Offset', player);
-		final mult = getPercent('beat' + axis + 'Mult', player);
+		final speed = getUnsafe(beatSpeedIDs[axisIdx], player);
+		final offset = getUnsafe(beatOffsetIDs[axisIdx], player);
+		final mult = getUnsafe(beatMultIDs[axisIdx], player);
 
-		var shift = beatMath(params, offset, 1 + mult, speed) * amount;
+		final shift = beatMath(params, offset, 1 + mult, speed) * amount;
 
-		switch (realAxis) {
-			case 'x':
-				curPos.x += shift;
-			case 'y':
-				curPos.y += shift;
-			case 'z':
-				curPos.z += shift;
-		}
+		if (realAxisIdx == 0) curPos.x += shift;
+		else if (realAxisIdx == 1) curPos.y += shift;
+		else curPos.z += shift;
 
 		return curPos;
 	}
 
 	override public function render(curPos:Vector3, params:ModifierParameters) {
-		computeBeat(curPos, params, '', 'x');
-		computeBeat(curPos, params, 'x', 'x');
-		computeBeat(curPos, params, 'y', 'y');
-		computeBeat(curPos, params, 'z', 'z');
+		computeBeat(curPos, params, 0, 0); // '' → x
+		computeBeat(curPos, params, 1, 0); // 'x' → x
+		computeBeat(curPos, params, 2, 1); // 'y' → y
+		computeBeat(curPos, params, 3, 2); // 'z' → z
 
 		return curPos;
 	}

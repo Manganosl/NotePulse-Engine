@@ -56,7 +56,8 @@ class Config {
 		APPLY_ALPHA: true,
 		APPLY_DEPTH: true,
 		APPLY_SCALE: false,
-		RESOLUTION: 0.5,
+		RESOLUTION: 1,
+		BASE_DIVISIONS: 60,
 		LENGTH: 0
 	};
 
@@ -112,6 +113,13 @@ typedef ArrowPathConfig = {
 	 * **WARNING**: Can't be zero or it will CRASH.
 	 */
 	RESOLUTION:Float,
+
+	/**
+	 * Base division count (before RESOLUTION multiplier).
+	 * Higher value = more sample points = smoother wave mods (drunk/bumpy).
+	 * Default: 60 (good balance between quality and performance).
+	 */
+	BASE_DIVISIONS:Int,
 
 	/**
 	 * Path lines length addition.

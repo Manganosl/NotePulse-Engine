@@ -12,6 +12,11 @@ class Transform extends Modifier {
 	var yOID = 0;
 	var zOID = 0;
 
+	// Per-lane IDs to avoid Std.string(lane) allocations.
+	var xLaneIDs:Array<Int>;
+	var yLaneIDs:Array<Int>;
+	var zLaneIDs:Array<Int>;
+
 	public function new(pf) {
 		super(pf);
 
@@ -22,15 +27,19 @@ class Transform extends Modifier {
 		xOID = findID('xoffset');
 		yOID = findID('yoffset');
 		zOID = findID('zoffset');
+
+		xLaneIDs = [for (l in 0...16) findID('x' + l)];
+		yLaneIDs = [for (l in 0...16) findID('y' + l)];
+		zLaneIDs = [for (l in 0...16) findID('z' + l)];
 	}
 
 	override public function render(curPos:Vector3, params:ModifierParameters) {
-		var receptorName = Std.string(params.lane);
 		var player = params.player;
+		var lane = params.lane;
 
-		curPos.x += getUnsafe(xID, player) + getUnsafe(xOID, player) + getPercent('x' + receptorName, player);
-		curPos.y += getUnsafe(yID, player) + getUnsafe(yOID, player) + getPercent('y' + receptorName, player);
-		curPos.z += getUnsafe(zID, player) + getUnsafe(zOID, player) + getPercent('z' + receptorName, player);
+		curPos.x += getUnsafe(xID, player) + getUnsafe(xOID, player) + getUnsafe(xLaneIDs[lane], player);
+		curPos.y += getUnsafe(yID, player) + getUnsafe(yOID, player) + getUnsafe(yLaneIDs[lane], player);
+		curPos.z += getUnsafe(zID, player) + getUnsafe(zOID, player) + getUnsafe(zLaneIDs[lane], player);
 
 		return curPos;
 	}

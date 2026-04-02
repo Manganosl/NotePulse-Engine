@@ -8,82 +8,94 @@ import funkin.game.modchart.backend.core.VisualParameters;
 import funkin.game.modchart.backend.util.ModchartUtil;
 
 class Stealth extends Modifier {
-    public function new(pf) {
-        super(pf);
+	// Pre-computed IDs to avoid Std.string(lane) allocations.
+	var _stealthID:Int;
+	var _darkID:Int;
+	var _stealthLaneIDs:Array<Int>;
+	var _darkLaneIDs:Array<Int>;
+	var _alphaID:Int;
+	var _alphaLaneIDs:Array<Int>;
 
-        setPercent('alpha', 1, -1);
+	public function new(pf) {
+		super(pf);
 
-        setPercent('suddenStart', 5, -1);
-        setPercent('suddenEnd', 3, -1);
-        setPercent('suddenGlow', 1, -1);
+		setPercent('alpha', 1, -1);
 
-        setPercent('hiddenStart', 5, -1);
-        setPercent('hiddenEnd', 3, -1);
-        setPercent('hiddenGlow', 1, -1);
-    }
+		setPercent('suddenStart', 5, -1);
+		setPercent('suddenEnd', 3, -1);
+		setPercent('suddenGlow', 1, -1);
 
-    private inline function computeSudden(data:VisualParameters, params:ModifierParameters) {
-        final player = params.player;
-        final laneStr = Std.string(params.lane);
+		setPercent('hiddenStart', 5, -1);
+		setPercent('hiddenEnd', 3, -1);
+		setPercent('hiddenGlow', 1, -1);
 
-        // Sudden per-strum logic
-        final sudden = getPercent('sudden', player) + getPercent('sudden' + laneStr, player);
+		final maxKeys = 16;
+		_stealthID = findID('stealth');
+		_darkID = findID('dark');
+		_stealthLaneIDs = [for (l in 0...maxKeys) findID('stealth' + l)];
+		_darkLaneIDs = [for (l in 0...maxKeys) findID('dark' + l)];
+		_alphaID = findID('alpha');
+		_alphaLaneIDs = [for (l in 0...maxKeys) findID('alpha' + l)];
+	}
 
-        if (sudden == 0)
-            return;
+	private inline function computeSudden(data:VisualParameters, params:ModifierParameters) {
+		final player = params.player;
 
-        final start = (getPercent('suddenStart', player) + getPercent('suddenStart' + laneStr, player)) * 100;
-        final end = (getPercent('suddenEnd', player) + getPercent('suddenEnd' + laneStr, player)) * 100;
-        final glow = getPercent('suddenGlow', player) + getPercent('suddenGlow' + laneStr, player);
+		final sudden = getPercent('sudden', player);
 
-        final alpha = FlxMath.remapToRange(FlxMath.bound(params.distance, end, start), end, start, 1, 0);
+		if (sudden == 0)
+			return;
 
-        if (glow != 0)
-            data.glow += Math.max(0, (1 - alpha) * sudden * 2) * glow;
-        data.alpha *= alpha * sudden;
-    }
+		final start = getPercent('suddenStart', player) * 100;
+		final end = getPercent('suddenEnd', player) * 100;
+		final glow = getPercent('suddenGlow', player);
 
-    private inline function computeHidden(data:VisualParameters, params:ModifierParameters) {
-        final player = params.player;
-        final laneStr = Std.string(params.lane);
+		final alpha = FlxMath.remapToRange(FlxMath.bound(params.distance, end, start), end, start, 1, 0);
 
-        // Hidden per-strum logic
-        final hidden = getPercent('hidden', player) + getPercent('hidden' + laneStr, player);
+		if (glow != 0)
+			data.glow += Math.max(0, (1 - alpha) * sudden * 2) * glow;
+		data.alpha *= alpha * sudden;
+	}
 
-        if (hidden == 0)
-            return;
+	private inline function computeHidden(data:VisualParameters, params:ModifierParameters) {
+		final player = params.player;
 
-        final start = (getPercent('hiddenStart', player) + getPercent('hiddenStart' + laneStr, player)) * 100;
-        final end = (getPercent('hiddenEnd', player) + getPercent('hiddenEnd' + laneStr, player)) * 100;
-        final glow = getPercent('hiddenGlow', player) + getPercent('hiddenGlow' + laneStr, player);
+		final hidden = getPercent('hidden', player);
 
-        final alpha = FlxMath.remapToRange(FlxMath.bound(params.distance, end, start), end, start, 0, 1);
+		if (hidden == 0)
+			return;
 
-        if (glow != 0)
-            data.glow += Math.max(0, (1 - alpha) * hidden * 2) * glow;
-        data.alpha *= alpha * hidden;
-    }
+		final start = getPercent('hiddenStart', player) * 100;
+		final end = getPercent('hiddenEnd', player) * 100;
+		final glow = getPercent('hiddenGlow', player);
 
-    override public function visuals(data:VisualParameters, params:ModifierParameters) {
-        final player = params.player;
-        final lane = params.lane;
-        final laneStr = Std.string(lane);
+		final alpha = FlxMath.remapToRange(FlxMath.bound(params.distance, end, start), end, start, 0, 1);
 
-        final vMod = params.isTapArrow ? 'stealth' : 'dark';
-        final visibility = getPercent(vMod, player) + getPercent(vMod + laneStr, player);
-        data.alpha = ((getPercent('alpha', player) + getPercent('alpha' + laneStr, player)) * (1 - ((Math.max(0.5, visibility) - 0.5) * 2)));
-        data.glow += visibility * 2;
+		if (glow != 0)
+			data.glow += Math.max(0, (1 - alpha) * hidden * 2) * glow;
+		data.alpha *= alpha * hidden;
+	}
 
-        // sudden & hidden
-        if (params.isTapArrow) // non receptor
-        {
-            computeSudden(data, params);
-            computeHidden(data, params);
-        }
+	override public function visuals(data:VisualParameters, params:ModifierParameters) {
+		final player = params.player;
+		final lane = params.lane;
 
-        return data;
-    }
+		final visibility = params.isTapArrow
+			? getUnsafe(_stealthID, player) + getUnsafe(_stealthLaneIDs[lane], player)
+			: getUnsafe(_darkID, player) + getUnsafe(_darkLaneIDs[lane], player);
+		data.alpha = ((getUnsafe(_alphaID, player) + getUnsafe(_alphaLaneIDs[lane], player)) * (1 - ((Math.max(0.5, visibility) - 0.5) * 2)));
+		data.glow += visibility * 2;
 
-    override public function shouldRun(params:ModifierParameters):Bool
-        return true;
+		// sudden & hidden
+		if (params.isTapArrow) // non receptor
+		{
+			computeSudden(data, params);
+			computeHidden(data, params);
+		}
+
+		return data;
+	}
+
+	override public function shouldRun(params:ModifierParameters):Bool
+		return true;
 }

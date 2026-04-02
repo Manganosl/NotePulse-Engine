@@ -7,30 +7,59 @@ import funkin.game.modchart.backend.core.ModifierParameters;
 import funkin.game.modchart.backend.util.ModchartUtil;
 
 class Boost extends Modifier {
+	// Pre-computed IDs to avoid Std.string(lane) allocations.
+	var _boostID:Int;
+	var _boostLaneIDs:Array<Int>;
+	var _brakeID:Int;
+	var _brakeLaneIDs:Array<Int>;
+	var _waveID:Int;
+	var _waveLaneIDs:Array<Int>;
+
 	public function new(pf) {
 		super(pf);
 
 		setPercent('waveMult', 1, -1);
-		setPercent('boostScale', 1, -1);
-	}
 
-	static final DIV38 = 1 / 38;
+		final maxKeys = 16;
+		_boostID = findID('boost');
+		_boostLaneIDs = [for (l in 0...maxKeys) findID('boost' + l)];
+		_brakeID = findID('brake');
+		_brakeLaneIDs = [for (l in 0...maxKeys) findID('brake' + l)];
+		_waveID = findID('wave');
+		_waveLaneIDs = [for (l in 0...maxKeys) findID('wave' + l)];
+	}
 
 	override public function render(curPos:Vector3, params:ModifierParameters) {
 		var player = params.player;
-		var lane = Std.string(params.lane);
+		var lane = params.lane;
 
-		final boost = (getPercent('boost', params.player) + getPercent('boost' + lane, params.player));
-		final brake = (getPercent('brake', params.player) + getPercent('brake' + lane, params.player));
-		final wave = (getPercent('wave', params.player) + getPercent('wave' + lane, params.player));
+		var fYOffset = params.distance;
 
-		if (boost != 0 || brake != 0) {
-			final scale = HEIGHT * getPercent('boostScale', player);
-			final shift = params.distance * 1.5 / ((params.distance + (scale) / 1.2) / scale);
-			curPos.y += ModchartUtil.clamp((boost - brake) * (shift - params.distance), -600, 600);
+		final boost = getUnsafe(_boostID, player) + getUnsafe(_boostLaneIDs[lane], player);
+		if (boost != 0) {
+			var fEffectHeight = HEIGHT;
+			var fNewYOffset = fYOffset * 1.5 / ((fYOffset + fEffectHeight / 1.2) / fEffectHeight);
+			var fAccelYAdjust = .75 * boost * (fNewYOffset - fYOffset);
+			fAccelYAdjust = ModchartUtil.clamp(fAccelYAdjust, -400, 400);
+
+			curPos.y += fAccelYAdjust;
 		}
-		if (wave != 0)
-			curPos.y += (-wave * 100) * sin(params.distance * DIV38 * getPercent('waveMult', player) * 0.2);
+
+		final brake = getUnsafe(_brakeID, player) + getUnsafe(_brakeLaneIDs[lane], player);
+
+		if (brake != 0) {
+			var fEffectHeight = HEIGHT;
+			var fScale = FlxMath.remapToRange(fYOffset, 0., fEffectHeight, 0, 1.);
+			var fNewYOffset = fYOffset * fScale;
+			var fBrakeYAdjust = .75 * brake * (fNewYOffset - fYOffset);
+			fBrakeYAdjust = ModchartUtil.clamp(fBrakeYAdjust, -400., 400.);
+			curPos.y += fBrakeYAdjust;
+		}
+		final wave = getUnsafe(_waveID, player) + getUnsafe(_waveLaneIDs[lane], player);
+
+		if (wave != 0) {
+			curPos.y += wave * 20.0 * sin(fYOffset / 96.);
+		}
 
 		return curPos;
 	}

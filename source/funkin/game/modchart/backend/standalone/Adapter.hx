@@ -20,6 +20,7 @@ class Adapter {
 	public static var startCrochet:Float = 0;
 	private static var isPlayState:Bool = false;
 	private static var isModchartEditor:Bool = false;
+	private static var __holdSubdivisions:Int = 4;
 	
 	public static function onModchartingInitialization() {
 		isPlayState = Std.is(FlxG.state, PlayState);
@@ -47,6 +48,14 @@ class Adapter {
 		else if (arrow is ModchartableSprite) @:privateAccess
 			return cast(arrow, ModchartableSprite).parentArrow.noteData;
 		return 0;
+	}
+
+	public static function getHoldSubdivisions():Int {
+		return __holdSubdivisions;
+	}
+
+	public static function setHoldSubdivisions(value:Int):Void {
+		__holdSubdivisions = value;
 	}
 
 	public static function getCastedSprite(arrow:FlxSprite):Dynamic {

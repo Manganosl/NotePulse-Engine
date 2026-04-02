@@ -5,57 +5,115 @@ import funkin.game.modchart.backend.core.ModifierParameters;
 import funkin.game.modchart.backend.core.VisualParameters;
 
 class Scale extends Modifier {
-    public function new(pf) {
-        super(pf);
+	static final AXES_S = ['', 'x', 'y'];
 
-        setPercent('scale', 1, -1);
-        setPercent('scaleX', 1, -1);
-        setPercent('scaleY', 1, -1);
-        
-        setPercent('mini', 0, -1);
-        setPercent('miniX', 0, -1);
-        setPercent('miniY', 0, -1);
+	var scaleIDs:Array<Int>;
+	var scaleLaneIDs:Array<Array<Int>>;
+	var tinyIDs:Array<Int>;
+	var tinyLaneIDs:Array<Array<Int>>;
+	var miniIDs:Array<Int>;
+	var miniLaneIDs:Array<Array<Int>>;
 
-        setPercent('squish', 0, -1);
-        setPercent('stretch', 0, -1);
-    }
+	var squishID:Int;
+	var squishLaneIDs:Array<Int>;
+	var stretchID:Int;
+	var stretchLaneIDs:Array<Int>;
 
-    private inline function lerp(a:Float, b:Float, c:Float):Float {
-        return a + (b - a) * c;
-    }
+	public function new(pf) {
+		super(pf);
 
-    override public function visuals(data:VisualParameters, params:ModifierParameters) {
-        var player = params.player;
-        var lane = Std.string(params.lane);
+		setPercent('scale', 1, -1);
+		setPercent('scaleX', 1, -1);
+		setPercent('scaleY', 1, -1);
+		setPercent('mini', 0, -1);
+		setPercent('miniX', 0, -1);
+		setPercent('miniY', 0, -1);
+		setPercent('squish', 0, -1);
+		setPercent('stretch', 0, -1);
 
-        var miniVal = getPercent('mini', player) + getPercent('mini' + lane, player);
-        var miniX = getPercent('miniX', player) + getPercent('mini' + lane + 'X', player);
-        var miniY = getPercent('miniY', player) + getPercent('mini' + lane + 'Y', player);
+		final maxKeys = 16;
+		
+		scaleIDs = [for (a in AXES_S) findID('scale' + a)];
+		scaleLaneIDs = [for (a in AXES_S) [for (l in 0...maxKeys) findID('scale' + a + l)]];
+		
+		tinyIDs = [for (a in AXES_S) findID('tiny' + a)];
+		tinyLaneIDs = [for (a in AXES_S) [for (l in 0...maxKeys) findID('tiny' + a + l)]];
 
-        var totalMiniX = (1 - miniVal) * (1 - miniX);
-        var totalMiniY = (1 - miniVal) * (1 - miniY);
+		miniIDs = [for (a in AXES_S) findID('mini' + a)];
+		miniLaneIDs = [for (a in AXES_S) [for (l in 0...maxKeys) findID('mini' + a + l)]];
 
-        var baseScaleX = getPercent('scale', player) + getPercent('scale' + lane, player);
-        var baseScaleY = getPercent('scale', player) + getPercent('scale' + lane, player);
-        
-        baseScaleX *= getPercent('scaleX', player) + getPercent('scaleX' + lane, player);
-        baseScaleY *= getPercent('scaleY', player) + getPercent('scaleY' + lane, player);
+		squishID = findID('squish');
+		squishLaneIDs = [for (l in 0...maxKeys) findID('squish' + l)];
+		
+		stretchID = findID('stretch');
+		stretchLaneIDs = [for (l in 0...maxKeys) findID('stretch' + l)];
+	}
 
-        var stretchVal = getPercent("stretch", player) + getPercent("stretch" + lane, player);
-        var squishVal = getPercent("squish", player) + getPercent("squish" + lane, player);
+	private inline function lerp(a:Float, b:Float, c:Float):Float {
+		return a + (b - a) * c;
+	}
 
-        var squishX = lerp(1, 2.0, squishVal);
-        var squishY = 1 / squishX;
+	override public function visuals(data:VisualParameters, params:ModifierParameters) {
+		final lane = params.lane;
+		final player = params.player;
 
-        var stretchX = lerp(1, 0.5, stretchVal);
-        var stretchY = 1 / stretchX;
+		var baseScale = getUnsafe(scaleIDs[0], player);
+		var scaleX = getUnsafe(scaleIDs[1], player);
+		var scaleY = getUnsafe(scaleIDs[2], player);
 
-        data.scaleX *= baseScaleX * totalMiniX * squishX * stretchX;
-        data.scaleY *= baseScaleY * totalMiniY * squishY * stretchY;
+		var tiny = getUnsafe(tinyIDs[0], player);
+		var tinyX = getUnsafe(tinyIDs[1], player);
+		var tinyY = getUnsafe(tinyIDs[2], player);
 
-        return data;
-    }
+		var mini = getUnsafe(miniIDs[0], player);
+		var miniX = getUnsafe(miniIDs[1], player);
+		var miniY = getUnsafe(miniIDs[2], player);
 
-    override public function shouldRun(params:ModifierParameters):Bool
-        return true;
+		var squish = getUnsafe(squishID, player);
+		var stretch = getUnsafe(stretchID, player);
+
+		if (Config.COLUMN_SPECIFIC_MODIFIERS) {
+			baseScale += getUnsafe(scaleLaneIDs[0][lane], player);
+			scaleX += getUnsafe(scaleLaneIDs[1][lane], player);
+			scaleY += getUnsafe(scaleLaneIDs[2][lane], player);
+
+			tiny += getUnsafe(tinyLaneIDs[0][lane], player);
+			tinyX += getUnsafe(tinyLaneIDs[1][lane], player);
+			tinyY += getUnsafe(tinyLaneIDs[2][lane], player);
+
+			mini += getUnsafe(miniLaneIDs[0][lane], player);
+			miniX += getUnsafe(miniLaneIDs[1][lane], player);
+			miniY += getUnsafe(miniLaneIDs[2][lane], player);
+
+			squish += getUnsafe(squishLaneIDs[lane], player);
+			stretch += getUnsafe(stretchLaneIDs[lane], player);
+		}
+
+		var finalScaleX = baseScale * scaleX;
+		var finalScaleY = baseScale * scaleY;
+
+		finalScaleX *= (1 - tiny * 0.5) * (1 - tinyX * 0.5);
+		finalScaleY *= (1 - tiny * 0.5) * (1 - tinyY * 0.5);
+
+		finalScaleX *= (1 - mini) * (1 - miniX);
+		finalScaleY *= (1 - mini) * (1 - miniY);
+
+		var sX = lerp(1.0, 2.0, squish);
+		var sY = 1.0 / sX;
+		finalScaleX *= sX;
+		finalScaleY *= sY;
+
+		var stX = lerp(1.0, 0.5, stretch);
+		var stY = 1.0 / stX;
+		finalScaleX *= stX;
+		finalScaleY *= stY;
+
+		data.scaleX *= finalScaleX;
+		data.scaleY *= finalScaleY;
+
+		return data;
+	}
+
+	override public function shouldRun(params:ModifierParameters):Bool
+		return true;
 }
