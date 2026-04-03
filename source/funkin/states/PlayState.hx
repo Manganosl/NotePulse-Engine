@@ -996,11 +996,6 @@ class PlayState extends MusicBeatState
 						});
 					}
 				}
-				for (strum in strumLineNotes.members) {
-					if (!strum.sustainSplash.updatedThisFrame) {
-						strum.sustainSplash.hide(true);
-					}
-				}
 			}
 			checkEventNote();
 		}
@@ -3404,6 +3399,8 @@ class PlayState extends MusicBeatState
 			if (note != null && !note.cpuControlled) {
 				note.playAnim("static", true);
 				note.resetAnim = 0;
+				if (note.sustainSplash.animation.curAnim.name != "splash")
+					note.sustainSplash.hide(true);
 			}
 		}
 

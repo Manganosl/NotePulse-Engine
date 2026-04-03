@@ -194,6 +194,8 @@ class StrumNote extends ModchartableSprite {
 			if(resetAnim <= 0) {
 				playAnim('static');
 				resetAnim = 0;
+				if (sustainSplash.animation.curAnim.name != "splash")
+					sustainSplash.hide(true);  // MOTHERFUCKER
 			}
 		}
 		super.update(elapsed);
