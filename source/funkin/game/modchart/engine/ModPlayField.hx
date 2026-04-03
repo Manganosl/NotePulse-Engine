@@ -190,6 +190,9 @@ final class ModPlayField extends FlxSprite {
 	public inline function repeater(beat:Float, length:Float, callback:(Event, Float) -> Void):Void
 		addEvent(new RepeaterEvent(beat, length, callback, events));
 
+	public inline function easeFunc(beat:Float, length:Float, easeCallback:(Event, Float, Float) -> Void, easeFunc:EaseFunction):Void
+		addEvent(new EaseFuncEvent(beat, length, easeCallback, easeFunc, events));
+
 	public inline function callback(beat:Float, callback:(Event, Float) -> Void):Void
 		addEvent(new Event(beat, callback, events));
 
