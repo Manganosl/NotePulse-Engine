@@ -183,11 +183,11 @@ final class Manager extends FlxBasic {
 	public inline function ease(name:String, beat:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1, field:Int = -1)
 		iteratePlayfields((pf) -> pf.ease(name, beat, length, value, easeFunc, (swapPlayers ? (player == 0 ? 1 : (player == 1 ? 0 : player)) : player)), field);
 
-	public inline function easeFunc(beat:Float, length:Float, callback:(Event, Float, Float) -> Void, easeFunc:EaseFunction, field:Int = -1)
-		iteratePlayfields((pf) -> pf.easeFunc(beat, length, callback, easeFunc), field);
+	//public inline function easeFunc(beat:Float, length:Float, callback:(Event, Float, Float) -> Void, easeFunc:EaseFunction, field:Int = -1)
+	//	iteratePlayfields((pf) -> pf.easeFunc(beat, length, callback, easeFunc), field);
 
-	public inline function queueEaseFunc(step:Float, stepToEnd:Float, callback:(Event, Float, Float) -> Void, easeFunc:EaseFunction, field:Int = -1)
-		iteratePlayfields((pf) -> pf.easeFunc(stepToBeat(step), stepToBeat(stepToEnd - step), callback, easeFunc), field);
+	//public inline function queueEaseFunc(step:Float, stepToEnd:Float, callback:(Event, Float, Float) -> Void, easeFunc:EaseFunction, field:Int = -1)
+	//	iteratePlayfields((pf) -> pf.easeFunc(stepToBeat(step), stepToBeat(stepToEnd - step), callback, easeFunc), field);
 		
 
 	/**

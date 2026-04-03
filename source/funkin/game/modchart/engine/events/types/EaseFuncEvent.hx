@@ -9,39 +9,43 @@ class EaseFuncEvent extends Event {
     public var endBeat:Float;
     public var beatLength:Float;
     public var ease:EaseFunction;
+    
+    public var easeCallback:(Event, Float, Float) -> Void;
 
-    public function new(beat:Float, length:Float, callback:(Event, Float, Float) -> Void, easeType:EaseFunction, parent:EventManager) {
+    public function new(beat:Float, length:Float, easeCallback:(Event, Float, Float) -> Void, easeType:EaseFunction, parent:EventManager) {
+        this.name = null;
+        this.player = -1;
+
+        super(beat, (_, beat) -> {}, parent, true);
+        
         this.startBeat = beat;
         this.endBeat = beat + length;
         this.beatLength = length;
-        this.callback = callback;
+        this.easeCallback = easeCallback;
+
+        this.target = 1;
         
         this.ease = easeType != null ? easeType : FlxEase.linear;
 
-        this.type = REPEATER;
-
-        super(beat, callback, parent, false);
+        type = EASE_FUNC;
     }
 
-    var entryPerc:Null<Float> = null;
+	var entryPerc:Float = 0;
+
 	override function update(curBeat:Float) {
 		if (fired)
 			return;
 
 		if (curBeat < endBeat) {
-			if (entryPerc == null)
-				entryPerc = 0;
-
 			var progress = (curBeat - startBeat) / (endBeat - startBeat);
-			// maybe we should make it use bound?
 			var out = FlxMath.lerp(entryPerc, target, ease(progress));
-			callback(this, out, player);
+			easeCallback(this, out, curBeat);
+            trace(this.type + " - " + out + " - " + curBeat);
 			fired = false;
 		} else if (curBeat >= endBeat) {
 			fired = true;
-
-			// we're using the ease function bc it may dont return 1
-			callback(this, ease(1) * target, player);
+			easeCallback(this, ease(1) * target, curBeat);
+            trace(this.type + " - " + ease(1) * target + " - " + curBeat);
 		}
 	}
 }
