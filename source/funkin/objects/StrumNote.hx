@@ -166,7 +166,7 @@ class StrumNote extends ModchartableSprite {
 		ID = noteData;
 
 		centerStrum(minPaddingStartThresh, padding);
-		sustainSplash.visible = false;
+		@:privateAccess sustainSplash.visibilityToggle = false;
 	}
 
 	/**
@@ -194,10 +194,12 @@ class StrumNote extends ModchartableSprite {
 			if(resetAnim <= 0) {
 				playAnim('static');
 				resetAnim = 0;
-				if (sustainSplash.animation.curAnim.name != "splash")
-					sustainSplash.hide(true);  // MOTHERFUCKER
+			if (sustainSplash.animation.curAnim.name != "splash")
+				sustainSplash.hide(true);
 			}
 		}
+		if (sustainSplash.animation.curAnim.name != "splash" && animation.curAnim.name == "static" && !cpuControlled)
+			sustainSplash.hide(true);  // You may ask, why 2 times? Well, BPM changes fuck with everything and I dont know why
 		super.update(elapsed);
 	}
 

@@ -189,8 +189,7 @@ class Adapter {
 
 			PlayState.instance.grpSustainSplashes.forEachAlive(splash -> {
 				@:privateAccess
-				if (splash != null && splash.strum != null && splash.shouldVisible) {
-					splash.visible = true;
+				if (splash != null && splash.strum != null) {
 					pspr[splash.strum.player][3].push(splash);
 				}
 			});

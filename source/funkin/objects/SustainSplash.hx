@@ -5,10 +5,11 @@ import funkin.game.modchart.backend.util.ModchartableSprite;
 import funkin.game.shaders.RGBPalette;
 
 class SustainSplash extends ModchartableSprite {
+	// We can't use the normal visibility property as FunkinModchart messes with it.
+	private var visibilityToggle:Bool = false;
+
 	public var rgbShader:PixelSplashShaderRef;
 	public var strum:StrumNote;
-	public var shouldVisible:Bool = false;
-	public var modchart:Bool = PlayState.fModchart;
 	public var updatedThisFrame:Bool = false;
 
 	public var offsetX:Float = 0;
@@ -26,14 +27,13 @@ class SustainSplash extends ModchartableSprite {
 		shader = rgbShader.shader;
 
 		frames = Paths.getSparrowAtlas('noteSplashes/holdSplashes/sustain_cover');
-		animation.addByPrefix('cover', 'sustain cover pre0', 24, false);
 		animation.addByPrefix('splash', 'sustain cover end0', 24, false);
 		animation.addByPrefix('loop', 'sustain cover0', 24, true);
 		animation.play("loop");
 
 		updateHitbox();
 		visible = true;
-		shouldVisible = false;
+		visibilityToggle = true;
 		antialiasing = ClientPrefs.data.antialiasing;
 
 		scale.set(strum.scale.x / 0.7, strum.scale.y / 0.7);
@@ -41,7 +41,7 @@ class SustainSplash extends ModchartableSprite {
 	}
 
 	public inline function show(note:Note) {
-		if(!modchart && !strum.visible) return;
+		if(!strum.visible) return;
 		updatedThisFrame = true;
 
 		var tempShader:RGBPalette = null;
@@ -61,12 +61,11 @@ class SustainSplash extends ModchartableSprite {
 
 		rgbShader.copyValues(tempShader);
 
-		if (!modchart) visible = true;
-		shouldVisible = true;
+		visibilityToggle = true;
 
 		if (animation.curAnim == null || animation.curAnim.name != "loop") {
 			animation.play("loop");
-			center();
+			centerSplash();
 		}
 	}
 
@@ -76,41 +75,38 @@ class SustainSplash extends ModchartableSprite {
 		updatedThisFrame = true;
 
 		if (miss) {
-			if (!modchart) visible = false;
-			shouldVisible = false;
+			visibilityToggle = false;
 			return;
 		}
 
 		if (animation.curAnim == null || animation.curAnim.name != "splash") {
 			animation.play("splash");
-			center();
+			centerSplash();
 		}
 	}
 
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
 		updatedThisFrame = false;
-		modchart = PlayState.fModchart;	
 
 		if (animation.curAnim != null && animation.curAnim.finished) {
 			switch (animation.curAnim.name) {
 				case "cover":
 					animation.play("loop");
 				case "splash":
-					if (!modchart) visible = false;
-					shouldVisible = false;
+					visibilityToggle = false;
 			}
 		}
 
-		center();
+		centerSplash();
 	}
 
-	public function center() {
+	public function centerSplash() {
 		centerOffsets();
 		scale.x = strum.scale.x * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleX;
 		scale.y = strum.scale.y * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleY;
 		angle = strum.direction-90 + offsetAngle;
-		alpha = strum.alpha + offsetAlpha;
+		alpha = (visibilityToggle ? (strum.alpha + offsetAlpha) : 0);
 		x = strum.x + (strum.width / 2) - (width / 2) + offsetX;
 		y = strum.y + (strum.height / 2) - (height / 2) + offsetY;
 	}
