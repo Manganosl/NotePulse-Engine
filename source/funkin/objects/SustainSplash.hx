@@ -41,7 +41,6 @@ class SustainSplash extends ModchartableSprite {
 	}
 
 	public inline function show(note:Note) {
-		if(!strum.visible) return;
 		updatedThisFrame = true;
 
 		var tempShader:RGBPalette = null;
@@ -103,6 +102,7 @@ class SustainSplash extends ModchartableSprite {
 
 	public function centerSplash() {
 		centerOffsets();
+		visible = strum.visible;
 		scale.x = strum.scale.x * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleX;
 		scale.y = strum.scale.y * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleY;
 		angle = strum.direction-90 + offsetAngle;

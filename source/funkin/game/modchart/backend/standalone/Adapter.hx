@@ -26,7 +26,6 @@ class Adapter {
 		isPlayState = Std.is(FlxG.state, PlayState);
 		isModchartEditor = Std.is(FlxG.state, ModchartEditor);
 		startCrochet = Conductor.crochet;
-		PlayState.fModchart = true;
 	}
 
 	public static function getHoldParentTime(arrow:FlxSprite) {
@@ -190,6 +189,7 @@ class Adapter {
 			PlayState.instance.grpSustainSplashes.forEachAlive(splash -> {
 				@:privateAccess
 				if (splash != null && splash.strum != null) {
+					splash.visible = true;
 					pspr[splash.strum.player][3].push(splash);
 				}
 			});

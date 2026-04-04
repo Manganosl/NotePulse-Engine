@@ -92,7 +92,6 @@ class PlayState extends MusicBeatState
 	];
 
 	public var judgementCounter:FlxText;
-	public static var fModchart:Bool = false;
 
 	//event variables
 	private var isCameraOnForcedPos:Bool = false;
@@ -395,8 +394,6 @@ class PlayState extends MusicBeatState
 	override public function create()
 	{
 		Paths.clearStoredMemory();
-
-		fModchart = false;
 
 		startCallback = startCountdown;
 		endCallback = endSong;
