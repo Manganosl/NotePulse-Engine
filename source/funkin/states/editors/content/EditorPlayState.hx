@@ -3,10 +3,10 @@ package funkin.states.editors.content;
 import funkin.data.Section;
 import funkin.game.Rating;
 
-import funkin.objects.Note;
-import funkin.objects.NoteSplash;
-import funkin.objects.StrumNote;
-import funkin.objects.PlayField;
+import funkin.objects.notes.Note;
+import funkin.objects.notes.splashes.NoteSplash;
+import funkin.objects.notes.StrumNote;
+import funkin.objects.notes.PlayField;
 
 import flixel.util.FlxSort;
 import flixel.input.keyboard.FlxKey;

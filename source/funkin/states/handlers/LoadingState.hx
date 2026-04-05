@@ -20,8 +20,8 @@ import funkin.backend.parsers.CodenameParser;
 import sys.thread.Thread;
 import sys.thread.Mutex;
 
-import funkin.objects.Note;
-import funkin.objects.NoteSplash;
+import funkin.objects.notes.Note;
+import funkin.objects.notes.splashes.NoteSplash;
 
 import funkin.scripting.lua.LoadingLua;
 

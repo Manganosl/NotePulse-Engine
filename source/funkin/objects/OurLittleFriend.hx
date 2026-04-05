@@ -1,7 +1,7 @@
 package funkin.objects;
 
 import haxe.ds.IntMap;
-import funkin.objects.Note;
+import funkin.objects.notes.Note;
 
 class OurLittleFriend extends FlxSprite
 {

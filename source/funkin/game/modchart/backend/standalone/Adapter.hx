@@ -2,12 +2,12 @@ package funkin.game.modchart.backend.standalone;
 
 import funkin.data.ClientPrefs;
 import funkin.backend.Conductor;
-import funkin.objects.Note;
-import funkin.objects.SustainSplash;
+import funkin.objects.notes.Note;
+import funkin.objects.notes.splashes.SustainSplash;
 import funkin.objects.AttachedSprite;
 import funkin.game.modchart.backend.util.ModchartableSprite;
-import funkin.objects.NoteSplash;
-import funkin.objects.StrumNote as Strum;
+import funkin.objects.notes.splashes.NoteSplash;
+import funkin.objects.notes.StrumNote as Strum;
 import funkin.states.PlayState;
 import funkin.states.editors.content.EditorPlayState;
 import funkin.states.editors.ModchartEditor;

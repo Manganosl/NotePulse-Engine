@@ -1,6 +1,6 @@
 package funkin.game.modchart.backend.util;
 
-import funkin.objects.StrumNote;
+import funkin.objects.notes.StrumNote;
 import funkin.game.modchart.backend.math.Vector3;
 
 /**

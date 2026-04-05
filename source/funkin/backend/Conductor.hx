@@ -3,7 +3,7 @@ package funkin.backend;
 import funkin.data.Song;
 import funkin.data.Section;
 import funkin.game.Rating;
-import funkin.objects.Note;
+import funkin.objects.notes.Note;
 
 typedef BPMChangeEvent =
 {

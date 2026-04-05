@@ -37,8 +37,8 @@ import openfl.events.IOErrorEvent;
 
 import funkin.objects.Character;
 import funkin.objects.HealthIcon;
-import funkin.objects.Note;
-import funkin.objects.StrumNote;
+import funkin.objects.notes.Note;
+import funkin.objects.notes.StrumNote;
 import funkin.objects.OurLittleFriend;
 
 import moonchart.formats.fnf.legacy.FNFPsych;

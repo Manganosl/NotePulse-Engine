@@ -1,6 +1,6 @@
-package funkin.objects;
+package funkin.objects.notes.splashes;
 
-import funkin.objects.NoteSplash.PixelSplashShaderRef;
+import funkin.objects.notes.splashes.NoteSplash.PixelSplashShaderRef;
 import funkin.game.modchart.backend.util.ModchartableSprite;
 import funkin.game.shaders.RGBPalette;
 

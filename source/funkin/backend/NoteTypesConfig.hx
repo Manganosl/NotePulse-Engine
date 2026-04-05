@@ -1,6 +1,6 @@
 package funkin.backend;
 
-import funkin.objects.Note;
+import funkin.objects.notes.Note;
 
 typedef NoteTypeProperty = {
 	property:Array<String>,

@@ -1,6 +1,6 @@
 package funkin.substates.options;
 
-import funkin.objects.PlayField;
+import funkin.objects.notes.PlayField;
 
 class GameplaySettingsSubState extends BaseOptionsMenu
 {

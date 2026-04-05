@@ -1,6 +1,6 @@
 package funkin.states.editors.content;
 
-import funkin.objects.Note;
+import funkin.objects.notes.Note;
 import funkin.game.shaders.RGBPalette;
 import flixel.util.FlxDestroyUtil;
 import flixel.math.FlxRect;

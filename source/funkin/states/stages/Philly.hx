@@ -48,7 +48,7 @@ class Philly extends BaseStage
 		phillyStreet = new BGSprite('base_game/philly/street', -40, 50);
 		add(phillyStreet);
 	}
-	override function eventPushed(event:funkin.objects.Note.EventNote)
+	override function eventPushed(event:funkin.objects.notes.Note.EventNote)
 	{
 		switch(event.event)
 		{

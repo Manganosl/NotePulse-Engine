@@ -5,9 +5,9 @@ import funkin.game.Rating;
 import funkin.data.Song;
 import funkin.data.StageData;
 
-import funkin.objects.Note;
-import funkin.objects.PlayField;
-import funkin.objects.StrumNote;
+import funkin.objects.notes.Note;
+import funkin.objects.notes.PlayField;
+import funkin.objects.notes.StrumNote;
 
 import flixel.util.FlxSort;
 import openfl.geom.Rectangle;

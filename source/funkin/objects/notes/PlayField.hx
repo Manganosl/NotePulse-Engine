@@ -1,7 +1,7 @@
-package funkin.objects;
+package funkin.objects.notes;
 
-import funkin.objects.StrumNote;
-import funkin.objects.StrumNote.StrumBoundaries;
+import funkin.objects.notes.StrumNote;
+import funkin.objects.notes.StrumNote.StrumBoundaries;
 import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
 import funkin.states.PlayState;

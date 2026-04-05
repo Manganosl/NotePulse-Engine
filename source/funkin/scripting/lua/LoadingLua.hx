@@ -5,8 +5,8 @@ import funkin.data.WeekData;
 
 import hxvlc.flixel.*;
 
-import funkin.objects.Note;
-import funkin.objects.NoteSplash;
+import funkin.objects.notes.Note;
+import funkin.objects.notes.splashes.NoteSplash;
 
 import funkin.states.MainMenuState;
 import funkin.states.handlers.LoadingState;

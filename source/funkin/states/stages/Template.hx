@@ -81,7 +81,7 @@ class Template extends BaseStage
 			case "My Event":
 		}
 	}
-	override function eventPushed(event:funkin.objects.Note.EventNote)
+	override function eventPushed(event:funkin.objects.notes.Note.EventNote)
 	{
 		// used for preloading assets used on events that doesn't need different assets based on its values
 		switch(event.event)
@@ -92,7 +92,7 @@ class Template extends BaseStage
 				//precacheMusic('myMusic') //preloads music/myMusic.ogg
 		}
 	}
-	override function eventPushedUnique(event:funkin.objects.Note.EventNote)
+	override function eventPushedUnique(event:funkin.objects.notes.Note.EventNote)
 	{
 		// used for preloading assets used on events where its values affect what assets should be preloaded
 		switch(event.event)

@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.objects.notes;
 
 import funkin.game.modchart.backend.util.ModchartableSprite;
 import funkin.backend.InputFormatter;
@@ -6,7 +6,8 @@ import flixel.FlxBasic;
 import funkin.backend.ExtraKeysHandler;
 import funkin.backend.animation.PsychAnimationController;
 
-import funkin.objects.PlayField;
+import funkin.objects.notes.PlayField;
+import funkin.objects.notes.splashes.*;
 
 import funkin.game.shaders.RGBPalette;
 import funkin.game.shaders.RGBPalette.RGBShaderReference;

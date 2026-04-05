@@ -8,8 +8,8 @@ import flixel.addons.display.shapes.FlxShapeCircle;
 import flixel.input.keyboard.FlxKey;
 import lime.system.Clipboard;
 import flixel.util.FlxGradient;
-import funkin.objects.StrumNote;
-import funkin.objects.Note;
+import funkin.objects.notes.StrumNote;
+import funkin.objects.notes.Note;
 
 import funkin.game.shaders.RGBPalette.RGBShaderReference;
 

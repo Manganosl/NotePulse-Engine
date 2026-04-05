@@ -5,7 +5,7 @@ import flixel.FlxObject;
 import flixel.FlxSubState;
 import flixel.group.FlxGroup;
 
-import funkin.objects.Note;
+import funkin.objects.notes.Note;
 import funkin.objects.Character;
 
 enum Countdown

@@ -28,9 +28,9 @@ import funkin.objects.FunkinVideoSprite;
 
 import funkin.game.cutscenes.DialogueBoxPsych;
 
-import funkin.objects.StrumNote;
-import funkin.objects.Note;
-import funkin.objects.NoteSplash;
+import funkin.objects.notes.StrumNote;
+import funkin.objects.notes.Note;
+import funkin.objects.notes.splashes.NoteSplash;
 import funkin.objects.Character;
 
 import funkin.states.MainMenuState;

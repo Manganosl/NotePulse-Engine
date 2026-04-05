@@ -17,5 +17,5 @@ import openfl.display.GraphicsPathCommand;
 import openfl.display.Shape;
 import openfl.geom.ColorTransform;
 import openfl.geom.Matrix;
-import funkin.objects.Note;
+import funkin.objects.notes.Note;
 #end

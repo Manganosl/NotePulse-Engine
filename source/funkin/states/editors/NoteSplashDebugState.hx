@@ -1,8 +1,8 @@
 package funkin.states.editors;
 
-import funkin.objects.Note;
-import funkin.objects.StrumNote;
-import funkin.objects.NoteSplash;
+import funkin.objects.notes.Note;
+import funkin.objects.notes.StrumNote;
+import funkin.objects.notes.splashes.NoteSplash;
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 

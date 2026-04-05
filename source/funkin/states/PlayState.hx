@@ -1,6 +1,6 @@
 package funkin.states;
 
-import funkin.objects.StrumNote.KeybindShowcase;
+import funkin.objects.notes.StrumNote.KeybindShowcase;
 import funkin.backend.ExtraKeysHandler;
 import funkin.data.Highscore;
 import funkin.data.StageData;
@@ -36,9 +36,10 @@ import funkin.scripting.objects.ModchartSprite.ModchartBackdrop;
 
 import hxvlc.flixel.*;
 
-import funkin.objects.Note.EventNote;
+import funkin.objects.notes.splashes.*;
+import funkin.objects.notes.Note.EventNote;
+import funkin.objects.notes.*;
 import funkin.objects.*;
-import funkin.objects.SustainSplash;
 
 #if LUA_ALLOWED
 import funkin.scripting.lua.*;

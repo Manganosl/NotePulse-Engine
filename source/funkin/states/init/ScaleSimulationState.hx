@@ -1,6 +1,6 @@
 package funkin.states.init;
 
-import funkin.objects.StrumNote;
+import funkin.objects.notes.StrumNote;
 import funkin.backend.ExtraKeysHandler;
 
 class ScaleSimulationState extends MusicBeatState {

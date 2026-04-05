@@ -29,3 +29,6 @@
 
 ## 04/04/2026
 - [ ] ~~Use Funkin Crew libraries~~ **Not a good idea**
+
+## 05/04/2026
+- [ ] Make ProxyField equivalent (CopyField)

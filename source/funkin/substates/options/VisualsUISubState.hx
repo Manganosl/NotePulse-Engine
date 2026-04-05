@@ -1,7 +1,7 @@
 package funkin.substates.options;
 
-import funkin.objects.Note;
-import funkin.objects.StrumNote;
+import funkin.objects.notes.Note;
+import funkin.objects.notes.StrumNote;
 import funkin.objects.Alphabet;
 
 class VisualsUISubState extends BaseOptionsMenu

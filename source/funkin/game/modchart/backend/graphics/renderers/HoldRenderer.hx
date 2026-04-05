@@ -1,6 +1,6 @@
 package funkin.game.modchart.backend.graphics.renderers;
 
-import funkin.objects.Note;
+import funkin.objects.notes.Note;
 
 using flixel.util.FlxColorTransformUtil;
 

@@ -1,6 +1,6 @@
 package funkin.states.stages.objects;
 
-import funkin.objects.Note;
+import funkin.objects.notes.Note;
 import funkin.objects.Character;
 
 // Pico Note functions

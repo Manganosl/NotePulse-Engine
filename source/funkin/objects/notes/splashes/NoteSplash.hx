@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.objects.notes.splashes;
 
 import funkin.backend.ExtraKeysHandler;
 import funkin.backend.animation.PsychAnimationController;
