@@ -479,10 +479,13 @@ class HScript implements HscriptInterface {
     }
 
     function onError(e:Error) {
-		#if PRETTY_TRACE
-		MusicBeatState.getState().addTextToDebug(getErrorMessage(e), FlxColor.RED, false);
-		var pos:PosInfos = {fileName: e.origin, lineNumber: e.line, className: null, methodName: null};
 		var splitErr = getErrorMessage(e).split(": ");
+		if(splitErr.length > 1)
+			MusicBeatState.getState().addTextToDebug(getErrorMessage(e), FlxColor.RED, false);
+		else
+			MusicBeatState.getState().addTextToDebug(e.origin + ":" + e.line + ": " + getErrorMessage(e), FlxColor.RED, false);
+		#if PRETTY_TRACE
+		var pos:PosInfos = {fileName: e.origin, lineNumber: e.line, className: null, methodName: null};
 		if(splitErr.length > 1)
 			error(splitErr.slice(1).join(": "), pos);
 		else
