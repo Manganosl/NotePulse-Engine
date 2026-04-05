@@ -408,8 +408,6 @@ class Note extends ModchartableSprite {
 
 		if (isSustainNote && prevNote != null)
 		{
-			alpha = 0.6;
-			multAlpha = 0.6;
 			hitsoundDisabled = true;
 
 			var mania = 3;
