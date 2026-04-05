@@ -24,8 +24,6 @@ import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
-import funkin.backend.utils.CustomShader;
-
 using flixel.util.FlxColorTransformUtil;
 
 /**
@@ -890,7 +888,7 @@ class FlxSprite extends FlxObject
 			_matrix.translate(camera.width / 2, camera.height / 2);
 		}
 
-		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, ((shader is CustomShader) ? shader.shader : shader));
+		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
 	}
 
 	/**

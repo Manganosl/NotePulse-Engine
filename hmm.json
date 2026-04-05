@@ -4,15 +4,15 @@
       "name": "funkin.vis",
       "type": "git",
       "dir": null,
-      "ref": "22b1ce089dd924f15cdc4632397ef3504d464e90",
+      "ref": "02bada154b474c2554709b9d12aef0cbf0da3ec9",
       "url": "https://github.com/FunkinCrew/funkVis"
     },
     {
       "name": "grig.audio",
       "type": "git",
       "dir": null,
-      "ref": "cbf91e2180fd2e374924fe74844086aab7891666",
-      "url": "https://gitlab.com/haxe-grig/grig.audio.git"
+      "ref": "8567c4dad34cfeaf2ff23fe12c3796f5db80685e",
+      "url": "https://github.com/FunkinCrew/grig.audio"
     },
     {
       "name": "moonchart",
@@ -21,33 +21,41 @@
     },
     {
       "name": "lime",
-      "type": "haxelib",
-      "version": "8.2.3"
+      "type": "git",
+      "dir": null,
+      "ref": "58dd49b018729f86600f719a98728ffb024724e3",
+      "url": "https://github.com/FunkinCrew/lime"
     },
     {
       "name": "openfl",
-      "type": "haxelib",
-      "version": "9.4.2"
+      "type": "git",
+      "dir": null,
+      "ref": "88534506595a32c3f02b21b3987e789a24074ae7",
+      "url": "https://github.com/FunkinCrew/openfl"
     },
-      {
+    {
       "name": "nape-haxe4",
       "type": "haxelib",
       "version": "2.0.22"
     },
     {
       "name": "flixel",
-      "type": "haxelib",
-      "version": "5.6.2"
+      "type": "git",
+      "dir": null,
+      "ref": "622bb65e7f49f0e1a03826b6593369d3ad5e54fa",
+      "url": "https://github.com/FunkinCrew/flixel"
     },
     {
       "name": "flixel-addons",
-      "type": "haxelib",
-      "version": "3.2.3"
+      "type": "git",
+      "dir": null,
+      "ref": "187f93b34f93c6a405d634a42913c745e443463a",
+      "url": "https://github.com/FunkinCrew/flixel-addons"
     },
     {
       "name": "flixel-ui",
       "type": "haxelib",
-      "version": "2.6.1"
+      "version": "2.6.2"
     },
     {
       "name": "hxcpp",
@@ -59,7 +67,7 @@
     {
       "name": "hxvlc",
       "type": "haxelib",
-      "version": "2.2.2"
+      "version": "2.2.6"
     },
     {
       "name": "hxcpp-debug-server",

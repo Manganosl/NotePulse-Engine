@@ -1013,21 +1013,11 @@ class FlxCamera extends FlxBasic
 	 * @param shader Shader to add
 	 * @return ShaderFilter
 	 */
-	public function addShader(shader:Dynamic)
+	public function addShader(shader:FlxRuntimeShader):Bool
 	{
-		var filter:FlxRuntimeShader;
-		if(shader is funkin.backend.utils.CustomShader)
-			filter = shader.shader;
-		else if(shader is FlxRuntimeShader)
-			filter = shader;
-		else {
-			Log.error(Type.getClassName(Type.getClass(shader)) + ' should be a Runtime Shader!');
-			return false;
-		}
-
 		try {
 			if (this.filters == null) this.filters = [];
-			this.filters.push(new ShaderFilter(filter));
+			this.filters.push(new ShaderFilter(shader));
 		} catch(_) {};
 		return false;
 	}
@@ -1037,18 +1027,8 @@ class FlxCamera extends FlxBasic
 	 * @param shader Shader to remove
 	 * @return Whenever the shader has been successfully removed or not.
 	 */
-	public function removeShader(shaderInput:Dynamic):Bool
+	public function removeShader(shader:FlxRuntimeShader):Bool
 	{
-		var shader:FlxRuntimeShader;
-		if(shaderInput is funkin.backend.utils.CustomShader)
-			shader = shaderInput.shader;
-		else if(shaderInput is FlxRuntimeShader)
-			shader = shaderInput;
-		else {
-			Log.error(Type.getClassName(Type.getClass(shaderInput)) + ' should be a Runtime Shader!');
-			return false;
-		}
-
 		if (filters == null) filters = [];
 		for (f in filters) {
 			if (f is ShaderFilter) {
