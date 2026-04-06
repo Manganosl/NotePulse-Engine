@@ -21,10 +21,10 @@ class CopyField extends PlayField {
         
         for (strum in sourceField.members) {
             var babyArrow:CopyStrum = new CopyStrum(strum, this);
-			babyArrow.playAnim("static", true);
-			babyArrow.parentField = this;
+            babyArrow.playAnim("static", true);
+            babyArrow.parentField = this;
             add(babyArrow);
-			babyArrow.postAddedToGroup();
+            babyArrow.postAddedToGroup();
         }
         adaptStrumline();
     }
@@ -42,25 +42,27 @@ class CopyField extends PlayField {
             if (!noteMap.exists(note)) {
                 var copy = new CopyNote(note, this);
                 noteMap.set(note, copy);
+                notes.push(copy); 
             }
         }
     }
 
-    override public function destroy() {
-        noteMap.clear();
-        super.destroy();
-    }
-
     override public function forEachNote(func:Note->Void, onlySpawnedNotes = false){
         syncNotes();
-		for (note in noteMap){
+		for (note in notes){
 			if (note != null && note.exists && note.alive){
+                var castedNote = cast(note, CopyNote);
 				if(onlySpawnedNotes){
-					if(note.spawned){
+					if(castedNote.sourceNote.spawned){
 						func(note);
 					}
 				} else func(note);
 			}
 		}
 	}
+
+    override public function destroy() {
+        noteMap.clear();
+        super.destroy();
+    }
 }

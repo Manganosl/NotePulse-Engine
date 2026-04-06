@@ -120,4 +120,18 @@ class PlayField extends FlxTypedGroup<StrumNote> {
 			}
 		}
 	}
+
+	override function set_camera(value:FlxCamera){
+		forEachNote(note -> {
+			note.camera = value;
+		});
+		return camera = value;
+	}
+
+	override function set_cameras(value:Array<FlxCamera>){
+		forEachNote(note -> {
+			note.cameras = value;
+		});
+		return cameras = value;
+	}
 }

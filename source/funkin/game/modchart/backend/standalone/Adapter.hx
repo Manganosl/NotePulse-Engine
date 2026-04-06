@@ -3,6 +3,7 @@ package funkin.game.modchart.backend.standalone;
 import funkin.data.ClientPrefs;
 import funkin.backend.Conductor;
 import funkin.objects.notes.Note;
+import funkin.objects.notes.copy.CopyNote;
 import funkin.objects.notes.splashes.SustainSplash;
 import funkin.objects.AttachedSprite;
 import funkin.game.modchart.backend.util.ModchartableSprite;
@@ -35,6 +36,8 @@ class Adapter {
 	}
 
 	public static function getLaneFromArrow(arrow:FlxSprite) {
+		if (arrow is CopyNote)
+			return cast(arrow, CopyNote).noteData;
 		if (arrow is Note)
 			return cast(arrow, Note).noteData;
 		else if (arrow is AttachedSprite) @:privateAccess
@@ -59,6 +62,8 @@ class Adapter {
 	}
 
 	public static function getCastedSprite(arrow:FlxSprite):Dynamic {
+		if (arrow is CopyNote)
+			return cast(arrow, CopyNote);
 		if (arrow is Note)
 			return cast(arrow, Note);
 		else if (arrow is AttachedSprite)
@@ -75,6 +80,8 @@ class Adapter {
 	}
 
 	public static function getPlayerFromArrow(arrow:FlxSprite) {
+		if (arrow is CopyNote)
+			return cast(arrow, CopyNote).playField.player;
 		if (arrow is Note)
 			return cast(arrow, Note).playField.player;
 		else if (arrow is AttachedSprite) @:privateAccess
@@ -91,18 +98,20 @@ class Adapter {
 	}
 
 	public static function getTimeFromArrow(arrow:FlxSprite) {
+		if (arrow is CopyNote)
+			return cast(arrow, CopyNote).strumTime;
 		if (arrow is Note)
 			return cast(arrow, Note).strumTime;
 		return 0;
 	}
 
 	inline static function getStrumFromInfo(lane:Int, player:Int) {
-		var group = if (isPlayState) {
-			if (player == 0) PlayState.instance.opponentStrums else PlayState.instance.playerStrums;
-		} else if (isModchartEditor) {
-			if (player == 0) ModchartEditor.instance.opponentStrums else ModchartEditor.instance.playerStrums;
-		} else {
-			if (player == 0) EditorPlayState.instance.opponentStrums else EditorPlayState.instance.playerStrums;
+		var group:PlayField = null;
+		for (field in PlayField.fields) {
+			if (field.player == player) {
+				group = field;
+				break;
+			}
 		}
 
 		var found:Strum = null;

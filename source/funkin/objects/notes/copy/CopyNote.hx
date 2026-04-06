@@ -5,7 +5,6 @@ import funkin.objects.notes.PlayField;
 
 class CopyNote extends Note {
     public var sourceNote:Note;
-    public var activeNote:Bool = false;
 
     public function new(sourceNote:Note, sourceField:PlayField) {
         this.sourceNote = sourceNote;
@@ -14,6 +13,7 @@ class CopyNote extends Note {
         
         this.playField = sourceField;
         
+        this.graphic = sourceNote.graphic;
         this.isSustainNote = sourceNote.isSustainNote;
         this.isSustainEnd = sourceNote.isSustainEnd;
         this.frames = sourceNote.frames;
@@ -34,7 +34,9 @@ class CopyNote extends Note {
 
     override function destroy() {
         super.destroy();
-        cast(playField, CopyField).noteMap.remove(sourceNote);
+        var castedField = cast(playField, CopyField);
+        castedField.noteMap.remove(sourceNote);
+        castedField.notes.remove(this);
         sourceNote.copyingNotes.remove(this);
     }
 

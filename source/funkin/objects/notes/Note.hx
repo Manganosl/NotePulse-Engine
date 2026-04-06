@@ -104,12 +104,12 @@ class Note extends ModchartableSprite {
 	function set_spawned(value:Bool):Bool {
 		if(value == true){
 			for(copy in copyingNotes){
-				copy.activeNote = true;
+				copy.spawned = true;
 				createdFrom.add(copy);
 			}
 		} else {
 			for(copy in copyingNotes){
-				copy.activeNote = false;
+				copy.spawned = false;
 				createdFrom.remove(copy, true);
 			}
 		}

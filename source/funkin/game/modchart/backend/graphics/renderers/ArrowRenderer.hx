@@ -1,7 +1,7 @@
 package funkin.game.modchart.backend.graphics.renderers;
 
-import funkin.objects.AttachedSprite;
 import funkin.game.modchart.backend.util.ModchartableSprite;
+import funkin.objects.notes.copy.CopyNote;
 
 using flixel.util.FlxColorTransformUtil;
 
@@ -60,7 +60,7 @@ final class ArrowRenderer extends BaseRenderer<FlxSprite> {
 		final orient = canUseLast ? __lastOrient : (__lastOrient = parent.getPercent('orient', player));
 
 		// apply centered 2 (aka centered path)
-		if (arrow is Note) {
+		if (arrow is Note || arrow is CopyNote) {
 			arrowDiff += FlxG.height * 0.25 * centered2;
 		} else {
 			arrowTime = songPos + (FlxG.height * 0.25 * centered2);
@@ -78,7 +78,7 @@ final class ArrowRenderer extends BaseRenderer<FlxSprite> {
 			distance: arrowDiff,
 			lane: Adapter.getLaneFromArrow(arrow),
 			player: player,
-			isTapArrow: (arrow is Note)
+			isTapArrow: (arrow is Note || arrow is CopyNote)
 		};
 
 		arrowPosition.setTo(Adapter.getDefaultReceptorX(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2,
