@@ -35,7 +35,7 @@ class CopyField extends PlayField {
         super.update(elapsed);
     }
 
-    private function syncNotes() {
+    public function syncNotes() {
         if (sourceField == null) return;
 
         for (note in sourceField.notes) {
@@ -50,4 +50,17 @@ class CopyField extends PlayField {
         noteMap.clear();
         super.destroy();
     }
+
+    override public function forEachNote(func:Note->Void, onlySpawnedNotes = false){
+        syncNotes();
+		for (note in noteMap){
+			if (note != null && note.exists && note.alive){
+				if(onlySpawnedNotes){
+					if(note.spawned){
+						func(note);
+					}
+				} else func(note);
+			}
+		}
+	}
 }

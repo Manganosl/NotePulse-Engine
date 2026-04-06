@@ -5,6 +5,7 @@ import funkin.objects.notes.PlayField;
 
 class CopyNote extends Note {
     public var sourceNote:Note;
+    public var activeNote:Bool = false;
 
     public function new(sourceNote:Note, sourceField:PlayField) {
         this.sourceNote = sourceNote;
@@ -13,15 +14,22 @@ class CopyNote extends Note {
         
         this.playField = sourceField;
         
+        this.isSustainNote = sourceNote.isSustainNote;
         this.isSustainEnd = sourceNote.isSustainEnd;
         this.frames = sourceNote.frames;
-        this.animation = sourceNote.animation;
         
         if (sourceNote.parent != null) this.parent = sourceNote.parent;
 
         sourceNote.copyingNotes.push(this);
 
+        this.hitHealth = 0;
+        this.missHealth = 0;
+
         syncValues();
+
+        if (isSustainNote && !isSustainEnd) {
+            this.scale.y = sourceNote.scale.y;
+        }
     }
 
     override function destroy() {
@@ -32,8 +40,6 @@ class CopyNote extends Note {
 
     override function update(elapsed:Float) {
         syncValues();
-
-        super.update(elapsed);
 
         if (sourceNote != null && !sourceNote.exists) {
             this.kill();
@@ -58,27 +64,8 @@ class CopyNote extends Note {
         this.noteType = sourceNote.noteType;
         this.ignoreNote = sourceNote.ignoreNote;
         this.lowPriority = sourceNote.lowPriority;
-        
-        this.hitHealth = sourceNote.hitHealth;
-        this.missHealth = sourceNote.missHealth;
-        this.copyX = sourceNote.copyX;
-        this.copyY = sourceNote.copyY;
-        this.copyAngle = sourceNote.copyAngle;
 
-        if(this.spawned != sourceNote.spawned) {
-            this.spawned = sourceNote.spawned;
-            if(spawned){
-                if(sourceNote.createdFrom != null){
-                    sourceNote.createdFrom.add(this);
-                    trace("Added a copy note to the original note's createdFrom list.");
-                }
-            } else {
-                if(sourceNote.createdFrom != null){
-                    sourceNote.createdFrom.remove(this);
-                    trace("Removed a copy note from the original note's createdFrom list.");
-                }
-            }
-        }
+        this.clipRect = sourceNote.clipRect;
         
         if (sourceNote.animation != null && sourceNote.animation.curAnim != null) {
             var animName:String = sourceNote.animation.curAnim.name;
@@ -87,11 +74,11 @@ class CopyNote extends Note {
                 if (this.animation.curAnim == null || this.animation.curAnim.name != animName) {
                     this.animation.play(animName, true);
                 }
+                
+                if (this.animation.curAnim != null) {
+                    this.animation.curAnim.curFrame = sourceNote.animation.curAnim.curFrame;
+                }
             }
-        }
-
-        if (isSustainNote && !isSustainEnd) {
-            this.scale.y = sourceNote.scale.y;
         }
     }
 

@@ -12,6 +12,8 @@ class PlayField extends FlxTypedGroup<StrumNote> {
     public var player:Int = 0;
 	public var notes:Array<Note> = [];
 
+	public var alpha(null, set):Float;
+
 	public var inControl(null, set):Bool;
 	public var downScroll(null, set):Bool;
 	public var direction(null, set):Float;
@@ -20,6 +22,11 @@ class PlayField extends FlxTypedGroup<StrumNote> {
 	public var noteMissCallback(null, set):Note->Void;
 	public var noteSpeed(null, set):Float;
 	public var texture(null, set):String;
+
+	function set_alpha(value:Float){
+		for(strum in members) strum.alpha = value;
+		return value;
+	}
 
 	function set_inControl(value:Bool){
 		for(strum in members) strum.inControl = value;
@@ -93,6 +100,24 @@ class PlayField extends FlxTypedGroup<StrumNote> {
 				strumLineWidth += note.width;
 			}
 			strumLineIsBig = strumLineWidth > StrumBoundaries.getBoundaryWidth().x;
+		}
+	}
+
+	public static function forEachField(func:PlayField->Void){
+		for (field in fields)
+			if (field != null && field.exists && field.alive)
+				func(field);
+	}
+
+	public function forEachNote(func:Note->Void, onlySpawnedNotes = false){
+		for (note in notes){
+			if (note != null && note.exists && note.alive){
+				if(onlySpawnedNotes){
+					if(note.spawned){
+						func(note);
+					}
+				} else func(note);
+			}
 		}
 	}
 }

@@ -8,6 +8,7 @@ import funkin.objects.AttachedSprite;
 import funkin.game.modchart.backend.util.ModchartableSprite;
 import funkin.objects.notes.splashes.NoteSplash;
 import funkin.objects.notes.StrumNote as Strum;
+import funkin.objects.notes.PlayField;
 import funkin.states.PlayState;
 import funkin.states.editors.content.EditorPlayState;
 import funkin.states.editors.ModchartEditor;
@@ -148,13 +149,19 @@ class Adapter {
 		var interpspr:Array<Array<FlxSprite>> = [];
 		while(interpspr.length != PlayState.SONG.mania+1)
 			interpspr.push([]);
-		while(pspr.length != PlayState.SONG.lanes)
+		while(pspr.length != PlayField.fields.length)
 			pspr.push(interpspr);
 
 		if (isPlayState) {
 			@:privateAccess
-			PlayState.instance.strumLineNotes.forEachAlive(strumNote -> {
-				pspr[strumNote.player][0].push(strumNote);
+			PlayField.forEachField(daField -> {
+				daField.forEachAlive(strumNote -> {
+					pspr[strumNote.player][0].push(strumNote);
+				});
+				daField.forEachNote(note -> {
+					final player = getPlayerFromArrow(note);
+					pspr[player][note.isSustainNote ? 2 : 1].push(note);
+				}, true);
 			});
 
 			if (ClientPrefs.data.ratingCam == "Bellow Note") {
@@ -171,13 +178,6 @@ class Adapter {
 					}
 				});
 			}
-
-			PlayState.instance.notes.forEachAlive(strumNote -> {
-				if(strumNote.modchartVisible){
-					final player = getPlayerFromArrow(strumNote);
-					pspr[player][strumNote.isSustainNote ? 2 : 1].push(strumNote);
-				} else strumNote.visible = false;
-			});
 
 			PlayState.instance.grpNoteSplashes.forEachAlive(splash -> {
 				@:privateAccess

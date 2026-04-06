@@ -100,7 +100,21 @@ class Note extends ModchartableSprite {
 	public var prevNote:Note;
 	public var nextNote:Note;
 
-	public var spawned:Bool = false;
+	public var spawned(default, set):Bool = false;
+	function set_spawned(value:Bool):Bool {
+		if(value == true){
+			for(copy in copyingNotes){
+				copy.activeNote = true;
+				createdFrom.add(copy);
+			}
+		} else {
+			for(copy in copyingNotes){
+				copy.activeNote = false;
+				createdFrom.remove(copy, true);
+			}
+		}
+		return spawned = value;
+	}
 
 	public var tail:Array<Note> = []; // for sustains
 	public var parent:Note;
