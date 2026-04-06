@@ -10,6 +10,7 @@ import funkin.game.shaders.RGBPalette.RGBShaderReference;
 import funkin.objects.notes.splashes.NoteSplash;
 import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.PlayField;
+import funkin.objects.notes.copy.CopyNote;
 
 import flixel.math.FlxRect;
 
@@ -158,6 +159,8 @@ class Note extends ModchartableSprite {
 	public var copyY:Bool = true;
 	public var copyAngle:Bool = true;
 	public var copyAlpha:Bool = true;
+
+	public var copyingNotes:Array<CopyNote> = [];
 
 	public var hitHealth:Float = 0.02;
 	public var missHealth:Float = 0.1;
@@ -352,10 +355,15 @@ class Note extends ModchartableSprite {
 		return noteType = value;
 	}
 
+	public var createdFrom:Dynamic;
 	private var oldSY:Float;
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?createdFrom:Dynamic = null)
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?inEditor:Bool = false, createdFrom:Dynamic = null, ?skipNew:Bool = false)
 	{
 		super();
+
+		if(skipNew) return;
+
+		this.createdFrom = createdFrom;
 
 		animation = new PsychAnimationController(this);
 
@@ -603,6 +611,9 @@ class Note extends ModchartableSprite {
 	private var lastDistance:Float = 0;
 	public function followStrumNote(fakeCrochet:Float, songSpeed:Float = 1)
 	{
+		for(daNote in copyingNotes)
+			daNote.followStrumNote(fakeCrochet, songSpeed);
+
 		var noteSpeed:Float = songSpeed * multSpeed * strum.noteSpeed;
 		var strumDir:Float = strum.direction + this.offsetDirection;
 		
