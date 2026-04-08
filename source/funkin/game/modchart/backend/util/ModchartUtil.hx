@@ -146,14 +146,14 @@ using StringTools;
 
 		var uv = new Vector<Float>(12 * subs);
 
-		var frameUV = arrow.frame.uv;
+		// i think this solution is a lot better -swordcube
+		// and yes i tested to make sure it works -swordcube again
+		var frameUV:FlxRect = cast arrow.frame.uv;
 
-		// i do not like this
-		// but i was suggested to do this instead by theo -swordcube
-		var left = #if (flixel >= "6.1.0") frameUV.left #else frameUV.x #end;
-		var right = #if (flixel >= "6.1.0") frameUV.right #else frameUV.y #end;
-		var top = #if (flixel >= "6.1.0") frameUV.top #else frameUV.width #end;
-		var bottom = #if (flixel >= "6.1.0") frameUV.bottom #else frameUV.height #end;
+		var left = frameUV.x;
+		var right = frameUV.y;
+		var top = frameUV.width;
+		var bottom = frameUV.height;
 
 		var frameWidth = top - left;
 		var frameHeight = bottom - right;
