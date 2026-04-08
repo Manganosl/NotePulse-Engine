@@ -6,13 +6,11 @@ import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
 import funkin.states.PlayState;
 
-class PlayField extends FlxTypedGroup<StrumNote> {
+class PlayField extends FlxTypedSpriteGroup<StrumNote> {
 	public static var fields:Array<PlayField> = [];
 
     public var player:Int = 0;
 	public var notes:Array<Note> = [];
-
-	public var alpha(null, set):Float;
 
 	public var inControl(null, set):Bool;
 	public var downScroll(null, set):Bool;
@@ -23,8 +21,22 @@ class PlayField extends FlxTypedGroup<StrumNote> {
 	public var noteSpeed(null, set):Float;
 	public var texture(null, set):String;
 
-	function set_alpha(value:Float){
-		for(strum in members) strum.alpha = value;
+	public var scrollFactorX(null, set):Float;
+	public var scrollFactorY(null, set):Float;
+
+	function set_scrollFactorX(value:Float){
+		for(note in notes)
+			note.scrollFactor.x = value;
+		for(strum in members)
+			strum.scrollFactor.x = value;
+		return value;
+	}
+
+	function set_scrollFactorY(value:Float){
+		for(note in notes)
+			note.scrollFactor.y = value;
+		for(strum in members)
+			strum.scrollFactor.y = value;
 		return value;
 	}
 
@@ -61,12 +73,12 @@ class PlayField extends FlxTypedGroup<StrumNote> {
 		return value;
 	}
 
-    public function new(player:Int) {
+    public function new() {
         super();
-        this.player = player;
+        this.player = fields.length;
 
         for (i in 0...PlayState.SONG.mania + 1) {
-            var babyArrow:StrumNote = new StrumNote(0, 0, i, player);
+            var babyArrow:StrumNote = new StrumNote(0, 0, i, this.player);
 			babyArrow.playAnim("static", true);
 			babyArrow.parentField = this;
             add(babyArrow);
@@ -125,6 +137,8 @@ class PlayField extends FlxTypedGroup<StrumNote> {
 		forEachNote(note -> {
 			note.camera = value;
 		});
+		for(strum in members)
+			strum.camera = value;
 		return camera = value;
 	}
 
@@ -132,6 +146,8 @@ class PlayField extends FlxTypedGroup<StrumNote> {
 		forEachNote(note -> {
 			note.cameras = value;
 		});
+		for(strum in members)
+			strum.cameras = value;
 		return cameras = value;
 	}
 }

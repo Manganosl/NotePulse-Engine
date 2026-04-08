@@ -12,6 +12,7 @@ import funkin.game.modchart.backend.graphics.*;
 import funkin.game.modchart.backend.graphics.renderers.*;
 import funkin.game.modchart.backend.util.ModchartUtil;
 import funkin.game.modchart.engine.events.types.*;
+import funkin.objects.notes.PlayField;
 import openfl.display.BitmapData;
 import openfl.geom.Matrix;
 import openfl.geom.Rectangle;
@@ -45,59 +46,11 @@ final class ModPlayField extends FlxSprite {
 
 	var _skewMatrix:Matrix = new Matrix();
 
-	@:allow(funkin.game.modchart.engine.Proxy)
-	@:allow(funkin.game.modchart.backend.graphics.CtxRenderer)
-	var _proxies:Array<Proxy> = [];
-
-	@:allow(funkin.game.modchart.engine.Proxy)
-	@:allow(funkin.game.modchart.backend.graphics.CtxRenderer)
-	var _indexedProxies:Array<Array<Proxy>> = [];
-
-	@:allow(funkin.game.modchart.engine.Proxy)
-	@:allow(funkin.game.modchart.backend.graphics.CtxRenderer)
-	function _appendProxy(proxy:Proxy) {
-		if (_proxies.contains(proxy))
-			return;
-		_proxies.push(proxy);
-
-		// so 0 are the global player proxies
-		_indexedProxies[1 + proxy.sourcePlayer].push(proxy);
-	}
-
-	@:allow(funkin.game.modchart.engine.Proxy)
-	@:allow(funkin.game.modchart.backend.graphics.CtxRenderer)
-	function _removeProxy(proxy:Proxy) {
-		if (_proxies.contains(proxy))
-			return;
-		_proxies.remove(proxy);
-
-		// so 0 are the global player proxies
-		_indexedProxies[1 + proxy.sourcePlayer].remove(proxy);
-	}
-
-	@:allow(funkin.game.modchart.engine.Proxy)
-	@:allow(funkin.game.modchart.backend.graphics.CtxRenderer)
-	function _swapProxy(proxy:Proxy) {
-		if (_proxies.contains(proxy))
-			return;
-
-		// so 0 are the global player proxies
-		@:privateAccess
-		_indexedProxies[1 + proxy.__lastSrcPlayer].remove(proxy);
-		_indexedProxies[1 + proxy.sourcePlayer].push(proxy);
-	}
-
 	function get_view()
 		return context.view;
 
 	public function new() {
 		super();
-
-		// allocate 16 players... why would u need more anyways
-		_indexedProxies.resize(16);
-		for (i in 0...16) {
-			_indexedProxies[i] = [];
-		}
 
 		moves = false;
 
@@ -147,7 +100,7 @@ final class ModPlayField extends FlxSprite {
 
 	public inline function set(name:String, beat:Float, value:Float, player:Int = -1):Void {
 		if (player == -1) {
-			for (curField in 0...PlayState.SONG.lanes)
+			for (curField in 0...PlayField.fields.length)
 				set(name, beat, value, curField);
 			return;
 		}
@@ -157,7 +110,7 @@ final class ModPlayField extends FlxSprite {
 
 	public inline function ease(name:String, beat:Float, length:Float, value:Float = 1, easeFunc:EaseFunction, player:Int = -1):Void {
 		if (player == -1) {
-			for (curField in 0...PlayState.SONG.lanes)
+			for (curField in 0...PlayField.fields.length)
 				ease(name, beat, length, value, easeFunc, curField);
 			return;
 		}
@@ -167,7 +120,7 @@ final class ModPlayField extends FlxSprite {
 
 	public inline function add(name:String, beat:Float, length:Float, addition:Float = 1, easeFunc:EaseFunction, player:Int = -1):Void {
 		if (player == -1) {
-			for (curField in 0...PlayState.SONG.lanes)
+			for (curField in 0...PlayField.fields.length)
 				add(name, beat, length, addition, easeFunc, curField);
 			return;
 		}
@@ -179,7 +132,7 @@ final class ModPlayField extends FlxSprite {
 		var addition = getPercent(name, player == -1 ? 0 : player);
 		var value = addition + valueToAdd;
 		if (player == -1) {
-			for (curField in 0...PlayState.SONG.lanes)
+			for (curField in 0...PlayField.fields.length)
 				set(name, beat, value, curField);
 			return;
 		}
@@ -226,7 +179,7 @@ final class ModPlayField extends FlxSprite {
 	// and u made a ease on drunk and u made a ease on the node
 	// input, the eases may overlap, causing visuals issues.
 	public function updateNodes() {
-		for (player in 0...PlayState.SONG.lanes) {
+		for (player in 0...PlayField.fields.length) {
 			final it = nodes.iterator();
 			final n = it.next;
 			final h = it.hasNext;
@@ -271,6 +224,11 @@ final class ModPlayField extends FlxSprite {
 
 	override public function destroy() {
 		super.destroy();
+	}
+
+	private function getVisibility(obj:flixel.FlxObject) {
+		@:bypassAccessor obj.visible = false;
+		return obj._fmVisible;
 	}
 
 	private function transformCmd(cmd:DrawCommand) {

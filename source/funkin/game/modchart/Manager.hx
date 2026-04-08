@@ -16,6 +16,7 @@ import funkin.game.modchart.backend.util.ModchartUtil;
 import funkin.game.modchart.engine.modifiers.list.*;
 import funkin.game.modchart.events.*;
 import funkin.game.modchart.events.types.*;
+import funkin.objects.notes.PlayField;
 
 import funkin.scripting.LuaUtils;
 
@@ -47,11 +48,6 @@ final class Manager extends FlxBasic {
 	 * List of playfields managed by the Manager.
 	 */
 	public var playfields:Array<ModPlayField> = [];
-
-	/**
-	 * List of playfields managed by the Manager.
-	 */
-	public var proxies:Array<Proxy> = [];
 
 	private var renderer:CtxRenderer;
 
@@ -509,13 +505,7 @@ final class Manager extends FlxBasic {
 		playfields.push(playfield);
 	}
 
-	/**
-	 * Adds a proxy to the list.
-	 */
-	public inline function appendProxy(proxy:Proxy) {
-		proxies.push(proxy);
-	}
-
+	private var currentPlayers:Int = PlayField.fields.length;
 	/**
 	 * Updates all playfields in the game loop.
 	 *
@@ -535,7 +525,7 @@ final class Manager extends FlxBasic {
 
 		if (playerItems == null)
 			return;
-		renderer.emit(playerItems, playfields, proxies);
+		renderer.emit(playerItems, playfields);
 	}
 
 	/**

@@ -8,10 +8,10 @@ class CopyField extends PlayField {
     
     public var noteMap:Map<Note, CopyNote> = new Map();
 
-    override public function new(sourceField:PlayField, player:Int) {
+    override public function new(sourceField:PlayField) {
         this.sourceField = sourceField;
 
-        super(player);
+        super();
 
         for (strum in members.copy()) {
             strum.destroy();

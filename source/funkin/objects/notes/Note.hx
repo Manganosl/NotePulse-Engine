@@ -603,7 +603,7 @@ class Note extends ModchartableSprite {
 
 			if (!wasGoodHit && strumTime <= Conductor.songPosition)
 			{
-				if(!isSustainNote || (prevNote.wasGoodHit && !ignoreNote))
+				if(!isSustainNote || ((prevNote != null && prevNote.wasGoodHit) && !ignoreNote))
 					wasGoodHit = true;
 			}
 		}

@@ -22,6 +22,9 @@ class CopyNote extends Note {
 
         sourceNote.copyingNotes.push(this);
 
+        rgbShader = sourceNote.rgbShader;
+        shader = sourceNote.shader;
+
         this.hitHealth = 0;
         this.missHealth = 0;
 

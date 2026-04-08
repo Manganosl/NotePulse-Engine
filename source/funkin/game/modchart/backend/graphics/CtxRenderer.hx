@@ -19,38 +19,11 @@ using funkin.game.modchart.backend.util.VectorUtil;
 
 class CtxRenderer {
 	var ctx:Context;
-	var ctxProxies:Array<Proxy>;
 
 	public function new() {}
 
 	var queue:Vector<DrawCommand>;
 	var count:Int = 0;
-
-	// Adaptive hold-subdivision tracking.
-	private var __targetSubdivisions:Int = 4;
-	private var __fpsSum:Float = 0;
-	private var __fpsFrames:Int = 0;
-	private var __lastStamp:Float = 0;
-	static inline final FPS_WINDOW:Int = 30;
-
-	private function updateAdaptiveSubdivisions():Void {
-		final now = haxe.Timer.stamp();
-		final delta = now - __lastStamp;
-		__lastStamp = now;
-		if (delta <= 0 || delta > 1) return;
-		__fpsSum += 1.0 / delta;
-		__fpsFrames++;
-		if (__fpsFrames >= FPS_WINDOW) {
-			final avgFps = __fpsSum / __fpsFrames;
-			if (avgFps < 45 && __targetSubdivisions > 1)
-				__targetSubdivisions--;
-			else if (avgFps >= 57 && __targetSubdivisions < 8)
-				__targetSubdivisions++;
-			Adapter.setHoldSubdivisions(__targetSubdivisions);
-			__fpsSum = 0;
-			__fpsFrames = 0;
-		}
-	}
 
 	public function alloc(n:Int) {
 		queue = new Vector<DrawCommand>(n);
@@ -80,9 +53,7 @@ class CtxRenderer {
 
 	var emptyVec:openfl.Vector<Int> = new openfl.Vector<Int>(8, true, [for (i in 0...8) 0]);
 
-	public function emit(items:Array<Array<Array<FlxSprite>>>, playfields:Array<ModPlayField>, proxies:Array<Proxy>) {
-		updateAdaptiveSubdivisions();
-
+	public function emit(items:Array<Array<Array<FlxSprite>>>, playfields:Array<ModPlayField>) {
 		// used for preallocate
 		var playfieldCount = playfields.length;
 
@@ -93,50 +64,38 @@ class CtxRenderer {
 
 		var pathCount = 0;
 
-		var proxiesAdd = 0;
-
 		for (i in 0...items.length) {
 			final curItems = items[i];
-			if (curItems.length == 0)
+
+			if (curItems == null || curItems.length == 0)
 				continue;
 
-			final r = curItems[0].length;
-			final a = curItems[1].length;
-			final h = curItems[2].length;
-			final at = curItems[3].length;
-
-			final sum = r + a + h + at;
-
-			for (proxy in proxies) {
-				if (proxy.sourcePlayer == -1 || proxy.sourcePlayer == i)
-					proxiesAdd += sum;
-			}
-
-			receptorCount += r;
-			arrowCount += a;
-			holdCount += h;
-			attachmentCount += at;
+			if (curItems[0] != null)
+				receptorCount = receptorCount + curItems[0].length;
+			if (curItems[1] != null)
+				arrowCount = arrowCount + curItems[1].length;
+			if (curItems[2] != null)
+				holdCount = holdCount + curItems[2].length;
+			if (curItems[3] != null)
+				attachmentCount = attachmentCount + curItems[3].length;
 		}
 
 		if (Config.RENDER_ARROW_PATHS)
 			pathCount = receptorCount;
 
-		alloc((arrowCount + receptorCount + attachmentCount + holdCount + pathCount) * playfieldCount + proxiesAdd);
+		alloc((arrowCount + receptorCount + attachmentCount + holdCount + pathCount) * playfieldCount);
 
 		// i is player index
 		for (f in 0...playfields.length) {
 			var playfield = playfields[f];
-			var proxies = playfield._indexedProxies;
 
 			ctx = playfield.context;
 
 			for (player in 0...items.length) {
 				var curItems:Array<Array<FlxSprite>> = items[player];
 
-				if (curItems.length == 0)
+				if (curItems == null || curItems.length == 0)
 					continue;
-
-				ctxProxies = proxies[1 + player].concat(proxies[0]);
 
 				// path stuff
 				if (pathCount > 0) {
@@ -231,15 +190,6 @@ class CtxRenderer {
 	public function append(dc:DrawCommand) {
 		@:privateAccess
 		queue[count++] = ctx.parent.transformCmd(dc);
-
-		if (ctxProxies.length > 0)
-			appendProxy(dc);
-	}
-
-	public function appendProxy(dc:DrawCommand) {
-		for (proxy in ctxProxies)
-			@:privateAccess
-			queue[count++] = proxy.transformCmd(ModchartUtil.cloneDrawCmd(dc));
 	}
 
 	private function getVisibility(obj:flixel.FlxObject) {

@@ -34,5 +34,5 @@
 - [X] Make ProxyField equivalent (CopyField) **Done 06/04/2026**
 
 ## 06/04/2026
-- [ ] Make CopyField compatible with modchart. -CopyNotes are invisible for some reason-
-- [ ] Make PlayField's variables affect its notes, not only strums.
+- [X] Make CopyField compatible with modchart. **Fixed 08/04/2026 - Just dont create new PlayFields after Manager**
+- [X] Make PlayField's variables affect its notes, not only strums. **Done 08/04/2026**

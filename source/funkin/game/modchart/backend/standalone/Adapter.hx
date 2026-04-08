@@ -37,7 +37,7 @@ class Adapter {
 
 	public static function getLaneFromArrow(arrow:FlxSprite) {
 		if (arrow is CopyNote)
-			return cast(arrow, CopyNote).noteData;
+			return cast(arrow, CopyNote).sourceNote.noteData;
 		if (arrow is Note)
 			return cast(arrow, Note).noteData;
 		else if (arrow is AttachedSprite) @:privateAccess
@@ -97,9 +97,27 @@ class Adapter {
 		return 0;
 	}
 
+	public static function getStrumFromArrow(arrow:FlxSprite) {
+		if (arrow is CopyNote)
+			return cast(arrow, CopyNote).strum;
+		if (arrow is Note)
+			return cast(arrow, Note).strum;
+		else if (arrow is AttachedSprite) @:privateAccess
+			return cast(arrow, AttachedSprite).parentArrow;
+		else if (arrow is Strum) @:privateAccess
+			return cast(arrow, Strum);
+		else if (arrow is NoteSplash) @:privateAccess
+			return cast(arrow, NoteSplash).babyArrow;
+		else if (arrow is SustainSplash) @:privateAccess
+			return cast(arrow, SustainSplash).strum;
+		else if (arrow is ModchartableSprite) @:privateAccess
+			return cast(arrow, ModchartableSprite).parentArrow;
+		return null;
+	}
+
 	public static function getTimeFromArrow(arrow:FlxSprite) {
 		if (arrow is CopyNote)
-			return cast(arrow, CopyNote).strumTime;
+			return cast(arrow, CopyNote).sourceNote.strumTime;
 		if (arrow is Note)
 			return cast(arrow, Note).strumTime;
 		return 0;
@@ -162,14 +180,12 @@ class Adapter {
 			pspr.push(interpspr);
 
 		if (isPlayState) {
-			@:privateAccess
 			PlayField.forEachField(daField -> {
 				daField.forEachAlive(strumNote -> {
-					pspr[strumNote.player][0].push(strumNote);
+					pspr[strumNote.parentField.player][0].push(strumNote);
 				});
 				daField.forEachNote(note -> {
-					final player = getPlayerFromArrow(note);
-					pspr[player][note.isSustainNote ? 2 : 1].push(note);
+					pspr[note.playField.player][note.isSustainNote ? 2 : 1].push(note);
 				}, true);
 			});
 

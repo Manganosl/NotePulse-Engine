@@ -11,6 +11,7 @@ import funkin.game.modchart.backend.core.PercentArray;
 import funkin.game.modchart.backend.core.VisualParameters;
 import funkin.game.modchart.backend.macros.ModifiersMacro;
 import funkin.game.modchart.backend.util.ModchartUtil;
+import funkin.objects.notes.PlayField;
 import funkin.game.modchart.engine.modifiers.Modifier;
 import funkin.game.modchart.engine.modifiers.list.*;
 import funkin.game.modchart.engine.modifiers.list.false_paradise.*;
@@ -238,7 +239,7 @@ final class ModifierGroup {
 
 	@:noCompletion
 	inline private function __getPercentTemplate():Vector<Float> {
-		final vector = new Vector<Float>(PlayState.SONG.lanes);
+		final vector = new Vector<Float>(PlayField.fields.length);
 		for (i in 0...vector.length)
 			vector[i] = 0;
 		return vector;

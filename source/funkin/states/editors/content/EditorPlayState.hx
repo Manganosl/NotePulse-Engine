@@ -143,12 +143,12 @@ class EditorPlayState extends MusicBeatSubstate
 		grpNoteSplashes.cameras = [camHUD];
 		splash.alpha = 0.000001; //cant make it invisible or it won't allow precaching
 
-		opponentStrums = new PlayField(0);
-		playerStrums = new PlayField(1);
-		gfStrums = new PlayField(2);
-		if(PlayState.SONG.lanes > 3){
+		opponentStrums = new PlayField();
+		playerStrums = new PlayField();
+		if(PlayState.SONG.lanes >= 3){
+			gfStrums = new PlayField();
 			for(lane in 0...(PlayState.SONG.lanes-3)){
-				extraStrums[lane] = new PlayField(lane+3);
+				extraStrums[lane] = new PlayField();
 			}
 		}
 		

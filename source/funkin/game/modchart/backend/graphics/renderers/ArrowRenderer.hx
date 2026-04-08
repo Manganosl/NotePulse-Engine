@@ -81,19 +81,15 @@ final class ArrowRenderer extends BaseRenderer<FlxSprite> {
 			isTapArrow: (arrow is Note || arrow is CopyNote)
 		};
 
-		arrowPosition.setTo(Adapter.getDefaultReceptorX(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2,
-			Adapter.getDefaultReceptorY(arrowData.lane, arrowData.player) + Manager.ARROW_SIZEDIV2, 0);
+		var arrowStrum = Adapter.getStrumFromArrow(castedArrow);
+		arrowPosition.setTo(arrowStrum.x + Manager.ARROW_SIZEDIV2, arrowStrum.y + Manager.ARROW_SIZEDIV2, 0);
 
 		final output = parent.modifiers.getPath(arrowPosition, arrowData);
 		arrowPosition.copyFrom(output.pos.clone());
 
 		// internal mods
 		if (orient != 0) {
-			final nextOutput = parent.modifiers.getPath(new Vector3(Adapter.getDefaultReceptorX(arrowData.lane, arrowData.player)
-				+ Manager.ARROW_SIZEDIV2,
-				Adapter.getDefaultReceptorY(arrowData.lane, arrowData.player)
-				+ Manager.ARROW_SIZEDIV2),
-				arrowData, 1, false, true);
+			final nextOutput = parent.modifiers.getPath(new Vector3(arrowStrum.x + Manager.ARROW_SIZEDIV2, arrowStrum.y + Manager.ARROW_SIZEDIV2), arrowData, 1, false, true);
 			final thisPos = output.pos;
 			final nextPos = nextOutput.pos;
 

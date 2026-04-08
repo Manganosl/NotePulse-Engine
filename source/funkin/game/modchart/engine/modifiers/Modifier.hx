@@ -7,6 +7,7 @@ import funkin.game.modchart.backend.core.ArrowData;
 import funkin.game.modchart.backend.core.ModifierParameters;
 import funkin.game.modchart.backend.core.VisualParameters;
 import funkin.game.modchart.engine.ModPlayField;
+import funkin.objects.notes.PlayField;
 
 using StringTools;
 
@@ -55,7 +56,7 @@ class Modifier {
 	}
 
 	private inline function getPlayerCount():Int {
-		return PlayState.SONG.lanes;
+		return PlayField.fields.length;
 	}
 
 	// Helpers Functions

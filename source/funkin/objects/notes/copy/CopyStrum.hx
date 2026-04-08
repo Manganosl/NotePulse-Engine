@@ -8,7 +8,7 @@ class CopyStrum extends StrumNote {
 
     public function new(sourceStrum:StrumNote, parentField:PlayField) {
         this.sourceStrum = sourceStrum;
-        @:privateAccess var sourcePlayer = sourceStrum.player;
+        var sourcePlayer = parentField.player; // So this was the problem, huh?
         super(sourceStrum.x, sourceStrum.y, sourceStrum.noteData, sourcePlayer);
         
         this.parentField = parentField;
@@ -28,13 +28,8 @@ class CopyStrum extends StrumNote {
     public function syncValues() {
         if (sourceStrum == null) return;
 
-        this.downScroll = sourceStrum.downScroll;
-        this.direction = sourceStrum.direction;
-        this.noteSpeed = sourceStrum.noteSpeed;
         this.trackedScale = sourceStrum.trackedScale;
         this.resetAnim = sourceStrum.resetAnim;
-        this.cpuControlled = sourceStrum.cpuControlled;
-        this.inControl = sourceStrum.inControl;
 
         if (sourceStrum.animation.curAnim != null) {
             var animName = sourceStrum.animation.curAnim.name;

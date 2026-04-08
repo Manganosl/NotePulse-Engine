@@ -325,6 +325,7 @@ class PlayState extends MusicBeatState
 	public var startCallback:Void->Void = null;
 	public var endCallback:Void->Void = null;
 
+	private var modManagerEvArray:Array<Dynamic> = [];
 	public var modManager:Manager;
 
 	//// Sets ////
@@ -660,12 +661,12 @@ class PlayState extends MusicBeatState
 		grpNoteSplashes.add(splash);
 		splash.alpha = 0.000001;
 
-		opponentStrums = new PlayField(0);
-		playerStrums = new PlayField(1);
-		gfStrums = new PlayField(2);
-		if(SONG.lanes > 3){
+		opponentStrums = new PlayField();
+		playerStrums = new PlayField();
+		if(SONG.lanes >= 3){
+			gfStrums = new PlayField();
 			for(lane in 0...(SONG.lanes-3)){
-				extraStrums[lane] = new PlayField(lane+3);
+				extraStrums[lane] = new PlayField();
 			}
 		}
 
@@ -805,6 +806,22 @@ class PlayState extends MusicBeatState
 		setOnScripts("isPlayerOpponent", isPlayerOpponent);
 		
 		stagesFunc(function(stage:BaseStage) stage.createPost());
+
+		callOnScripts('preInitModchart');
+
+		if(SONG.nativeModchart){
+			modManager = new Manager();
+			add(modManager);
+
+			var fields = 1;
+			while(fields != SONG.playfields){
+				fields++;
+				modManager.addPlayfield();
+			}
+
+			for(func in modManagerEvArray) func();
+		}
+
 		callOnScripts('initModchart');
 		callOnScripts('onCreatePost');
 		callOnScripts('postCreate');
@@ -1182,17 +1199,6 @@ class PlayState extends MusicBeatState
 		// NEW SHIT
 		noteData = songData.notes;
 
-		if(SONG.nativeModchart){
-			modManager = new Manager();
-			add(modManager);
-
-			var fields = 1;
-			while(fields != SONG.playfields){
-				fields++;
-				modManager.addPlayfield();
-			}
-		}
-
 		var file:String = Paths.json(songName + '/events');
 		#if MODS_ALLOWED
 		if (FileSystem.exists(Paths.modsJson(songName + '/events')) || FileSystem.exists(file))
@@ -1364,15 +1370,16 @@ class PlayState extends MusicBeatState
 				setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
 				setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
 			}
-			for(i in 0...gfStrums.length){
-				gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
-				setOnScripts('defaultGfStrumX' + i, gfStrums.members[i].x);
-				setOnScripts('defaultGfStrumY' + i, gfStrums.members[i].y);
+			if(gfStrums != null){
+				for(i in 0...gfStrums.length){
+					gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
+					setOnScripts('defaultGfStrumX' + i, gfStrums.members[i].x);
+					setOnScripts('defaultGfStrumY' + i, gfStrums.members[i].y);
+				}
+				for(strums in extraStrums)
+					for(i in 0...strums.length)
+						strums.members[i].x = gfStrums.members[i].x;
 			}
-			for(strums in extraStrums)
-				for(i in 0...strums.length)
-					strums.members[i].x = gfStrums.members[i].x;
-
 			startedCountdown = true;
 			Conductor.songPosition = -Conductor.crochet * 5;
 			setOnScripts('startedCountdown', true);
@@ -1625,11 +1632,16 @@ class PlayState extends MusicBeatState
 					var ease = FlxEase.linear;
 					if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
 					switch(info[0]){
-						case "Add Modifier": modManager.addModifier(info[1], Std.parseInt(info[6]));
-						case "Ease": modManager.ease(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "Set": modManager.set(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "EaseAdd": modManager.add(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "SetAdd": modManager.setAdd(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "Add Modifier": 
+							modManagerEvArray.push(function(){ modManager.addModifier(info[1], Std.parseInt(info[6])); });
+						case "Ease": 
+							modManagerEvArray.push(function(){ modManager.ease(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6])); });
+						case "Set": 
+							modManagerEvArray.push(function(){ modManager.set(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6])); });
+						case "EaseAdd": 
+							modManagerEvArray.push(function(){ modManager.add(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6])); });
+						case "SetAdd": 
+							modManagerEvArray.push(function(){ modManager.setAdd(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6])); });
 					}
 				}
 		}

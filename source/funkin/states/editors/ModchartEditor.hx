@@ -181,15 +181,15 @@ class ModchartEditor extends MusicBeatState
 		strumLineNotes.cameras = [camHUD];
 		add(strumLineNotes);
 
-		opponentStrums = new PlayField(0);
+		opponentStrums = new PlayField();
 		opponentStrums.cameras = [camHUD];
-		playerStrums = new PlayField(1);
+		playerStrums = new PlayField();
 		playerStrums.cameras = [camHUD];
-		gfStrums = new PlayField(2);
-		gfStrums.cameras = [camHUD];
-		if(PlayState.SONG.lanes > 3){
+		if(PlayState.SONG.lanes >= 3){
+			gfStrums = new PlayField();
+			gfStrums.cameras = [camHUD];
 			for(lane in 0...(PlayState.SONG.lanes-3)){
-				extraStrums[lane] = new PlayField(lane+3);
+				extraStrums[lane] = new PlayField();
 				extraStrums[lane].cameras = [camHUD];
 			}
 		}
