@@ -48,7 +48,7 @@ ndll(val)
 - [FunkinModchart](https://github.com/theoo-h/FunkinModchart/blob/main/README.md)
 
 - There's an integrated instance on songs with "nativeModchart", that is activated in Charting State > Actions > Modchart.
-This instance is called "manager", can be used the same way as one that you create yourself
+This instance is called "modManager", can be used the same way as one that you create yourself
 
 # Extra LUA functions
 Here you'll find multiple LUA functions added to make coding easier and do some things without the need of runHaxeCode() or a separate HScript file

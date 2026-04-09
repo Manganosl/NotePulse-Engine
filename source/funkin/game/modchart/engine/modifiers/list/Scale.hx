@@ -65,10 +65,6 @@ class Scale extends Modifier {
 		var tinyX = getUnsafe(tinyIDs[1], player);
 		var tinyY = getUnsafe(tinyIDs[2], player);
 
-		var mini = getUnsafe(miniIDs[0], player);
-		var miniX = getUnsafe(miniIDs[1], player);
-		var miniY = getUnsafe(miniIDs[2], player);
-
 		var squish = getUnsafe(squishID, player);
 		var stretch = getUnsafe(stretchID, player);
 

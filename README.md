@@ -2,7 +2,7 @@
 
 This engine is a WIP fork of Psych Engine v0.7.3, made with the purpose of giving modders tool that make coding a lot easier, adding equivalents of tools other Friday Night Funkin' engines have.
 
-You can find the differences [docs/Diffs.md]
+You can find the differences [here](docs/Diffs.md)
 And some help at modding [here](docs/LUA.md)
 
 ## Where to download?
