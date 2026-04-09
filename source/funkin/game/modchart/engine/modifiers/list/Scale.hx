@@ -11,8 +11,6 @@ class Scale extends Modifier {
 	var scaleLaneIDs:Array<Array<Int>>;
 	var tinyIDs:Array<Int>;
 	var tinyLaneIDs:Array<Array<Int>>;
-	var miniIDs:Array<Int>;
-	var miniLaneIDs:Array<Array<Int>>;
 
 	var squishID:Int;
 	var squishLaneIDs:Array<Int>;
@@ -25,9 +23,6 @@ class Scale extends Modifier {
 		setPercent('scale', 1, -1);
 		setPercent('scaleX', 1, -1);
 		setPercent('scaleY', 1, -1);
-		setPercent('mini', 0, -1);
-		setPercent('miniX', 0, -1);
-		setPercent('miniY', 0, -1);
 		setPercent('squish', 0, -1);
 		setPercent('stretch', 0, -1);
 
@@ -38,9 +33,6 @@ class Scale extends Modifier {
 		
 		tinyIDs = [for (a in AXES_S) findID('tiny' + a)];
 		tinyLaneIDs = [for (a in AXES_S) [for (l in 0...maxKeys) findID('tiny' + a + l)]];
-
-		miniIDs = [for (a in AXES_S) findID('mini' + a)];
-		miniLaneIDs = [for (a in AXES_S) [for (l in 0...maxKeys) findID('mini' + a + l)]];
 
 		squishID = findID('squish');
 		squishLaneIDs = [for (l in 0...maxKeys) findID('squish' + l)];
@@ -77,10 +69,6 @@ class Scale extends Modifier {
 			tinyX += getUnsafe(tinyLaneIDs[1][lane], player);
 			tinyY += getUnsafe(tinyLaneIDs[2][lane], player);
 
-			mini += getUnsafe(miniLaneIDs[0][lane], player);
-			miniX += getUnsafe(miniLaneIDs[1][lane], player);
-			miniY += getUnsafe(miniLaneIDs[2][lane], player);
-
 			squish += getUnsafe(squishLaneIDs[lane], player);
 			stretch += getUnsafe(stretchLaneIDs[lane], player);
 		}
@@ -90,9 +78,6 @@ class Scale extends Modifier {
 
 		finalScaleX *= (1 - tiny * 0.5) * (1 - tinyX * 0.5);
 		finalScaleY *= (1 - tiny * 0.5) * (1 - tinyY * 0.5);
-
-		finalScaleX *= (1 - mini) * (1 - miniX);
-		finalScaleY *= (1 - mini) * (1 - miniY);
 
 		var sX = lerp(1.0, 2.0, squish);
 		var sY = 1.0 / sX;

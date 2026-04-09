@@ -1,4 +1,4 @@
-package modchart.engine.modifiers.list;
+package funkin.game.modchart.engine.modifiers.list;
 
 import flixel.FlxG;
 
