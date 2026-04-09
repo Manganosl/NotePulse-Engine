@@ -239,7 +239,6 @@ class Macro {
 					position.putWeak();
 					cameraBounds.putWeak();
 
-					#if (flixel >= "5.2.0")
 					for (_ in 0...indicesLength) {
 						final possibleTransform = transforms[Math.floor(_ / indicesLength * transforms.length)];
 
@@ -283,7 +282,6 @@ class Macro {
 							colorMultipliers.push(1);
 						}
 					}
-					#end
 				}
 			}),
 		};
