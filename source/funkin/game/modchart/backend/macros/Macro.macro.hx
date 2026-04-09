@@ -172,117 +172,126 @@ class Macro {
 					}
 				],
 				expr: macro {
-					// hay glitches en el alpha de las holds
-					// no es de aqui, ya llege a la conclusion de que no es dentro de aqui
-					// otra cosa, el alpha que agarran es de los batchs anteriores (no estos)
-					// tipo si yo pongo en el arrow renderer una alpha hardcodeadas, esa alpha se pone en las primeras holds
-					if (position == null)
-						position = point.set();
+                    // hay glitches en el alpha de las holds
+                    // no es de aqui, ya llege a la conclusion de que no es dentro de aqui
+                    // otra cosa, el alpha que agarran es de los batchs anteriores (no estos)
+                    // tipo si yo pongo en el arrow renderer una alpha hardcodeadas, esa alpha se pone en las primeras holds
+                    if (position == null)
+                        position = point.set();
 
-					if (cameraBounds == null)
-						cameraBounds = rect.set(0, 0, FlxG.width, FlxG.height);
+                    if (cameraBounds == null)
+                        cameraBounds = rect.set(0, 0, FlxG.width, FlxG.height);
 
-					var verticesLength:Int = vertices.length;
-					var prevVerticesLength:Int = this.vertices.length;
-					var numberOfVertices:Int = Std.int(verticesLength / 2);
-					var prevIndicesLength:Int = this.indices.length;
-					var prevUVTDataLength:Int = this.uvtData.length;
-					var prevNumberOfVertices:Int = this.numVertices;
-					var prevColorsPos:Int = colorsPosition;
-					var prevColorsLength:Int = this.colors.length;
+                    var verticesLength:Int = vertices.length;
+                    var prevVerticesLength:Int = this.vertices.length;
+                    var numberOfVertices:Int = Std.int(verticesLength / 2);
+                    var prevIndicesLength:Int = this.indices.length;
+                    var prevUVTDataLength:Int = this.uvtData.length;
+                    var prevNumberOfVertices:Int = this.numVertices;
+                    var prevColorsPos:Int = colorsPosition;
+                    var prevColorsLength:Int = this.colors.length;
 
-					var tempX:Float, tempY:Float;
-					var i:Int = 0;
-					var currentVertexPosition:Int = prevVerticesLength;
+                    var tempX:Float, tempY:Float;
+                    var i:Int = 0;
+                    var currentVertexPosition:Int = prevVerticesLength;
 
-					while (i < verticesLength) {
-						tempX = position.x + vertices[i];
-						tempY = position.y + vertices[i + 1];
+                    while (i < verticesLength) {
+                        tempX = position.x + vertices[i];
+                        tempY = position.y + vertices[i + 1];
 
-						this.vertices[currentVertexPosition++] = tempX;
-						this.vertices[currentVertexPosition++] = tempY;
+                        this.vertices[currentVertexPosition++] = tempX;
+                        this.vertices[currentVertexPosition++] = tempY;
 
-						if (i == 0) {
-							bounds.set(tempX, tempY, 0, 0);
-						} else {
-							inflateBounds(bounds, tempX, tempY);
-						}
+                        if (i == 0) {
+                            bounds.set(tempX, tempY, 0, 0);
+                        } else {
+                            inflateBounds(bounds, tempX, tempY);
+                        }
 
-						i = i + 2;
-					}
+                        i += 2;
+                    }
 
-					var indicesLength:Int = indices.length;
-					if (!cameraBounds.overlaps(bounds)) {
-						this.vertices.splice(this.vertices.length - verticesLength, verticesLength);
-					} else {
-						var uvtDataLength:Int = uvtData.length;
-						for (i in 0...uvtDataLength) {
-							this.uvtData[prevUVTDataLength + i] = uvtData[i];
-						}
+                    var indicesLength:Int = indices.length;
+                    
+                    if (!cameraBounds.overlaps(bounds)) {
+                        #if cpp
+                        this.vertices.resize(prevVerticesLength);
+                        #else
+                        this.vertices.splice(prevVerticesLength, verticesLength);
+                        #end
+                    } else {
+                        var uvtDataLength:Int = uvtData.length;
+                        for (i in 0...uvtDataLength) {
+                            this.uvtData[prevUVTDataLength + i] = uvtData[i];
+                        }
 
-						for (i in 0...indicesLength) {
-							this.indices[prevIndicesLength + i] = indices[i] + prevNumberOfVertices;
-						}
+                        for (i in 0...indicesLength) {
+                            this.indices[prevIndicesLength + i] = indices[i] + prevNumberOfVertices;
+                        }
 
-						if (colored) {
-							for (i in 0...numberOfVertices) {
-								this.colors[prevColorsLength + i] = 0;
-							}
+                        if (colored) {
+                            for (i in 0...numberOfVertices) {
+                                this.colors[prevColorsLength + i] = 0;
+                            }
+                            colorsPosition += numberOfVertices;
+                        }
 
-							colorsPosition += numberOfVertices;
-						}
+                        verticesPosition += verticesLength;
+                        indicesPosition += indicesLength;
+                    }
 
-						verticesPosition = verticesPosition + verticesLength;
-						indicesPosition = indicesPosition + indicesLength;
-					}
+                    position.putWeak();
+                    cameraBounds.putWeak();
+                    
+                    var transformsLength:Int = transforms.length;
+                    var transformRatio:Float = transformsLength / indicesLength;
+                    
+                    var doColors:Bool = colored || hasColorOffsets;
+                    
+                    if (doColors) {
+                        if (colorMultipliers == null) colorMultipliers = [];
+                        if (colorOffsets == null) colorOffsets = [];
+                    }
 
-					position.putWeak();
-					cameraBounds.putWeak();
+                    var alphaIdx:Int = alphas.length;
+                    var multIdx:Int = doColors ? colorMultipliers.length : 0;
+                    var offIdx:Int = doColors ? colorOffsets.length : 0;
 
-					for (_ in 0...indicesLength) {
-						final possibleTransform = transforms[Math.floor(_ / indicesLength * transforms.length)];
+                    for (_ in 0...indicesLength) {
+                        var tIndex:Int = Std.int(_ * transformRatio);
+                        var transform = transforms[tIndex];
 
-						var alphaMultiplier = 1.;
+                        if (transform != null) {
+                            alphas[alphaIdx++] = transform.alphaMultiplier;
 
-						if (possibleTransform != null)
-							alphaMultiplier = possibleTransform.alphaMultiplier;
+                            if (doColors) {
+                                colorMultipliers[multIdx++] = transform.redMultiplier;
+                                colorMultipliers[multIdx++] = transform.greenMultiplier;
+                                colorMultipliers[multIdx++] = transform.blueMultiplier;
+                                colorMultipliers[multIdx++] = 1.0;
 
-						alphas.push(alphaMultiplier);
-					}
+                                colorOffsets[offIdx++] = transform.redOffset;
+                                colorOffsets[offIdx++] = transform.greenOffset;
+                                colorOffsets[offIdx++] = transform.blueOffset;
+                                colorOffsets[offIdx++] = transform.alphaOffset;
+                            }
+                        } else {
+                            alphas[alphaIdx++] = 1.0;
 
-					if (colored || hasColorOffsets) {
-						if (colorMultipliers == null)
-							colorMultipliers = [];
+                            if (doColors) {
+                                colorMultipliers[multIdx++] = 1.0;
+                                colorMultipliers[multIdx++] = 1.0;
+                                colorMultipliers[multIdx++] = 1.0;
+                                colorMultipliers[multIdx++] = 1.0;
 
-						if (colorOffsets == null)
-							colorOffsets = [];
-
-						for (_ in 0...indicesLength) {
-							final transform = transforms[Math.floor(_ / indicesLength * transforms.length)];
-							if (transform != null) {
-								colorMultipliers.push(transform.redMultiplier);
-								colorMultipliers.push(transform.greenMultiplier);
-								colorMultipliers.push(transform.blueMultiplier);
-
-								colorOffsets.push(transform.redOffset);
-								colorOffsets.push(transform.greenOffset);
-								colorOffsets.push(transform.blueOffset);
-								colorOffsets.push(transform.alphaOffset);
-							} else {
-								colorMultipliers.push(1);
-								colorMultipliers.push(1);
-								colorMultipliers.push(1);
-
-								colorOffsets.push(0);
-								colorOffsets.push(0);
-								colorOffsets.push(0);
-								colorOffsets.push(0);
-							}
-
-							colorMultipliers.push(1);
-						}
-					}
-				}
+                                colorOffsets[offIdx++] = 0.0;
+                                colorOffsets[offIdx++] = 0.0;
+                                colorOffsets[offIdx++] = 0.0;
+                                colorOffsets[offIdx++] = 0.0;
+                            }
+                        }
+                    }
+                }
 			}),
 		};
 
