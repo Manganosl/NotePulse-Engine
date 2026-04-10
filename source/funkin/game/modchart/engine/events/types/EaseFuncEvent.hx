@@ -22,8 +22,6 @@ class EaseFuncEvent extends Event {
         this.endBeat = beat + length;
         this.beatLength = length;
         this.easeCallback = easeCallback;
-
-        this.target = 1;
         
         this.ease = easeType != null ? easeType : FlxEase.linear;
 
@@ -38,14 +36,11 @@ class EaseFuncEvent extends Event {
 
 		if (curBeat < endBeat) {
 			var progress = (curBeat - startBeat) / (endBeat - startBeat);
-			var out = FlxMath.lerp(entryPerc, target, ease(progress));
-			easeCallback(this, out, curBeat);
-            trace(this.type + " - " + out + " - " + curBeat);
+			easeCallback(this, ease(progress), curBeat);
 			fired = false;
 		} else if (curBeat >= endBeat) {
 			fired = true;
-			easeCallback(this, ease(1) * target, curBeat);
-            trace(this.type + " - " + ease(1) * target + " - " + curBeat);
+			easeCallback(this, ease(1), curBeat);
 		}
 	}
 }
