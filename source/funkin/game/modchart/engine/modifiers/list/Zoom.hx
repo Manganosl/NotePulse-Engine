@@ -37,8 +37,8 @@ class Zoom extends Modifier {
 	}
 
 	inline function updatePercent(params:ModifierParameters) {
-		__curPercent = 1 + ((-getPercent('zoom', params.player) + getPercent('mini', params.player)) * 0.5);
-		__localPercent = 1 + ((-getPercent('localZoom', params.player) + getPercent('localMini', params.player)) * 0.5);
+		__curPercent = 1 + ((-getPercent('zoom', params.player) - getPercent('mini', params.player)) * 0.5);
+		__localPercent = 1 + ((-getPercent('localZoom', params.player) - getPercent('localMini', params.player)) * 0.5);
 	}
 
 	override public function shouldRun(params:ModifierParameters):Bool
