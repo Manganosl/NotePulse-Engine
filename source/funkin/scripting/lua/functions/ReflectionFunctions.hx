@@ -70,6 +70,7 @@ class ReflectionFunctions
 			return value;
 		});
 		Lua_helper.add_callback(lua, "getPropertyFromGroup", function(obj:String, index:Int, variable:Dynamic, ?allowMaps:Bool = false) {
+			if(obj == "playerStrums" || obj == "opponentStrums" || obj == "gfStrums") obj += ".members";
 			var split:Array<String> = obj.split('.');
 			var realObject:Dynamic = null;
 			if(split.length > 1)
@@ -96,6 +97,7 @@ class ReflectionFunctions
 			return null;
 		});
 		Lua_helper.add_callback(lua, "setPropertyFromGroup", function(obj:String, index:Int, variable:Dynamic, value:Dynamic, ?allowMaps:Bool = false) {
+			if(obj == "playerStrums" || obj == "opponentStrums" || obj == "gfStrums") obj += ".members";
 			var split:Array<String> = obj.split('.');
 			var realObject:Dynamic = null;
 			if(split.length > 1)
