@@ -809,8 +809,8 @@ class PlayState extends MusicBeatState
 
 		callOnScripts('preInitModchart');
 
+		modManager = new Manager();
 		if(SONG.nativeModchart){
-			modManager = new Manager();
 			add(modManager);
 
 			var fields = 1;

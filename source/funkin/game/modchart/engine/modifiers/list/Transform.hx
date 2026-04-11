@@ -20,17 +20,17 @@ class Transform extends Modifier {
 	public function new(pf) {
 		super(pf);
 
-		xID = findID('x');
-		yID = findID('y');
-		zID = findID('z');
+		xID = (findID('x') + findID('transformx'));
+		yID = (findID('y') + findID('transformy'));
+		zID = (findID('z') + findID('transformz'));
 
 		xOID = findID('xoffset');
 		yOID = findID('yoffset');
 		zOID = findID('zoffset');
 
-		xLaneIDs = [for (l in 0...16) findID('x' + l)];
-		yLaneIDs = [for (l in 0...16) findID('y' + l)];
-		zLaneIDs = [for (l in 0...16) findID('z' + l)];
+		xLaneIDs = [for (l in 0...16) (findID('x' + l) + findID('transform' + l + 'x'))];
+		yLaneIDs = [for (l in 0...16) (findID('y' + l) + findID('transform' + l + 'y'))];
+		zLaneIDs = [for (l in 0...16) (findID('z' + l) + findID('transform' + l + 'z'))];
 	}
 
 	override public function render(curPos:Vector3, params:ModifierParameters) {
