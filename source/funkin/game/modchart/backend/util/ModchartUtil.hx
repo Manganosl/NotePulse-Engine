@@ -258,11 +258,11 @@ using StringTools;
 
 	@:pure
 	public static inline function sin(num:Float)
-		return FlxMath.fastSin(num);
+		return Math.sin(num);
 
 	@:pure
 	public static inline function cos(num:Float)
-		return FlxMath.fastCos(num);
+		return Math.cos(num);
 
 	@:pure
 	public static inline function tan(num:Float)
