@@ -59,7 +59,7 @@ class HScript implements HscriptInterface {
 		// OpenFL & Lime classes
 		"Assets"					=> openfl.utils.Assets,
 		"Application"				=> lime.app.Application,
-		"Main" 						=> funkin.Main,
+		"Main" 						=> Main,
 
 		//Flixel Classes
 		"FlxG" 						=> flixel.FlxG,

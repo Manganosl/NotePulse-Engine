@@ -1,4 +1,4 @@
-package funkin;
+package;
 
 import flixel.FlxState;
 import funkin.backend.ExtraKeysHandler;

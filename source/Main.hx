@@ -1,4 +1,4 @@
-package funkin;
+package;
 
 #if android
 import android.content.Context;
@@ -41,7 +41,7 @@ class Main extends Sprite
 	var game = {
 		width: 1280, // WINDOW width
 		height: 720, // WINDOW height
-		initialState: funkin.Init, // initial game state
+		initialState: Init, // initial game state
 		zoom: -1.0, // game state bounds
 		framerate: 60, // default framerate
 		skipSplash: true, // if the default flixel splash screen should be skipped

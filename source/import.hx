@@ -4,8 +4,6 @@
 import funkin.backend.Discord;
 #end
 
-import funkin.Main;
-
 //Psych
 #if LUA_ALLOWED
 import llua.*;
