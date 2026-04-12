@@ -8,6 +8,10 @@ class Transform extends Modifier {
 	var yID = 0;
 	var zID = 0;
 
+	var transformxID = 0;
+	var transformyID = 0;
+	var transformzID = 0;
+
 	var xOID = 0;
 	var yOID = 0;
 	var zOID = 0;
@@ -17,29 +21,41 @@ class Transform extends Modifier {
 	var yLaneIDs:Array<Int>;
 	var zLaneIDs:Array<Int>;
 
+	var transformxLaneIDs:Array<Int>;
+	var transformyLaneIDs:Array<Int>;
+	var transformzLaneIDs:Array<Int>;
+
 	public function new(pf) {
 		super(pf);
 
-		xID = (findID('x') + findID('transformx'));
-		yID = (findID('y') + findID('transformy'));
-		zID = (findID('z') + findID('transformz'));
+		xID = findID('x');
+		yID = findID('y');
+		zID = findID('z');
+
+		transformxID = findID('transformx');
+		transformyID = findID('transformy');
+		transformzID = findID('transformz');
 
 		xOID = findID('xoffset');
 		yOID = findID('yoffset');
 		zOID = findID('zoffset');
 
-		xLaneIDs = [for (l in 0...16) (findID('x' + l) + findID('transform' + l + 'x'))];
-		yLaneIDs = [for (l in 0...16) (findID('y' + l) + findID('transform' + l + 'y'))];
-		zLaneIDs = [for (l in 0...16) (findID('z' + l) + findID('transform' + l + 'z'))];
+		xLaneIDs = [for (l in 0...16) findID('x' + l)];
+		yLaneIDs = [for (l in 0...16) findID('y' + l)];
+		zLaneIDs = [for (l in 0...16) findID('z' + l)];
+
+		transformxLaneIDs = [for (l in 0...16) findID('transform' + l + "x")];
+		transformyLaneIDs = [for (l in 0...16) findID('transform' + l + "y")];
+		transformzLaneIDs = [for (l in 0...16) findID('transform' + l + "z")];
 	}
 
 	override public function render(curPos:Vector3, params:ModifierParameters) {
 		var player = params.player;
 		var lane = params.lane;
 
-		curPos.x += getUnsafe(xID, player) + getUnsafe(xOID, player) + getUnsafe(xLaneIDs[lane], player);
-		curPos.y += getUnsafe(yID, player) + getUnsafe(yOID, player) + getUnsafe(yLaneIDs[lane], player);
-		curPos.z += getUnsafe(zID, player) + getUnsafe(zOID, player) + getUnsafe(zLaneIDs[lane], player);
+		curPos.x += getUnsafe(xID, player) + getUnsafe(transformxID, player) + getUnsafe(xOID, player) + getUnsafe(xLaneIDs[lane], player) + getUnsafe(transformxLaneIDs[lane], player);
+		curPos.y += getUnsafe(yID, player) + getUnsafe(transformyID, player) + getUnsafe(yOID, player) + getUnsafe(yLaneIDs[lane], player) + getUnsafe(transformyLaneIDs[lane], player);
+		curPos.z += getUnsafe(zID, player) + getUnsafe(transformzID, player) + getUnsafe(zOID, player) + getUnsafe(zLaneIDs[lane], player) + getUnsafe(transformzLaneIDs[lane], player);
 
 		return curPos;
 	}
