@@ -183,7 +183,7 @@ final class Manager extends FlxBasic {
 		iteratePlayfields((pf) -> pf.easeFunc(beat, length, callback, easeFunc), 0);
 
 	public inline function queueEaseFunc(step:Float, stepToEnd:Float, easeFunc:EaseFunction, callback:(Event, Float, Float) -> Void)
-		iteratePlayfields((pf) -> pf.easeFunc(stepToBeat(step), stepToBeat(stepToEnd - step), callback, easeFunc), 0);
+		easeFunc(stepToBeat(step), stepToBeat(stepToEnd - step), easeFunc, (ev, val, beat) -> func(ev, val, beat * 4), field);
 		
 
 	/**

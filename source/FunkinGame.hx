@@ -94,7 +94,7 @@ class FunkinGame extends FlxGame {
 
 class FunkinSoundFrontEnd extends SoundFrontEnd
 {
-	override function changeVolume(Amount:Float)
+	override function changeVolume(Amount:Float) // This somehow fixes volume not saving?
 	{
 		muted = false;
 		volume += Amount;
