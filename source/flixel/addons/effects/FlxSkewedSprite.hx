@@ -8,7 +8,6 @@ import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
 import flixel.util.FlxDestroyUtil;
-import funkin.backend.utils.CustomShader;
 
 /**
  * @author Zaphod
@@ -87,7 +86,7 @@ class FlxSkewedSprite extends FlxSprite
 		}
 
 		_matrix.translate(_point.x, _point.y);
-		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, ((shader is CustomShader) ? shader.shader : shader));
+		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
 	}
 
 	function updateSkewMatrix():Void

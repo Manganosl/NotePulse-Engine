@@ -98,7 +98,7 @@ class HScript implements HscriptInterface {
 		#if PRETTY_TRACE "Log" 		=> funkin.backend.Log, #end
 		"CoolUtil"					=> funkin.backend.utils.CoolUtil,
 		"WindowUtil" 				=> funkin.backend.utils.WindowUtil,
-		"CustomShader" 				=> funkin.backend.utils.CustomShader,
+		"CustomShader" 				=> funkin.game.shaders.CustomShader,
 		"NdllUtil" 					=> funkin.backend.utils.NdllUtil,
 		"LuaUtils" 					=> funkin.scripting.LuaUtils,
 		"Manager" 					=> funkin.game.modchart.Manager,

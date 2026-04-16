@@ -15,7 +15,7 @@ import funkin.scripting.HScript;
 import flixel.addons.display.FlxRuntimeShader;
 #end
 
-import funkin.backend.utils.CustomShader;
+import funkin.game.shaders.CustomShader;
 
 class MusicBeatState extends FlxUIState
 {

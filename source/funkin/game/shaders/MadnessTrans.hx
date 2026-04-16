@@ -4,7 +4,7 @@ import flixel.graphics.tile.FlxGraphicsShader;
 
 //too lazy to make this proper
 //
-class MadnessTrans extends FlxGraphicsShader
+class MadnessTrans extends FunkinShader
 {
     @:isVar public var fade(get,set):Float = 0;
     @:noCompletion function set_fade(v:Float):Float

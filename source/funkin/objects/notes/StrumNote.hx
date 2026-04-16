@@ -18,7 +18,7 @@ class StrumNote extends ModchartableSprite {
 	public var noteData:Int = 0;
 	public var direction:Float = 90;
 	public var downScroll:Bool = false;
-	public var cpuControlled:Bool = true;
+	public var cpuControlled(default, set):Bool = true;
 	public var inControl:Bool = true;
 	public var noteHitCallback:Note->Void;
 	public var noteMissCallback:Note->Void;
@@ -38,6 +38,12 @@ class StrumNote extends ModchartableSprite {
 			reloadNote();
 		}
 		return value;
+	}
+
+	private function set_cpuControlled(value:Bool){
+		playAnim('static');
+		resetAnim = 0;
+		return cpuControlled = value;
 	}
 
 	public var useRGBShader:Bool = true;
@@ -224,6 +230,16 @@ class StrumNote extends ModchartableSprite {
 
 	public function getAnimSet(index:Int) {
 		return ExtraKeysHandler.instance.data.animations[index];
+	}
+
+	override function set_camera(value:FlxCamera){
+		sustainSplash.camera = value;
+		return camera = value;
+	}
+
+	override function set_cameras(value:Array<FlxCamera>){
+		sustainSplash.cameras = value;
+		return cameras = value;
 	}
 }
 
