@@ -234,12 +234,12 @@ class StrumNote extends ModchartableSprite {
 
 	override function set_camera(value:FlxCamera){
 		sustainSplash.camera = value;
-		return camera = value;
+		return super.set_camera(value);
 	}
 
 	override function set_cameras(value:Array<FlxCamera>){
 		sustainSplash.cameras = value;
-		return cameras = value;
+		return super.set_cameras(value);
 	}
 }
 
