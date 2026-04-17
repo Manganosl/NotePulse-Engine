@@ -5,6 +5,7 @@ import android.content.Context;
 #end
 
 import funkin.objects.debug.FunkinDebugDisplay;
+import funkin.objects.debug.FunkinDebugPrint;
 
 import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
@@ -48,6 +49,7 @@ class Main extends Sprite
 		startFullscreen: false // if the game should start at fullscreen mode
 	};
 	public static var fpsVar:FunkinDebugDisplay;
+	public static var traces:FunkinDebugPrint;
 	
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
@@ -112,6 +114,9 @@ class Main extends Sprite
 		ClientPrefs.loadDefaultKeys();
 
 		addChild(new FunkinGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
+
+		traces = new FunkinDebugPrint();
+		addChild(traces);
 
 		#if !mobile
 		fpsVar = new FunkinDebugDisplay(10, 10, 0xFFFFFF);

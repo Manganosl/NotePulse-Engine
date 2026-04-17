@@ -429,13 +429,6 @@ class PlayState extends MusicBeatState
 
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
-
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		if(luaDebugGroup == null){
-			luaDebugGroup = new FlxTypedGroup<funkin.scripting.lua.DebugLuaText>();
-			insert(99999999, luaDebugGroup);
-		}
-		#end
 		
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		grpSustainSplashes = new FlxTypedGroup<SustainSplash>();
@@ -3336,55 +3329,46 @@ class PlayState extends MusicBeatState
 
 	private function keyPressed(key:Int)
 	{
-		if(cpuControlled || paused || inCutscene || key < 0 || key >= playerStrums.length || !generatedMusic || endingSong) return;
-
+		if (cpuControlled || paused || inCutscene || key < 0 || key >= playerStrums.length || !generatedMusic || endingSong) return;
+		
 		var ret:Dynamic = callOnScripts('onKeyPressPre', [key]);
 		if(ret == LuaUtils.Function_Stop) return;
-
+		
+		// more accurate hit time for the ratings?
 		var lastTime:Float = Conductor.songPosition;
-		if(Conductor.songPosition >= 0) Conductor.songPosition = FlxG.sound.music.time;
-
-		var plrInputNotes:Array<Note> = notes.members.filter(function(n:Note):Bool {
-			var canHit:Bool = n.strum.inControl && n.canBeHit && !n.strum.cpuControlled && !n.tooLate && !n.wasGoodHit && !n.blockHit;
-			return n != null && canHit && !n.isSustainNote && n.noteData == key;
-		});
-		plrInputNotes.sort(sortHitNotes);
-
-		var shouldMiss:Bool = !ClientPrefs.data.ghostTapping;
-
-		if (plrInputNotes.length != 0) {
-			var funnyNote:Note = plrInputNotes[0];
-
-			if (plrInputNotes.length > 1) {
-				var doubleNote:Note = plrInputNotes[1];
-
-				if (doubleNote.noteData == funnyNote.noteData) {
-					if (Math.abs(doubleNote.strumTime - funnyNote.strumTime) < 1.0){
-						if(funnyNote.strum == doubleNote.strum) invalidateNote(doubleNote);
-						else doubleNote.strum.noteHitCallback(doubleNote);
-					} else if (doubleNote.strumTime < funnyNote.strumTime)
-					{
-						funnyNote = doubleNote;
-					}
+		if (Conductor.songPosition >= 0 && !startingSong && FlxG.sound.music?.playing)
+			Conductor.songPosition = FlxG.sound.music.time + Conductor.offset;
+		
+		// obtain notes that the player can hit
+		var highestNote:Note = null;
+		for (n in notes) {
+			if (n != null && !n.isSustainNote && n.noteData == key && n.canBeHit && !n.strum.cpuControlled && !n.tooLate && !n.wasGoodHit && !n.blockHit) {
+				if (highestNote == null || n.hitPriority > highestNote.hitPriority || (n.hitPriority == highestNote.hitPriority && n.strumTime < highestNote.strumTime))
+					highestNote = n;
+			}
+		}
+		
+		if (highestNote != null) {
+			goodNoteHit(highestNote);
+		} else {
+			for(field in PlayField.fields){
+				var note:StrumNote = field.members[key];
+				if (note != null && !note.cpuControlled && note.animation.curAnim.name != 'confirm') {
+					note.playAnim("pressed", true);
+					note.resetAnim = 0;
 				}
 			}
-			funnyNote.strum.noteHitCallback(funnyNote);
-		}
-		else if(shouldMiss)
-		{
-			callOnScripts('onGhostTap', [key]);
-			noteMissPress(key);
-		}
-
-		Conductor.songPosition = lastTime;
-
-		for(field in PlayField.fields){
-			var note:StrumNote = field.members[key];
-			if (note != null && !note.cpuControlled && note.animation.curAnim.name != 'confirm') {
-				note.playAnim("pressed", true);
-				note.resetAnim = 0;
+			
+			if (ClientPrefs.data.ghostTapping) {
+				callOnScripts('onGhostTap', [key]);
+			} else {
+				noteMissPress(key);
 			}
 		}
+		
+		//more accurate hit time for the ratings? part 2 (Now that the calculations are done, go back to the time it was before for not causing a note stutter)
+		Conductor.songPosition = lastTime;
+		
 		callOnScripts('onKeyPress', [key]);
 	}
 

@@ -12,10 +12,6 @@
 - [X] Fix Modchart Editor crashing. **Fixed 10/03/2026**
 - [X] Flx Notes not regenerating in Modchart Editor. **Fixed 10/03/2026**
 
-## 13/03/2026
-- [ ] Add winning health icons
-- [ ] Add animated health icons
-
 ## 21/03/2026
 - [X] Fix ghost animations not working correctly with characters using texture atlas. **Fixed 22/03/2026**
 - [X] Reimplement multiatlas on characters. **Done 22/03/2026**

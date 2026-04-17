@@ -79,7 +79,7 @@ class Beat extends Modifier {
 		final offset = getUnsafe(beatOffsetIDs[axisIdx], player);
 		final mult = getUnsafe(beatMultIDs[axisIdx], player);
 
-		final shift = beatMath(params, offset, 1 + mult, speed) * amount;
+		final shift = beatMath(params, offset, 4 + mult, speed) * amount;
 
 		if (realAxisIdx == 0) curPos.x += shift;
 		else if (realAxisIdx == 1) curPos.y += shift;

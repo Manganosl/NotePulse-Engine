@@ -45,7 +45,6 @@ import funkin.scripting.LuaUtils.LuaTweenOptions;
 #if HSCRIPT_ALLOWED
 import funkin.scripting.HScript;
 #end
-import funkin.scripting.lua.DebugLuaText;
 import funkin.scripting.objects.ModchartSprite;
 
 import flixel.input.keyboard.FlxKey;

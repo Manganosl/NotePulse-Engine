@@ -24,15 +24,7 @@ class ScriptedState extends MusicBeatState
 		this.initialScriptPath = Paths.modState(scriptPath);
 	}
 
-	override public function create():Void
-	{
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		if(luaDebugGroup == null){
-			luaDebugGroup = new FlxTypedGroup<funkin.scripting.lua.DebugLuaText>();
-			insert(99999999, luaDebugGroup);
-		}
-		#end
-		
+	override public function create():Void {
 		if (initialScriptPath != null)
 		{
 			startHScript(initialScriptPath);

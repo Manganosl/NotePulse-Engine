@@ -15,26 +15,15 @@ class MusicBeatSubstate extends FlxSubState
 	#end
 
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	public function addTextToDebug(text:String, color:FlxColor, ?trace:Bool = false, ?type:String) {
-		var newText:funkin.scripting.lua.DebugLuaText = luaDebugGroup.recycle(funkin.scripting.lua.DebugLuaText);
-		newText.text = text;
-		newText.color = color;
-		newText.disableTime = 6;
-		newText.alpha = 1;
-		newText.setPosition(10, 8 - newText.height);
+	public function addTextToDebug(text:String, color:FlxColor, ?doTrace:Bool = false, ?type:String) {
+		Main.traces?.displayLog(text, color, 15);
 
-		luaDebugGroup.forEachAlive(function(spr:funkin.scripting.lua.DebugLuaText) {
-			spr.y += newText.height + 2;
-		});
-		luaDebugGroup.add(newText);
-
-		if(trace){
-			if(type == "trace" || type == null) Log.hxTrace(text);
+		if(doTrace){
+			if(type == "trace" || type == null) trace(text);
 			if(type == "error") error(text);
 			if(type == "warn") warn(text);
 			if(type == "info") info(text);
 		}
-
 	}
 	#end
 
@@ -114,9 +103,6 @@ class MusicBeatSubstate extends FlxSubState
 
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
-	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	private var luaDebugGroup:FlxTypedGroup<funkin.scripting.lua.DebugLuaText>;
-	#end
 
 	private var curStep:Int = 0;
 	private var curBeat:Int = 0;
@@ -131,17 +117,6 @@ class MusicBeatSubstate extends FlxSubState
 
 	override function destroy() {
 		super.destroy();
-	}
-
-	override function create() {
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		if(luaDebugGroup == null){
-			luaDebugGroup = new FlxTypedGroup<funkin.scripting.lua.DebugLuaText>();
-			//luaDebugGroup.cameras = FlxG.cameras.list[FlxG.cameras.list.length - 1];
-			insert(99999999, luaDebugGroup);
-		}
-		#end
-		super.create();
 	}
 
 	inline function get_controls():Controls
