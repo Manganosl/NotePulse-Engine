@@ -3311,8 +3311,7 @@ class PlayState extends MusicBeatState
 
 	//// Keys ////
 
-	private function onKeyPress(event:KeyboardEvent):Void
-	{
+	private function onKeyPress(event:KeyboardEvent):Void {
 
 		var eventKey:FlxKey = event.keyCode;
 		var key:Int = getKeyFromEvent(keysArray, eventKey);
@@ -3327,29 +3326,37 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	private function keyPressed(key:Int)
-	{
+	private function keyPressed(key:Int) {
 		if (cpuControlled || paused || inCutscene || key < 0 || key >= playerStrums.length || !generatedMusic || endingSong) return;
 		
 		var ret:Dynamic = callOnScripts('onKeyPressPre', [key]);
 		if(ret == LuaUtils.Function_Stop) return;
 		
-		// more accurate hit time for the ratings?
 		var lastTime:Float = Conductor.songPosition;
 		if (Conductor.songPosition >= 0 && !startingSong && FlxG.sound.music?.playing)
 			Conductor.songPosition = FlxG.sound.music.time + Conductor.offset;
 		
-		// obtain notes that the player can hit
-		var highestNote:Note = null;
-		for (n in notes) {
-			if (n != null && !n.isSustainNote && n.noteData == key && n.canBeHit && !n.strum.cpuControlled && !n.tooLate && !n.wasGoodHit && !n.blockHit) {
-				if (highestNote == null || n.hitPriority > highestNote.hitPriority || (n.hitPriority == highestNote.hitPriority && n.strumTime < highestNote.strumTime))
-					highestNote = n;
+		var notesToHit:Array<Note> = [];
+		
+		for (field in PlayField.fields) {
+			var highestNote:Note = null;
+			
+			for (n in notes) {
+				if (n != null && n.playField == field && !n.isSustainNote && n.noteData == key && n.canBeHit && !n.strum.cpuControlled && !n.tooLate && !n.wasGoodHit && !n.blockHit) {
+					if (highestNote == null || n.hitPriority > highestNote.hitPriority || (n.hitPriority == highestNote.hitPriority && n.strumTime < highestNote.strumTime))
+						highestNote = n;
+				}
+			}
+			
+			if (highestNote != null) {
+				notesToHit.push(highestNote);
 			}
 		}
-		
-		if (highestNote != null) {
-			goodNoteHit(highestNote);
+
+		if (notesToHit.length > 0) {
+			for (note in notesToHit) {
+				goodNoteHit(note);
+			}
 		} else {
 			for(field in PlayField.fields){
 				var note:StrumNote = field.members[key];
@@ -3366,9 +3373,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		//more accurate hit time for the ratings? part 2 (Now that the calculations are done, go back to the time it was before for not causing a note stutter)
 		Conductor.songPosition = lastTime;
-		
 		callOnScripts('onKeyPress', [key]);
 	}
 
