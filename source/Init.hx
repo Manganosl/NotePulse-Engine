@@ -80,7 +80,10 @@ class Init extends FlxState {
 		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F2)
 			funkin.backend.utils.WindowUtil.showConsole();
 
-		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5){
+		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F5)
+			MusicBeatState.resetState();
+
+		if(FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.F10){
 			Mods.currentModDirectory = null;
 			Mods.currentLoadedMod = null;
 			Mods.modPack = null;
