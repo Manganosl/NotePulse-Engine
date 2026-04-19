@@ -608,7 +608,6 @@ class PlayState extends MusicBeatState
 		noteGroup = new FlxTypedGroup<FlxBasic>();
 		add(noteGroup);
 		uiGroup = new FlxSpriteGroup();
-		add(uiGroup);
 
 		if(ClientPrefs.data.judgecounter){
 			judgementCounter = new FlxText(20, 0, 0, "", 18);
@@ -777,6 +776,22 @@ class PlayState extends MusicBeatState
 			
 		#end
 
+		callOnScripts('preInitModchart');
+
+		modManager = new Manager();
+		if(SONG.nativeModchart){
+			add(modManager);
+
+			var fields = 1;
+			while(fields != SONG.playfields){
+				fields++;
+				modManager.addPlayfield();
+			}
+
+			for(func in modManagerEvArray) func();
+		}
+		add(uiGroup);
+
 		startCallback();
 		RecalculateRating();
 
@@ -799,21 +814,6 @@ class PlayState extends MusicBeatState
 		setOnScripts("isPlayerOpponent", isPlayerOpponent);
 		
 		stagesFunc(function(stage:BaseStage) stage.createPost());
-
-		callOnScripts('preInitModchart');
-
-		modManager = new Manager();
-		if(SONG.nativeModchart){
-			add(modManager);
-
-			var fields = 1;
-			while(fields != SONG.playfields){
-				fields++;
-				modManager.addPlayfield();
-			}
-
-			for(func in modManagerEvArray) func();
-		}
 
 		callOnScripts('initModchart');
 		callOnScripts('onCreatePost');
