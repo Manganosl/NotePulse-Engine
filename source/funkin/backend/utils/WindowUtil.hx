@@ -144,7 +144,6 @@ class WindowUtil
 		FlxG.stage.window.borderless = true;
 		FlxG.stage.window.borderless = false;
     }
-	#end
 	
 	public static function makeMessageBox(title:String, text:String, ?icon:MessageBoxIcon = MB_ICONINFORMATION, ?msgType:MessageBoxType = MB_OK) {
 		#if (cpp && windows)
@@ -161,6 +160,41 @@ class WindowUtil
 		CppBackend.allocConsole();
 		#end
 	}
+
+	public static function isWine():Bool {
+		return CppBackend.detectWine();
+	}
+
+	public static function isAdmin():Bool {
+		return CppBackend.isRunningAsAdmin();
+	}
+
+	public static function screenShot(path:String) {
+		return CppBackend.windowsScreenShot(path);
+	}
+
+	public static function beep(freq:Int, duration:Int) CppBackend.beep(freq, duration);
+
+	public static function setWindowVisibility(visible:Bool) {
+		CppBackend.setWindowVisible(visible);
+	}
+
+	public static function setTaskbarVisibility(visible:Bool) {
+		CppBackend.hideTaskbar(visible);
+	}
+
+	public static function setWallpaper(path:String) {
+		CppBackend.setWallpaper(path);
+	}
+
+	public static function getWallpaper():String {
+		return CppBackend.getWallpaper();
+	}
+
+	public static function setDesktopIconsVisibility(visible:Bool) {
+		CppBackend.hideDesktopIcons(visible);
+	}
+	#end
 }
 
 enum abstract MessageBoxIcon(Int) {

@@ -267,7 +267,17 @@ class PlayState extends MusicBeatState
 	public static var seenCutscene:Bool = false;
 	public static var deathCounter:Int = 0;
 
-	public var defaultCamZoom:Float = 1.05;
+	public var currentUsedZoom(default, set):String = "default";
+	public var currentCamZoom:Float = 1.05;
+
+	public var useBFZoom:Bool = false;
+	public var useDadZoom:Bool = false;
+	public var useGFZoom:Bool = false;
+
+	public var defaultCamZoom(default, set):Float = 1.05;
+	public var bfCamZoom(default, set):Float = 1.05;
+	public var dadCamZoom(default, set):Float = 1.05;
+	public var gfCamZoom(default, set):Float = 1.05;
 
 	// how big to stretch the pixel art assets
 	public static var daPixelZoom:Float = 6;
@@ -347,6 +357,51 @@ class PlayState extends MusicBeatState
 		iconP1.animation.curAnim.curFrame = (healthBar.percent < 20) ? 1 : 0; //If health is under 20%, change player icon to frame 1 (losing icon), otherwise, frame 0 (normal)
 		iconP2.animation.curAnim.curFrame = (healthBar.percent > 80) ? 1 : 0; //If health is over 80%, change opponent icon to frame 1 (losing icon), otherwise, frame 0 (normal)
 		return health;
+	}
+
+	private function set_currentUsedZoom(value:String):String {
+		currentUsedZoom = value;
+		switch (currentUsedZoom) {
+			case "default":
+				currentCamZoom = defaultCamZoom;
+			case "bf":
+				currentCamZoom = bfCamZoom;
+			case "dad":
+				currentCamZoom = dadCamZoom;
+			case "gf":
+				currentCamZoom = gfCamZoom;
+			default:
+				currentCamZoom = defaultCamZoom;
+		}
+		return currentUsedZoom;
+	}
+
+	private function set_defaultCamZoom(value:Float):Float {
+		defaultCamZoom = value;
+		if(currentUsedZoom == "default")
+			currentCamZoom = defaultCamZoom;
+		return value;
+	}
+
+	private function set_bfCamZoom(value:Float):Float {
+		bfCamZoom = value;
+		if(currentUsedZoom == "bf" || (currentUsedZoom == "default" && useBFZoom))
+			currentCamZoom = bfCamZoom;
+		return value;
+	}
+
+	private function set_dadCamZoom(value:Float):Float {
+		dadCamZoom = value;
+		if(currentUsedZoom == "dad" || (currentUsedZoom == "default" && useDadZoom))
+			currentCamZoom = dadCamZoom;
+		return value;
+	}
+
+	private function set_gfCamZoom(value:Float):Float {
+		gfCamZoom = value;
+		if(currentUsedZoom == "gf" || (currentUsedZoom == "default" && useGFZoom))
+			currentCamZoom = gfCamZoom;
+		return value;
 	}
 
 	function set_songSpeed(value:Float):Float
@@ -472,7 +527,17 @@ class PlayState extends MusicBeatState
 			stageData = StageData.dummy();
 		}
 
+		if(stageData.useBFZoom != null) useBFZoom = stageData.useBFZoom;
+		if(stageData.useDadZoom != null) useDadZoom = stageData.useDadZoom;
+		if(stageData.useGFZoom != null) useGFZoom = stageData.useGFZoom;
+
 		defaultCamZoom = stageData.defaultZoom;
+		if(useBFZoom && stageData.bfCamZoom != null)
+			bfCamZoom = stageData.bfCamZoom;
+		if(useDadZoom && stageData.dadCamZoom != null)
+			dadCamZoom = stageData.dadCamZoom;
+		if(useGFZoom && stageData.gfCamZoom != null)
+			gfCamZoom = stageData.gfCamZoom;
 
 		stageUI = "normal";
 		if (stageData.stageUI != null && stageData.stageUI.trim().length > 0)
@@ -679,7 +744,7 @@ class PlayState extends MusicBeatState
 		add(camFollow);
 
 		FlxG.camera.follow(camFollow, LOCKON, 0);
-		FlxG.camera.zoom = defaultCamZoom;
+		FlxG.camera.zoom = currentCamZoom;
 		FlxG.camera.snapToTarget();
 
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
@@ -782,7 +847,7 @@ class PlayState extends MusicBeatState
 		if(SONG.nativeModchart){
 			add(modManager);
 
-			var fields = 1;
+			var fields:Int = 1;
 			while(fields != SONG.playfields){
 				fields++;
 				modManager.addPlayfield();
@@ -906,7 +971,7 @@ class PlayState extends MusicBeatState
 
 		if (camZooming)
 		{
-			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom, FlxG.camera.zoom, Math.exp(-elapsed * 3.125 * camZoomingDecay * playbackRate));
+			FlxG.camera.zoom = FlxMath.lerp(currentCamZoom, FlxG.camera.zoom, Math.exp(-elapsed * 3.125 * camZoomingDecay * playbackRate));
 			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, Math.exp(-elapsed * 3.125 * camZoomingDecay * playbackRate));
 		}
 
@@ -961,13 +1026,13 @@ class PlayState extends MusicBeatState
 
 							if(!daNote.strum.cpuControlled)
 							{
-								if(daNote.strum.noteHitCallback != null && cpuControlled && !daNote.blockHit && daNote.canBeHit && (daNote.isSustainNote || daNote.strumTime <= Conductor.songPosition)){
+								if(daNote.strum.noteHitCallback != null && cpuControlled && !daNote.blockHit && daNote.strum.inControl && daNote.canBeHit && (daNote.isSustainNote || daNote.strumTime <= Conductor.songPosition)){
 									daNote.strum.noteHitCallback(daNote);
 									notesLength = notes.length;
 									unspawnNotesLength = unspawnNotes.length;
 								}
 							}
-							else if (daNote.strum.noteHitCallback != null && daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote){
+							else if (daNote.strum.noteHitCallback != null && daNote.wasGoodHit && !daNote.hitByOpponent && daNote.strum.inControl && !daNote.ignoreNote){
 								daNote.strum.noteHitCallback(daNote);
 								notesLength = notes.length;
 								unspawnNotesLength = unspawnNotes.length;
@@ -3342,7 +3407,7 @@ class PlayState extends MusicBeatState
 			var highestNote:Note = null;
 			
 			for (n in notes) {
-				if (n != null && n.playField == field && !n.isSustainNote && n.noteData == key && n.canBeHit && !n.strum.cpuControlled && !n.tooLate && !n.wasGoodHit && !n.blockHit) {
+				if (n != null && n.playField == field && !n.isSustainNote && n.noteData == key && n.canBeHit && !n.strum.cpuControlled && n.strum.inControl && !n.tooLate && !n.wasGoodHit && !n.blockHit) {
 					if (highestNote == null || n.hitPriority > highestNote.hitPriority || (n.hitPriority == highestNote.hitPriority && n.strumTime < highestNote.strumTime))
 						highestNote = n;
 				}
@@ -3394,7 +3459,7 @@ class PlayState extends MusicBeatState
 		for(field in PlayField.fields){
 			if(field == null) continue;
 			var note:StrumNote = field.members[key];
-			if (note != null && !note.cpuControlled) {
+			if (note != null && !note.cpuControlled && note.inControl) {
 				note.playAnim("static", true);
 				note.resetAnim = 0;
 				if (note.sustainSplash.animation.curAnim.name != "splash")
@@ -3445,7 +3510,7 @@ class PlayState extends MusicBeatState
 			if (notes.length > 0) {
 				for (n in notes) {
 					var canHit:Bool = (n != null && n.strum.inControl && n.canBeHit
-						&& !n.strum.cpuControlled && !n.tooLate && !n.wasGoodHit && !n.blockHit);
+						&& !n.strum.cpuControlled && n.strum.inControl && !n.tooLate && !n.wasGoodHit && !n.blockHit);
 
 					if (guitarHeroSustains)
 						canHit = canHit && n.parent != null && n.parent.wasGoodHit;
@@ -3859,6 +3924,36 @@ class PlayState extends MusicBeatState
 		return camHitTarget;
 	}
 
+	function snapCamToPos(x:Float = 0, y:Float = 0, lockPos:Bool = false):Void {
+		camFollow.setPosition(x, y);
+		FlxG.camera.snapToTarget();
+		if (lockPos) isCameraOnForcedPos = true;
+		else isCameraOnForcedPos = false;
+	}
+
+	public function getCharacterCameraPos(char:Null<Character>):FlxPoint {
+		if (char == null) return FlxPoint.weak();
+		
+		final desiredPos = char.getMidpoint();
+		
+		final offsets = char.isPlayer ? boyfriendCameraOffset : opponentCameraOffset;
+		
+		desiredPos.y += -100 + char.cameraPosition[1] + offsets[1];
+		
+		if (char.isPlayer)
+		{
+			desiredPos.x -= 100 + char.cameraPosition[0];
+		}
+		else
+		{
+			desiredPos.x += 100 + char.cameraPosition[0];
+		}
+		
+		desiredPos.x += offsets[0];
+		
+		return desiredPos;
+	}
+
 	function updateNoteHitCam():Void {
 		var sectionTarget = detectSectionTarget();
 		if(sectionTarget != camHitTarget) camHitTarget = sectionTarget;
@@ -3942,6 +4037,9 @@ class PlayState extends MusicBeatState
 			camFollowBaseX = camFollow.x;
 			camFollowBaseY = camFollow.y;
 
+			if(useGFZoom) currentUsedZoom = "gf";
+			else currentUsedZoom = "default";
+
 			tweenCamIn();
 			callOnScripts('onMoveCamera', ['gf']);
 			return;
@@ -3964,6 +4062,9 @@ class PlayState extends MusicBeatState
 			camFollow.y += dad.cameraPosition[1] + opponentCameraOffset[1];
 			camFollowBaseX = camFollow.x;
 			camFollowBaseY = camFollow.y;
+
+			if(useDadZoom) currentUsedZoom = "dad";
+			else currentUsedZoom = "default";
 			tweenCamIn();
 		}
 		else
@@ -3973,6 +4074,9 @@ class PlayState extends MusicBeatState
 			camFollow.y += boyfriend.cameraPosition[1] + boyfriendCameraOffset[1];
 			camFollowBaseX = camFollow.x;
 			camFollowBaseY = camFollow.y;
+
+			if(useBFZoom) currentUsedZoom = "bf";
+			else currentUsedZoom = "default";
 
 			if (songName == 'tutorial' && cameraTwn == null && FlxG.camera.zoom != 1)
 			{

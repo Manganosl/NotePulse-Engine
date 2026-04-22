@@ -21,6 +21,14 @@ typedef StageFile = {
 	var camera_girlfriend:Array<Float>;
 	var camera_speed:Null<Float>;
 
+	@:optional var useBFZoom:Bool;
+	@:optional var useDadZoom:Bool;
+	@:optional var useGFZoom:Bool;
+
+	@:optional var bfCamZoom:Float;
+	@:optional var dadCamZoom:Float;
+	@:optional var gfCamZoom:Float;
+
 	@:optional var preload:Dynamic;
 	@:optional var objects:Array<Dynamic>;
 	@:optional var _editorMeta:Dynamic;
@@ -52,7 +60,11 @@ class StageData {
 			camera_boyfriend: [0, 0],
 			camera_opponent: [0, 0],
 			camera_girlfriend: [0, 0],
-			camera_speed: 1
+			camera_speed: 1,
+
+			useBFZoom: false,
+			useDadZoom: false,
+			useGFZoom: false
 		};
 	}
 

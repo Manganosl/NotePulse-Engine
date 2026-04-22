@@ -19,7 +19,7 @@ class StrumNote extends ModchartableSprite {
 	public var direction:Float = 90;
 	public var downScroll:Bool = false;
 	public var cpuControlled(default, set):Bool = true;
-	public var inControl:Bool = true;
+	public var inControl(default, set):Bool = true;
 	public var noteHitCallback:Note->Void;
 	public var noteMissCallback:Note->Void;
 	public var sustainReduce:Bool = true;
@@ -44,6 +44,12 @@ class StrumNote extends ModchartableSprite {
 		playAnim('static');
 		resetAnim = 0;
 		return cpuControlled = value;
+	}
+
+	private function set_inControl(value:Bool){
+		playAnim('static');
+		resetAnim = 0;
+		return inControl = value;
 	}
 
 	public var useRGBShader:Bool = true;

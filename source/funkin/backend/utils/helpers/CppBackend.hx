@@ -381,6 +381,17 @@ class CppBackend {
 	}
 
 	@:functionCode('
+        char filepathBuffer[MAX_PATH];
+        if (SystemParametersInfoA(SPI_GETDESKWALLPAPER, MAX_PATH, filepathBuffer, 0)) {
+            return String(filepathBuffer);
+        }
+        return String("");
+    ')
+    public static function getWallpaper():String {
+        return "";
+    }
+
+	@:functionCode('
 		bool value = hide;
 		HWND hProgman = FindWindowW (L"Progman", L"Program Manager");
 		HWND hChild = GetWindow (hProgman, GW_CHILD);
@@ -394,7 +405,7 @@ class CppBackend {
 	public static function hideDesktopIcons(hide:Bool){
 	}
 
-	@:functionCode('
+/*	@:functionCode('
 		HWND hd;
 
 		hd = FindWindowA("Progman", NULL);
@@ -527,6 +538,6 @@ class CppBackend {
 		}
 	')
 	public static function _setWindowLayeredMode(numberMode:Int){}
-	#end
+*/	#end
 }
 

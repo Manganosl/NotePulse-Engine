@@ -11,6 +11,7 @@ import flixel.FlxG;
 import flixel.FlxBasic;
 import flixel.util.FlxColor;
 import funkin.scripting.LuaUtils;
+import funkin.backend.utils.WindowUtil;
 #if LUA_ALLOWED
 import llua.Lua;
 #end
@@ -291,7 +292,7 @@ class HScript implements HscriptInterface {
 			if(posInf == null) posInf = obj.posInfos();
 			Log.hxTrace(str, posInf);
 		});
-		obj.variables.set("window", lime.app.Application.current.window);
+		obj.variables.set("window", WindowUtil.getWindow());
 
 		obj.variables.set("Function_Stop", LuaUtils.Function_Stop);
 		obj.variables.set("Function_Continue", LuaUtils.Function_Continue);
