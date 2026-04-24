@@ -2881,6 +2881,7 @@ class PlayState extends MusicBeatState
 			default: playField = extraStrums[player-3];
 		}
 
+		@:privateAccess playField.stateGeneration = this.generateStaticArrows;
 		var i:Int = 0;
 		for (babyArrow in playField.members)
 		{

@@ -8,6 +8,7 @@ import funkin.states.PlayState;
 
 class PlayField extends FlxTypedSpriteGroup<StrumNote> {
 	public static var fields:Array<PlayField> = [];
+	private var stateGeneration:(Int, Bool)->Void = null;
 
 	public var keysArray:Array<String>;
 
@@ -108,8 +109,8 @@ class PlayField extends FlxTypedSpriteGroup<StrumNote> {
 				note.reloadNote(note.texture);
 			}
 		}
-
 		adaptStrumline();
+		if(stateGeneration != null) stateGeneration(this.player, false);
 		return value;
 	}
 
