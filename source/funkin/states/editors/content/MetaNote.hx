@@ -173,7 +173,7 @@ class MetaNote extends Note {
             loadPixelNoteAnims();
 
         if (Note.globalRgbShaders.contains(rgbShader.parent))
-            rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(noteData));
+            rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(noteData, PlayState.SONG.mania));
 
         animation.play(Note.colArray[this.noteData % Note.colArray.length] + "Scroll");
         updateHitbox();

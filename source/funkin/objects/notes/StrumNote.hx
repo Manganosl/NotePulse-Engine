@@ -53,15 +53,16 @@ class StrumNote extends ModchartableSprite {
 	}
 
 	public var useRGBShader:Bool = true;
-	public function new(x:Float, y:Float, leData:Int, player:Int) {
+	public function new(x:Float, y:Float, leData:Int, player:Int, ?field:PlayField) {
+		if(field != null) this.parentField = field;
 		animation = new PsychAnimationController(this);
 
-		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData));
+		var mania = 3;
+		if (PlayState.SONG != null) mania = (field != null ? field.keyCount - 1 : PlayState.SONG.mania);
+
+		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData, mania));
 		rgbShader.enabled = false;
 		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) useRGBShader = false;
-
-		var mania = 3;
-		if (PlayState.SONG != null) mania = PlayState.SONG.mania;
 		
 		var arrowRGBIndex = getIndex(mania, leData);
 
@@ -112,7 +113,7 @@ class StrumNote extends ModchartableSprite {
 			setGraphicSize(width * PlayState.daPixelZoom);
 
 			var mania = 3;
-			if (PlayState.SONG != null) mania = PlayState.SONG.mania;
+			if (PlayState.SONG != null) mania = parentField != null ? parentField.keyCount - 1 : PlayState.SONG.mania;
 
 			var noteAnimInt = getAnimSet(getIndex(mania, noteData)).pixel;
 
@@ -147,7 +148,7 @@ class StrumNote extends ModchartableSprite {
 			setGraphicSize(width * trackedScale);
 
 			var mania = 3;
-			if (PlayState.SONG != null) mania = PlayState.SONG.mania;
+			if (PlayState.SONG != null) mania = parentField != null ? parentField.keyCount - 1 : PlayState.SONG.mania;
 
 			animation.addByPrefix('static', 'arrow${getAnimSet(getIndex(mania, noteData)).strum}');
 			animation.addByPrefix('pressed', '${getAnimSet(getIndex(mania, noteData)).anim} press', 24, false);
@@ -172,8 +173,8 @@ class StrumNote extends ModchartableSprite {
 		playAnim('static');
 		var padding:Float = 0;
 		var minPaddingStartThresh:Int = 4;
-		if (PlayState.SONG.mania > minPaddingStartThresh) {
-			padding = 4 * (PlayState.SONG.mania - minPaddingStartThresh);
+		if ((parentField != null ? parentField.keyCount - 1 : PlayState.SONG.mania) > minPaddingStartThresh) {
+			padding = 4 * ((parentField != null ? parentField.keyCount - 1 : PlayState.SONG.mania) - minPaddingStartThresh);
 			if (padding > 8) padding = 8;
 		}
 		ID = noteData;
@@ -191,13 +192,13 @@ class StrumNote extends ModchartableSprite {
 		var sWidth = Note.swagWidthUnscaled;
 		if (!ClientPrefs.data.middleScroll) {
 			x = player == 0 ? 320 : 960;
-			x += ((sWidth * trackedScale) - padding) * (-((PlayState.SONG.mania+1) / 2) + noteData);
+			x += ((sWidth * trackedScale) - padding) * (-((parentField != null ? parentField.keyCount : PlayState.SONG.mania + 1) / 2) + noteData);
 		} else {
 			x = player == 0 ? 320 : 640;
 			if (player == 0) {
-				if (noteData > Math.floor((PlayState.SONG.mania / 2))) x = 960;
+				if (noteData > Math.floor(((parentField != null ? parentField.keyCount - 1 : PlayState.SONG.mania) / 2))) x = 960;
 			}
-			x += ((sWidth * trackedScale) - padding) * (-((PlayState.SONG.mania+1) / 2) + noteData);
+			x += ((sWidth * trackedScale) - padding) * (-((parentField != null ? parentField.keyCount : PlayState.SONG.mania + 1) / 2) + noteData);
 		}
 	}
 
@@ -246,6 +247,11 @@ class StrumNote extends ModchartableSprite {
 	override function set_cameras(value:Array<FlxCamera>){
 		sustainSplash.cameras = value;
 		return super.set_cameras(value);
+	}
+
+	override function destroy(){
+		sustainSplash.destroy();
+		return super.destroy();
 	}
 }
 

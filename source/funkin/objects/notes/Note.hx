@@ -313,7 +313,7 @@ class Note extends ModchartableSprite {
 		}
 
 		var mania = 3;
-		if (PlayState.SONG != null) mania = PlayState.SONG.mania;
+		if (PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
 
 		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[getIndex(mania, noteData)];
 		if (PlayState.isPixelStage)
@@ -401,13 +401,13 @@ class Note extends ModchartableSprite {
 
 		if(noteData > -1) {
 			texture = '';
-			rgbShader = new RGBShaderReference(this, initializeGlobalRGBShader(noteData));
+			rgbShader = new RGBShaderReference(this, initializeGlobalRGBShader(noteData, (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania)));
 			if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) rgbShader.enabled = false;
 			x += swagWidth * (noteData);
 			if(!isSustainNote) {
 				var animToPlay:String = '';
 				var mania = 3;
-				if (PlayState.SONG != null) mania = PlayState.SONG.mania;
+				if (PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
 				animToPlay = getAnimSet(getIndex(mania, noteData)).note;
 				animation.play(animToPlay + 'Scroll');
 			}
@@ -434,7 +434,7 @@ class Note extends ModchartableSprite {
 			hitsoundDisabled = true;
 
 			var mania = 3;
-			if (PlayState.SONG != null) mania = PlayState.SONG.mania;
+			if (PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
 			var animToPlay = getAnimSet(getIndex(mania, noteData)).note;
 			animation.play(animToPlay + 'holdend');
 			updateHitbox();
@@ -455,14 +455,12 @@ class Note extends ModchartableSprite {
 		x += offsetX;
 	}
 
-	public static function initializeGlobalRGBShader(noteData:Int)
+	public static function initializeGlobalRGBShader(noteData:Int, mania:Int)
 	{
 		if(globalRgbShaders[noteData] == null)
 		{
 			var newRGB:RGBPalette = new RGBPalette();
 			globalRgbShaders[noteData] = newRGB;
-			var mania = 3;
-			if (PlayState.SONG != null) mania = PlayState.SONG.mania;
 			var arr:Array<FlxColor> = (!PlayState.isPixelStage) ? ClientPrefs.data.arrowRGB[ExtraKeysHandler.instance.data.keys[mania].notes[noteData]] : ClientPrefs.data.arrowRGBPixel[ExtraKeysHandler.instance.data.keys[mania].notes[noteData]];
 			if (noteData > -1)
 			{
@@ -512,7 +510,7 @@ class Note extends ModchartableSprite {
 				loadGraphic(graphic, true, Math.floor(graphic.width / getPixelColumns()), Math.floor(graphic.height / 5));
 			}
 			var mania = 3;
-			if (PlayState.SONG != null) mania = PlayState.SONG.mania;
+			if (PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
 			setGraphicSize((width * (ExtraKeysHandler.instance.data.pixelScales[mania] + 0.3)) * PlayState.daPixelZoom);
 			loadPixelNoteAnims();
 			antialiasing = false;
@@ -548,7 +546,7 @@ class Note extends ModchartableSprite {
 
 	function loadNoteAnims() {
 		var mania = 3;
-		if (PlayState.SONG != null) mania = PlayState.SONG.mania;
+		if (PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
 		var noteAnim = getAnimSet(getIndex(mania, noteData)).note;
 		if (isSustainNote)
 		{
@@ -563,7 +561,7 @@ class Note extends ModchartableSprite {
 
 	function loadPixelNoteAnims() {
 		var mania = 3;
-		if (PlayState.SONG != null) mania = PlayState.SONG.mania;
+		if (PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
 		var noteAnimStr = getAnimSet(getIndex(mania, noteData)).note;
 		var noteAnimInt = getAnimSet(getIndex(mania, noteData)).pixel;
 		var cols = Note.getPixelColumns();

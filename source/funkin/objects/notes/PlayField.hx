@@ -9,6 +9,10 @@ import funkin.states.PlayState;
 class PlayField extends FlxTypedSpriteGroup<StrumNote> {
 	public static var fields:Array<PlayField> = [];
 
+	public var keysArray:Array<String>;
+
+	public var keyCount(default, set):Int;
+
     public var player:Int = 0;
 	public var notes:Array<Note> = [];
 
@@ -73,18 +77,46 @@ class PlayField extends FlxTypedSpriteGroup<StrumNote> {
 		return value;
 	}
 
+	function set_keyCount(value:Int) {
+		if(value == keyCount) return value;
+
+		for(strum in members) {
+			strum.kill();
+			strum.exists = false;
+			strum.destroy();
+			remove(strum);
+		}
+
+		keyCount = value;
+		
+		this.keysArray = [];
+		for (i in 0...keyCount) {
+			this.keysArray.push((keyCount - 1) + '_key_$i');
+		}
+
+		for (i in 0...keyCount) {
+			var babyArrow:StrumNote = new StrumNote(0, 0, i, this.player, this);
+			babyArrow.playAnim("static", true);
+			babyArrow.parentField = this;
+			add(babyArrow);
+			babyArrow.postAddedToGroup();
+		}
+
+		if (notes != null) {
+			for (note in notes){
+				note.defaultRGB();
+				note.reloadNote(note.texture);
+			}
+		}
+
+		adaptStrumline();
+		return value;
+	}
+
     public function new() {
         super();
         this.player = fields.length;
-
-        for (i in 0...PlayState.SONG.mania + 1) {
-            var babyArrow:StrumNote = new StrumNote(0, 0, i, this.player);
-			babyArrow.playAnim("static", true);
-			babyArrow.parentField = this;
-            add(babyArrow);
-			babyArrow.postAddedToGroup();
-        }
-        adaptStrumline();
+		this.keyCount = PlayState.SONG.mania + 1;
 
 		FlxG.signals.stateSwitched.addOnce(function(){
 			fields = [];

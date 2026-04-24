@@ -706,7 +706,6 @@ class PlayState extends MusicBeatState
 		uiGroup.add(timeTxt);
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
-		noteGroup.add(strumLineNotes);
 
 		if(ClientPrefs.data.timeBarType == 'Song Name')
 		{
@@ -719,11 +718,14 @@ class PlayState extends MusicBeatState
 		splash.alpha = 0.000001;
 
 		opponentStrums = new PlayField();
+		noteGroup.add(opponentStrums);
 		playerStrums = new PlayField();
+		noteGroup.add(playerStrums);
 		if(SONG.lanes >= 3){
 			gfStrums = new PlayField();
 			for(lane in 0...(SONG.lanes-3)){
 				extraStrums[lane] = new PlayField();
+				noteGroup.add(extraStrums[lane]);
 			}
 		}
 
@@ -855,6 +857,8 @@ class PlayState extends MusicBeatState
 
 			for(func in modManagerEvArray) func();
 		}
+		callOnScripts('initModchart');
+
 		add(uiGroup);
 
 		startCallback();
@@ -880,7 +884,6 @@ class PlayState extends MusicBeatState
 		
 		stagesFunc(function(stage:BaseStage) stage.createPost());
 
-		callOnScripts('initModchart');
 		callOnScripts('onCreatePost');
 		callOnScripts('postCreate');
 		notesLength = notes.length;
@@ -2626,12 +2629,12 @@ class PlayState extends MusicBeatState
 		}
 		if(!cpuControlled)
 		{
-			for (note in strumLineNotes)
-				if(!note.cpuControlled && note.animation.curAnim != null && note.animation.curAnim.name != 'static')
-				{
-					note.playAnim('static');
-					note.resetAnim = 0;
-				}
+			for(field in PlayField.fields)
+				for (note in field.members)
+					if(!note.cpuControlled && note.animation.curAnim != null && note.animation.curAnim.name != 'static'){
+						note.playAnim('static');
+						note.resetAnim = 0;
+					}
 		}
 		if(Mods.modPack != null && Mods.modPack.pauseSubState != null && Mods.modPack.pauseSubState.length > 0){
 			openSubState(new ScriptedSubstate(Mods.modPack.pauseSubState));
@@ -3377,157 +3380,171 @@ class PlayState extends MusicBeatState
 	//// Keys ////
 
 	private function onKeyPress(event:KeyboardEvent):Void {
-
 		var eventKey:FlxKey = event.keyCode;
-		var key:Int = getKeyFromEvent(keysArray, eventKey);
-
-		if (!controls.controllerMode)
-		{
+		if (!controls.controllerMode) {
 			#if debug
 			@:privateAccess if (!FlxG.keys._keyListMap.exists(eventKey)) return;
 			#end
-
-			if(FlxG.keys.checkStatus(eventKey, JUST_PRESSED)) keyPressed(key);
+			if (FlxG.keys.checkStatus(eventKey, JUST_PRESSED)) keyPressed(eventKey, -1);
 		}
 	}
 
-	private function keyPressed(key:Int) {
-		if (cpuControlled || paused || inCutscene || key < 0 || key >= playerStrums.length || !generatedMusic || endingSong) return;
-		
-		var ret:Dynamic = callOnScripts('onKeyPressPre', [key]);
-		if(ret == LuaUtils.Function_Stop) return;
-		
+	private function keyPressed(eventKey:FlxKey, ?controllerKey:Int = -1) {
+		if (cpuControlled || paused || inCutscene || !generatedMusic || endingSong) return;
+
+		var scriptKey:Int = (controllerKey > -1) ? controllerKey : getKeyFromEvent(keysArray, eventKey);
+		var ret:Dynamic = callOnScripts('onKeyPressPre', [scriptKey]);
+		if (ret == LuaUtils.Function_Stop) return;
+
 		var lastTime:Float = Conductor.songPosition;
 		if (Conductor.songPosition >= 0 && !startingSong && FlxG.sound.music?.playing)
 			Conductor.songPosition = FlxG.sound.music.time + Conductor.offset;
-		
+
 		var notesToHit:Array<Note> = [];
-		
+		var fieldsProcessed:Int = 0;
+		var keysChecked:Array<Int> = [];
+
 		for (field in PlayField.fields) {
+			var fieldKey:Int = (controllerKey > -1) ? controllerKey : getKeyFromEvent(field.keysArray, eventKey);
+			if (fieldKey < 0 || fieldKey >= field.keyCount) continue;
+
+			fieldsProcessed++;
+			keysChecked.push(fieldKey);
 			var highestNote:Note = null;
-			
+
 			for (n in notes) {
-				if (n != null && n.playField == field && !n.isSustainNote && n.noteData == key && n.canBeHit && !n.strum.cpuControlled && n.strum.inControl && !n.tooLate && !n.wasGoodHit && !n.blockHit) {
+				if (n != null && n.playField == field && !n.isSustainNote && n.noteData == fieldKey && n.canBeHit && !n.strum.cpuControlled && n.strum.inControl && !n.tooLate && !n.wasGoodHit && !n.blockHit) {
 					if (highestNote == null || n.hitPriority > highestNote.hitPriority || (n.hitPriority == highestNote.hitPriority && n.strumTime < highestNote.strumTime))
 						highestNote = n;
 				}
 			}
-			
-			if (highestNote != null) {
-				notesToHit.push(highestNote);
-			}
+
+			if (highestNote != null) notesToHit.push(highestNote);
 		}
 
 		if (notesToHit.length > 0) {
 			for (note in notesToHit) {
 				goodNoteHit(note);
 			}
-		} else {
-			for(field in PlayField.fields){
-				var note:StrumNote = field.members[key];
-				if (note != null && !note.cpuControlled && note.animation.curAnim.name != 'confirm') {
-					note.playAnim("pressed", true);
-					note.resetAnim = 0;
+		} else if (fieldsProcessed > 0) {
+			for (i in 0...PlayField.fields.length) {
+				var field = PlayField.fields[i];
+				var fKey = (controllerKey > -1) ? controllerKey : getKeyFromEvent(field.keysArray, eventKey);
+				
+				if (fKey >= 0 && fKey < field.members.length) {
+					var strum:StrumNote = field.members[fKey];
+					if (strum != null && !strum.cpuControlled && strum.animation.curAnim.name != 'confirm') {
+						strum.playAnim("pressed", true);
+						strum.resetAnim = 0;
+					}
 				}
 			}
-			
+
 			if (ClientPrefs.data.ghostTapping) {
-				callOnScripts('onGhostTap', [key]);
+				callOnScripts('onGhostTap', [scriptKey]);
 			} else {
-				noteMissPress(key);
+				noteMissPress(scriptKey);
 			}
 		}
-		
+
 		Conductor.songPosition = lastTime;
-		callOnScripts('onKeyPress', [key]);
+		callOnScripts('onKeyPress', [scriptKey]);
 	}
 
-	private function onKeyRelease(event:KeyboardEvent):Void
-	{
+	private function onKeyRelease(event:KeyboardEvent):Void {
 		var eventKey:FlxKey = event.keyCode;
-		var key:Int = getKeyFromEvent(keysArray, eventKey);
-		if(!controls.controllerMode && key > -1) keyReleased(key);
+		if (!controls.controllerMode) keyReleased(eventKey, -1);
 	}
 
-	private function keyReleased(key:Int)
-	{
-		if(cpuControlled || !startedCountdown || paused || key < 0 || key >= playerStrums.length) return;
+	private function keyReleased(eventKey:FlxKey, ?controllerKey:Int = -1) {
+		if (cpuControlled || !startedCountdown || paused) return;
 
-		var ret:Dynamic = callOnScripts('onKeyReleasePre', [key]);
-		if(ret == LuaUtils.Function_Stop) return;
+		var scriptKey:Int = (controllerKey > -1) ? controllerKey : getKeyFromEvent(keysArray, eventKey);
+		var ret:Dynamic = callOnScripts('onKeyReleasePre', [scriptKey]);
+		if (ret == LuaUtils.Function_Stop) return;
 
-		for(field in PlayField.fields){
-			if(field == null) continue;
-			var note:StrumNote = field.members[key];
-			if (note != null && !note.cpuControlled && note.inControl) {
-				note.playAnim("static", true);
-				note.resetAnim = 0;
-				if (note.sustainSplash.animation.curAnim.name != "splash")
-					note.sustainSplash.hide(true);
+		for (field in PlayField.fields) {
+			if (field == null) continue;
+			var fieldKey:Int = (controllerKey > -1) ? controllerKey : getKeyFromEvent(field.keysArray, eventKey);
+			
+			if (fieldKey >= 0 && fieldKey < field.members.length) {
+				var strum:StrumNote = field.members[fieldKey];
+				if (strum != null && !strum.cpuControlled && strum.inControl) {
+					strum.playAnim("static", true);
+					strum.resetAnim = 0;
+					if (strum.sustainSplash.animation.curAnim.name != "splash")
+						strum.sustainSplash.hide(true);
+				}
 			}
 		}
 
-		callOnScripts('onKeyRelease', [key]);
+		callOnScripts('onKeyRelease', [scriptKey]);
 	}
 
-	public static function getKeyFromEvent(arr:Array<String>, key:FlxKey):Int
-	{
-		if(key != NONE)
-		{
-			for (i in 0...arr.length)
-			{
-				var note:Array<FlxKey> = Controls.instance.keyboardBinds[arr[i]];
-				for (noteKey in note)
-					if(key == noteKey)
-						return i;
+	public static function getKeyFromEvent(arr:Array<String>, key:FlxKey):Int {
+		if (key != NONE && arr != null) {
+			for (i in 0...arr.length) {
+				var noteKeys:Array<FlxKey> = Controls.instance.keyboardBinds[arr[i]];
+				if (noteKeys != null) {
+					for (noteKey in noteKeys) {
+						if (key == noteKey) return i;
+					}
+				}
 			}
 		}
 		return -1;
 	}
 
-	// Hold notes
-	private function keysCheck():Void
-	{
+	private function keysCheck():Void {
 		var holdArray:Array<Bool> = [];
 		var pressArray:Array<Bool> = [];
 		var releaseArray:Array<Bool> = [];
-		for (key in keysArray)
-		{
+
+		for (key in keysArray) {
 			holdArray.push(controls.pressed(key));
-			if(controls.controllerMode)
-			{
+			if (controls.controllerMode) {
 				pressArray.push(controls.justPressed(key));
 				releaseArray.push(controls.justReleased(key));
 			}
 		}
 
-		if(controls.controllerMode && pressArray.contains(true))
-			for (i in 0...pressArray.length)
-				if(pressArray[i]) keyPressed(i);
+		if (controls.controllerMode && pressArray.contains(true)) {
+			for (i in 0...pressArray.length) {
+				if (pressArray[i]) keyPressed(NONE, i);
+			}
+		}
 
-		if (startedCountdown && !inCutscene && generatedMusic)
-		{
+		if (startedCountdown && !inCutscene && generatedMusic) {
 			if (notes.length > 0) {
 				for (n in notes) {
+					var fieldKey:Int = n.noteData;
+					var isHolding:Bool = false;
+					
+					if (controls.controllerMode) {
+						isHolding = controls.pressed(keysArray[fieldKey]);
+					} else {
+						var bindName:String = n.playField.keysArray[fieldKey];
+						isHolding = controls.pressed(bindName);
+					}
+
 					var canHit:Bool = (n != null && n.strum.inControl && n.canBeHit
-						&& !n.strum.cpuControlled && n.strum.inControl && !n.tooLate && !n.wasGoodHit && !n.blockHit);
+						&& !n.strum.cpuControlled && !n.tooLate && !n.wasGoodHit && !n.blockHit);
 
 					if (guitarHeroSustains)
 						canHit = canHit && n.parent != null && n.parent.wasGoodHit;
 
-					if (canHit && n.isSustainNote) {
-						var released:Bool = !holdArray[n.noteData];
-
-						if (!released)
-							n.strum.noteHitCallback(n);
+					if (canHit && n.isSustainNote && isHolding) {
+						n.strum.noteHitCallback(n);
 					}
 				}
 			}
 		}
 
-		if((controls.controllerMode) && releaseArray.contains(true))
-			for (i in 0...releaseArray.length)
-				if(releaseArray[i]) keyReleased(i);
+		if (controls.controllerMode && releaseArray.contains(true)) {
+			for (i in 0...releaseArray.length) {
+				if (releaseArray[i]) keyReleased(NONE, i);
+			}
+		}
 	}
 
 	//// Ratings | Score ////
