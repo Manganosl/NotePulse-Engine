@@ -17,6 +17,7 @@ import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import funkin.game.modchart.Config;
+import funkin.backend.ExtraKeysHandler;
 
 class Adapter {
 	public static var startCrochet:Float = 0;
@@ -174,7 +175,7 @@ class Adapter {
 	public static function getArrowItems() {
 		var pspr:Array<Array<Array<FlxSprite>>> = [];
 		var interpspr:Array<Array<FlxSprite>> = [];
-		while(interpspr.length != PlayState.SONG.mania+1)
+		while(interpspr.length != ExtraKeysHandler.instance.data.maxKeys)
 			interpspr.push([]);
 		while(pspr.length != PlayField.fields.length)
 			pspr.push(interpspr);

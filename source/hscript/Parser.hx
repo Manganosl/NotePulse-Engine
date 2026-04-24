@@ -620,27 +620,28 @@ class Parser {
 		return switch( expr(e) ) {
 		case EBinop(bop, e1, e2): mk(EBinop(bop, makeUnop(op, e1), e2), pmin(e1), pmax(e2));
 		case ETernary(e1, e2, e3): mk(ETernary(makeUnop(op, e1), e2, e3), pmin(e1), pmax(e3));
-		default: mk(EUnop(op,true,e),pmin(e),pmax(e));
+		default: mk(EUnop(Unop.fromString(op),true,e),pmin(e),pmax(e));
 		}
 	}
 
 	function makeBinop( op:String, e1:Expr, e:Expr ):Expr {
+		var binop = Binop.fromString(op);
 		if( e == null && resumeErrors )
-			return mk(EBinop(op,e1,e),pmin(e1),pmax(e1));
+			return mk(EBinop(binop,e1,e),pmin(e1),pmax(e1));
 		return switch( expr(e) ) {
 		case EBinop(op2,e2,e3):
-			var delta = opPriority.get(op) - opPriority.get(op2);
+			var delta = opPriority.get(op) - opPriority.get(op2.toString());
 			if( delta < 0 || (delta == 0 && !opRightAssoc.exists(op)) )
 				mk(EBinop(op2,makeBinop(op,e1,e2),e3),pmin(e1),pmax(e3));
 			else
-				mk(EBinop(op, e1, e), pmin(e1), pmax(e));
+				mk(EBinop(binop, e1, e), pmin(e1), pmax(e));
 		case ETernary(e2,e3,e4):
 			if( opRightAssoc.exists(op) )
-				mk(EBinop(op,e1,e),pmin(e1),pmax(e));
+				mk(EBinop(binop,e1,e),pmin(e1),pmax(e));
 			else
 				mk(ETernary(makeBinop(op, e1, e2), e3, e4), pmin(e1), pmax(e));
 		default:
-			mk(EBinop(op,e1,e),pmin(e1),pmax(e));
+			mk(EBinop(binop,e1,e),pmin(e1),pmax(e));
 		}
 	}
 
@@ -1412,7 +1413,7 @@ class Parser {
 						push(tk);
 						return e1;
 					}
-					return parseExprNext(mk(EUnop(op,false,e1),pmin(e1)));
+					return parseExprNext(mk(EUnop(Unop.fromString(op),false,e1),pmin(e1)));
 				}
 				return makeBinop(op,e1,parseExpr());
 			case TId(op) if( opPriority.exists(op) ):
@@ -1769,7 +1770,7 @@ class Parser {
 			var expr:Null<Expr> = exprs.shift();
 			while(true) {
 				if(exprs.length == 0) break;
-				expr = mk(EBinop('+', expr, exprs.shift()));
+				expr = mk(EBinop(OpAdd, expr, exprs.shift()));
 			}
 			return expr;
 		}
@@ -2451,7 +2452,7 @@ class Parser {
 			case TConst(c):
 				return mk(EConst(c), tokenMin, tokenMax);
 			case TOp("!"):
-				return mk(EUnop("!", true, parsePreproCond()), tokenMin, tokenMax);
+				return mk(EUnop(OpNot, true, parsePreproCond()), tokenMin, tokenMax);
 			default:
 				return unexpected(tk);
 		}
@@ -2508,16 +2509,16 @@ class Parser {
 						error(EInvalidPreprocessor("Can't eval " + edef.getName() + " with " + edef2.getName()), readPos, readPos);
 						return false;
 				}
-			case EUnop("!", _, e):
+			case EUnop(OpNot, _, e):
 				return !evalPreproCond(e);
 			case EParent(e):
 				return evalPreproCond(e);
 			case EBinop(op, e1, e2):
 				switch (op)
 				{
-					case "&&":
+					case OpBoolAnd:
 						return evalPreproCond(e1) && evalPreproCond(e2);
-					case "||":
+					case OpBoolOr:
 						return evalPreproCond(e1) || evalPreproCond(e2);
 					case op:
 						var e1:Dynamic = getValFromPreproExpr(e1);
@@ -2526,17 +2527,17 @@ class Parser {
 							var vers1:Version = Std.string(e1);
 							var vers2:Version = Std.string(e2);
 							switch (op) {
-								case "==":
+								case OpEq:
 									return vers1 == vers2;
-								case "!=":
+								case OpNeq:
 									return vers1 != vers2;
-								case ">=":
+								case OpGte:
 									return vers1 >= vers2;
-								case ">":
+								case OpGt:
 									return vers1 > vers2;
-								case "<=":
+								case OpLte:
 									return vers1 <= vers2;
-								case "<":
+								case OpLt:
 									return vers1 < vers2;
 								default:
 									throw null;
@@ -2548,17 +2549,17 @@ class Parser {
 						}
 						try {
 							switch (op) {
-								case "==":
+								case OpEq:
 									return e1 == e2;
-								case "!=":
+								case OpNeq:
 									return e1 != e2;
-								case ">=":
+								case OpGte:
 									return e1 >= e2;
-								case ">":
+								case OpGt:
 									return e1 > e2;
-								case "<=":
+								case OpLte:
 									return e1 <= e2;
-								case "<":
+								case OpLt:
 									return e1 < e2;
 								default:
 							}

@@ -52,7 +52,7 @@ class Modifier {
 	}
 
 	private inline function getKeyCount(player:Int = 0):Int {
-		return PlayState.SONG.mania + 1;
+		return PlayField.fields[player].keyCount;
 	}
 
 	private inline function getPlayerCount():Int {
