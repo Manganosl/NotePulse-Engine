@@ -22,6 +22,8 @@ import funkin.objects.audio.PolygonSpectogram;
 import funkin.objects.audio.PolygonSpectogram.VISTYPE;
 import funkin.objects.audio.SpectogramSprite.SPECDIRECTION;
 
+import funkin.objects.audio.BarSpectogram;
+
 
 typedef TitleData =
 {

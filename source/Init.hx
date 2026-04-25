@@ -34,6 +34,7 @@ class Init extends FlxState {
 		FlxG.mouse.visible = false;
 		FlxG.scaleMode = new FunkinRatioScaleMode();
 		FlxG.signals.preStateSwitch.add((cast FlxG.scaleMode : FunkinRatioScaleMode).resetSize);
+		FlxG.signals.stateSwitched.add(()->{ funkin.objects.notes.PlayField.fields = []; });
 		FlxG.signals.postUpdate.add(handleDaKeys);
 
 		if (ExtraKeysHandler.instance.data.scales == null) {

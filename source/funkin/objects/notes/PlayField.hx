@@ -119,10 +119,6 @@ class PlayField extends FlxTypedSpriteGroup<StrumNote> {
         this.player = fields.length;
 		this.keyCount = PlayState.SONG.mania + 1;
 
-		FlxG.signals.stateSwitched.addOnce(function(){
-			fields = [];
-		});
-
 		fields.push(this);
     }
 

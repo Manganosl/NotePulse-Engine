@@ -94,6 +94,8 @@ class PlayState extends MusicBeatState
 
 	public var judgementCounter:FlxText;
 
+	public static var holdSubdivisions:Int = 4;// how many extra notes to spawn in for each hold note, set this to 0 to disable it
+
 	//event variables
 	private var isCameraOnForcedPos:Bool = false;
 
@@ -451,6 +453,8 @@ class PlayState extends MusicBeatState
 	override public function create()
 	{
 		Paths.clearStoredMemory();
+
+		holdSubdivisions = 4;
 
 		startCallback = startCountdown;
 		endCallback = endSong;
@@ -1101,6 +1105,8 @@ class PlayState extends MusicBeatState
 	}
 
 	override function destroy() {
+		holdSubdivisions = 4;
+		
 		#if LUA_ALLOWED
 		for (lua in luaArray)
 		{
@@ -3947,6 +3953,32 @@ class PlayState extends MusicBeatState
 		FlxG.camera.snapToTarget();
 		if (lockPos) isCameraOnForcedPos = true;
 		else isCameraOnForcedPos = false;
+	}
+
+	public function setCharacterCameraPos(x:Float = 0, y:Float = 0, char:Null<Character>):Void
+	{
+		if (char == null) return;
+
+		final midpoint = char.getMidpoint();
+		final offsets = char.isPlayer ? boyfriendCameraOffset : opponentCameraOffset;
+
+		var target:FlxPoint = new FlxPoint(x, y);
+
+		target.set(midpoint.x, midpoint.y);
+		target.y += -100 + char.cameraPosition[1] + offsets[1];
+
+		if (char.isPlayer)
+		{
+			target.x -= 100 + char.cameraPosition[0];
+		}
+		else
+		{
+			target.x += 100 + char.cameraPosition[0];
+		}
+
+		target.x += offsets[0];
+
+		midpoint.put();
 	}
 
 	public function getCharacterCameraPos(char:Null<Character>):FlxPoint {
