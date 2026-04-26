@@ -17,9 +17,13 @@ class WindowUtil
 	public static var monitorResolutionWidth(get, never):Float;
 	public static var monitorResolutionHeight(get, never):Float;
 	
-	static function get_monitorResolutionWidth():Float return openfl.system.Capabilities.screenResolutionX;
+	public static function get_monitorResolutionWidth():Float return openfl.system.Capabilities.screenResolutionX;
 	
-	static function get_monitorResolutionHeight():Float return openfl.system.Capabilities.screenResolutionY;
+	public static function get_monitorResolutionHeight():Float return openfl.system.Capabilities.screenResolutionY;
+
+	public static function getCenterMonitorPoint():FlxPoint {
+		return FlxPoint.get(monitorResolutionWidth/2, monitorResolutionHeight/2);
+	}
 	
 	public static var defaultAppTitle(get, never):String;
 	
@@ -94,6 +98,9 @@ class WindowUtil
 	#if cpp
 	public static function obtainRAM():Int
 		return CppBackend.obtainRAM();
+
+	public static function setColorTransparent(col:Int)
+		CppBackend.setWindowColorKey(col);
 	
 	//Detects if you are currently using a certain version of windows
 	public static function hasWindowsVersion(vers:String = "10")
