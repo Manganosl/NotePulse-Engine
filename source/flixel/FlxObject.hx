@@ -1148,6 +1148,8 @@ class FlxObject extends FlxBasic
 		revive();
 	}
 
+	public var forceIsOnScreen:Bool = false;
+
 	/**
 	 * Check and see if this object is currently on screen.
 	 *
@@ -1157,6 +1159,9 @@ class FlxObject extends FlxBasic
 	 */
 	public function isOnScreen(?camera:FlxCamera):Bool
 	{
+		if (forceIsOnScreen)
+			return true;
+
 		if (camera == null)
 			camera = FlxG.camera;
 
