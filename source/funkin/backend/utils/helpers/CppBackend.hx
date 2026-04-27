@@ -253,6 +253,13 @@ class CppBackend {
     ")
     public static function setWindowColorKey(color:Int):Void {}
 
+	@:functionCode("
+        HWND hwnd = GetActiveWindow();
+        SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) & ~WS_EX_LAYERED);
+        SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+    ")
+    public static function resetWindowTransparency():Void {}
+
 	@:functionCode('
 	// https://stackoverflow.com/questions/15543571/allocconsole-not-displaying-cout
 

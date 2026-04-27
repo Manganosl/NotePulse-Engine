@@ -101,6 +101,10 @@ class WindowUtil
 
 	public static function setColorTransparent(col:Int)
 		CppBackend.setWindowColorKey(col);
+
+	public static function resetWindowTransparency(){
+		CppBackend.resetWindowTransparency();
+	}
 	
 	//Detects if you are currently using a certain version of windows
 	public static function hasWindowsVersion(vers:String = "10")
