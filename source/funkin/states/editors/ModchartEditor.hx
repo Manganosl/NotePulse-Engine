@@ -19,9 +19,6 @@ import openfl.events.IOErrorEvent;
 import haxe.Json;
 import funkin.objects.Character;
 
-import funkin.game.modchart.Manager;
-import funkin.game.modchart.Config;
-
 import funkin.states.editors.ChartingState;
 
 import funkin.states.editors.content.MetaNote.EventMetaNote;
@@ -96,8 +93,6 @@ class ModchartEditor extends MusicBeatState
 	var guitarHeroSustains:Bool = false;
 
 	public static var instance:ModchartEditor;
-
-	public var manager:Manager;
 
 	private var player:Int;
 
@@ -1177,9 +1172,6 @@ class ModchartEditor extends MusicBeatState
 
 	override function destroy()
 	{
-		Config.RENDER_ARROW_PATHS = false;
-		remove(manager);
-		manager.destroy();
 		FlxG.cameras.remove(camHUD);
 		camHUD.destroy();
 		FlxG.sound.list.remove(inst);
@@ -1611,7 +1603,7 @@ class ModchartEditor extends MusicBeatState
 	}
 
 	function reloadManager(){
-		if(manager != null){
+		/*if(manager != null){
 			remove(manager);
 			manager.destroy();
 		}
@@ -1644,7 +1636,7 @@ class ModchartEditor extends MusicBeatState
 					}
 				}
 			}
-		}
+		}*/
 	}
 
 	private var outputGroup:Array<FlxText> = [];

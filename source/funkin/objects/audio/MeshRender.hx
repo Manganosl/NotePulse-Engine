@@ -1,4 +1,4 @@
-package funkin.game.modchart.backend.util;
+package funkin.objects.audio;
 
 import flixel.FlxStrip;
 import flixel.util.FlxColor;

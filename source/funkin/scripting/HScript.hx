@@ -102,9 +102,6 @@ class HScript implements HscriptInterface {
 		"CustomShader" 				=> funkin.game.shaders.CustomShader,
 		"NdllUtil" 					=> funkin.backend.utils.NdllUtil,
 		"LuaUtils" 					=> funkin.scripting.LuaUtils,
-		"Manager" 					=> funkin.game.modchart.Manager,
-		"ModPlayField" 				=> funkin.game.modchart.engine.ModPlayField,
-		"Event" 					=> funkin.game.modchart.engine.events.Event,
 
 		// Away3D
 		#if(away3d && AWAY3D_ALLOWED)

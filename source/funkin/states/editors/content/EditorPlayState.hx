@@ -15,9 +15,6 @@ import openfl.events.KeyboardEvent;
 import haxe.Json;
 import funkin.objects.Character;
 
-import funkin.game.modchart.Manager;
-import funkin.game.modchart.Config;
-
 import funkin.states.editors.ChartingState;
 
 import funkin.scripting.LuaUtils;
@@ -84,8 +81,6 @@ class EditorPlayState extends MusicBeatSubstate
 	var guitarHeroSustains:Bool = false;
 
 	public static var instance:EditorPlayState;
-
-	public var manager:Manager;
 
 	private var player:Int;
 
@@ -190,7 +185,7 @@ class EditorPlayState extends MusicBeatSubstate
 		
 		generateSong(PlayState.SONG.song);
 
-		if(ChartingState.arrowPathsEnabled) Config.RENDER_ARROW_PATHS = true;
+		/*if(ChartingState.arrowPathsEnabled) Config.RENDER_ARROW_PATHS = true;
 		else Config.RENDER_ARROW_PATHS = false;
 		if(PlayState.SONG.nativeModchart){ 
 			var fields = 1;
@@ -223,7 +218,7 @@ class EditorPlayState extends MusicBeatSubstate
 					}
 				}
 			}
-		}
+		}*/
 
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
@@ -353,11 +348,6 @@ class EditorPlayState extends MusicBeatSubstate
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		PlayField.fields = [];
 		FlxG.mouse.visible = true;
-		Config.RENDER_ARROW_PATHS = false;
-		if(PlayState.SONG.nativeModchart){ 
-			remove(manager);
-			manager = null;
-		}
 		FlxG.cameras.remove(camHUD);
 		camHUD.destroy();
 		FlxG.cameras.remove(bgCam);

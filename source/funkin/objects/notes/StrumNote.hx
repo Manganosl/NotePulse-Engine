@@ -1,6 +1,5 @@
 package funkin.objects.notes;
 
-import funkin.game.modchart.backend.util.ModchartableSprite;
 import funkin.backend.InputFormatter;
 import flixel.FlxBasic;
 import funkin.backend.ExtraKeysHandler;
@@ -12,7 +11,7 @@ import funkin.objects.notes.splashes.*;
 import funkin.game.shaders.RGBPalette;
 import funkin.game.shaders.RGBPalette.RGBShaderReference;
 
-class StrumNote extends ModchartableSprite {
+class StrumNote extends FlxSkewedSprite {
 	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;
 	public var noteData:Int = 0;

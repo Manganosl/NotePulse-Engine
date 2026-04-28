@@ -14,8 +14,6 @@ import funkin.objects.notes.copy.CopyNote;
 
 import flixel.math.FlxRect;
 
-import funkin.game.modchart.backend.util.ModchartableSprite;
-
 using StringTools;
 
 typedef EventNote = {
@@ -37,7 +35,7 @@ typedef NoteSplashData = {
 	a:Float
 }
 
-class Note extends ModchartableSprite {
+class Note extends FlxSkewedSprite {
 	//This is needed for the hardcoded note types to appear on the Chart Editor,
 	//It's also used for backwards compatibility with 0.1 - 0.3.2 charts.
 	public static final defaultNoteTypes:Array<String> = [
@@ -80,7 +78,6 @@ class Note extends ModchartableSprite {
 
 	public var characters:Array<Character> = [];
 
-	public var modchartVisible:Bool = true;
 	public var followStrum:Bool = true;
 
 	public var strumTime:Float = 0;

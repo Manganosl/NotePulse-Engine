@@ -18,7 +18,6 @@ import flixel.addons.transition.FlxTransitionableState;
 import funkin.backend.utils.NdllUtil;
 import lime.app.Application;
 
-import funkin.game.modchart.Manager;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
@@ -989,42 +988,6 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "setNdllBool", function(tag:String, bool:Bool){
 			var current = game.modchartNdlls.get(tag);
 			current(bool);
-		});
-
-		Lua_helper.add_callback(lua, "modchart.newInstance", function(tag:String){
-			var instance:Manager = new Manager();
-			game.add(instance);
-			game.modchartInstances.set(tag, instance);
-		});
-
-		Lua_helper.add_callback(lua, "modchart.addModifier", function(tag:String, modifier:String, field:Int = -1){
-			var instance = game.modchartInstances.get(tag);
-			instance.addModifier(modifier, field);
-		});
-
-		Lua_helper.add_callback(lua, "modchart.setPercent", function(tag:String, modifier:String, value:Float, player:Int = -1, field:Int = -1){
-			var instance = game.modchartInstances.get(tag);
-			instance.setPercent(modifier, value, player, field);
-		});
-
-		Lua_helper.add_callback(lua, "modchart.getPercent", function(tag:String, modifier:String, player:Int = -1, field:Int = -1){
-			var instance = game.modchartInstances.get(tag);
-			return instance.getPercent(modifier, player, field);
-		});
-
-		Lua_helper.add_callback(lua, "modchart.set", function(tag:String, modifier:String, beat:Float, value:Float, player:Int = -1, field:Int = -1){
-			var instance = game.modchartInstances.get(tag);
-			instance.set(modifier, beat, value, player, field);
-		});
-
-		Lua_helper.add_callback(lua, "modchart.ease", function(tag:String, modifier:String, beat:Float, value:Float, ease:String = "linear", player:Int = -1, field:Int = -1){
-			var instance = game.modchartInstances.get(tag);
-			instance.ease(modifier, beat, value, LuaUtils.getTweenEaseByString(ease), player, field);
-		});
-
-		Lua_helper.add_callback(lua, "modchart.addPlayfield", function(tag:String){
-			var instance = game.modchartInstances.get(tag);
-			instance.addPlayfield();
 		});
 
 		Lua_helper.add_callback(lua, "makeLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0) {

@@ -55,9 +55,6 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 #end
 
-import funkin.game.modchart.Manager;
-import funkin.game.modchart.backend.util.ModchartableSprite;
-
 /**
  * This is where all the Gameplay stuff happens and is managed
  *
@@ -114,7 +111,6 @@ class PlayState extends MusicBeatState
 	public var modchartTexts:Map<String, FlxText> = new Map<String, FlxText>();
 	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
 	public var modchartNdlls:Map<String, Dynamic> = new Map<String, Dynamic>();
-	public var modchartInstances:Map<String, Manager> = new Map<String, Manager>(); 
 	public var modchartCharacters:Map<String, Character> = new Map<String, Character>();
 	#end
 
@@ -339,8 +335,7 @@ class PlayState extends MusicBeatState
 	public var startCallback:Void->Void = null;
 	public var endCallback:Void->Void = null;
 
-	private var modManagerEvArray:Array<Dynamic> = [];
-	public var modManager:Manager;
+	private var modManagerEvArray:Array<Dynamic> = []; // LEAVING HERE FOR NOW
 
 	//// Sets ////
 
@@ -851,18 +846,8 @@ class PlayState extends MusicBeatState
 
 		callOnScripts('preInitModchart');
 
-		modManager = new Manager();
-		if(SONG.nativeModchart){
-			add(modManager);
-
-			var fields:Int = 1;
-			while(fields != SONG.playfields){
-				fields++;
-				modManager.addPlayfield();
-			}
-
-			for(func in modManagerEvArray) func();
-		}
+		// CREATE MODMANAGER INSTANCE HERE!
+		// APPLY MODCHART EVENTS HERE TOO!
 		callOnScripts('initModchart');
 
 		add(uiGroup);
@@ -1694,7 +1679,7 @@ class PlayState extends MusicBeatState
 			case 'Play Sound':
 				Paths.sound(event.value1); //Precache sound
 
-			case "Modchart Event":
+			/*case "Modchart Event":
 				if(SONG.nativeModchart){
 					var info = event.value1.split(',');
 					final daBeat:Float = Conductor.getBeat(event.strumTime);
@@ -1712,7 +1697,7 @@ class PlayState extends MusicBeatState
 						case "SetAdd": 
 							modManagerEvArray.push(function(){ modManager.setAdd(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6])); });
 					}
-				}
+				}*/  // FIX THIS TOO!
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventPushedUnique(event));
 	}
@@ -3738,8 +3723,7 @@ class PlayState extends MusicBeatState
 		var scaX:Float = (linkStrum.scale.x*0.6)+0.085;
 		var scaY:Float = (linkStrum.scale.y*0.6)+0.085;
 
-		var rating:ModchartableSprite = new ModchartableSprite();
-		@:privateAccess rating.modchartIsRating = true;
+		var rating:FlxSkewedSprite = new FlxSkewedSprite();
 		rating.loadGraphic(Paths.image(uiPrefix + daRating.image + uiSuffix));
 		rating.x = baseX;
 		rating.y = baseY;
@@ -3748,7 +3732,6 @@ class PlayState extends MusicBeatState
 		rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
 		rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
 		rating.visible = (!ClientPrefs.data.hideHud && showRating);
-		@:privateAccess rating.parentArrow = linkStrum;
 
 		if(camMode == "HUD") {
 			rating.x += ClientPrefs.data.comboOffset[0];
@@ -3770,9 +3753,6 @@ class PlayState extends MusicBeatState
 			earlyLateSpr.cameras = ratingCamArr;
 			earlyLateSpr.antialiasing = ClientPrefs.data.antialiasing;
 			earlyLateSpr.alpha = 1;
-			@:privateAccess earlyLateSpr.parentArrow = linkStrum;
-			@:privateAccess rating.babySprite = earlyLateSpr;
-			@:privateAccess earlyLateSpr.modchartIsRating = true;
 			if(ClientPrefs.data.ratingCam == "Bellow Note"){
 				earlyLateSpr.scale.set(scaX/(PlayState.isPixelStage ? daPixelZoom : 1), scaY/(PlayState.isPixelStage ? daPixelZoom : 1));
 			}
