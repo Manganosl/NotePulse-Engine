@@ -26,6 +26,9 @@ class MacroUtil
 	//Adds any extra classes into the executable, no dce
 	public static final addonClasses:Array<String> = [
 		"funkin.backend",
+        "funkin.game.shaders",
+
+        "animate",
 
 		//Lime library
 		"lime.app", "lime.graphics",
