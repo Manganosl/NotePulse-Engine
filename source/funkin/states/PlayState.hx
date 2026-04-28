@@ -1828,53 +1828,26 @@ class PlayState extends MusicBeatState
 					boyfriend.heyTimer = flValue2;
 				}
 
-			case 'zoomTween':
-					final split = value1.split(',');
-					var value = Std.parseFloat(split[0]);
-					var time = Std.parseFloat(split[1]);
-					if (Math.isNaN(value)) value = 1.0;
-					if (Math.isNaN(time)) time = 1.0;
-		
-					cameraZoomTween?.cancel();
-					cameraZoomTween = FlxTween.num(FlxG.camera.zoom,value,time,{ease: LuaUtils.getTweenEaseByString(value2),onComplete: Void->camZooming = true},(v)->
-					{
-						camZooming = false;
-						FlxG.camera.zoom = v;
-						defaultCamZoom = v;
-					});
-
-					case 'Camera Zoom':
-						if (camTween != null)
-						{
-							camTween.cancel();
-							camTween = null;
-						}
-						var val1:Float = Std.parseFloat(value1);
-						if(Math.isNaN(val1)) val1 = 1;
-		
-						var targetZoom = defaultCamZoom * val1;
-						if (value2 != '')
-						{
-							var split = value2.split(',');
-							var duration:Float = 0;
-							var leEase:String = 'linear';
-							if(split[0] != null) duration = Std.parseFloat(split[0].trim());
-							if(split[1] != null) leEase = split[1].trim();
-							if(Math.isNaN(duration)) duration = 0;
-		
-							if (duration > 0)
-							{
-								camTween = FlxTween.num(FlxG.camera.zoom,targetZoom,duration,{ease: LuaUtils.getTweenEaseByString(leEase),onComplete: Void->camZooming = true},(v)->
-								{
-									camZooming = false;
-								});
-							}
-							else
-							{
-								FlxG.camera.zoom = targetZoom;
-							}
-						}
-						defaultCamZoom = targetZoom;
+			case 'Camera Zoom':
+				FlxTween.cancelTweensOf(FlxG.camera, ['zoom']);
+				
+				var val1:Float = Std.parseFloat(value1);
+				if (Math.isNaN(val1)) val1 = 1;
+				
+				var targetZoom = val1;
+				if (value2 != '')
+				{
+					var split = value2.split(',');
+					var duration:Float = 0;
+					var leEase:String = 'linear';
+					if (split[0] != null) duration = Std.parseFloat(split[0].trim());
+					if (split[1] != null) leEase = split[1].trim();
+					if (Math.isNaN(duration)) duration = 0;
+					
+					if (duration > 0) FlxTween.tween(FlxG.camera, {zoom: targetZoom}, duration, {ease: FlxEase.circOut});
+					else FlxG.camera.zoom = targetZoom;
+				}
+				defaultCamZoom = targetZoom;
 
 			case 'Set GF Speed':
 				if(flValue1 == null || flValue1 < 1) flValue1 = 1;
