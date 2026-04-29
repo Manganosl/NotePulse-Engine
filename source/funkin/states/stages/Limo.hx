@@ -68,7 +68,7 @@ class Limo extends BaseStage
 			resetLimoKill();
 
 			//PRECACHE SOUND
-			Paths.sound('dancerdeath');
+			Paths.sound('base_game/dancerdeath');
 			setDefaultGF('gf-car');
 		}
 
@@ -240,7 +240,7 @@ class Limo extends BaseStage
 	function fastCarDrive()
 	{
 		//trace('Car drive');
-		FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
+		FlxG.sound.play(Paths.soundRandom('base_game/carPass', 0, 1), 0.7);
 
 		fastCar.velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
 		fastCarCanDrive = false;

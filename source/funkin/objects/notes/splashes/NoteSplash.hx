@@ -5,6 +5,8 @@ import funkin.backend.animation.PsychAnimationController;
 
 import funkin.game.shaders.RGBPalette;
 
+import funkin.objects.FunkinSprite;
+
 import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.frames.FlxFrame;
 
@@ -15,12 +17,17 @@ typedef NoteSplashConfig = {
 	offsets:Array<Array<Float>>
 }
 
-class NoteSplash extends FlxSkewedSprite {
+class NoteSplash extends FunkinSprite implements funkin.modchart.IModNote {
 	public var rgbShader:PixelSplashShaderRef;
 	private var idleAnim:String;
 	private var _textureLoaded:String = null;
 	private var _configLoaded:String = null;
-	public var babyArrow:StrumNote;
+	public var babyArrow(default, set):StrumNote;
+	private function set_babyArrow(value:StrumNote){
+		noteData = value.noteData;
+		return babyArrow = value;
+	}
+	public var noteData:Int;
 
 	public static var defaultNoteSplash(default, never):String = 'noteSplashes/noteSplashes';
 	public static var configs:Map<String, NoteSplashConfig> = new Map<String, NoteSplashConfig>();
@@ -207,6 +214,7 @@ class NoteSplash extends FlxSkewedSprite {
 
 class PixelSplashShaderRef {
 	public var shader:PixelSplashShader = new PixelSplashShader();
+	public var alphaMult:Float = 1; // DO THIS LATER
 
 	public function copyValues(tempShader:RGBPalette)
 	{

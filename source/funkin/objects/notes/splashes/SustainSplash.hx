@@ -3,12 +3,20 @@ package funkin.objects.notes.splashes;
 import funkin.objects.notes.splashes.NoteSplash.PixelSplashShaderRef;
 import funkin.game.shaders.RGBPalette;
 
-class SustainSplash extends FlxSkewedSprite {
+import funkin.objects.FunkinSprite;
+
+class SustainSplash extends FunkinSprite implements funkin.modchart.IModNote{
 	// We can't use the normal visibility property as FunkinModchart messes with it.
 	private var visibilityToggle:Bool = false;
 
+	public var noteData:Int;
+
 	public var rgbShader:PixelSplashShaderRef;
-	public var strum:StrumNote;
+	public var strum(default, set):StrumNote;
+	private function set_strum(value:StrumNote){
+		noteData = value.noteData;
+		return strum = value;
+	}
 	public var updatedThisFrame:Bool = false;
 
 	public var offsetX:Float = 0;

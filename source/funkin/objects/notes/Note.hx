@@ -14,6 +14,7 @@ import funkin.objects.notes.splashes.NoteSplash;
 import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.PlayField;
 import funkin.objects.notes.copy.CopyNote;
+import funkin.objects.FunkinSprite;
 
 import funkin.modchart.math.Vector3;
 
@@ -38,7 +39,7 @@ typedef NoteSplashData = {
 	a:Float
 }
 
-class Note extends FlxSkewedSprite {
+class Note extends FunkinSprite implements funkin.modchart.IModNote{
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
 
