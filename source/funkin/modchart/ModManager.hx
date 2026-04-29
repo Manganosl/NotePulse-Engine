@@ -229,19 +229,6 @@ class ModManager implements IFlxDestroyable
 	
 	public function updateObject(beat:Float, obj:FlxSprite, pos:Vector3, player:Int)
 	{
-		final note:Note = (obj is Note ? cast obj : null);
-		
-		obj.x = (pos.x - obj.width * .5);
-		
-		if (note != null && note.isSustainNote)
-		{
-			note.y = pos.y;
-		}
-		else
-		{
-			obj.y = (pos.y - obj.height * .5);
-		}
-		
 		if (activeMods[player] != null)
 		{
 			for (name in activeMods[player])
@@ -255,16 +242,15 @@ class ModManager implements IFlxDestroyable
 				else if (obj is SustainSplash) mod.updateSustainSplash(beat, cast obj, pos, player);
 			}
 		}
-		
+
+		if((obj is Note)) obj.updateHitbox();
 		obj.centerOrigin();
 		obj.centerOffsets();
 		
-		if (note != null)
-		{
-			if (note.isSustainNote) note.origin.y = note.offset.y = 0;
-			
-			note.spriteOffset.x = note.typeOffsetX;
-			note.spriteOffset.y = note.typeOffsetY;
+		if((obj is Note)){
+			var cum:Note = cast obj;
+			cum.offset.x += cum.typeOffsetX;
+			cum.offset.y += cum.typeOffsetY;
 		}
 	}
 	
@@ -285,7 +271,7 @@ class ModManager implements IFlxDestroyable
 		if (!obj.active) return pos;
 		
 		pos.x = getBaseX(data, player);
-		pos.y = (50 + diff + Note.swagWidth * .5);
+		pos.y = (50 + diff + obj.height);
 		pos.z = 0;
 		
 		if (activeMods[player] != null)

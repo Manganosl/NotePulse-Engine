@@ -681,6 +681,7 @@ class Note extends FunkinSprite implements funkin.modchart.IModNote{
 		}
 		origin.set(frameWidth * .5, 0);
 		offset.set();
+		defScale.copyFrom(scale);
 		
 		flipX = strum.downScroll;
 		x += (strum.width - frameWidth) * .5;

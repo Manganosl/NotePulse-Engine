@@ -1085,7 +1085,9 @@ class PlayState extends MusicBeatState
 					{
 						final dist:Float = Math.sqrt(Math.pow(pos.y - nextPos.y, 2) + Math.pow(pos.x - nextPos.x, 2));
 						
-						daNote.scale.y = daNote.baseScale.y = (dist / (daNote.frameHeight - (daNote.antialiasing ? 1 : 0)));
+						// SCALE WONT WORK CORRECTLY
+						// Maybe my FM SimpleHoldRenderer's code works?
+						//daNote.scale.y = daNote.baseScale.y = (dist / (daNote.frameHeight - (daNote.antialiasing ? 1 : 0)));
 					}
 					
 					//daNote.clip(daNote.playField.members[daNote.noteData]);
