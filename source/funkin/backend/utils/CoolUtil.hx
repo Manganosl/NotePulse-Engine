@@ -46,6 +46,31 @@ class CoolUtil
 		}
 	}
 	
+	inline public static function scale(x:Float, l1:Float, h1:Float, l2:Float, h2:Float):Float
+		return ((x - l1) * (h2 - l2) / (h1 - l1) + l2);
+
+	inline public static function clamp(n:Float, l:Float, h:Float)
+	{
+		if (n > h)
+			n = h;
+		if (n < l)
+			n = l;
+
+		return n;
+	}
+
+	inline public static function quantizeAlpha(f:Float, interval:Float)
+	{
+		return Std.int((f + interval / 2) / interval) * interval;
+	}
+
+	public static function rotate(x:Float, y:Float, angle:Float, ?point:FlxPoint):FlxPoint
+	{
+		var p = point == null ? FlxPoint.weak() : point;
+		p.set((x * Math.cos(angle)) - (y * Math.sin(angle)), (x * Math.sin(angle)) + (y * Math.cos(angle)));
+		return p;
+	}
+	
 	public static function sortByTime(Obj1:Dynamic, Obj2:Dynamic):Int
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
 

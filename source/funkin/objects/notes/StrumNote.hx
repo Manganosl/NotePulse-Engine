@@ -1,7 +1,9 @@
 package funkin.objects.notes;
 
-import funkin.backend.InputFormatter;
 import flixel.FlxBasic;
+import flixel.math.FlxPoint;
+
+import funkin.backend.InputFormatter;
 import funkin.backend.ExtraKeysHandler;
 import funkin.backend.animation.PsychAnimationController;
 
@@ -11,7 +13,16 @@ import funkin.objects.notes.splashes.*;
 import funkin.game.shaders.RGBPalette;
 import funkin.game.shaders.RGBPalette.RGBShaderReference;
 
+import funkin.modchart.math.Vector3;
+
 class StrumNote extends FlxSkewedSprite {
+	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
+	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
+
+	public var zIndex:Float = 0;
+	public var desiredZIndex:Float = 0;
+	public var z:Float = 0;
+
 	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;
 	public var noteData:Int = 0;
@@ -153,6 +164,7 @@ class StrumNote extends FlxSkewedSprite {
 			animation.addByPrefix('pressed', '${getAnimSet(getIndex(mania, noteData)).anim} press', 24, false);
 			animation.addByPrefix('confirm', '${getAnimSet(getIndex(mania, noteData)).anim} confirm', 24, false);
 		}
+		defScale.copyFrom(scale);
 		updateHitbox();
 
 		if(lastAnim != null)
@@ -249,6 +261,7 @@ class StrumNote extends FlxSkewedSprite {
 	}
 
 	override function destroy(){
+		defScale.put();
 		sustainSplash.destroy();
 		return super.destroy();
 	}

@@ -55,6 +55,8 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 #end
 
+import funkin.modchart.*;
+
 /**
  * This is where all the Gameplay stuff happens and is managed
  *
@@ -73,6 +75,8 @@ import flixel.tweens.FlxEase;
 **/
 class PlayState extends MusicBeatState
 {
+	public var modManager:ModManager;
+
 	public static var STRUM_X = 42;
 	public static var STRUM_X_MIDDLESCROLL = -278;
 
@@ -848,6 +852,11 @@ class PlayState extends MusicBeatState
 
 		// CREATE MODMANAGER INSTANCE HERE!
 		// APPLY MODCHART EVENTS HERE TOO!
+		modManager = new ModManager(this);
+		modManager.receptors = [];
+		for(field in PlayField.fields)
+			modManager.receptors.push(field.members);
+		modManager.registerDefaultModifiers();
 		callOnScripts('initModchart');
 
 		add(uiGroup);
@@ -979,6 +988,8 @@ class PlayState extends MusicBeatState
 			health = 0;
 		}
 		doDeathCheck();
+		modManager.updateTimeline(curDecStep);
+		modManager.update(elapsed);
 
 		if (unspawnNotes[0] != null)
 		{
@@ -1002,6 +1013,19 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		for(field in PlayField.fields){
+			field.forEachAlive(function(strum:StrumNote)
+			{
+				var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, 1, strum, [], strum.vec3Cache);
+				modManager.updateObject(curDecBeat, strum, pos, field.player);
+				strum.x = pos.x;
+				strum.y = pos.y;
+				strum.z = pos.z;
+			});
+		}
+
+		strumLineNotes.sort(sortByOrderStrumNote);
+
 		if (generatedMusic)
 		{
 			if(!inCutscene)
@@ -1014,9 +1038,19 @@ class PlayState extends MusicBeatState
 					if(startedCountdown)
 					{
 						var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
+						notes.sort(sortByOrderNote);
 						notes.forEachAlive(function(daNote:Note)
 						{
 							daNote.followStrumNote(fakeCrochet, songSpeed / playbackRate);
+							var pos = modManager.getPos(daNote.strumTime, modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed),
+								daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, daNote.playField.player, daNote, [], daNote.vec3Cache);
+
+							modManager.updateObject(curDecBeat, daNote, pos, daNote.playField.player);
+							pos.x += daNote.offsetX;
+							pos.y += daNote.offsetY;
+							daNote.x = pos.x;
+							daNote.y = pos.y;
+							daNote.z = pos.z;
 
 							if(!daNote.strum.cpuControlled)
 							{
@@ -1089,6 +1123,16 @@ class PlayState extends MusicBeatState
 		setOnScripts('botPlay', cpuControlled);
 
 		callOnScripts('onUpdatePost', [elapsed]);
+	}
+
+	function sortByOrderNote(wat:Int, Obj1:Note, Obj2:Note):Int
+	{
+		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
+	}
+
+	function sortByOrderStrumNote(wat:Int, Obj1:StrumNote, Obj2:StrumNote):Int
+	{
+		return FlxSort.byValues(FlxSort.DESCENDING, Obj1.zIndex, Obj2.zIndex);
 	}
 
 	override function destroy() {
@@ -2836,7 +2880,7 @@ class PlayState extends MusicBeatState
 	private function generateStaticArrows(player:Int, ?doIntro = true):Void
 	{
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X;
-		var strumLineY:Float = ClientPrefs.data.downScroll ? (FlxG.height - 150) : 50;
+		var strumLineY:Float = /*ClientPrefs.data.downScroll ? (FlxG.height - 150) : */50; // ModManager requieres to disable downScroll?
 
 		var playField:PlayField = null;
 		switch (player)

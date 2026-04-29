@@ -1,5 +1,8 @@
 package funkin.objects.notes;
 
+import flixel.math.FlxRect;
+import flixel.math.FlxPoint;
+
 import funkin.backend.ExtraKeysHandler;
 import funkin.backend.animation.PsychAnimationController;
 import funkin.backend.NoteTypesConfig;
@@ -12,7 +15,7 @@ import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.PlayField;
 import funkin.objects.notes.copy.CopyNote;
 
-import flixel.math.FlxRect;
+import funkin.modchart.math.Vector3;
 
 using StringTools;
 
@@ -36,6 +39,23 @@ typedef NoteSplashData = {
 }
 
 class Note extends FlxSkewedSprite {
+	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
+	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
+
+	override function destroy() {
+		defScale.put();
+		super.destroy();
+	}	
+	public var zIndex:Float = 0;
+	public var desiredZIndex:Float = 0;
+	public var z:Float = 0;
+	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
+	public var alphaMod:Float = 1;
+	public var alphaMod2:Float = 1; // TODO: unhardcode this shit lmao
+
+	public var mAngle:Float = 0;
+	public var bAngle:Float = 0;
+
 	//This is needed for the hardcoded note types to appear on the Chart Editor,
 	//It's also used for backwards compatibility with 0.1 - 0.3.2 charts.
 	public static final defaultNoteTypes:Array<String> = [
@@ -187,6 +207,9 @@ class Note extends FlxSkewedSprite {
 	public var noMissAnimation:Bool = false;
 	public var hitCausesMiss:Bool = false;
 	public var distance:Float = 2000; //plan on doing scroll directions soon -bb
+
+	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
+	public var typeOffsetY:Float = 0;
 	
 	public var playMissSound:Bool = false;
 	public var hitsoundDisabled:Bool = false;
@@ -235,6 +258,7 @@ class Note extends FlxSkewedSprite {
 		{
 			scale.y *= ratio;
 			updateHitbox();
+			defScale.copyFrom(scale);
 		}
 	}
 	
@@ -423,6 +447,7 @@ class Note extends FlxSkewedSprite {
 					prevNote.scale.y *= 6;
 				}
 				prevNote.updateHitbox();
+				prevNote.defScale.copyFrom(prevNote.scale);
 			}
 		}
 
