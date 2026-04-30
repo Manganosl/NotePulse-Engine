@@ -1058,7 +1058,6 @@ class PlayState extends MusicBeatState
 							modManager.updateObject(curDecBeat, daNote, pos, pN);
 							pos.x += daNote.offsetX;
 							pos.y += daNote.offsetY;
-							daNote.x = pos.x;
 							daNote.y = pos.y;
 							daNote.z = pos.z;
 							if (daNote.isSustainNote)
@@ -1067,21 +1066,34 @@ class PlayState extends MusicBeatState
 								var diff = daNote.strumTime - futureSongPos;
 								var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
 
-								var nextPos = modManager.getPos(daNote.strumTime, vDiff, diff, Conductor.getStep(futureSongPos) / 4, daNote.noteData, pN, daNote, [],
-									daNote.vec3Cache);
+								var nextPos = modManager.getPos(daNote.strumTime, vDiff, diff, Conductor.getStep(futureSongPos) / 4, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
+								
 								nextPos.x += daNote.offsetX;
 								nextPos.y += daNote.offsetY;
+
 								var diffX = (nextPos.x - pos.x);
 								var diffY = (nextPos.y - pos.y);
+								var diffZ = (nextPos.z - pos.z);
+
 								var rad = Math.atan2(diffY, diffX);
 								var deg = rad * (180 / Math.PI);
-								if (deg != 0)
-									daNote.mAngle = (deg + 90);
-								else
-									daNote.mAngle = 0;
+								daNote.mAngle = (deg != 0) ? (deg + 90) : 0;
+
+								var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
+
+								if(daNote.frameHeight != 0) {
+									if(!daNote.isSustainEnd){
+									daNote.scale.y = (visualDist / daNote.frameHeight);
+									} else {
+										daNote.scale.y = 1;
+									}
+								}
 
 								daNote.clip(daNote.playField.members[daNote.noteData]);
 							}
+
+							if(daNote.isSustainNote) pos.x += daNote.parent.width/2 - daNote.width/2;
+							daNote.x = pos.x;
 
 							if(!daNote.strum.cpuControlled)
 							{

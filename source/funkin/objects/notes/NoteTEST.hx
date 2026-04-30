@@ -14,6 +14,7 @@ import funkin.objects.notes.splashes.NoteSplash;
 import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.PlayField;
 import funkin.objects.notes.copy.CopyNote;
+import funkin.objects.FunkinSprite;
 
 import math.Vector3;
 
@@ -101,7 +102,6 @@ class Note extends FlxSkewedSprite {
 
 	public var characters:Array<Character> = [];
 
-	public var modchartVisible:Bool = true;
 	public var followStrum:Bool = true;
 
 	public var strumTime:Float = 0;
@@ -188,7 +188,7 @@ class Note extends FlxSkewedSprite {
 	public var offsetAngle:Float = 0;
 	public var offsetDirection:Float = 0;
 	public var multAlpha:Float = 1;
-	public var multSpeed(default, set):Float = 1;
+	public var multSpeed:Float = 1;
 
 	public var copyX:Bool = true;
 	public var copyY:Bool = true;
@@ -245,21 +245,6 @@ class Note extends FlxSkewedSprite {
 			playField.notes.remove(this);
 		value.notes.push(this);
 		return playField = value;
-	}
-
-	private function set_multSpeed(value:Float):Float {
-		resizeByRatio(value / multSpeed);
-		multSpeed = value;
-		return value;
-	}
-
-	public function resizeByRatio(ratio:Float)
-	{
-		if(isSustainNote && animation.curAnim != null && !animation.curAnim.name.endsWith('end'))
-		{
-			scale.y *= ratio;
-			updateHitbox();
-		}
 	}
 	
 	private function set_texture(value:String):String {
@@ -447,6 +432,7 @@ class Note extends FlxSkewedSprite {
 					prevNote.scale.y *= 6;
 				}
 				prevNote.updateHitbox();
+				prevNote.defScale.copyFrom(prevNote.scale);
 			}
 		}
 
@@ -632,62 +618,6 @@ class Note extends FlxSkewedSprite {
 			if (alpha > 0.3)
 				alpha = 0.3;
 		}
-
-		if(currentStrumSpeed == -99999999999999) currentStrumSpeed = strum.noteSpeed;
-		if(currentStrumSpeed != strum.noteSpeed){
-			var ratio = strum.noteSpeed / currentStrumSpeed;
-			currentStrumSpeed = strum.noteSpeed;
-			resizeByRatio(ratio);
-		}
-	}
-
-	private var lastDistance:Float = 0;
-	public function followStrumNote(fakeCrochet:Float, songSpeed:Float = 1)
-	{
-		for(daNote in copyingNotes)
-			daNote.followStrumNote(fakeCrochet, songSpeed);
-
-		var noteSpeed:Float = songSpeed * multSpeed * strum.noteSpeed;
-		var strumDir:Float = strum.direction + this.offsetDirection;
-		
-		distance = getDistance(strumTime - Conductor.songPosition, noteSpeed, strum);
-		lastDistance = distance;
-		var scrollMult:Int = (strum.downScroll ? -1 : 1);
-		
-		if(copyAlpha)
-			alpha = strum.alpha * multAlpha;
-		
-		var angleDir:Float = strumDir * Math.PI / 180;
-		if(copyX)
-			x = strum.x + offsetX + Math.cos(angleDir) * distance;
-		if(copyY)
-			y = strum.y + offsetY + Math.sin(angleDir) * (followStrum ? distance : lastDistance) * scrollMult;
-		if (copyAngle)
-			angle = (isSustainNote ? strumDir - 90 : strum.angle) + offsetAngle;
-		
-		if (isSustainNote)
-			updateSustain(noteSpeed);
-	}
-	
-	public function updateSustain(noteSpeed:Float = 1) {
-		if(!isSustainEnd && parent == null) {
-			scale.y = getDistance(sustainLength, noteSpeed, strum) / frameHeight;
-			updateHitbox();
-		}
-		if(isSustainEnd) {
-			scale.y = oldSY;
-		}
-		origin.set(frameWidth * .5, 0);
-		offset.set();
-		
-		flipX = strum.downScroll;
-		x += (strum.width - frameWidth) * .5;
-		y += strum.height * .5;
-		if (strum.downScroll)
-			angle = 180 - angle;
-	}
-	public static function getDistance(time:Float, speed:Float, daStrum:StrumNote) {
-		return (0.45 * time * speed * daStrum.noteSpeed);
 	}
 
 	public function clip(strum:StrumNote)

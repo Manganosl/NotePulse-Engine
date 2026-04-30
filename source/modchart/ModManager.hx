@@ -213,6 +213,8 @@ class ModManager {
 		final note:Note = (obj is Note ? cast obj : null);
 		
 		obj.x = (pos.x - obj.width * .5);
+		if(obj is Note && note.isSustainNote)
+			obj.x += note.parent.width/2 - note.width;
 		
 		if (note != null && note.isSustainNote)
 		{
@@ -242,6 +244,7 @@ class ModManager {
 
 		if((obj is Note)){
 			var cum:Note = cast obj;
+			if (cum.isSustainNote) cum.origin.y = cum.offset.y = 0;
 			cum.offset.x += cum.typeOffsetX;
 			cum.offset.y += cum.typeOffsetY;
 		}
