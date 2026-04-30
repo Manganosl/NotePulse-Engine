@@ -249,8 +249,8 @@ class ModManager implements IFlxDestroyable
 		
 		if((obj is Note)){
 			var cum:Note = cast obj;
-			cum.offset.x += cum.typeOffsetX;
-			cum.offset.y += cum.typeOffsetY;
+			cum.spriteOffset.x += cum.typeOffsetX;
+			cum.spriteOffset.y += cum.typeOffsetY;
 		}
 	}
 	
