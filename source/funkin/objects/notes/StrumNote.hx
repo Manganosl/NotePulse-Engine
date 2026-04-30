@@ -14,12 +14,12 @@ import funkin.objects.FunkinSprite;
 import funkin.game.shaders.RGBPalette;
 import funkin.game.shaders.RGBPalette.RGBShaderReference;
 
-import funkin.modchart.math.Vector3;
+import math.Vector3;
 
-class StrumNote extends FunkinSprite implements funkin.modchart.IModNote {
+class StrumNote extends FlxSkewedSprite {
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
-
+	
 	public var zIndex:Float = 0;
 	public var desiredZIndex:Float = 0;
 	public var z:Float = 0;

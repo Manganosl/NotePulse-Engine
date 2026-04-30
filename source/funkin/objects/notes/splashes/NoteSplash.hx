@@ -17,7 +17,7 @@ typedef NoteSplashConfig = {
 	offsets:Array<Array<Float>>
 }
 
-class NoteSplash extends FunkinSprite implements funkin.modchart.IModNote {
+class NoteSplash extends FlxSkewedSprite {
 	public var rgbShader:PixelSplashShaderRef;
 	private var idleAnim:String;
 	private var _textureLoaded:String = null;

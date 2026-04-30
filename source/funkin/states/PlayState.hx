@@ -55,7 +55,7 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 #end
 
-import funkin.modchart.*;
+import modchart.*;
 
 /**
  * This is where all the Gameplay stuff happens and is managed
@@ -853,12 +853,8 @@ class PlayState extends MusicBeatState
 		// CREATE MODMANAGER INSTANCE HERE!
 		// APPLY MODCHART EVENTS HERE TOO!
 		modManager = new ModManager(this);
-		modManager.receptors = [for (i in PlayField.fields) i.members];
-		modManager.lanes = SONG.lanes;
-		modManager.keys = SONG.mania+1;
-		modManager.registerEssentialModifiers();
+		modManager.receptors = [for(i in PlayField.fields) i.members];
 		modManager.registerDefaultModifiers();
-		modManager.registerScriptedModifiers();
 		callOnScripts('initModchart');
 
 		add(uiGroup);
@@ -1015,28 +1011,17 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		var tempVector = funkin.modchart.math.Vector3.get();
-		
-		final canUpdateModchart:Bool = (PlayField.fields != null);
-		
-		inline function modchart(obj:Dynamic, id:Int)
-		{
-			final pos = modManager.getPos(0, 0, 0, curDecBeat, obj.noteData, id, obj, tempVector);
-			
-			modManager.updateObject(curDecBeat, obj, pos, id);
-			
-			return pos;
-		}
-		
-		if (canUpdateModchart)
-		{
-			for (playField in PlayField.fields)
+		for(field in PlayField.fields){
+			field.forEachAlive(function(strum:StrumNote)
 			{
-				final id = playField.player;
-				
-				playField.forEachAlive(function(strum) modchart(strum, id));
-			}
+				var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
+				modManager.updateObject(curDecBeat, strum, pos, field.player);
+				strum.x = pos.x;
+				strum.y = pos.y;
+				strum.z = pos.z;
+			});
 		}
+		strumLineNotes.sort(sortByOrderStrumNote);
 
 		if (generatedMusic)
 		{
@@ -1053,45 +1038,49 @@ class PlayState extends MusicBeatState
 						notes.sort(sortByOrderNote);
 						notes.forEachAlive(function(daNote:Note)
 						{
-							var futureSongPos = Conductor.songPosition;
-							final visPos = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
-							final diff = (daNote.strumTime - Conductor.songPosition);
-							
-							final pos = modManager.getPos(daNote.strumTime, visPos, diff, curDecBeat, daNote.noteData, daNote.playField.player, daNote, tempVector);
-							
-							modManager.updateObject(curDecBeat, daNote, pos, daNote.playField.player);
-							
-							daNote.spriteOffset.x = (daNote.offsetX);
-							daNote.spriteOffset.y = (daNote.offsetY);
-							
+							var strumGroup:PlayField = daNote.playField;
+
+							var strumX:Float = strumGroup.members[daNote.noteData].x;
+							var strumY:Float = strumGroup.members[daNote.noteData].y;
+							var strumAngle:Float = strumGroup.members[daNote.noteData].angle;
+							var strumDirection:Float = strumGroup.members[daNote.noteData].direction;
+							var strumAlpha:Float = strumGroup.members[daNote.noteData].alpha;
+							var strumScroll:Bool = strumGroup.members[daNote.noteData].downScroll;
+
+							strumX += daNote.offsetX;
+							strumY += daNote.offsetY;
+							strumAngle += daNote.offsetAngle;
+							strumAlpha *= daNote.multAlpha;
+							var pN:Int = daNote.playField.player;
+							var pos = modManager.getPos(daNote.strumTime, modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed),
+								daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
+
+							modManager.updateObject(curDecBeat, daNote, pos, pN);
+							pos.x += daNote.offsetX;
+							pos.y += daNote.offsetY;
+							daNote.x = pos.x;
+							daNote.y = pos.y;
+							daNote.z = pos.z;
 							if (daNote.isSustainNote)
 							{
-								final futureSongPos = Conductor.getBeat(Conductor.songPosition + daNote.sustainLength);
-								
-								final visPos = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
-								final diff = (daNote.strumTime + daNote.sustainLength - Conductor.songPosition);
-								
-								var nextPos = modManager.getPos(daNote.strumTime + daNote.sustainLength, visPos, diff, Conductor.getBeat(futureSongPos), daNote.noteData, daNote.playField.player, daNote);
-								
-								final rad = Math.atan2(nextPos.y - pos.y, nextPos.x - pos.x);
-								
-								final deg = (rad * 180 / Math.PI);
-								
-								daNote.angle = (deg - 90);
-								
-								if (!daNote.isSustainEnd)
-								{
-									final dist:Float = Math.sqrt(Math.pow(pos.y - nextPos.y, 2) + Math.pow(pos.x - nextPos.x, 2));
-									
-									// SCALE WONT WORK CORRECTLY
-									// Maybe my FM SimpleHoldRenderer's code works?
-									daNote.scale.y = daNote.baseScale.y = ((Conductor.crochet + 8) / 4) / dist;
-									trace(daNote.scale.y);
-								}
-								
+								var futureSongPos = Conductor.songPosition + 75;
+								var diff = daNote.strumTime - futureSongPos;
+								var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
+
+								var nextPos = modManager.getPos(daNote.strumTime, vDiff, diff, Conductor.getStep(futureSongPos) / 4, daNote.noteData, pN, daNote, [],
+									daNote.vec3Cache);
+								nextPos.x += daNote.offsetX;
+								nextPos.y += daNote.offsetY;
+								var diffX = (nextPos.x - pos.x);
+								var diffY = (nextPos.y - pos.y);
+								var rad = Math.atan2(diffY, diffX);
+								var deg = rad * (180 / Math.PI);
+								if (deg != 0)
+									daNote.mAngle = (deg + 90);
+								else
+									daNote.mAngle = 0;
+
 								daNote.clip(daNote.playField.members[daNote.noteData]);
-								
-								nextPos.put();
 							}
 
 							if(!daNote.strum.cpuControlled)
