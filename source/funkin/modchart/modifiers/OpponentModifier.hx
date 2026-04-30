@@ -14,7 +14,7 @@ class OpponentModifier extends NoteModifier
 		
 		var distX = oppX - plrX;
 		
-		pos.x = pos.x + distX * (1 - getValue(player));
+		pos.x = pos.x + distX * getValue(player);
 		
 		return pos;
 	}

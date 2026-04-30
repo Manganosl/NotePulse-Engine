@@ -414,8 +414,8 @@ class PlayState extends MusicBeatState
 			var ratio:Float = value / songSpeed; //funny word huh
 			if(ratio != 1)
 			{
-				for (note in notes.members) note.resizeByRatio(ratio);
-				for (note in unspawnNotes) note.resizeByRatio(ratio);
+				//for (note in notes.members) note.resizeByRatio(ratio);
+				//for (note in unspawnNotes) note.resizeByRatio(ratio);
 			}
 		}
 		songSpeed = value;
@@ -435,8 +435,8 @@ class PlayState extends MusicBeatState
 			var ratio:Float = playbackRate / value; //funny word huh
 			if(ratio != 1)
 			{
-				for (note in notes.members) note.resizeByRatio(ratio);
-				for (note in unspawnNotes) note.resizeByRatio(ratio);
+				//for (note in notes.members) note.resizeByRatio(ratio);
+				//for (note in unspawnNotes) note.resizeByRatio(ratio);
 			}
 		}
 		playbackRate = value;
@@ -1053,48 +1053,46 @@ class PlayState extends MusicBeatState
 						notes.sort(sortByOrderNote);
 						notes.forEachAlive(function(daNote:Note)
 						{
-							daNote.followStrumNote(fakeCrochet, songSpeed / playbackRate);
-				
-				var futureSongPos = Conductor.songPosition + 75;
-				final visPos = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
-				final diff = (daNote.strumTime - Conductor.songPosition);
-				
-				final pos = modManager.getPos(daNote.strumTime, visPos, diff, curDecBeat, daNote.noteData, daNote.playField.player, daNote, tempVector);
-				
-				modManager.updateObject(curDecBeat, daNote, pos, daNote.playField.player);
-				
-				daNote.spriteOffset.x = (daNote.offsetX);
-				daNote.spriteOffset.y = (daNote.offsetY);
-				
-				if (daNote.isSustainNote)
-				{
-					final futureSongPos = Conductor.getBeat(Conductor.songPosition + daNote.sustainLength);
-					
-					final visPos = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
-					final diff = (daNote.strumTime + daNote.sustainLength - Conductor.songPosition);
-					
-					var nextPos = modManager.getPos(daNote.strumTime + daNote.sustainLength, visPos, diff, Conductor.getBeat(futureSongPos), daNote.noteData, daNote.playField.player, daNote);
-					
-					final rad = Math.atan2(nextPos.y - pos.y, nextPos.x - pos.x);
-					
-					final deg = (rad * 180 / Math.PI);
-					
-					daNote.angle = (deg - 90);
-					
-					if (!daNote.isSustainEnd)
-					{
-						final dist:Float = Math.sqrt(Math.pow(pos.y - nextPos.y, 2) + Math.pow(pos.x - nextPos.x, 2));
-						
-						// SCALE WONT WORK CORRECTLY
-						// Maybe my FM SimpleHoldRenderer's code works?
-						//daNote.scale.y = daNote.baseScale.y = (dist / (daNote.frameHeight - (daNote.antialiasing ? 1 : 0)));
-					}
-					
-					//daNote.clip(daNote.playField.members[daNote.noteData]);
-					
-					nextPos.put();
-				}
-
+							var futureSongPos = Conductor.songPosition;
+							final visPos = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
+							final diff = (daNote.strumTime - Conductor.songPosition);
+							
+							final pos = modManager.getPos(daNote.strumTime, visPos, diff, curDecBeat, daNote.noteData, daNote.playField.player, daNote, tempVector);
+							
+							modManager.updateObject(curDecBeat, daNote, pos, daNote.playField.player);
+							
+							daNote.spriteOffset.x = (daNote.offsetX);
+							daNote.spriteOffset.y = (daNote.offsetY);
+							
+							if (daNote.isSustainNote)
+							{
+								final futureSongPos = Conductor.getBeat(Conductor.songPosition + daNote.sustainLength);
+								
+								final visPos = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
+								final diff = (daNote.strumTime + daNote.sustainLength - Conductor.songPosition);
+								
+								var nextPos = modManager.getPos(daNote.strumTime + daNote.sustainLength, visPos, diff, Conductor.getBeat(futureSongPos), daNote.noteData, daNote.playField.player, daNote);
+								
+								final rad = Math.atan2(nextPos.y - pos.y, nextPos.x - pos.x);
+								
+								final deg = (rad * 180 / Math.PI);
+								
+								daNote.angle = (deg - 90);
+								
+								if (!daNote.isSustainEnd)
+								{
+									final dist:Float = Math.sqrt(Math.pow(pos.y - nextPos.y, 2) + Math.pow(pos.x - nextPos.x, 2));
+									
+									// SCALE WONT WORK CORRECTLY
+									// Maybe my FM SimpleHoldRenderer's code works?
+									daNote.scale.y = daNote.baseScale.y = ((Conductor.crochet + 8) / 4) / dist;
+									trace(daNote.scale.y);
+								}
+								
+								daNote.clip(daNote.playField.members[daNote.noteData]);
+								
+								nextPos.put();
+							}
 
 							if(!daNote.strum.cpuControlled)
 							{
@@ -1109,8 +1107,6 @@ class PlayState extends MusicBeatState
 								notesLength = notes.length;
 								unspawnNotesLength = unspawnNotes.length;
 							}
-
-							if(daNote.isSustainNote && daNote.strum.sustainReduce) daNote.clipToStrumNote();
 
 							if (daNote.isSustainNote && daNote.wasGoodHit && !daNote.strum.sustainSplash.updatedThisFrame) {
 								if (daNote.isSustainEnd) {

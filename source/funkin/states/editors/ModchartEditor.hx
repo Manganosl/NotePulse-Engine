@@ -1108,12 +1108,12 @@ class ModchartEditor extends MusicBeatState
 			var fakeCrochet:Float = (60 / PlayState.SONG.bpm) * 1000;
 			notes.forEachAlive(function(daNote:Note)
 			{
-				daNote.followStrumNote(fakeCrochet, songSpeed / playbackRate);
+				//daNote.followStrumNote(fakeCrochet, songSpeed / playbackRate);
 
 				if(daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
 					opponentNoteHit(daNote);
 
-				if(daNote.isSustainNote && daNote.strum.sustainReduce) daNote.clipToStrumNote();
+				//if(daNote.isSustainNote && daNote.strum.sustainReduce) daNote.clipToStrumNote();
 
 				if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
 				{

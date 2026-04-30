@@ -219,9 +219,9 @@ class ModManager implements IFlxDestroyable
 		switch (player)
 		{
 			case 0:
-				x += FlxG.width * 0.5 - Note.swagWidth * (keys / 2) - 100;
-			case 1:
 				x -= FlxG.width * 0.5 - Note.swagWidth * (keys / 2) - 100;
+			case 1:
+				x += FlxG.width * 0.5 - Note.swagWidth * (keys / 2) - 100;
 		}
 		
 		return x;
@@ -229,6 +229,19 @@ class ModManager implements IFlxDestroyable
 	
 	public function updateObject(beat:Float, obj:FlxSprite, pos:Vector3, player:Int)
 	{
+		final note:Note = (obj is Note ? cast obj : null);
+		
+		obj.x = (pos.x - obj.width * .5);
+		
+		if (note != null && note.isSustainNote)
+		{
+			note.y = pos.y;
+		}
+		else
+		{
+			obj.y = (pos.y - obj.height * .5);
+		}
+		
 		if (activeMods[player] != null)
 		{
 			for (name in activeMods[player])
@@ -242,15 +255,16 @@ class ModManager implements IFlxDestroyable
 				else if (obj is SustainSplash) mod.updateSustainSplash(beat, cast obj, pos, player);
 			}
 		}
-
-		if((obj is Note)) obj.updateHitbox();
+		
 		obj.centerOrigin();
 		obj.centerOffsets();
 		
-		if((obj is Note)){
-			var cum:Note = cast obj;
-			cum.spriteOffset.x += cum.typeOffsetX;
-			cum.spriteOffset.y += cum.typeOffsetY;
+		if (note != null)
+		{
+			if (note.isSustainNote) note.origin.y = note.offset.y = 0;
+			
+			note.spriteOffset.x = note.typeOffsetX;
+			note.spriteOffset.y = note.typeOffsetY;
 		}
 	}
 	
@@ -259,9 +273,8 @@ class ModManager implements IFlxDestroyable
 		return (0.45 * (diff) * songSpeed);
 	}
 	
-	public inline function getVisPos(songPos:Float = 0, strumTime:Float = 0, songSpeed:Float = 1)
-	{
-		return -getBaseVisPosD(songPos - strumTime, songSpeed);
+	public inline function getVisPos(songPos:Float=0, strumTime:Float=0, songSpeed:Float=1){
+		return -(0.45 * (songPos - strumTime) * songSpeed);
 	}
 	
 	public function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, ?exclusions:Array<String>, ?pos:Vector3):Vector3

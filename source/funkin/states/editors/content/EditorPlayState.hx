@@ -270,12 +270,12 @@ class EditorPlayState extends MusicBeatSubstate
 			var fakeCrochet:Float = (60 / PlayState.SONG.bpm) * 1000;
 			notes.forEachAlive(function(daNote:Note)
 			{
-				daNote.followStrumNote(fakeCrochet, songSpeed / playbackRate);
+				//daNote.followStrumNote(fakeCrochet, songSpeed / playbackRate);
 
 				if(daNote.strum.cpuControlled && daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
 					opponentNoteHit(daNote);
 
-				if(daNote.isSustainNote && daNote.strum.sustainReduce) daNote.clipToStrumNote();
+				//if(daNote.isSustainNote && daNote.strum.sustainReduce) daNote.clipToStrumNote();
 
 				// Kill extremely late notes and cause misses
 				if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
