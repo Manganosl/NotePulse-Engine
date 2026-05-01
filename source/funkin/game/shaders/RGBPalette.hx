@@ -140,6 +140,7 @@ class RGBShaderReference
 		_owner = owner;
 		_original = ref;
 		shader = ref.shader;
+		owner.shader = ref.shader;
 		
 		@:bypassAccessor
 		{

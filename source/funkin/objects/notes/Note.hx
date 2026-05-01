@@ -627,6 +627,11 @@ class Note extends FlxSkewedSprite {
 			}
 		}
 
+		if (rgbShader != null)
+		{			
+			rgbShader.alphaMult = (alphaMod * alphaMod2);
+		}
+
 		if (tooLate && !inEditor)
 		{
 			if (alpha > 0.3)
