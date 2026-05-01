@@ -5,8 +5,6 @@ import funkin.backend.animation.PsychAnimationController;
 
 import funkin.game.shaders.RGBPalette;
 
-import funkin.objects.FunkinSprite;
-
 import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.frames.FlxFrame;
 

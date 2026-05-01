@@ -3,8 +3,6 @@ package funkin.objects.notes.splashes;
 import funkin.objects.notes.splashes.NoteSplash.PixelSplashShaderRef;
 import funkin.game.shaders.RGBPalette;
 
-import funkin.objects.FunkinSprite;
-
 class SustainSplash extends FlxSkewedSprite {
 	// We can't use the normal visibility property as FunkinModchart messes with it.
 	private var visibilityToggle:Bool = false;

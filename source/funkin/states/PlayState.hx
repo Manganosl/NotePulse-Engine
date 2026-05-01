@@ -283,6 +283,8 @@ class PlayState extends MusicBeatState
 	public var dadCamZoom(default, set):Float = 1.05;
 	public var gfCamZoom(default, set):Float = 1.05;
 
+	private var initialCrochet:Float = 0;
+
 	// how big to stretch the pixel art assets
 	public static var daPixelZoom:Float = 6;
 	private var singAnimations:Array<String> = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
@@ -1061,7 +1063,9 @@ class PlayState extends MusicBeatState
 							daNote.z = pos.z;
 							if (daNote.isSustainNote)
 							{
-								var futureSongPos = Conductor.songPosition + ((Conductor.crochet+8)/4);
+								var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / holdSubdivisions, 10);
+
+								var futureSongPos = Conductor.songPosition + holdCrochet;
 								var diff = daNote.strumTime - futureSongPos;
 								var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
 
@@ -1354,6 +1358,9 @@ class PlayState extends MusicBeatState
 		while(noteRows.length != PlayField.fields.length)
 			noteRows.push([]);
 
+		initialCrochet = Conductor.crochet;
+		var holdCrochet:Float = Math.max(Conductor.stepCrochet / holdSubdivisions, 10);
+
 		for (section in noteData)
 		{
 			for (songNotes in section.sectionNotes)
@@ -1388,7 +1395,7 @@ class PlayState extends MusicBeatState
 				rowArray[swagNote.row].push(swagNote);
 				unspawnNotes.push(swagNote);
 
-				final susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
+				final susLength = (swagNote.sustainLength / holdCrochet);
 				final floorSus:Int = Math.floor(susLength);
 
 				if(floorSus > 0) {
@@ -1396,7 +1403,8 @@ class PlayState extends MusicBeatState
 					{
 						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true, false, this);
+						var sustainNote:Note = new Note(daStrumTime + (holdCrochet * susNote), daNoteData, oldNote, true, false, this);
+						sustainNote.sustainLength = holdCrochet;
 						sustainNote.mustPress = swagNote.mustPress;
 						sustainNote.characters = swagNote.characters;
 						sustainNote.gfNote = swagNote.gfNote;

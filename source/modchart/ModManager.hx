@@ -13,6 +13,7 @@ import modchart.events.*;
 // Weird amalgamation of Schmovin' modifier system, Andromeda modifier system and my own new shit -neb
 
 class ModManager {
+	public var swapPlayers:Bool = false;
 	public function registerDefaultModifiers()
 	{
 		var quickRegs:Array<Any> = [
@@ -93,20 +94,26 @@ class ModManager {
         // TODO: sort by mod.getOrder()
     }
 
+	private inline function getP(player:Int):Int {
+        if (!swapPlayers || player == -1) return player;
+        return 1 - player;
+    }
+
     inline public function get(modName:String)
         return register.get(modName);
 
 	inline public function getPercent(modName:String, player:Int)
-		return register.get(modName).getPercent(player);
+		return register.get(modName).getPercent(getP(player));
 
 	inline public function getValue(modName:String, player:Int)
-		return register.get(modName).getValue(player);
+		return register.get(modName).getValue(getP(player));
 
     inline public function setPercent(modName:String, val:Float, player:Int=-1)
 		setValue(modName, val/100, player);
     
 
 	public function setValue(modName:String, val:Float, player:Int=-1){
+		player = getP(player);
 		if (player == -1)
 		{
 			for (pN in 0...2)

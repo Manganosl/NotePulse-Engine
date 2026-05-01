@@ -60,10 +60,6 @@ class PathModifier extends NoteModifier {
         idx++;
       }
     }
-
-    for(dir in 0...totalDists.length){
-      trace(dir, totalDists[dir]);
-    }
   }
 
 

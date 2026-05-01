@@ -55,6 +55,7 @@ class Note extends FlxSkewedSprite {
 
 	public var mAngle:Float = 0;
 	public var bAngle:Float = 0;
+	public var visualLength:Float = 0;
 
 	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
 	public var typeOffsetY:Float = 0;

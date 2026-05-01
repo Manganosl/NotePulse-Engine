@@ -9,7 +9,6 @@ import funkin.backend.animation.PsychAnimationController;
 
 import funkin.objects.notes.PlayField;
 import funkin.objects.notes.splashes.*;
-import funkin.objects.FunkinSprite;
 
 import funkin.game.shaders.RGBPalette;
 import funkin.game.shaders.RGBPalette.RGBShaderReference;
