@@ -3091,6 +3091,7 @@ class PlayState extends MusicBeatState
 	function noteMissCommon(direction:Int, note:Note = null)
 	{
 		// score and data
+		final susMult:Float = (note.isSustainNote ? 1 / holdSubdivisions : 1);
 		var subtract:Float = 0.05;
 		if(note != null) subtract = note.missHealth;
 
@@ -3147,7 +3148,7 @@ class PlayState extends MusicBeatState
 		var lastCombo:Int = combo;
 		combo = 0;
 
-		if(!isPlayerOpponent) health -= subtract * healthLoss; else health += subtract * healthLoss;
+		if(!isPlayerOpponent) health -= subtract * healthLoss * susMult; else health += subtract * healthLoss * susMult;
 		if(!practiceMode) songScore -= 10;
 		if(!endingSong) songMisses++;
 		totalPlayed++;
@@ -3425,10 +3426,11 @@ class PlayState extends MusicBeatState
 			noteMs.push((noteDiff));
 			noteTime.push(note.strumTime);
 		}
+		final susMult:Float = (note.isSustainNote ? 1 / holdSubdivisions : 1);
 		var gainHealth:Bool = true; // prevent health gain, *if* sustains are treated as a singular note
 		if (guitarHeroSustains && note.isSustainNote) gainHealth = false;
-		if (gainHealth && !isPlayerOpponent) health += note.hitHealth * healthGain;
-		if (gainHealth && isPlayerOpponent) health -= note.hitHealth * healthGain;
+		if (gainHealth && !isPlayerOpponent) health += note.hitHealth * healthGain * susMult;
+		if (gainHealth && isPlayerOpponent) health -= note.hitHealth * healthGain * susMult;
 
 		stagesFunc(function(stage:BaseStage) stage.goodNoteHit(note));
 		var result:Dynamic = (!isPlayerOpponent && !note.gfStrum) ? callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]) : callOnLuas('opponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
