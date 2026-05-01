@@ -625,13 +625,21 @@ class Note extends FlxSkewedSprite {
 			if (alpha > 0.3)
 				alpha = 0.3;
 		}
+
+		rgbShader.centerOffsetX = (FlxG.width/2) - (x + width/2);
+        rgbShader.centerOffsetY = (FlxG.height/2) - (y + height/2);
+        rgbShader.centerOffsetZ = 0;
 	}
 
 	public function clip(strum:StrumNote)
 	{
 		if (strum.sustainReduce && wasGoodHit && Conductor.songPosition >= strumTime)
 		{
-			final x:Float = (x - strum.x - (strum.width - width) * .5), y:Float = (y - strum.y - strum.height * .5);
+			var centerOffset:Float = (parent != null) ? parent.height * 0.5 : 0;
+			
+			final x:Float = (x - strum.x - (strum.width - width) * .5);
+			final y:Float = (y - centerOffset - strum.y - strum.height * .5);
+			
 			final mag:Float = Math.sqrt(x * x + y * y);
 			
 			var swagRect:FlxRect = getRect();

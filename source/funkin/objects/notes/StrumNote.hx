@@ -228,7 +228,12 @@ class StrumNote extends FlxSkewedSprite {
 		if(sustainSplash != null)
 			if(sustainSplash.animation.curAnim != null)
 				if (sustainSplash.animation.curAnim.name != "splash" && animation.curAnim.name == "static" && !cpuControlled)
-					sustainSplash.hide(true);  // You may ask, why 2 times? Well, BPM changes fuck with everything and I dont know why
+					sustainSplash.hide(true);  // You may ask, why 2 times? Well, BPM changes fucks with everything and I dont know why
+
+		rgbShader.centerOffsetX = (FlxG.width/2) - (x + width/2);
+        rgbShader.centerOffsetY = (FlxG.height/2) - (y + height/2);
+        rgbShader.centerOffsetZ = 0;
+
 		super.update(elapsed);
 	}
 

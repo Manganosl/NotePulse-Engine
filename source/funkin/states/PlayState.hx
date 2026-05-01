@@ -1058,13 +1058,17 @@ class PlayState extends MusicBeatState
 								daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
 
 							modManager.updateObject(curDecBeat, daNote, pos, pN);
+
 							pos.x += daNote.offsetX;
+							if(daNote.isSustainNote) pos.x += daNote.parent.width/2 - daNote.width/2;
 							pos.y += daNote.offsetY;
+							if(daNote.isSustainNote) pos.y += daNote.parent.height/2;
+							daNote.x = pos.x;
+							daNote.y = pos.y;
 							daNote.z = pos.z;
 							if (daNote.isSustainNote)
 							{
 								var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / holdSubdivisions, 10);
-
 								var futureSongPos = Conductor.songPosition + holdCrochet;
 								var diff = daNote.strumTime - futureSongPos;
 								var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
@@ -1072,7 +1076,9 @@ class PlayState extends MusicBeatState
 								var nextPos = modManager.getPos(daNote.strumTime, vDiff, diff, Conductor.getStep(futureSongPos) / 4, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
 								
 								nextPos.x += daNote.offsetX;
+								if(daNote.isSustainNote) nextPos.x += daNote.parent.width/2 - daNote.width/2;
 								nextPos.y += daNote.offsetY;
+								if(daNote.isSustainNote) nextPos.y += daNote.parent.height/2;
 
 								var diffX = (nextPos.x - pos.x);
 								var diffY = (nextPos.y - pos.y);
@@ -1084,19 +1090,17 @@ class PlayState extends MusicBeatState
 
 								var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
 
+								daNote.rgbShader.angleX = Math.atan2(diffY, diffZ) + (Math.PI / 2);
+
 								if(daNote.frameHeight != 0) {
 									if(!daNote.isSustainEnd){
-									daNote.scale.y = (visualDist / daNote.frameHeight);
+										daNote.scale.y = (visualDist / daNote.frameHeight);
 									} else {
 										daNote.scale.y = 1;
 									}
 								}
 							}
 
-							if(daNote.isSustainNote) pos.y += daNote.parent.height/2;
-							daNote.y = pos.y;
-							if(daNote.isSustainNote) pos.x += daNote.parent.width/2 - daNote.width/2;
-							daNote.x = pos.x;
 							if(daNote.isSustainNote) daNote.clip(daNote.playField.members[daNote.noteData]);
 
 							if(!daNote.strum.cpuControlled)
