@@ -59,18 +59,18 @@ class ScaleModifier extends NoteModifier {
 
 	override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int)
 	{
-		//var scale = getScale(note, FlxPoint.weak(note.defScale.x, note.defScale.y), note.noteData, player);
-		//if(note.isSustainNote)scale.y = note.defScale.y;
+		var scale = getScale(note, FlxPoint.weak(note.defScale.x, note.defScale.y), note.noteData, player);
+		if(note.isSustainNote)scale.y = note.defScale.y;
 		
-		//note.scale.copyFrom(scale);
-		//scale.putWeak();
+		note.scale.copyFrom(scale);
+		scale.putWeak();
 	}
 
 	override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int)
 	{
-		//var scale = getScale(receptor, FlxPoint.weak(receptor.defScale.x, receptor.defScale.y), receptor.noteData, player);
-		//receptor.scale.copyFrom(scale);
-		//scale.putWeak();
+		var scale = getScale(receptor, FlxPoint.weak(receptor.defScale.x, receptor.defScale.y), receptor.noteData, player);
+		receptor.scale.copyFrom(scale);
+		scale.putWeak();
 	}
 
 	override function getSubmods()

@@ -28,7 +28,7 @@ class PerspectiveModifier extends NoteModifier {
   override function shouldExecute(player:Int, val:Float)return true;
 
   var fov = Math.PI/2;
-  var near = 0;
+  var near = 0.01;
   var far = 2;
 
   function FastTan(rad:Float) // thanks schmoovin

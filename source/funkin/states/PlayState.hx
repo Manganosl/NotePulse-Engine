@@ -1058,11 +1058,10 @@ class PlayState extends MusicBeatState
 							modManager.updateObject(curDecBeat, daNote, pos, pN);
 							pos.x += daNote.offsetX;
 							pos.y += daNote.offsetY;
-							daNote.y = pos.y;
 							daNote.z = pos.z;
 							if (daNote.isSustainNote)
 							{
-								var futureSongPos = Conductor.songPosition + 75;
+								var futureSongPos = Conductor.songPosition + ((Conductor.crochet+8)/4);
 								var diff = daNote.strumTime - futureSongPos;
 								var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
 
@@ -1088,12 +1087,13 @@ class PlayState extends MusicBeatState
 										daNote.scale.y = 1;
 									}
 								}
-
-								daNote.clip(daNote.playField.members[daNote.noteData]);
 							}
 
+							if(daNote.isSustainNote) pos.y += daNote.parent.height/2;
+							daNote.y = pos.y;
 							if(daNote.isSustainNote) pos.x += daNote.parent.width/2 - daNote.width/2;
 							daNote.x = pos.x;
+							if(daNote.isSustainNote) daNote.clip(daNote.playField.members[daNote.noteData]);
 
 							if(!daNote.strum.cpuControlled)
 							{
