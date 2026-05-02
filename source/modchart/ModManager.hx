@@ -148,7 +148,7 @@ class ModManager {
 			var daMod = register.get(modName);
 			if (daMod == null)
 			{
-				trace("cannot set " + modName + " because it is null lol");
+				Log.warn("The modifier " + modName + " cannot be set as it's null");
 				return;
 			}
 			var mod = daMod.parent==null?daMod:daMod.parent;
@@ -296,13 +296,16 @@ class ModManager {
 		pos.x = getBaseX(data, player);
 		pos.y = 50 + diff;
 		pos.z = 0;
-		for (name in activeMods[player]){
-			if (exclusions.contains(name))continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
-			var mod:Modifier = notemodRegister.get(name);
-			if (mod==null)continue;
-			if(!obj.active)continue;
-			pos = mod.getPos(time, diff, tDiff, beat, pos, data, player, obj);
-        }
+
+		if(activeMods[player] != null){
+			for (name in activeMods[player]){
+				if (exclusions.contains(name))continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
+				var mod:Modifier = notemodRegister.get(name);
+				if (mod==null)continue;
+				if(!obj.active)continue;
+				pos = mod.getPos(time, diff, tDiff, beat, pos, data, player, obj);
+			}
+		}
 		return pos;
     }
 

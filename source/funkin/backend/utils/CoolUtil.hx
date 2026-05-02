@@ -59,6 +59,36 @@ class CoolUtil
 		return n;
 	}
 
+	inline public static function square(angle:Float) {
+		var fAngle = angle % (Math.PI * 2);
+
+		return fAngle >= Math.PI ? -1.0 : 1.0;
+	}
+
+	inline public static function triangle(angle:Float) {
+		var fAngle:Float = angle % (Math.PI * 2.0);
+		if (fAngle < 0.0)
+			fAngle += Math.PI * 2.0;
+		
+		var result:Float = fAngle / Math.PI;
+		
+		if (result < 0.5) {
+			return 2.0 * result;
+		}
+		else if (result < 1.5) {
+			return -2.0 * result + 2.0;
+		}
+		else {
+			return 2.0 * result - 4.0;
+		}
+	}
+
+	inline public static function snap(f:Float, snap:Float):Float
+		return Math.fround(f / snap) * snap;
+
+	inline public static function boundTo(value:Float, min:Float, max:Float):Float
+		return Math.max(min, Math.min(max, value));
+
 	inline public static function quantizeAlpha(f:Float, interval:Float)
 	{
 		return Std.int((f + interval / 2) / interval) * interval;

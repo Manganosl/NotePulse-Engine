@@ -23,7 +23,7 @@ class ModEaseEvent extends ModEvent {
 	override function run(curStep:Float)
 	{
 		if (mod == null && !finished){
-			trace('no mod! mod name is wrong ($modName)');
+			Log.warn("Tried to ease modifier " + modName + " but it's null");
 			finished = true;
 			return;
 		}
