@@ -58,13 +58,36 @@ class Modifier {
 		return '';
 	}
 
+	inline public function getTargetOtherValue(modName:String, player:Int)
+		return modMgr.getTargetValue(modName, player);
+
+	public function getOtherValue(modName:String, player:Int)
+		return modMgr.getValue(modName, player);
+
+	public function getTargetValue(player:Int):Float // because most the time when you getValue you wanna get the CURRENT value, not the target
+		return percents[player];
+
+	inline public function getTargetPercent(player:Int):Float
+		return getTargetValue(player) * 100;
+
 	public function getValue(player:Int):Float
 		return percents[player];
 
 	public function getPercent(player:Int):Float
 		return getValue(player) * 100;
 
-	public function setValue(value:Float, player:Int = -1)
+	public function setValue(value:Float, player:Int = -1) // because most the time when you setValue you wanna set the TARGET value, not the current
+	{
+		setCurrentValue(value, player);
+		if (player == -1)
+			for (idx in 0...percents.length)
+				percents[idx] = value;
+		else
+			percents[player] = value;
+		
+	}
+
+	public function setCurrentValue(value:Float, player:Int = -1)
 	{
 		if (player == -1)
 			for (idx in 0...percents.length)
@@ -72,6 +95,7 @@ class Modifier {
 		else
 			percents[player] = value;
 	}
+
 	public function setPercent(percent:Float, player:Int = -1)
 		setValue(percent * 0.01, player);
 	

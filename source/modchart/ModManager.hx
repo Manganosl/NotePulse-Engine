@@ -11,29 +11,6 @@ import modchart.modifiers.*;
 import modchart.events.*;
 
 // Weird amalgamation of Schmovin' modifier system, Andromeda modifier system and my own new shit -neb
-// NEW: Now also has some features of mirin (aliases, nodes) [FROM TROLL ENGINE]
-
-/**
- * So, what is a Node?
- * A Node can be used to extend or otherwise modify modifiers
- * (for example you can have a screen bounce aux mod + node w/ that aux mod as an input, and then change transformX)
- */
-typedef Node = {
-	/**
-		Modifiers that get input into this node
-	**/
-	var in_mods:Array<String>;
-	
-	/**
-		Modifiers that get transformed by this node
-	**/
-	var out_mods:Array<String>;
-
-	/**
-		Takes an array of the input mods' values, and returns an array of transformed modifier values, if out_mods.length > 0
-	**/
-	var nodeFunc:(values:Array<Float>, player:Int) -> Array<Float>; 
-}
 
 class ModManager {
 	public var swapPlayers:Bool = false;
@@ -122,18 +99,42 @@ class ModManager {
         return 1 - player;
     }
 
-    inline public function get(modName:String)
-        return register.get(modName);
-
+	inline public function get(modName:String)
+		return register.get(modName);
+	
 	inline public function getPercent(modName:String, player:Int)
-		return register.get(modName).getPercent(getP(player));
+		return !register.exists(modName)?0:get(modName).getPercent(player);
 
-	inline public function getValue(modName:String, player:Int)
-		return register.get(modName).getValue(getP(player));
+	inline public function getValue(modName:String, player:Int):Float
+		return !register.exists(modName)?0:get(modName).getValue(player);
 
     inline public function setPercent(modName:String, val:Float, player:Int=-1)
 		setValue(modName, val/100, player);
-    
+
+	inline public function setCurrentPercent(modName:String, val:Float, player:Int = -1)
+		setCurrentValue(modName, val / 100, player);
+
+	inline public function getTargetPercent(modName:String, player:Int)
+		return !register.exists(modName) ? 0 : get(modName).getTargetPercent(player);
+
+	inline public function getTargetValue(modName:String, player:Int)
+		return !register.exists(modName) ? 0 : get(modName).getTargetValue(player);
+
+	public function setCurrentValue(modName:String, val:Float, player:Int = -1)
+	{
+		if (player == -1)
+		{
+			for (pN => mods in activeMods)
+				setCurrentValue(modName, val, pN);
+		}
+		else
+		{
+			var daMod = get(modName);
+			if (daMod == null)
+				return;
+			daMod.setCurrentValue(val, player);
+		}
+	}
 
 	public function setValue(modName:String, val:Float, player:Int=-1){
 		player = getP(player);
@@ -305,54 +306,84 @@ class ModManager {
 		return pos;
     }
 
-	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)
-		queueEase(step, endStep, modName, percent * 0.01, style, player, startVal * 0.01);
-	
-	public function queueSetP(step:Float, modName:String, percent:Float, player:Int = -1)
-		queueSet(step, modName, percent * 0.01, player);
-	
-	
-
-	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)
-	{
+	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:String = 'linear', player:Int = -1, ?startVal:Float){
 		if(player==-1){
 			queueEase(step, endStep, modName, target, style, 0);
 			queueEase(step, endStep, modName, target, style, 1);
-		}else{
+		} else {
 			var easeFunc = FlxEase.linear;
-
-			try
-			{
+			try {
 				var newEase = Reflect.getProperty(FlxEase, style);
 				if (newEase != null)
 					easeFunc = newEase;
 			}
-			
-
-			timeline.addEvent(new EaseEvent(step, endStep, modName, target, easeFunc, player, this));
-
+			timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this));
 		}
 	}
 
-	public function queueSet(step:Float, modName:String, target:Float, player:Int = -1)
-	{
-		if (player == -1)
-		{
+	public function queueSet(step:Float, modName:String, target:Float, player:Int = -1){
+		if (player == -1){
 			queueSet(step, modName, target, 0);
 			queueSet(step, modName, target, 1);
 		}
 		else
 			timeline.addEvent(new SetEvent(step, modName, target, player, this));
-		
 	}
 
+	public function queueEaseL(step:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
+		queueEase(step, step + length, modName, value, style, player, startVal);
+	
+	public function queueEaseLB(beat:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
+		queueEase(beat * 4, (beat + length) * 4, modName, value, style, player, startVal);
+
+	public function queueEaseB(beat:Float, endBeat:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
+		queueEase(beat * 4, endBeat * 4, modName, value, style, player, startVal);
+
+	public function queueSetB(beat:Float, modName:String, value:Float, player = -1)
+		queueSet(beat * 4, modName, value, player);
+
+	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:Dynamic = 'linear', player:Int = -1, ?startVal:Float)
+		queueEase(step, endStep, modName, percent * 0.01, style, player, startVal * 0.01);
+	
+	public function queueSetP(step:Float, modName:String, percent:Float, player:Int = -1)
+		queueSet(step, modName, percent * 0.01, player);
+
 	public function queueFunc(step:Float, endStep:Float, callback:(CallbackEvent, Float) -> Void)
-	{
 		timeline.addEvent(new StepCallbackEvent(step, endStep, callback, this));
-	}
-    
+	
+	public function queueFuncL(step:Float, length:Float, callback:(CallbackEvent, Float) -> Void)
+		timeline.addEvent(new StepCallbackEvent(step, step + length, callback, this));
+
+	public function queueFuncB(beat:Float, endBeat:Float, callback:(CallbackEvent, Float) -> Void)
+		timeline.addEvent(new StepCallbackEvent(beat * 4, endBeat * 4, callback, this));
+
+	public function queueFuncLB(beat:Float, length:Float, callback:(CallbackEvent, Float) -> Void)
+		timeline.addEvent(new StepCallbackEvent(beat * 4, (beat + length) * 4, callback, this));
+
 	public function queueFuncOnce(step:Float, callback:(CallbackEvent, Float) -> Void)
 		timeline.addEvent(new CallbackEvent(step, callback, this));
 	
+	public function queueEaseFunc(step:Float, endStep:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
+		timeline.addEvent(new EaseEvent(step, endStep, func, callback, this));
 
+	public function queueEaseFuncL(step:Float, length:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
+		timeline.addEvent(new EaseEvent(step, step + length, func, callback, this));
+
+	public function queueEaseFuncB(beat:Float, endBeat:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
+		timeline.addEvent(new EaseEvent(beat * 4, endBeat * 4, func, callback, this));
+
+	public function queueEaseFuncLB(beat:Float, length:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
+		timeline.addEvent(new EaseEvent(beat * 4, (beat + length) * 4, func, callback, this));
+
+	public function queueEaseProps(step:Float, endStep:Float, object:Dynamic, values:Dynamic, ?options:EasePropertiesEvent.TweenOptions)
+		timeline.addEvent(new EasePropertiesEvent(step, endStep - step, object, values, options, this));
+
+	public function queueEasePropsL(step:Float, length:Float, object:Dynamic, values:Dynamic, ?options:EasePropertiesEvent.TweenOptions)
+		timeline.addEvent(new EasePropertiesEvent(step, length, object, values, options, this));
+
+	public function queueEasePropsB(beat:Float, endBeat:Float, object:Dynamic, values:Dynamic, ?options:EasePropertiesEvent.TweenOptions)
+		timeline.addEvent(new EasePropertiesEvent(beat * 4, (endBeat - beat) * 4, object, values, options, this));
+
+	public function queueEasePropsLB(beat:Float, length:Float, object:Dynamic, values:Dynamic, ?options:EasePropertiesEvent.TweenOptions)
+		timeline.addEvent(new EasePropertiesEvent(beat * 4, length * 4, object, values, options, this));
 }

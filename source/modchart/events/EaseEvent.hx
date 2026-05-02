@@ -1,48 +1,44 @@
+package modchart.events;
 // @author Nebula_Zorua
 
-package modchart.events;
+import flixel.tweens.FlxEase.EaseFunction;
 
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
+class EaseEvent extends BaseEvent
+{
+	public var endStep:Float;
+	public var easeFunc:EaseFunction;
+	public var callback:(EaseEvent, Float, Float) -> Void;
 
-class EaseEvent extends ModEvent {
-    public var endStep:Float = 0;
-	public var startVal:Null<Float>;
-    public var easeFunc:EaseFunction;
-    public var length:Float = 0;
-	public function new(step:Float, endStep:Float, modName:String, target:Float, easeFunc:EaseFunction, player:Int = 0, modMgr:ModManager, ?startVal:Float) {
-		super(step, modName, target, player, modMgr);
-        this.endStep = endStep; 
+	/** Ease length in steps **/
+	public var length:Float;
+
+	/** Ease progress percentage [0.0, 1.0] **/
+	public var progress:Float = 0;
+
+	public var value:Float = 0;
+
+	public function new(step:Float, endStep:Float, easeFunc:EaseFunction, callback:(EaseEvent, Float, Float) -> Void, modMgr:ModManager)
+	{
+		super(step, modMgr);
+		this.callback = callback;
 		this.easeFunc = easeFunc;
-		this.startVal=startVal;
-		if(mod==null)trace(modName + " is null!");
+		this.endStep = endStep;
 
-        length = endStep - step;
-    }
-
-	function ease(e:EaseFunction, t:Float, b:Float, c:Float, d:Float)
-	{ // elapsed, begin, change (ending-beginning), duration
-		var time = t / d;
-		return c * e(time) + b;
+		length = endStep - step;
 	}
 
 	override function run(curStep:Float)
 	{
 		if (curStep <= endStep)
 		{
-			if (this.startVal == null)
-				this.startVal = mod.getValue(player);
-			
-
-			var passed = curStep - executionStep;
-			var change = endVal - startVal;
-			//mod.setValue(ease(easeFunc, passed, startVal, change, length), player);
-			manager.setValue(modName, ease(easeFunc, passed, startVal, change, length), player);
+			progress = (curStep - executionStep) / length;
+			value = easeFunc(progress);
+			callback(this, value, curStep);
 		}
-		else if (curStep > endStep)
-		{
+		else{
 			finished = true;
-			manager.setValue(modName, endVal, player);
+			progress = 1.0;
+			callback(this, 1.0, curStep);
 		}
 	}
 }

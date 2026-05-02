@@ -17,11 +17,11 @@ class TransformModifier extends NoteModifier
 	{
 		pos.x += getValue(player) + getSubmodValue("transformX-a", player);
 		pos.y += getSubmodValue("transformY", player) + getSubmodValue("transformY-a", player);
-		pos.z += getSubmodValue('transformZ', player) + getSubmodValue("transformZ-a", player);
+		pos.z += (getSubmodValue('transformZ', player) + getSubmodValue("transformZ-a", player)) / 1280;
 		
 		pos.x += getSubmodValue('transform${data}X', player) + getSubmodValue('transform${data}X-a', player);
 		pos.y += getSubmodValue('transform${data}Y', player) + getSubmodValue('transform${data}Y-a', player);
-		pos.z += getSubmodValue('transform${data}Z', player) + getSubmodValue('transform${data}Z-a', player);
+		pos.z += (getSubmodValue('transform${data}Z', player) + getSubmodValue('transform${data}Z-a', player)) / 1280;
 		
 		return pos;
 	}
