@@ -626,9 +626,8 @@ class Note extends FlxSkewedSprite {
 				alpha = 0.3;
 		}
 
-		rgbShader.centerOffsetX = (FlxG.width/2) - (x + width/2);
-        rgbShader.centerOffsetY = (FlxG.height/2) - (y + height/2);
-        rgbShader.centerOffsetZ = 0;
+		rgbShader.pivotX = (FlxG.width/2) - (x + width/2);
+        rgbShader.pivotY = (FlxG.height/2) - (y + height/2);
 	}
 
 	public function clip(strum:StrumNote)

@@ -11,6 +11,29 @@ import modchart.modifiers.*;
 import modchart.events.*;
 
 // Weird amalgamation of Schmovin' modifier system, Andromeda modifier system and my own new shit -neb
+// NEW: Now also has some features of mirin (aliases, nodes) [FROM TROLL ENGINE]
+
+/**
+ * So, what is a Node?
+ * A Node can be used to extend or otherwise modify modifiers
+ * (for example you can have a screen bounce aux mod + node w/ that aux mod as an input, and then change transformX)
+ */
+typedef Node = {
+	/**
+		Modifiers that get input into this node
+	**/
+	var in_mods:Array<String>;
+	
+	/**
+		Modifiers that get transformed by this node
+	**/
+	var out_mods:Array<String>;
+
+	/**
+		Takes an array of the input mods' values, and returns an array of transformed modifier values, if out_mods.length > 0
+	**/
+	var nodeFunc:(values:Array<Float>, player:Int) -> Array<Float>; 
+}
 
 class ModManager {
 	public var swapPlayers:Bool = false;

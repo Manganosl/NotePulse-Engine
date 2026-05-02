@@ -20,9 +20,8 @@ class RGBPalette
     public var angleX(default, set):Float;
     public var angleY(default, set):Float;
 
-	public var centerOffsetX(default, set):Float;
-	public var centerOffsetY(default, set):Float;
-	public var centerOffsetZ(default, set):Float;
+	public var pivotX(default, set):Float;
+	public var pivotY(default, set):Float;
 
     public function copyValues(tempShader:RGBPalette)
     {
@@ -33,7 +32,7 @@ class RGBPalette
                 shader.r.value[i] = tempShader.shader.r.value[i];
                 shader.g.value[i] = tempShader.shader.g.value[i];
                 shader.b.value[i] = tempShader.shader.b.value[i];
-                shader.centerOffset.value[i] = tempShader.shader.centerOffset.value[i];
+                shader.pivot.value[i] = tempShader.shader.pivot.value[i];
             }
             shader.mult.value[0] = tempShader.shader.mult.value[0];
             shader.u_alpha.value[0] = tempShader.shader.u_alpha.value[0];
@@ -41,9 +40,9 @@ class RGBPalette
             shader.u_enabled.value[0] = tempShader.shader.u_enabled.value[0];
             shader.angleX.value[0] = tempShader.shader.angleX.value[0];
             shader.angleY.value[0] = tempShader.shader.angleY.value[0];
-            shader.centerOffset.value[0] = tempShader.shader.centerOffset.value[0];
-            shader.centerOffset.value[1] = tempShader.shader.centerOffset.value[1];
-            shader.centerOffset.value[2] = tempShader.shader.centerOffset.value[2];
+            shader.pivot.value[0] = tempShader.shader.pivot.value[0];
+            shader.pivot.value[1] = tempShader.shader.pivot.value[1];
+            shader.pivot.value[2] = tempShader.shader.pivot.value[2];
         }
         else shader.mult.value[0] = 0.0;
     }
@@ -84,22 +83,16 @@ class RGBPalette
         return alphaMult;
     }
 
-    private function set_centerOffsetX(value:Float):Float {
-        centerOffsetX = value;
-        shader.centerOffset.value[0] = value;
-        return centerOffsetX;
+    private function set_pivotX(value:Float):Float {
+        pivotX = value;
+        shader.pivot.value[0] = value;
+        return pivotX;
     }
 
-    private function set_centerOffsetY(value:Float):Float {
-        centerOffsetY = value;
-        shader.centerOffset.value[1] = value;
-        return centerOffsetY;
-    }
-
-    private function set_centerOffsetZ(value:Float):Float {
-        centerOffsetZ = value;
-        shader.centerOffset.value[2] = value;
-        return centerOffsetZ;
+    private function set_pivotY(value:Float):Float {
+        pivotY = value;
+        shader.pivot.value[1] = value;
+        return pivotY;
     }
     
     function set_enabled(value:Bool):Bool {
@@ -138,9 +131,8 @@ class RGBShaderReference
     public var angleX(default, set):Float;
     public var angleY(default, set):Float;
 
-	public var centerOffsetX(default, set):Float;
-	public var centerOffsetY(default, set):Float;
-	public var centerOffsetZ(default, set):Float;
+	public var pivotX(default, set):Float;
+	public var pivotY(default, set):Float;
     
     public var shader:FlxShader;
     public var parent:RGBPalette;
@@ -173,10 +165,8 @@ class RGBShaderReference
     private function set_enabled(value:Bool) { if (allowNew && value != _original.enabled) cloneOriginal(); return (enabled = parent.enabled = value); }
     private function set_angleX(value:Float) { if (allowNew && value != _original.angleX) cloneOriginal(); return (angleX = parent.angleX = value); }
     private function set_angleY(value:Float) { if (allowNew && value != _original.angleY) cloneOriginal(); return (angleY = parent.angleY = value); }
-    private function set_centerOffsetX(value:Float) { if (allowNew && value != _original.centerOffsetX) cloneOriginal(); return (centerOffsetX = parent.centerOffsetX = value); }
-    private function set_centerOffsetY(value:Float) { if (allowNew && value != _original.centerOffsetY) cloneOriginal(); return (centerOffsetY = parent.centerOffsetY = value); }
-    private function set_centerOffsetZ(value:Float) { if (allowNew && value != _original.centerOffsetZ) cloneOriginal(); return (centerOffsetZ = parent.centerOffsetZ = value); }
-
+    private function set_pivotX(value:Float) { if (allowNew && value != _original.pivotX) cloneOriginal(); return (pivotX = parent.pivotX = value); }
+    private function set_pivotY(value:Float) { if (allowNew && value != _original.pivotY) cloneOriginal(); return (pivotY = parent.pivotY = value); }
     public function setColors(colors:Array<FlxColor>) {
         r = colors[0]; g = colors[1]; b = colors[2];
         colorArray = colors;
@@ -200,15 +190,15 @@ class RGBPaletteShader extends FlxShader
 
         uniform float angleX;
         uniform float angleY;
-        uniform vec3 centerOffset;
+        uniform vec3 pivot;
 
         varying vec2 vTexCoord;
     ')
     @:glVertexBody('
         vec4 pos = openfl_Position;
 
-        float cosX = cos(angleX);
-        float cosY = cos(angleY);
+        float cosX = abs(cos(angleX));
+        float cosY = abs(cos(angleY));
 
         mat2 rotX = mat2(
             1.0, 0.0,
@@ -220,9 +210,9 @@ class RGBPaletteShader extends FlxShader
             0.0, 1.0
         );
 
-        vec2 centered = pos.xy - centerOffset.xy;
+        vec2 centered = pos.xy - pivot.xy;
         centered = rotY * rotX * centered;
-        pos.xy = centered + centerOffset.xy;
+        pos.xy = centered + pivot.xy;
 
         gl_Position = openfl_Matrix * pos;
         vTexCoord = openfl_TextureCoordv;
@@ -284,6 +274,6 @@ class RGBPaletteShader extends FlxShader
 
         this.angleX.value = [0];
         this.angleY.value = [0];
-        this.centerOffset.value = [0, 0, 0];
+        this.pivot.value = [0, 0, 0];
     }
 }
