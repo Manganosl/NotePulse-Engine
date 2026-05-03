@@ -55,7 +55,7 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 #end
 
-import modchart.*;
+import funkin.game.modchart.*;
 
 /**
  * This is where all the Gameplay stuff happens and is managed
@@ -857,6 +857,7 @@ class PlayState extends MusicBeatState
 		modManager = new ModManager(this);
 		modManager.receptors = [for(i in PlayField.fields) i.members];
 		modManager.registerDefaultModifiers();
+		for(func in modManagerEvArray) func();
 		callOnScripts('initModchart');
 
 		add(uiGroup);
@@ -1040,67 +1041,9 @@ class PlayState extends MusicBeatState
 						notes.sort(sortByOrderNote);
 						notes.forEachAlive(function(daNote:Note)
 						{
-							var strumGroup:PlayField = daNote.playField;
-
-							var strumX:Float = strumGroup.members[daNote.noteData].x;
-							var strumY:Float = strumGroup.members[daNote.noteData].y;
-							var strumAngle:Float = strumGroup.members[daNote.noteData].angle;
-							var strumDirection:Float = strumGroup.members[daNote.noteData].direction;
-							var strumAlpha:Float = strumGroup.members[daNote.noteData].alpha;
-							var strumScroll:Bool = strumGroup.members[daNote.noteData].downScroll;
-
-							strumX += daNote.offsetX;
-							strumY += daNote.offsetY;
-							strumAngle += daNote.offsetAngle;
-							strumAlpha *= daNote.multAlpha;
-							var pN:Int = daNote.playField.player;
-							var pos = modManager.getPos(daNote.strumTime, modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed),
-								daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
-
-							modManager.updateObject(curDecBeat, daNote, pos, pN);
-
-							pos.x += daNote.offsetX;
-							if(daNote.isSustainNote) pos.x += daNote.parent.width/2 - daNote.width/2;
-							pos.y += daNote.offsetY;
-							if(daNote.isSustainNote) pos.y += daNote.parent.height/2;
-							daNote.x = pos.x;
-							daNote.y = pos.y;
-							daNote.z = pos.z;
-							if (daNote.isSustainNote){
-								var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / holdSubdivisions, 10);
-								var futureSongPos = Conductor.songPosition + holdCrochet;
-								var diff = daNote.strumTime - futureSongPos;
-								var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
-
-								var nextPos = modManager.getPos(daNote.strumTime, vDiff, diff, Conductor.getStep(futureSongPos) / 4, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
-								
-								nextPos.x += daNote.offsetX;
-								if(daNote.isSustainNote) nextPos.x += daNote.parent.width/2 - daNote.width/2;
-								nextPos.y += daNote.offsetY;
-								if(daNote.isSustainNote) nextPos.y += daNote.parent.height/2;
-
-								var diffX = (nextPos.x - pos.x);
-								var diffY = (nextPos.y - pos.y);
-								var diffZ = (nextPos.z - pos.z);
-
-								var rad = Math.atan2(diffY, diffX);
-								var deg = rad * (180 / Math.PI);
-								daNote.mAngle = (deg != 0) ? (deg + 90) : 0;
-
-								var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
-
-								daNote.rgbShader.angleX = Math.atan2(diffY, diffZ) + (Math.PI / 2);
-
-								if(daNote.frameHeight != 0) {
-									if(!daNote.isSustainEnd){
-										daNote.scale.y = (visualDist / daNote.frameHeight);
-									} else {
-										daNote.scale.y = 1;
-									}
-								}
-
-								daNote.clip(daNote.playField.members[daNote.noteData], (diffY < 0));
-							}
+							for(copy in daNote.copyingNotes)
+								noteFollowStrum(copy);
+							noteFollowStrum(daNote);
 
 							if(!daNote.strum.cpuControlled)
 							{
@@ -1779,25 +1722,25 @@ class PlayState extends MusicBeatState
 			case 'Play Sound':
 				Paths.sound(event.value1); //Precache sound
 
-			/*case "Modchart Event":
+			case "Modchart Event":
 				if(SONG.nativeModchart){
 					var info = event.value1.split(',');
 					final daBeat:Float = Conductor.getBeat(event.strumTime);
 					var ease = FlxEase.linear;
 					if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
 					switch(info[0]){
-						case "Add Modifier": 
-							modManagerEvArray.push(function(){ modManager.addModifier(info[1], Std.parseInt(info[6])); });
+						//case "Add Modifier": 
+						//	modManagerEvArray.push(function(){ modManager.addModifier(info[1], Std.parseInt(info[6])); });
 						case "Ease": 
 							modManagerEvArray.push(function(){ modManager.ease(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6])); });
 						case "Set": 
 							modManagerEvArray.push(function(){ modManager.set(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6])); });
-						case "EaseAdd": 
-							modManagerEvArray.push(function(){ modManager.add(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6])); });
-						case "SetAdd": 
-							modManagerEvArray.push(function(){ modManager.setAdd(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6])); });
+						//case "EaseAdd": 
+						//	modManagerEvArray.push(function(){ modManager.add(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6])); });
+						//case "SetAdd": 
+						//	modManagerEvArray.push(function(){ modManager.setAdd(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6])); });
 					}
-				}*/  // FIX THIS TOO!
+				}
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventPushedUnique(event));
 	}
@@ -2899,6 +2842,67 @@ class PlayState extends MusicBeatState
 	}
 
 	//// Strums | Notes ////
+
+	public function noteFollowStrum(daNote:Note){
+		var strumX:Float = daNote.playField.members[daNote.noteData].x;
+		var strumY:Float = daNote.playField.members[daNote.noteData].y;
+		var strumAngle:Float = daNote.playField.members[daNote.noteData].angle;
+		var strumAlpha:Float = daNote.playField.members[daNote.noteData].alpha;
+		var strumScroll:Bool = daNote.playField.members[daNote.noteData].downScroll;
+
+		strumX += daNote.offsetX;
+		strumY += daNote.offsetY;
+		strumAngle += daNote.offsetAngle;
+		strumAlpha *= daNote.multAlpha;
+		var pN:Int = daNote.playField.player;
+		var pos = modManager.getPos(daNote.strumTime, modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed),
+			daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
+
+		modManager.updateObject(curDecBeat, daNote, pos, pN);
+
+		pos.x += daNote.offsetX;
+		if(daNote.isSustainNote) pos.x += daNote.parent.width/2 - daNote.width/2;
+		pos.y += daNote.offsetY;
+		if(daNote.isSustainNote) pos.y += daNote.parent.height/2;
+		daNote.x = pos.x;
+		daNote.y = pos.y;
+		daNote.z = pos.z;
+		if (daNote.isSustainNote){
+			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / holdSubdivisions, 10);
+			var futureSongPos = Conductor.songPosition + holdCrochet;
+			var diff = daNote.strumTime - futureSongPos;
+			var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
+
+			var nextPos = modManager.getPos(daNote.strumTime, vDiff, diff, Conductor.getStep(futureSongPos) / 4, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
+								
+			nextPos.x += daNote.offsetX;
+			if(daNote.isSustainNote) nextPos.x += daNote.parent.width/2 - daNote.width/2;
+			nextPos.y += daNote.offsetY;
+			if(daNote.isSustainNote) nextPos.y += daNote.parent.height/2;
+
+			var diffX = (nextPos.x - pos.x);
+			var diffY = (nextPos.y - pos.y);
+			var diffZ = (nextPos.z - pos.z);
+
+			var rad = Math.atan2(diffY, diffX);
+			var deg = rad * (180 / Math.PI);
+			daNote.mAngle = (deg != 0) ? (deg + 90) : 0;
+
+			var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
+
+			daNote.rgbShader.angleX = Math.atan2(diffY, diffZ) + (Math.PI / 2);
+
+			if(daNote.frameHeight != 0) {
+				if(!daNote.isSustainEnd){
+					daNote.scale.y = (visualDist / daNote.frameHeight);
+				} else {
+					daNote.scale.y = 1;
+				}
+			}
+
+			daNote.clip(daNote.playField.members[daNote.noteData], (diffY < 0));
+		}
+	}
 
 	public function clearNotesBefore(time:Float)
 	{

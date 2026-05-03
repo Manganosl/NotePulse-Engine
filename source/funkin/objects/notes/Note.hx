@@ -15,7 +15,7 @@ import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.PlayField;
 import funkin.objects.notes.copy.CopyNote;
 
-import math.Vector3;
+import funkin.game.modchart.math.Vector3;
 
 using StringTools;
 
@@ -101,9 +101,6 @@ class Note extends FlxSkewedSprite {
 	public var column:Int = 0; // Why both for the same thing? I'm dumb
 
 	public var characters:Array<Character> = [];
-
-	public var modchartVisible:Bool = true;
-	public var followStrum:Bool = true;
 
 	public var strumTime:Float = 0;
 	public var noteData:Int = 0;

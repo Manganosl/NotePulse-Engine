@@ -13,7 +13,7 @@ import funkin.objects.notes.splashes.*;
 import funkin.game.shaders.RGBPalette;
 import funkin.game.shaders.RGBPalette.RGBShaderReference;
 
-import math.Vector3;
+import funkin.game.modchart.math.Vector3;
 
 class StrumNote extends FlxSkewedSprite {
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
