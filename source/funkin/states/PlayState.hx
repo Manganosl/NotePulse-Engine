@@ -1066,8 +1066,7 @@ class PlayState extends MusicBeatState
 							daNote.x = pos.x;
 							daNote.y = pos.y;
 							daNote.z = pos.z;
-							if (daNote.isSustainNote)
-							{
+							if (daNote.isSustainNote){
 								var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / holdSubdivisions, 10);
 								var futureSongPos = Conductor.songPosition + holdCrochet;
 								var diff = daNote.strumTime - futureSongPos;
@@ -1099,9 +1098,9 @@ class PlayState extends MusicBeatState
 										daNote.scale.y = 1;
 									}
 								}
-							}
 
-							if(daNote.isSustainNote) daNote.clip(daNote.playField.members[daNote.noteData]);
+								daNote.clip(daNote.playField.members[daNote.noteData], (diffY < 0));
+							}
 
 							if(!daNote.strum.cpuControlled)
 							{
@@ -1516,20 +1515,24 @@ class PlayState extends MusicBeatState
 			for(i in 0...playerStrums.length){
 				setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
 				setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
+				playerStrums.members[i].defX = playerStrums.members[i].x;
 			}
 			for(i in 0...opponentStrums.length){
 				setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
 				setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
+				opponentStrums.members[i].defX = opponentStrums.members[i].x;
 			}
 			if(gfStrums != null){
 				for(i in 0...gfStrums.length){
-					gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
+					gfStrums.members[i].x = gfStrums.members[i].defX = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
 					setOnScripts('defaultGfStrumX' + i, gfStrums.members[i].x);
 					setOnScripts('defaultGfStrumY' + i, gfStrums.members[i].y);
 				}
-				for(strums in extraStrums)
-					for(i in 0...strums.length)
-						strums.members[i].x = gfStrums.members[i].x;
+				for(strums in extraStrums){
+					for(i in 0...strums.length){
+						strums.members[i].x = strums.members[i].defX = gfStrums.members[i].x;
+					}
+				}
 			}
 			startedCountdown = true;
 			Conductor.songPosition = -Conductor.crochet * 5;

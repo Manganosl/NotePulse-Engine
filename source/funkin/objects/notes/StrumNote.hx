@@ -40,6 +40,8 @@ class StrumNote extends FlxSkewedSprite {
 	public var noteSpeed:Float = 1;
 
 	public var parentField:PlayField = null;
+
+	public var defX:Float = 0;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -177,6 +179,7 @@ class StrumNote extends FlxSkewedSprite {
 		trackedScale = trackedScale * 0.85;
 		setGraphicSize(initialWidth * (trackedScale * (PlayState.isPixelStage ? PlayState.daPixelZoom /** (1/ExtraKeysHandler.instance.data.pixelScales[PlayState.SONG.mania])) */: 1)));
 		updateHitbox();
+		defScale.copyFrom(scale);
 		postAddedToGroup();
 	}
 

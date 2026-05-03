@@ -630,7 +630,7 @@ class Note extends FlxSkewedSprite {
         rgbShader.pivotY = (FlxG.height/2) - (y + height/2);
 	}
 
-	public function clip(strum:StrumNote)
+	public function clip(strum:StrumNote, isDownScroll:Bool)
 	{
 		if (strum.sustainReduce && wasGoodHit && Conductor.songPosition >= strumTime)
 		{
@@ -645,6 +645,7 @@ class Note extends FlxSkewedSprite {
 			
 			swagRect.y = (mag / scale.y);
 			swagRect.height -= swagRect.y;
+			if(isDownScroll) swagRect.y -= Note.swagWidth*0.5;
 			
 			clipRect = swagRect;
 		}
