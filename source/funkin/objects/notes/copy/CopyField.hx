@@ -28,6 +28,8 @@ class CopyField extends PlayField {
             babyArrow.postAddedToGroup();
         }
         adaptStrumline();
+        for(arrow in members)
+            arrow.defX = arrow.x;
     }
 
     override function update(elapsed:Float) {
