@@ -95,11 +95,6 @@ class AlphaModifier extends NoteModifier
 	override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int)
 	{
 		var player = note.playField.player;
-		/* @:privateAccess
-			var pos = modMgr.getPos(note.strumTime, modMgr.getVisPos(Conductor.songPosition, note.strumTime, PlayState.instance.songSpeed),
-				note.strumTime - Conductor.songPosition,
-				PlayState.instance.curDecBeat, note.noteData,
-				player, note, ["reverse", "receptorScroll", "transformY"]); */
 		var speed = PlayState.instance.songSpeed * note.multSpeed;
 		var yPos:Float = modMgr.getVisPos(Conductor.songPosition, note.strumTime, speed) + 50;
 		

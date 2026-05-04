@@ -137,7 +137,7 @@ class ModManager {
 		player = getP(player);
 		if (player == -1)
 		{
-			for (pN in 0...2)
+			for (pN in 0...PlayField.fields.length)
 				setValue(modName, val, pN);
 		}
 		else
@@ -295,9 +295,9 @@ class ModManager {
     }
 
 	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:String = 'linear', player:Int = -1, ?startVal:Float){
-		if(player==-1){
-			queueEase(step, endStep, modName, target, style, 0);
-			queueEase(step, endStep, modName, target, style, 1);
+		if(player == -1){
+			for (pN in 0...PlayField.fields.length)
+			queueEase(step, endStep, modName, target, style, pN);
 		} else {
 			var easeFunc = FlxEase.linear;
 			try {
@@ -311,8 +311,8 @@ class ModManager {
 
 	public function queueSet(step:Float, modName:String, target:Float, player:Int = -1){
 		if (player == -1){
-			queueSet(step, modName, target, 0);
-			queueSet(step, modName, target, 1);
+			for (pN in 0...PlayField.fields.length)
+				queueSet(step, modName, target, pN);
 		}
 		else
 			timeline.addEvent(new SetEvent(step, modName, target, player, this));
@@ -377,9 +377,21 @@ class ModManager {
 
 	// FunkinModchart compatibility functions
 
-	public function ease(modName:String, beat:Float, len:Float, val:Float, easeFunc:EaseFunction, player:Int, ?_:Int)
-		timeline.addEvent(new ModEaseEvent(beat * 4, (beat + len) * 4, modName, val, easeFunc, player, this));
+	public function ease(modName:String, beat:Float, len:Float, val:Float, easeFunc:EaseFunction, player:Int, ?_:Int){
+		if(player == -1){
+			for (pN in 0...PlayField.fields.length)
+				ease(modName, beat, len, val, easeFunc, pN);
+		} else {
+			timeline.addEvent(new ModEaseEvent(beat * 4, (beat + len) * 4, modName, val, easeFunc, player, this));
+		}
+	}
 
-	public function set(modName:String, beat:Float, val:Float, player:Int, ?_:Int)
-		timeline.addEvent(new SetEvent(beat * 4, modName, val, player, this));
+	public function set(modName:String, beat:Float, val:Float, player:Int, ?_:Int){
+		if(player == -1){
+			for (pN in 0...PlayField.fields.length)
+				set(modName, beat, val, pN);
+		} else {
+			timeline.addEvent(new SetEvent(beat * 4, modName, val, player, this));
+		}
+	}
 }
