@@ -41,7 +41,7 @@ class StrumNote extends FlxSkewedSprite {
 
 	public var parentField:PlayField = null;
 
-	public var defX:Float = 0;
+	public var modPos:FlxPoint = new FlxPoint(0, 0);
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -271,6 +271,28 @@ class StrumNote extends FlxSkewedSprite {
 		defScale.put();
 		sustainSplash.destroy();
 		return super.destroy();
+	}
+
+	/**
+	 * Returns the screen position of this object.
+	 * For StrumNote, this uses `modPos` instead of the usual `x` and `y`
+	 *
+	 * @param   result  Optional arg for the returning point
+	 * @param   camera  The desired "screen" coordinate space. If `null`, `FlxG.camera` is used.
+	 * @return  The screen position of this object.
+	 */
+	override public function getScreenPosition(?result:FlxPoint, ?camera:FlxCamera):FlxPoint {
+		if (result == null)
+			result = FlxPoint.get();
+
+		if (camera == null)
+			camera = FlxG.camera;
+
+		result.set(modPos.x, modPos.y);
+		if (pixelPerfectPosition)
+			result.floor();
+
+		return result.subtract(camera.scroll.x * scrollFactor.x, camera.scroll.y * scrollFactor.y);
 	}
 }
 

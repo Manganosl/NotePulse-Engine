@@ -59,14 +59,6 @@ class PerspectiveModifier extends NoteModifier {
     return returnedVector;
   }
 
-  /*override function getReceptorPos(receptor:Receptor, pos:Vector3, data:Int, player:Int){ // maybe replace FlxPoint with a Vector3?
-    // HI 4MBR0S3 IM SORRY :(( I GENUINELY FUCKIN FORGOT TO CREDIT PLEASEDONTHATEMEILOVEYOURSTUFF:(
-    var vec = getVector(receptor.z,pos);
-    pos.x=vec.x;
-    pos.y=vec.y;
-
-    return pos;
-  }*/
 	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
     return getVector(pos.z,pos);
   

@@ -95,7 +95,7 @@ class PlayState extends MusicBeatState
 
 	public var judgementCounter:FlxText;
 
-	public static var holdSubdivisions:Int = 4;// how many extra notes to spawn in for each hold note, set this to 0 to disable it
+	public static var holdSubdivisions:Int = 4;	// how many extra notes to spawn in for each hold note, set this to 1 to disable it
 
 	//event variables
 	private var isCameraOnForcedPos:Bool = false;
@@ -1019,8 +1019,8 @@ class PlayState extends MusicBeatState
 			{
 				var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
 				modManager.updateObject(curDecBeat, strum, pos, field.player);
-				strum.x = pos.x;
-				strum.y = pos.y;
+				strum.modPos.x = pos.x;
+				strum.modPos.y = pos.y;
 				strum.z = pos.z;
 			});
 		}
@@ -1458,22 +1458,20 @@ class PlayState extends MusicBeatState
 			for(i in 0...playerStrums.length){
 				setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
 				setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
-				playerStrums.members[i].defX = playerStrums.members[i].x;
 			}
 			for(i in 0...opponentStrums.length){
 				setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
 				setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
-				opponentStrums.members[i].defX = opponentStrums.members[i].x;
 			}
 			if(gfStrums != null){
 				for(i in 0...gfStrums.length){
-					gfStrums.members[i].x = gfStrums.members[i].defX = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
+					gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
 					setOnScripts('defaultGfStrumX' + i, gfStrums.members[i].x);
 					setOnScripts('defaultGfStrumY' + i, gfStrums.members[i].y);
 				}
 				for(strums in extraStrums){
 					for(i in 0...strums.length){
-						strums.members[i].x = strums.members[i].defX = gfStrums.members[i].x;
+						strums.members[i].x = gfStrums.members[i].x;
 					}
 				}
 			}
@@ -2940,7 +2938,7 @@ class PlayState extends MusicBeatState
 	private function generateStaticArrows(player:Int, ?doIntro = true):Void
 	{
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X;
-		var strumLineY:Float = /*ClientPrefs.data.downScroll ? (FlxG.height - 150) : */50; // ModManager requieres to disable downScroll?
+		var strumLineY:Float = 50; // Now we invert reverse mod
 
 		var playField:PlayField = null;
 		switch (player)
@@ -3061,7 +3059,7 @@ class PlayState extends MusicBeatState
 	public function spawnNoteSplashOnNote(note:Note) {
 		if(note != null) {
 			if(note.strum != null)
-				spawnNoteSplash(note.strum.x, note.strum.y, note.noteData, note, note.strum);
+				spawnNoteSplash(note.strum.modPos.x, note.strum.modPos.y, note.noteData, note, note.strum);
 		}
 	}
 
@@ -4332,6 +4330,23 @@ class PlayState extends MusicBeatState
 
 	public function skipDialogue() {
 		callOnScripts('onSkipDialogue', [dialogueCount]);
+	}
+
+	//// Helpers ////
+
+	public static function prepareForSong(songName:String, difficulty:Int = 1, isStoryMode:Bool = false):Null<haxe.Exception> {
+		try {
+			final formattedSong = Paths.formatToSongPath(songName);
+			var poop = Highscore.formatSong(formattedSong, difficulty);
+			PlayState.SONG = Song.loadFromJson(poop, formattedSong);
+			PlayState.isStoryMode = isStoryMode;
+			
+			return null;
+		}
+		catch (e)
+		{
+			return e;
+		}
 	}
 
 	//// Add ////

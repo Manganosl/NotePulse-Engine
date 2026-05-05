@@ -112,7 +112,7 @@ class SustainSplash extends FlxSkewedSprite {
 		scale.y = strum.scale.y * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleY;
 		angle = strum.direction-90 + offsetAngle;
 		alpha = (visibilityToggle ? (strum.alpha + offsetAlpha) : 0);
-		x = strum.x + (strum.width / 2) - (width / 2) + offsetX;
-		y = strum.y + (strum.height / 2) - (height / 2) + offsetY;
+		x = strum.modPos.x + (strum.width / 2) - (width / 2) + offsetX;
+		y = strum.modPos.y + (strum.height / 2) - (height / 2) + offsetY;
 	}
 }

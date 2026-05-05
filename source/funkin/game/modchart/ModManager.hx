@@ -221,14 +221,16 @@ class ModManager {
 		timeline.update(curStep);
 
 	public function getBaseX(direction:Int, player:Int):Float {
-		return PlayField.fields[player].members[direction].defX;
+		return PlayField.fields[player].members[direction].x;
 	}
 
 	public function updateObject(beat:Float, obj:FlxSprite, pos:Vector3, player:Int)
 	{
 		final note:Note = (obj is Note ? cast obj : null);
+		final strum:StrumNote = (obj is StrumNote ? cast obj : null);
 		
-		obj.x = (pos.x - obj.width * .5);
+		if(strum != null) strum.modPos.x = (pos.x - obj.width * .5);
+		else obj.x = (pos.x - obj.width * .5);
 		if(obj is Note && note.isSustainNote)
 			obj.x += note.parent.width/2 - note.width;
 		
@@ -238,7 +240,8 @@ class ModManager {
 		}
 		else
 		{
-			obj.y = (pos.y - obj.height * .5);
+			if(strum != null) strum.modPos.y = (pos.y - obj.height * .5);
+			else obj.y = (pos.y - obj.height * .5);
 		}
 		
 		if (activeMods[player] != null)
@@ -279,7 +282,7 @@ class ModManager {
 		if (!obj.active)return pos;
 
 		pos.x = getBaseX(data, player);
-		pos.y = 50 + diff;
+		pos.y = PlayField.fields[player].members[data].y + diff;
 		pos.z = 0;
 
 		if(activeMods[player] != null){
