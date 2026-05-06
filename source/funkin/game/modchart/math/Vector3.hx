@@ -405,7 +405,12 @@ class Vector3 implements IFlxPooled
 	    result.setTo(Math.max(a.x, b.x), Math.max(a.y, b.y), Math.max(a.z, b.z));
 	    return result;
 	}
-	
+
+	public static function weak(x:Float = 0., y:Float = 0., z:Float = 0.) {
+		var vec = get(x, y, z);
+		vec._weak = true;
+		return vec;
+	}
 	
 	@:dox(hide) public inline function toString():String
 	{

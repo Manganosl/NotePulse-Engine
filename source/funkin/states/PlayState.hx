@@ -3788,8 +3788,8 @@ class PlayState extends MusicBeatState
 			}
 		} else if (camMode == "Bellow Note") {
 			ratingCamArr = [camHUD];
-			baseX = linkStrum.x;
-			baseY = linkStrum.y + (linkStrum.downScroll ? -10 : linkStrum.height + 10);
+			baseX = linkStrum.modPos.x;
+			baseY = linkStrum.modPos.y + (linkStrum.downScroll ? -10 : linkStrum.height + 10);
 		}
 
 		var daRating:Rating = Conductor.judgeNote(ratingsData, noteDiff / playbackRate);

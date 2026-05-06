@@ -51,6 +51,8 @@ class NoteSplashDebugState extends MusicBeatState
 			var x = i * 220 + 240;
 			var y = 290;
 			var note:StrumNote = new StrumNote(x, y, i, 0);
+			note.modPos.x = note.x;
+			note.modPos.y = note.y;
 			note.alpha = 0.75;
 			note.playAnim('static');
 			notes.add(note);
