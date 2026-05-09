@@ -100,13 +100,13 @@ class ModManager {
 		return register.get(modName);
 	
 	inline public function getPercent(modName:String, player:Int)
-		return !register.exists(modName)?0:get(modName).getPercent(player);
+		return !register.exists(modName) ? 0 : get(modName).getPercent(player);
 
 	inline public function getValue(modName:String, player:Int):Float
-		return !register.exists(modName)?0:get(modName).getValue(player);
+		return !register.exists(modName) ? 0 : get(modName).getValue(player);
 
     inline public function setPercent(modName:String, val:Float, player:Int=-1)
-		setValue(modName, val/100, player);
+		setValue(modName, val / 100, player);
 
 	inline public function setCurrentPercent(modName:String, val:Float, player:Int = -1)
 		setCurrentValue(modName, val / 100, player);
@@ -232,15 +232,16 @@ class ModManager {
 		if(strum != null) strum.modPos.x = (pos.x - obj.width * .5);
 		else obj.x = (pos.x - obj.width * .5);
 		if(obj is Note && note.isSustainNote)
-			obj.x += note.parent.width/2 - note.width;
+			obj.x += note.parent.width/2 - note.width + note.offsetX;
 		
 		if (note != null && note.isSustainNote)
 		{
-			note.y = pos.y;
+			note.y = pos.y + note.offsetY;
 		}
 		else
 		{
 			if(strum != null) strum.modPos.y = (pos.y - obj.height * .5);
+			else if (note != null) note.y = (note.offsetY + pos.y - obj.height * .5);
 			else obj.y = (pos.y - obj.height * .5);
 		}
 		

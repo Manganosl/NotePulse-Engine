@@ -37,7 +37,7 @@ class CreditsState extends MusicBeatState
 
 		var defaultList:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
 			['Main NP Pals'],
-			['Manganos', 			'face',				'Main Coder - I have nothing else to do',			 		 'https://github.com/Manganosl', 		'6a329f'],
+			['Manganos', 			'mang',				'Main Coder - I have nothing else to do',			 		 'https://github.com/Manganosl', 		'6a329f'],
 			[''],
 			['More'],
 			['tposejank', 			'tposejank',		'Made the EK fork NP is based on',			 				 'https://twitter.com/tposejank', 		'B9AF27'],	//mensajes subliminales
