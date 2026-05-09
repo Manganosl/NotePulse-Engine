@@ -194,7 +194,7 @@ class StrumNote extends FlxSkewedSprite {
 		ID = noteData;
 
 		centerStrum(minPaddingStartThresh, padding);
-		@:privateAccess sustainSplash.visibilityToggle = false;
+		@:privateAccess sustainSplash.visible = false;
 	}
 
 	/**

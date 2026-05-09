@@ -1220,6 +1220,7 @@ class PlayState extends MusicBeatState
 	private var eventsPushed:Array<String> = [];
 	private function generateSong(dataPath:String):Void
 	{
+		holdSubdivisions = PlayState.SONG.holdSubdivisions;
 		// FlxG.log.add(ChartParser.parse());
 		songSpeed = PlayState.SONG.speed;
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype');
@@ -1721,23 +1722,15 @@ class PlayState extends MusicBeatState
 				Paths.sound(event.value1); //Precache sound
 
 			case "Modchart Event":
-				if(SONG.nativeModchart){
-					var info = event.value1.split(',');
-					final daBeat:Float = Conductor.getBeat(event.strumTime);
-					var ease = FlxEase.linear;
-					if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
-					switch(info[0]){
-						//case "Add Modifier": 
-						//	modManagerEvArray.push(function(){ modManager.addModifier(info[1], Std.parseInt(info[6])); });
-						case "Ease": 
-							modManagerEvArray.push(function(){ modManager.ease(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6])); });
-						case "Set": 
-							modManagerEvArray.push(function(){ modManager.set(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6])); });
-						//case "EaseAdd": 
-						//	modManagerEvArray.push(function(){ modManager.add(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6])); });
-						//case "SetAdd": 
-						//	modManagerEvArray.push(function(){ modManager.setAdd(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6])); });
-					}
+				var info = event.value1.split(',');
+				final daBeat:Float = Conductor.getBeat(event.strumTime);
+				var ease = FlxEase.linear;
+				if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
+				switch(info[0]){
+					case "Ease": 
+						modManagerEvArray.push(function(){ modManager.ease(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6])); });
+					case "Set": 
+						modManagerEvArray.push(function(){ modManager.set(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6])); });
 				}
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventPushedUnique(event));
@@ -2842,19 +2835,11 @@ class PlayState extends MusicBeatState
 	//// Strums | Notes ////
 
 	public function noteFollowStrum(daNote:Note){
-		var strumX:Float = daNote.playField.members[daNote.noteData].x;
-		var strumY:Float = daNote.playField.members[daNote.noteData].y;
-		var strumAngle:Float = daNote.playField.members[daNote.noteData].angle;
-		var strumAlpha:Float = daNote.playField.members[daNote.noteData].alpha;
-		var strumScroll:Bool = daNote.playField.members[daNote.noteData].downScroll;
-
-		strumX += daNote.offsetX;
-		strumY += daNote.offsetY;
-		strumAngle += daNote.offsetAngle;
-		strumAlpha *= daNote.multAlpha;
 		var pN:Int = daNote.playField.player;
 		var pos = modManager.getPos(daNote.strumTime, modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed),
 			daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
+
+    	daNote.distance = modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed);
 
 		modManager.updateObject(curDecBeat, daNote, pos, pN);
 
@@ -3905,8 +3890,8 @@ class PlayState extends MusicBeatState
 		comboSpr.updateHitbox();
 
 		if (camMode == "Bellow Note") {
-			rating.x = linkStrum.x + (linkStrum.width - rating.width) * 0.5;
-			rating.y = linkStrum.y + (linkStrum.downScroll ? -25 : linkStrum.height + 10);
+			rating.x = linkStrum.modPos.x + (linkStrum.width - rating.width) * 0.5;
+			rating.y = linkStrum.modPos.y + (linkStrum.downScroll ? -25 : linkStrum.height + 10);
 			comboSpr.x = rating.x + 40;
 			comboSpr.y = rating.y + 60;
 			if(PlayState.isPixelStage) rating.x -= rating.width/2;

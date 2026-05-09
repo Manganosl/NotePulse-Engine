@@ -4,9 +4,6 @@ import funkin.objects.notes.splashes.NoteSplash.PixelSplashShaderRef;
 import funkin.game.shaders.RGBPalette;
 
 class SustainSplash extends FlxSkewedSprite {
-	// We can't use the normal visibility property as FunkinModchart messes with it.
-	private var visibilityToggle:Bool = false;
-
 	public var noteData:Int;
 
 	public var rgbShader:PixelSplashShaderRef;
@@ -38,7 +35,6 @@ class SustainSplash extends FlxSkewedSprite {
 
 		updateHitbox();
 		visible = true;
-		visibilityToggle = true;
 		antialiasing = ClientPrefs.data.antialiasing;
 
 		scale.set(strum.scale.x / 0.7, strum.scale.y / 0.7);
@@ -65,7 +61,7 @@ class SustainSplash extends FlxSkewedSprite {
 
 		rgbShader.copyValues(tempShader);
 
-		visibilityToggle = true;
+		visible = true;
 
 		if (animation.curAnim == null || animation.curAnim.name != "loop") {
 			animation.play("loop");
@@ -79,7 +75,7 @@ class SustainSplash extends FlxSkewedSprite {
 		updatedThisFrame = true;
 
 		if (miss) {
-			visibilityToggle = false;
+			visible = false;
 			return;
 		}
 
@@ -98,7 +94,7 @@ class SustainSplash extends FlxSkewedSprite {
 				case "cover":
 					animation.play("loop");
 				case "splash":
-					visibilityToggle = false;
+					visible = false;
 			}
 		}
 
@@ -107,11 +103,10 @@ class SustainSplash extends FlxSkewedSprite {
 
 	public function centerSplash() {
 		centerOffsets();
-		visible = strum.visible;
 		scale.x = strum.scale.x * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleX;
 		scale.y = strum.scale.y * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleY;
 		angle = strum.direction-90 + offsetAngle;
-		alpha = (visibilityToggle ? (strum.alpha + offsetAlpha) : 0);
+		alpha = strum.alpha + offsetAlpha;
 		x = strum.modPos.x + (strum.width / 2) - (width / 2) + offsetX;
 		y = strum.modPos.y + (strum.height / 2) - (height / 2) + offsetY;
 	}

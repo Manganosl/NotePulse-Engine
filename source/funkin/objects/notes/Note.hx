@@ -627,37 +627,17 @@ class Note extends FlxSkewedSprite {
         rgbShader.pivotY = (FlxG.height/2) - (y + height/2);
 	}
 
-	public function clip(strum:StrumNote, isDownScroll:Bool)
+	public function clip(strumNote:StrumNote, isDownScroll:Bool)
 	{
-		if (strum.sustainReduce && wasGoodHit && Conductor.songPosition >= strumTime)
-		{
-			var centerOffset:Float = (parent != null) ? parent.height * 0.5 : 0;
+		if ((mustPress || !ignoreNote) && wasGoodHit) {
+			var clipDistance:Float = Math.max(-distance, 0);
+			clipRect ??= new FlxRect(0, 0, frameWidth);
 			
-			final x:Float = (x - strum.x - (strum.width - width) * .5);
-			final y:Float = (y - centerOffset - strum.y - strum.height * .5);
+			clipRect.y = clipDistance / scale.y;
+			clipRect.height = frameHeight - clipRect.y;
 			
-			final mag:Float = Math.sqrt(x * x + y * y);
-			
-			var swagRect:FlxRect = getRect();
-			
-			swagRect.y = (mag / scale.y);
-			swagRect.height -= swagRect.y;
-			if(isDownScroll) swagRect.y -= Note.swagWidth*0.5;
-			
-			clipRect = swagRect;
+			clipRect = clipRect;
 		}
-	}
-	
-	inline function getRect()
-	{
-		final rect = (clipRect ?? new FlxRect());
-		
-		rect.x = 0;
-		rect.y = 0;
-		rect.width = frameWidth;
-		rect.height = frameHeight;
-		
-		return rect;
 	}
 
 	@:noCompletion

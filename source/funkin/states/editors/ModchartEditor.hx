@@ -303,7 +303,7 @@ class ModchartEditor extends MusicBeatState
 
 	var selectedEvent:EventMetaNote;
 
-	var modchartCheckbox:PsychUICheckBox;
+	var subdivisionsStepper:PsychUINumericStepper;
 	var playfieldStepper:PsychUINumericStepper;
 	var modifierInput:PsychUIInputText;
 	var actionsDropdown:PsychUIDropDownMenu;
@@ -347,10 +347,11 @@ class ModchartEditor extends MusicBeatState
 		var posX = 10;
 		var posY = 25;
 
-		modchartCheckbox = new PsychUICheckBox(posX, posY-7.5, 'Modchart', 150, function(){
-			PlayState.SONG.nativeModchart = modchartCheckbox.checked;
-		});
-		modchartCheckbox.checked = PlayState.SONG.nativeModchart;
+		subdivisionsStepper = new PsychUINumericStepper(posX, posY-7.5, 1, 0, 1, 16, 1);
+		subdivisionsStepper.value = PlayState.SONG.holdSubdivisions;	
+		subdivisionsStepper.onValueChange = () -> {
+			PlayState.SONG.holdSubdivisions = Std.int(subdivisionsStepper.value);
+		};
 
 		playfieldStepper = new PsychUINumericStepper(posX + 150, posY, 1, 0, 1, 16, 1);
 		playfieldStepper.value = PlayState.SONG.playfields;	
@@ -410,9 +411,11 @@ class ModchartEditor extends MusicBeatState
 		var valueLabelText = new FlxText(valueStepper.x, valueStepper.y - 15, 80, 'Value:');
 		var easeLabelText = new FlxText(easeInput.x, easeInput.y - 15, 80, 'Ease (if ease):');
 		var playerLabelText = new FlxText(playerStepper.x, playerStepper.y - 15, 80, 'Player:');
+		var subdivisionsLabelText = new FlxText(subdivisionsStepper.x, subdivisionsStepper.y - 15, 80, 'Hold Subdivisions:');
 		var playfieldModLabelText = new FlxText(playfieldModStepper.x, playfieldModStepper.y - 15, 80, 'Playfield:');
 
-		tabGroupModchart.add(modchartCheckbox);
+		tabGroupModchart.add(subdivisionsStepper);
+		tabGroupModchart.add(subdivisionsLabelText);
 		tabGroupModchart.add(playfieldStepper);
 		tabGroupModchart.add(playfieldsLabelText);
 		tabGroupModchart.add(modifierInput);

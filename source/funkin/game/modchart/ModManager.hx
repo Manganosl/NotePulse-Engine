@@ -92,7 +92,7 @@ class ModManager {
     }
 
 	private inline function getP(player:Int):Int {
-        if (!swapPlayers || player == -1) return player;
+        if (!swapPlayers || (player != 0 && player != 1)) return player;
         return 1 - player;
     }
 
@@ -137,8 +137,8 @@ class ModManager {
 		player = getP(player);
 		if (player == -1)
 		{
-			for (pN in 0...PlayField.fields.length)
-				setValue(modName, val, pN);
+			for (field in PlayField.fields)
+				setValue(modName, val, field.player);
 		}
 		else
 		{
@@ -299,8 +299,8 @@ class ModManager {
 
 	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:String = 'linear', player:Int = -1, ?startVal:Float){
 		if(player == -1){
-			for (pN in 0...PlayField.fields.length)
-			queueEase(step, endStep, modName, target, style, pN);
+			for (field in PlayField.fields)
+				queueEase(step, endStep, modName, target, style, field.player);
 		} else {
 			var easeFunc = FlxEase.linear;
 			try {
@@ -314,8 +314,8 @@ class ModManager {
 
 	public function queueSet(step:Float, modName:String, target:Float, player:Int = -1){
 		if (player == -1){
-			for (pN in 0...PlayField.fields.length)
-				queueSet(step, modName, target, pN);
+			for (field in PlayField.fields)
+				queueSet(step, modName, target, field.player);
 		}
 		else
 			timeline.addEvent(new SetEvent(step, modName, target, player, this));
@@ -382,8 +382,8 @@ class ModManager {
 
 	public function ease(modName:String, beat:Float, len:Float, val:Float, easeFunc:EaseFunction, player:Int, ?_:Int){
 		if(player == -1){
-			for (pN in 0...PlayField.fields.length)
-				ease(modName, beat, len, val, easeFunc, pN);
+			for (field in PlayField.fields)
+				ease(modName, beat, len, val, easeFunc, field.player);
 		} else {
 			timeline.addEvent(new ModEaseEvent(beat * 4, (beat + len) * 4, modName, val, easeFunc, player, this));
 		}
@@ -391,8 +391,8 @@ class ModManager {
 
 	public function set(modName:String, beat:Float, val:Float, player:Int, ?_:Int){
 		if(player == -1){
-			for (pN in 0...PlayField.fields.length)
-				set(modName, beat, val, pN);
+			for (field in PlayField.fields)
+				set(modName, beat, val, field.player);
 		} else {
 			timeline.addEvent(new SetEvent(beat * 4, modName, val, player, this));
 		}

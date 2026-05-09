@@ -26,7 +26,7 @@ typedef SwagSong =
 
 	@:optional var lanes:Int;
 
-	@:optional var nativeModchart:Bool;
+	@:optional var holdSubdivisions:Int;
 	@:optional var playfields:Int;
 
 	@:optional var gameOverChar:String;
@@ -146,8 +146,8 @@ class Song
             else songJson.pixel4kTexture = true;
         }
 
-        if (songJson.nativeModchart == null || songJson.nativeModchart == false){
-            songJson.nativeModchart = false;
+        if (songJson.holdSubdivisions == null){
+            songJson.holdSubdivisions = 4;
         }
 
         if (convertedChart && Std.is(songJson.notes, Array)) {
