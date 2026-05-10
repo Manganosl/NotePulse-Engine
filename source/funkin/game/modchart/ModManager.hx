@@ -43,6 +43,16 @@ class ModManager {
 			setValue('xmod$i', 1);
 	}
 
+	public function registerScriptedModifiers(){
+		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'scripts/modifiers/')){
+			for (file in FileSystem.readDirectory(folder)){
+				if(file.toLowerCase().endsWith('.hx')){
+					quickRegister(new ScriptedModifier(this, folder + file, file));
+					Log.info('Registered scripted modifier: $file');
+				}
+			}
+		}
+	}
 
     private var state:PlayState;
 	public var receptors:Array<Array<StrumNote>> = []; // for modifiers to be able to access receptors directly if they need to
