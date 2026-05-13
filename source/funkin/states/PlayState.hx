@@ -1115,12 +1115,12 @@ class PlayState extends MusicBeatState
 		callOnScripts('onUpdatePost', [elapsed]);
 	}
 
-	function sortByOrderNote(wat:Int, Obj1:Note, Obj2:Note):Int
+	public static function sortByOrderNote(wat:Int, Obj1:Note, Obj2:Note):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
 	}
 
-	function sortByOrderStrumNote(wat:Int, Obj1:StrumNote, Obj2:StrumNote):Int
+	public static function sortByOrderStrumNote(wat:Int, Obj1:StrumNote, Obj2:StrumNote):Int
 	{
 		return FlxSort.byValues(FlxSort.DESCENDING, Obj1.zIndex, Obj2.zIndex);
 	}

@@ -25,8 +25,12 @@ import funkin.states.editors.content.MetaNote.EventMetaNote;
 import funkin.states.editors.content.*;
 
 import funkin.scripting.LuaUtils;
+
+import funkin.game.modchart.*;
 class ModchartEditor extends MusicBeatState
 {
+	var modManager:ModManager;
+	var initialCrochet:Float = 0;
 	// Borrowed from original PlayState
 	public var bgCam:FlxCamera;
 	public var camHUD:FlxCamera;
@@ -213,11 +217,15 @@ class ModchartEditor extends MusicBeatState
 		
 		generateSong(PlayState.SONG.song);
 
+		modManager = new ModManager(this);
+		modManager.receptors = [for(i in PlayField.fields) i.members];
+		modManager.registerDefaultModifiers();
+		modManager.registerScriptedModifiers();
 		reloadManager();
 		
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
-		DiscordClient.changePresence('Playtesting on Chart Editor', PlayState.SONG.song, null, true, songLength);
+		DiscordClient.changePresence('Modcharting a Song', PlayState.SONG.song, null, true, songLength);
 		#end
 
 		gridBg = new ChartingGridSprite(1, 0xFF3F3F3F, 0xFF2F2F2F);
@@ -918,6 +926,8 @@ class ModchartEditor extends MusicBeatState
 			}
 		}
 
+		modManager.updateTimeline(curDecStep);
+		modManager.update(elapsed);
 		notesFollow();
 
 		var minX:Float = gridBg.x;
@@ -1052,6 +1062,18 @@ class ModchartEditor extends MusicBeatState
 				} else selectedEvent = null;
 			}
 		} else dummyArrow.visible = false;
+
+		for(field in PlayField.fields){
+			field.forEachAlive(function(strum:StrumNote)
+			{
+				var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
+				modManager.updateObject(curDecBeat, strum, pos, field.player);
+				strum.modPos.x = pos.x;
+				strum.modPos.y = pos.y;
+				strum.z = pos.z;
+			});
+		}
+		strumLineNotes.sort(PlayState.sortByOrderStrumNote);
 		
 		super.update(elapsed);
 	}
@@ -1111,12 +1133,10 @@ class ModchartEditor extends MusicBeatState
 			var fakeCrochet:Float = (60 / PlayState.SONG.bpm) * 1000;
 			notes.forEachAlive(function(daNote:Note)
 			{
-				//daNote.followStrumNote(fakeCrochet, songSpeed / playbackRate);
+				noteFollowStrum(daNote);
 
 				if(daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
 					opponentNoteHit(daNote);
-
-				//if(daNote.isSustainNote && daNote.strum.sustainReduce) daNote.clipToStrumNote();
 
 				if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
 				{
@@ -1124,6 +1144,59 @@ class ModchartEditor extends MusicBeatState
 					invalidateNote(daNote);
 				}
 			});
+		}
+	}
+
+	public function noteFollowStrum(daNote:Note){
+		var pN:Int = daNote.playField.player;
+		var pos = modManager.getPos(daNote.strumTime, modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed),
+			daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
+
+    	daNote.distance = modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed);
+
+		modManager.updateObject(curDecBeat, daNote, pos, pN);
+
+		pos.x += daNote.offsetX;
+		if(daNote.isSustainNote) pos.x += daNote.parent.width/2 - daNote.width/2;
+		pos.y += daNote.offsetY;
+		if(daNote.isSustainNote) pos.y += daNote.parent.height/2;
+		daNote.x = pos.x;
+		daNote.y = pos.y;
+		daNote.z = pos.z;
+		if (daNote.isSustainNote){
+			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / PlayState.holdSubdivisions, 10);
+			var futureSongPos = Conductor.songPosition + holdCrochet;
+			var diff = daNote.strumTime - futureSongPos;
+			var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
+
+			var nextPos = modManager.getPos(daNote.strumTime, vDiff, diff, Conductor.getStep(futureSongPos) / 4, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
+								
+			nextPos.x += daNote.offsetX;
+			if(daNote.isSustainNote) nextPos.x += daNote.parent.width/2 - daNote.width/2;
+			nextPos.y += daNote.offsetY;
+			if(daNote.isSustainNote) nextPos.y += daNote.parent.height/2;
+
+			var diffX = (nextPos.x - pos.x);
+			var diffY = (nextPos.y - pos.y);
+			var diffZ = (nextPos.z - pos.z);
+
+			var rad = Math.atan2(diffY, diffX);
+			var deg = rad * (180 / Math.PI);
+			daNote.mAngle = (deg != 0) ? (deg + 90) : 0;
+
+			var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
+
+			daNote.rgbShader.angleX = Math.atan2(diffY, diffZ) + (Math.PI / 2);
+
+			if(daNote.frameHeight != 0) {
+				if(!daNote.isSustainEnd){
+					daNote.scale.y = (visualDist / daNote.frameHeight);
+				} else {
+					daNote.scale.y = 1;
+				}
+			}
+
+			daNote.clip(daNote.playField.members[daNote.noteData], (diffY < 0));
 		}
 	}
 	
@@ -1291,6 +1364,10 @@ class ModchartEditor extends MusicBeatState
 
 		// NEW SHIT
 		noteData = songData.notes;
+
+		initialCrochet = Conductor.crochet;
+		var holdCrochet:Float = Math.max(Conductor.stepCrochet / PlayState.holdSubdivisions, 10);
+
 		for (section in noteData)
 		{
 			for (songNotes in section.sectionNotes)
@@ -1322,7 +1399,7 @@ class ModchartEditor extends MusicBeatState
 				allNotes.push(swagNote);
 				unspawnNotes.push(swagNote);
 
-				final susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
+				final susLength = (swagNote.sustainLength / holdCrochet);
 				final floorSus:Int = Math.floor(susLength);
 
 				if(floorSus > 0) {
@@ -1330,7 +1407,8 @@ class ModchartEditor extends MusicBeatState
 					{
 						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true, true, this);
+						var sustainNote:Note = new Note(daStrumTime + (holdCrochet * susNote), daNoteData, oldNote, true, true, this);
+						sustainNote.sustainLength = holdCrochet;
 						sustainNote.mustPress = swagNote.mustPress;
 						sustainNote.gfNote = swagNote.gfNote;
 						sustainNote.noteType = swagNote.noteType;
@@ -1606,19 +1684,6 @@ class ModchartEditor extends MusicBeatState
 	}
 
 	function reloadManager(){
-		/*if(manager != null){
-			remove(manager);
-			manager.destroy();
-		}
-		manager = new Manager();
-		add(manager);
-
-		var fields = 1;
-		while(fields != PlayState.SONG.playfields){
-			fields++;
-			manager.addPlayfield();
-		}
-
 		for (songEvent in PlayState.SONG.events){
 			for (i in 0...songEvent[1].length){
 				var evName:String = songEvent[1][i][0];
@@ -1631,15 +1696,12 @@ class ModchartEditor extends MusicBeatState
 					if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
 
 					switch(info[0]){
-						case "Add Modifier": manager.addModifier(info[1], Std.parseInt(info[6]));
-						case "Ease": manager.ease(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "Set": manager.set(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "EaseAdd": manager.add(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "SetAdd": manager.setAdd(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "Ease": modManager.ease(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+						case "Set": modManager.set(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
 					}
 				}
 			}
-		}*/
+		}
 	}
 
 	private var outputGroup:Array<FlxText> = [];

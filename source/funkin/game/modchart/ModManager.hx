@@ -54,7 +54,7 @@ class ModManager {
 		}
 	}
 
-    private var state:PlayState;
+	public var state:Dynamic;
 	public var receptors:Array<Array<StrumNote>> = []; // for modifiers to be able to access receptors directly if they need to
 	public var timeline:EventTimeline = new EventTimeline();
 
@@ -214,9 +214,9 @@ class ModManager {
 		}
     }
 
-    public function new(state:PlayState) {
-        this.state=state;
-    }
+    public function new(daState:Dynamic){
+		this.state = daState;
+	}
 
 	public function update(elapsed:Float)
 	{
