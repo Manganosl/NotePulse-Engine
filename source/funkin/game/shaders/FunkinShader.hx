@@ -8,8 +8,18 @@ import openfl.display.BitmapData;
 import hscript.IHScriptCustomBehaviour;
 import sys.FileSystem;
 import sys.io.File;
+import lime.graphics.opengl.GLProgram;
 
-class FunkinShader extends FlxRuntimeShader implements IHScriptCustomBehaviour {
+class FunkinRuntimeShader extends FlxRuntimeShader implements IHScriptCustomBehaviour {
+	override function __createGLProgram(vert:String, frag:String):GLProgram {
+		try {
+            return super.__createGLProgram(vert, frag);
+		} catch(error){
+			Log.error('Shader Crash!');
+			@:privateAccess return super.__createGLProgram(vert, FunkinShader._templateFrag);
+		}
+	}
+
     public function addToCameras(cameras:Array<FlxCamera>) {
         for (cam in cameras) addToCamera(cam);
     }
@@ -94,4 +104,22 @@ class FunkinShader extends FlxRuntimeShader implements IHScriptCustomBehaviour {
         setUniform(name, val);
         return val;
     }
+}
+
+class FunkinShader extends flixel.graphics.tile.FlxGraphicsShader {
+	override function __createGLProgram(vertexSource:String, fragmentSource:String):GLProgram {
+		try {
+            return super.__createGLProgram(vertexSource, fragmentSource);
+		} catch(error){
+			Log.error('Shader Crash!');
+			return super.__createGLProgram(vertexSource, _templateFrag);
+		}
+	}
+	
+	static final _templateFrag:String = "
+		void main() 
+        {
+			gl_FragColor = flixel_texture2D(bitmap, openfl_TextureCoordv);
+		}
+    ";
 }

@@ -18,7 +18,7 @@ class ChromaticWarp {
     }
 }
 
-class ChromaWarpShader extends FlxShader
+class ChromaWarpShader extends FunkinShader
 {
     @:glFragmentSource('
         #pragma header
