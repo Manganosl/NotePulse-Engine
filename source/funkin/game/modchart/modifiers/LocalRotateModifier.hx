@@ -40,10 +40,26 @@ class LocalRotateModifier extends NoteModifier
 		
 		return offY;
 	}
+
+	private var origin = Vector3.get(0.0, FlxG.height * 0.5, 0.0);
+	private function getFieldOrigin(field:PlayField):Vector3 {
+		final FKC = field.keyCount;
+
+		if (FKC % 2 == 0) {
+			final RKN = Math.floor(FKC / 2);
+			final LKN = RKN - 1;
+			origin.x = (field.members[LKN].x + field.members[RKN].x) * 0.5;
+		} else {
+			origin.x = field.members[Math.floor(FKC / 2)];
+		}
+
+		return origin;
+	}
 	
 	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
 	{
-		var origin:Vector3 = Vector3.weak(PlayField.fields[player].members[data].x, FlxG.height * 0.5);
+		var origin = getFieldOrigin(PlayField.fields[player]);
+		origin.x += Note.swagWidth / 2;
 		
 		var diff = pos.subtract(origin);
 		var scale = FlxG.height;
