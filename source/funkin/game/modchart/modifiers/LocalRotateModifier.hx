@@ -50,7 +50,7 @@ class LocalRotateModifier extends NoteModifier
 			final LKN = RKN - 1;
 			origin.x = (field.members[LKN].x + field.members[RKN].x) * 0.5;
 		} else {
-			origin.x = field.members[Math.floor(FKC / 2)];
+			origin.x = field.members[Math.floor(FKC / 2)].x;
 		}
 
 		return origin;
