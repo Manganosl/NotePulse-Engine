@@ -1,5 +1,8 @@
 package funkin.objects.notes;
 
+import flixel.math.FlxRect;
+import flixel.math.FlxPoint;
+
 import funkin.backend.ExtraKeysHandler;
 import funkin.backend.animation.PsychAnimationController;
 import funkin.backend.NoteTypesConfig;
@@ -12,9 +15,7 @@ import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.PlayField;
 import funkin.objects.notes.copy.CopyNote;
 
-import flixel.math.FlxRect;
-
-import funkin.game.modchart.backend.util.ModchartableSprite;
+import funkin.game.modchart.math.Vector3;
 
 using StringTools;
 
@@ -37,7 +38,28 @@ typedef NoteSplashData = {
 	a:Float
 }
 
-class Note extends ModchartableSprite {
+class Note extends FlxSkewedSprite {
+	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
+	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
+
+	override function destroy() {
+		defScale.put();
+		super.destroy();
+	}	
+	public var zIndex:Float = 0;
+	public var desiredZIndex:Float = 0;
+	public var z:Float = 0;
+	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
+	public var alphaMod:Float = 1;
+	public var alphaMod2:Float = 1; // TODO: unhardcode this shit lmao
+
+	public var mAngle:Float = 0;
+	public var bAngle:Float = 0;
+	public var visualLength:Float = 0;
+
+	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
+	public var typeOffsetY:Float = 0;
+
 	//This is needed for the hardcoded note types to appear on the Chart Editor,
 	//It's also used for backwards compatibility with 0.1 - 0.3.2 charts.
 	public static final defaultNoteTypes:Array<String> = [
@@ -79,9 +101,6 @@ class Note extends ModchartableSprite {
 	public var column:Int = 0; // Why both for the same thing? I'm dumb
 
 	public var characters:Array<Character> = [];
-
-	public var modchartVisible:Bool = true;
-	public var followStrum:Bool = true;
 
 	public var strumTime:Float = 0;
 	public var noteData:Int = 0;
@@ -167,7 +186,7 @@ class Note extends ModchartableSprite {
 	public var offsetAngle:Float = 0;
 	public var offsetDirection:Float = 0;
 	public var multAlpha:Float = 1;
-	public var multSpeed(default, set):Float = 1;
+	public var multSpeed:Float = 1;
 
 	public var copyX:Bool = true;
 	public var copyY:Bool = true;
@@ -224,21 +243,6 @@ class Note extends ModchartableSprite {
 			playField.notes.remove(this);
 		value.notes.push(this);
 		return playField = value;
-	}
-
-	private function set_multSpeed(value:Float):Float {
-		resizeByRatio(value / multSpeed);
-		multSpeed = value;
-		return value;
-	}
-
-	public function resizeByRatio(ratio:Float)
-	{
-		if(isSustainNote && animation.curAnim != null && !animation.curAnim.name.endsWith('end'))
-		{
-			scale.y *= ratio;
-			updateHitbox();
-		}
 	}
 	
 	private function set_texture(value:String):String {
@@ -425,6 +429,7 @@ class Note extends ModchartableSprite {
 					prevNote.scale.y *= (6 / height);
 					prevNote.scale.y *= 6;
 				}
+				prevNote.defScale.copyFrom(prevNote.scale);
 				prevNote.updateHitbox();
 			}
 		}
@@ -532,6 +537,7 @@ class Note extends ModchartableSprite {
 			scale.y = lastScaleY;
 		}
 		updateHitbox();
+		defScale.copyFrom(scale);
 		if(animName != null)
 			animation.play(animName, true);
 	}
@@ -606,70 +612,22 @@ class Note extends ModchartableSprite {
 			}
 		}
 
+		if (rgbShader != null)
+		{			
+			rgbShader.alphaMult = (alphaMod * alphaMod2);
+		}
+
 		if (tooLate && !inEditor)
 		{
 			if (alpha > 0.3)
 				alpha = 0.3;
 		}
 
-		if(currentStrumSpeed == -99999999999999) currentStrumSpeed = strum.noteSpeed;
-		if(currentStrumSpeed != strum.noteSpeed){
-			var ratio = strum.noteSpeed / currentStrumSpeed;
-			currentStrumSpeed = strum.noteSpeed;
-			resizeByRatio(ratio);
-		}
+		rgbShader.pivotX = (FlxG.width/2) - (x + width/2);
+        rgbShader.pivotY = (FlxG.height/2) - (y + height/2);
 	}
 
-	private var lastDistance:Float = 0;
-	public function followStrumNote(fakeCrochet:Float, songSpeed:Float = 1)
-	{
-		for(daNote in copyingNotes)
-			daNote.followStrumNote(fakeCrochet, songSpeed);
-
-		var noteSpeed:Float = songSpeed * multSpeed * strum.noteSpeed;
-		var strumDir:Float = strum.direction + this.offsetDirection;
-		
-		distance = getDistance(strumTime - Conductor.songPosition, noteSpeed, strum);
-		lastDistance = distance;
-		var scrollMult:Int = (strum.downScroll ? -1 : 1);
-		
-		if(copyAlpha)
-			alpha = strum.alpha * multAlpha;
-		
-		var angleDir:Float = strumDir * Math.PI / 180;
-		if(copyX)
-			x = strum.x + offsetX + Math.cos(angleDir) * distance;
-		if(copyY)
-			y = strum.y + offsetY + Math.sin(angleDir) * (followStrum ? distance : lastDistance) * scrollMult;
-		if (copyAngle)
-			angle = (isSustainNote ? strumDir - 90 : strum.angle) + offsetAngle;
-		
-		if (isSustainNote)
-			updateSustain(noteSpeed);
-	}
-	
-	public function updateSustain(noteSpeed:Float = 1) {
-		if(!isSustainEnd && parent == null) {
-			scale.y = getDistance(sustainLength, noteSpeed, strum) / frameHeight;
-			updateHitbox();
-		}
-		if(isSustainEnd) {
-			scale.y = oldSY;
-		}
-		origin.set(frameWidth * .5, 0);
-		offset.set();
-		
-		flipX = strum.downScroll;
-		x += (strum.width - frameWidth) * .5;
-		y += strum.height * .5;
-		if (strum.downScroll)
-			angle = 180 - angle;
-	}
-	public static function getDistance(time:Float, speed:Float, daStrum:StrumNote) {
-		return (0.45 * time * speed * daStrum.noteSpeed);
-	}
-
-	public function clipToStrumNote()
+	public function clip(strumNote:StrumNote, isDownScroll:Bool)
 	{
 		if ((mustPress || !ignoreNote) && wasGoodHit) {
 			var clipDistance:Float = Math.max(-distance, 0);
@@ -683,13 +641,10 @@ class Note extends ModchartableSprite {
 	}
 
 	@:noCompletion
-	override function set_clipRect(rect:FlxRect):FlxRect
+	override function set_clipRect(rect:FlxRect)
 	{
 		clipRect = rect;
-
-		if (frames != null)
-			frame = frames.frames[animation.frameIndex];
-
+		if (frames != null) frame = frames.frames[animation.frameIndex];
 		return rect;
 	}
 

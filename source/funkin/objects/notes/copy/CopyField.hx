@@ -10,6 +10,7 @@ class CopyField extends PlayField {
 
     override public function new(sourceField:PlayField) {
         this.sourceField = sourceField;
+        this.stateGeneration = sourceField.stateGeneration;
 
         super();
 

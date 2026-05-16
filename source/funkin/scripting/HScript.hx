@@ -102,9 +102,18 @@ class HScript implements HscriptInterface {
 		"CustomShader" 				=> funkin.game.shaders.CustomShader,
 		"NdllUtil" 					=> funkin.backend.utils.NdllUtil,
 		"LuaUtils" 					=> funkin.scripting.LuaUtils,
-		"Manager" 					=> funkin.game.modchart.Manager,
-		"ModPlayField" 				=> funkin.game.modchart.engine.ModPlayField,
-		"Event" 					=> funkin.game.modchart.engine.events.Event,
+
+		"ModManager" 				=> funkin.game.modchart.ModManager,
+		"SubModifier" 				=> funkin.game.modchart.SubModifier,
+		"NoteModifier" 				=> funkin.game.modchart.NoteModifier,
+		"ScriptedModifier" 			=> funkin.game.modchart.ScriptedModifier,
+		"EventTimeline" 			=> funkin.game.modchart.EventTimeline,
+		"Modifier" 					=> funkin.game.modchart.Modifier,
+		"StepCallbackEvent" 		=> funkin.game.modchart.events.StepCallbackEvent,
+		"CallbackEvent" 			=> funkin.game.modchart.events.CallbackEvent,
+		"ModEvent" 					=> funkin.game.modchart.events.ModEvent,
+		"EaseEvent" 				=> funkin.game.modchart.events.EaseEvent,
+		"SetEvent" 					=> funkin.game.modchart.events.SetEvent,
 
 		// Away3D
 		#if(away3d && AWAY3D_ALLOWED)
@@ -183,8 +192,7 @@ class HScript implements HscriptInterface {
         scriptName = path;
 
 		#if MODS_ALLOWED
-		if(scriptName != null && scriptName.length > 0)
-		{
+		if(scriptName != null && scriptName.length > 0){
 			var myFolder:Array<String> = scriptName.trim().split('/');
 			if(myFolder[0] + '/' == Paths.mods() && (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1]))) //is inside mods folder
 				this.modFolder = myFolder[1];

@@ -13,6 +13,8 @@ class CopyStrum extends StrumNote {
         
         this.parentField = parentField;
 
+        this.defScale.copyFrom(sourceStrum.defScale);
+
         syncValues();
     }
 

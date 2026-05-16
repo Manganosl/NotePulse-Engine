@@ -1,8 +1,9 @@
 package funkin.objects.notes;
 
-import funkin.game.modchart.backend.util.ModchartableSprite;
-import funkin.backend.InputFormatter;
 import flixel.FlxBasic;
+import flixel.math.FlxPoint;
+
+import funkin.backend.InputFormatter;
 import funkin.backend.ExtraKeysHandler;
 import funkin.backend.animation.PsychAnimationController;
 
@@ -12,7 +13,16 @@ import funkin.objects.notes.splashes.*;
 import funkin.game.shaders.RGBPalette;
 import funkin.game.shaders.RGBPalette.RGBShaderReference;
 
-class StrumNote extends ModchartableSprite {
+import funkin.game.modchart.math.Vector3;
+
+class StrumNote extends FlxSkewedSprite {
+	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
+	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
+	
+	public var zIndex:Float = 0;
+	public var desiredZIndex:Float = 0;
+	public var z:Float = 0;
+
 	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;
 	public var noteData:Int = 0;
@@ -30,6 +40,8 @@ class StrumNote extends ModchartableSprite {
 	public var noteSpeed:Float = 1;
 
 	public var parentField:PlayField = null;
+
+	public var modPos:FlxPoint = new FlxPoint(0, 0);
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -154,6 +166,7 @@ class StrumNote extends ModchartableSprite {
 			animation.addByPrefix('pressed', '${getAnimSet(getIndex(mania, noteData)).anim} press', 24, false);
 			animation.addByPrefix('confirm', '${getAnimSet(getIndex(mania, noteData)).anim} confirm', 24, false);
 		}
+		defScale.copyFrom(scale);
 		updateHitbox();
 
 		if(lastAnim != null)
@@ -166,6 +179,7 @@ class StrumNote extends ModchartableSprite {
 		trackedScale = trackedScale * 0.85;
 		setGraphicSize(initialWidth * (trackedScale * (PlayState.isPixelStage ? PlayState.daPixelZoom /** (1/ExtraKeysHandler.instance.data.pixelScales[PlayState.SONG.mania])) */: 1)));
 		updateHitbox();
+		defScale.copyFrom(scale);
 		postAddedToGroup();
 	}
 
@@ -180,7 +194,7 @@ class StrumNote extends ModchartableSprite {
 		ID = noteData;
 
 		centerStrum(minPaddingStartThresh, padding);
-		@:privateAccess sustainSplash.visibilityToggle = false;
+		@:privateAccess sustainSplash.visible = false;
 	}
 
 	/**
@@ -217,7 +231,11 @@ class StrumNote extends ModchartableSprite {
 		if(sustainSplash != null)
 			if(sustainSplash.animation.curAnim != null)
 				if (sustainSplash.animation.curAnim.name != "splash" && animation.curAnim.name == "static" && !cpuControlled)
-					sustainSplash.hide(true);  // You may ask, why 2 times? Well, BPM changes fuck with everything and I dont know why
+					sustainSplash.hide(true);  // You may ask, why 2 times? Well, BPM changes fucks with everything and I dont know why
+
+		rgbShader.pivotX = (FlxG.width/2) - (x + width/2);
+        rgbShader.pivotY = (FlxG.height/2) - (y + height/2);
+
 		super.update(elapsed);
 	}
 
@@ -250,8 +268,31 @@ class StrumNote extends ModchartableSprite {
 	}
 
 	override function destroy(){
+		defScale.put();
 		sustainSplash.destroy();
 		return super.destroy();
+	}
+
+	/**
+	 * Returns the screen position of this object.
+	 * For StrumNote, this uses `modPos` instead of the usual `x` and `y`
+	 *
+	 * @param   result  Optional arg for the returning point
+	 * @param   camera  The desired "screen" coordinate space. If `null`, `FlxG.camera` is used.
+	 * @return  The screen position of this object.
+	 */
+	override public function getScreenPosition(?result:FlxPoint, ?camera:FlxCamera):FlxPoint {
+		if (result == null)
+			result = FlxPoint.get();
+
+		if (camera == null)
+			camera = FlxG.camera;
+
+		result.set(modPos.x, modPos.y);
+		if (pixelPerfectPosition)
+			result.floor();
+
+		return result.subtract(camera.scroll.x * scrollFactor.x, camera.scroll.y * scrollFactor.y);
 	}
 }
 

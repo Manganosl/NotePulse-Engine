@@ -5,8 +5,6 @@ import funkin.backend.animation.PsychAnimationController;
 
 import funkin.game.shaders.RGBPalette;
 
-import funkin.game.modchart.backend.util.ModchartableSprite;
-
 import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.frames.FlxFrame;
 
@@ -17,12 +15,17 @@ typedef NoteSplashConfig = {
 	offsets:Array<Array<Float>>
 }
 
-class NoteSplash extends ModchartableSprite {
+class NoteSplash extends FlxSkewedSprite {
 	public var rgbShader:PixelSplashShaderRef;
 	private var idleAnim:String;
 	private var _textureLoaded:String = null;
 	private var _configLoaded:String = null;
-	public var babyArrow:StrumNote;
+	public var babyArrow(default, set):StrumNote;
+	private function set_babyArrow(value:StrumNote){
+		noteData = value.noteData;
+		return babyArrow = value;
+	}
+	public var noteData:Int;
 
 	public static var defaultNoteSplash(default, never):String = 'noteSplashes/noteSplashes';
 	public static var configs:Map<String, NoteSplashConfig> = new Map<String, NoteSplashConfig>();
@@ -52,6 +55,8 @@ class NoteSplash extends ModchartableSprite {
 
 	var maxAnims:Int = 1;
 	public function setupNoteSplash(x:Float, y:Float, direction:Int = 0, ?note:Note = null) {
+		this.babyArrow = note.strum;
+
 		setPosition(x - Note.swagWidth * 0.95, y - Note.swagWidth);
 		aliveTime = 0;
 
@@ -98,15 +103,15 @@ class NoteSplash extends ModchartableSprite {
 		{
 			var animID:Int = direction + ((1 - 1) * Note.colArray.length);
 			var offs:Array<Float> = config.offsets[FlxMath.wrap(animID, 0, config.offsets.length-1)];
-			offset.x += offs[0] * (ExtraKeysHandler.instance.data.scales[PlayState.SONG.mania] + 0.3);
-			offset.y += offs[1] * (ExtraKeysHandler.instance.data.scales[PlayState.SONG.mania] + 0.3);
+			offset.x += offs[0] * (ExtraKeysHandler.instance.data.scales[(note.playField.keyCount - 1)] + 0.3);
+			offset.y += offs[1] * (ExtraKeysHandler.instance.data.scales[(note.playField.keyCount - 1)] + 0.3);
 			minFps = config.minFps;
 			maxFps = config.maxFps;
 		}
 		else
 		{
-			offset.x += -58 * (ExtraKeysHandler.instance.data.scales[PlayState.SONG.mania] + 0.3);
-			offset.y += -55 * (ExtraKeysHandler.instance.data.scales[PlayState.SONG.mania] + 0.3);
+			offset.x += -58 * (ExtraKeysHandler.instance.data.scales[(note.playField.keyCount - 1)] + 0.3);
+			offset.y += -55 * (ExtraKeysHandler.instance.data.scales[(note.playField.keyCount - 1)] + 0.3);
 		}
 
 		if(animation.curAnim != null)
@@ -136,7 +141,7 @@ class NoteSplash extends ModchartableSprite {
 			}
 		}
 
-		setGraphicSize(width * (ExtraKeysHandler.instance.data.scales[PlayState.SONG.mania] + 0.3));
+		setGraphicSize(width * (ExtraKeysHandler.instance.data.scales[(babyArrow.parentField.keyCount - 1)] + 0.3));
 		updateHitbox();
 
 		config = precacheConfig(skin);
@@ -209,6 +214,7 @@ class NoteSplash extends ModchartableSprite {
 
 class PixelSplashShaderRef {
 	public var shader:PixelSplashShader = new PixelSplashShader();
+	public var alphaMult:Float = 1; // DO THIS LATER
 
 	public function copyValues(tempShader:RGBPalette)
 	{

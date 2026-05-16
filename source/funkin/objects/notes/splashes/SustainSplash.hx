@@ -1,15 +1,17 @@
 package funkin.objects.notes.splashes;
 
 import funkin.objects.notes.splashes.NoteSplash.PixelSplashShaderRef;
-import funkin.game.modchart.backend.util.ModchartableSprite;
 import funkin.game.shaders.RGBPalette;
 
-class SustainSplash extends ModchartableSprite {
-	// We can't use the normal visibility property as FunkinModchart messes with it.
-	private var visibilityToggle:Bool = false;
+class SustainSplash extends FlxSkewedSprite {
+	public var noteData:Int;
 
 	public var rgbShader:PixelSplashShaderRef;
-	public var strum:StrumNote;
+	public var strum(default, set):StrumNote;
+	private function set_strum(value:StrumNote){
+		noteData = value.noteData;
+		return strum = value;
+	}
 	public var updatedThisFrame:Bool = false;
 
 	public var offsetX:Float = 0;
@@ -33,7 +35,6 @@ class SustainSplash extends ModchartableSprite {
 
 		updateHitbox();
 		visible = true;
-		visibilityToggle = true;
 		antialiasing = ClientPrefs.data.antialiasing;
 
 		scale.set(strum.scale.x / 0.7, strum.scale.y / 0.7);
@@ -60,7 +61,7 @@ class SustainSplash extends ModchartableSprite {
 
 		rgbShader.copyValues(tempShader);
 
-		visibilityToggle = true;
+		visible = true;
 
 		if (animation.curAnim == null || animation.curAnim.name != "loop") {
 			animation.play("loop");
@@ -74,7 +75,7 @@ class SustainSplash extends ModchartableSprite {
 		updatedThisFrame = true;
 
 		if (miss) {
-			visibilityToggle = false;
+			visible = false;
 			return;
 		}
 
@@ -93,7 +94,7 @@ class SustainSplash extends ModchartableSprite {
 				case "cover":
 					animation.play("loop");
 				case "splash":
-					visibilityToggle = false;
+					visible = false;
 			}
 		}
 
@@ -102,12 +103,11 @@ class SustainSplash extends ModchartableSprite {
 
 	public function centerSplash() {
 		centerOffsets();
-		visible = strum.visible;
 		scale.x = strum.scale.x * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleX;
 		scale.y = strum.scale.y * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleY;
 		angle = strum.direction-90 + offsetAngle;
-		alpha = (visibilityToggle ? (strum.alpha + offsetAlpha) : 0);
-		x = strum.x + (strum.width / 2) - (width / 2) + offsetX;
-		y = strum.y + (strum.height / 2) - (height / 2) + offsetY;
+		alpha = strum.alpha + offsetAlpha;
+		x = strum.modPos.x + (strum.width / 2) - (width / 2) + offsetX;
+		y = strum.modPos.y + (strum.height / 2) - (height / 2) + offsetY;
 	}
 }

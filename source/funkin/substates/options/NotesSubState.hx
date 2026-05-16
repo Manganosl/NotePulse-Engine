@@ -663,6 +663,8 @@ class NotesSubState extends MusicBeatSubstate
 		{
 			Note.initializeGlobalRGBShader(i, ExtraKeysHandler.instance.data.maxKeys);
 			var newNote:StrumNote = new StrumNote(150 + (480 / dataArray.length * i), 200, i, 0);
+			newNote.modPos.x = newNote.x;
+			newNote.modPos.y = newNote.y;
 			newNote.useRGBShader = true;
 			newNote.setGraphicSize(102);
 			newNote.updateHitbox();

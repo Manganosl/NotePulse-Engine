@@ -36,16 +36,15 @@ class CreditsState extends MusicBeatState
 		add(grpOptions);
 
 		var defaultList:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
-			['NotePulse Engine'],
-			['Manganos', 			'face',				'Main Coder',			 					 'https://github.com/Manganosl', 		'6a329f'],
-			['Alvarititi', 			'face',				'Emotional Support. Thinks making a single FlxSprite is torture',			 					 'https://github.com/Alvarititi', 		'6a329f'],
+			['Main NP Pals'],
+			['Manganos', 			'mang',				'Main Coder - I have nothing else to do',			 		 'https://github.com/Manganosl', 		'6a329f'],
 			[''],
-			['More credits'],
-			['tposejank', 			'tposejank',		'EK Programmer',			 								 'https://twitter.com/tposejank', 		'B9AF27'],	//mensajes subliminales
+			['More'],
+			['tposejank', 			'tposejank',		'Made the EK fork NP is based on',			 				 'https://twitter.com/tposejank', 		'B9AF27'],	//mensajes subliminales
 			['srPerez', 			'perez', 			'1-9 keys art', 											 'https://twitter.com/NewSrPerez', 		'FF9E00'],
 			['CNE Team', 			'face',				'NdllUtils, away3d, debug menu and HScript-Improved',		 'https://codename-engine.com/', 		'6a329f'],
-			['FunkinModchart', 		'face',				'Awesome modcharting tools',			 					 'https://github.com/theoo-h/FunkinModchart', 		'6a329f'],
-			['NightmareVision Engine', 		'face',		'WindowUtils',			 				 'https://github.com/DuskieWhy/NightmareVision', 		'6a329f'],
+			['NebulaZorua', 		'neb', 				'Modchart backend', 										 'https://twitter.com/Nebula_Zorua', '0x9B00B3'],
+			['NMV Engine', 			'face',				'WindowUtils and adjusted Modchart Modifiers',		 		 'https://github.com/NMVTeam/NightmareVision/tree/dev', 		'6a329f'],
 			[''],
 			['Psych Engine Team'],
 			['Shadow Mario',		'shadowmario',		'Main Programmer and Head of Psych Engine',					 'https://ko-fi.com/shadowmario',		'444444'],

@@ -11,6 +11,7 @@ import flixel.FlxBasic;
 
 class ScriptedState extends MusicBeatState
 {
+	static var lastScriptPath:String = "";
 	public var hscript:HScript = null;
 	private var initialScriptPath:String;
 	public static var instance:ScriptedState;
@@ -19,9 +20,10 @@ class ScriptedState extends MusicBeatState
 
 	public function new(?scriptPath:String = null, ?isCode:Bool = false)
 	{
+		lastScriptPath = scriptPath;
 		instance = this;
 		super();
-		this.initialScriptPath = Paths.modState(scriptPath);
+		this.initialScriptPath = Paths.modState(scriptPath != null ? scriptPath : lastScriptPath);
 	}
 
 	override public function create():Void {

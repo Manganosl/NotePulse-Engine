@@ -1,6 +1,7 @@
 package funkin.game.shaders;
 
 import flixel.addons.display.FlxRuntimeShader;
+import funkin.game.shaders.FunkinShader.FunkinRuntimeShader;
 import flixel.FlxCamera;
 import openfl.filters.ShaderFilter;
 import flixel.graphics.FlxGraphic;
@@ -9,7 +10,7 @@ import hscript.IHScriptCustomBehaviour;
 import sys.FileSystem;
 import sys.io.File;
 
-class CustomShader extends FunkinShader {
+class CustomShader extends FunkinRuntimeShader {
     public static var shaderCache:Map<String, Array<String>> = new Map();
     public var shader:FlxRuntimeShader;
 

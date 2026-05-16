@@ -19,7 +19,7 @@ Then you can just compile!
 ## Thanks
 - **tposejank**: The EK fork this is based on
 - **Codename Engine**: Most cool things we have.
-- **Nightmare Vision Engine**: WindowUtils
+- **Nightmare Vision Engine**: WindowUtils and some adjusted Modchart Modifiers
 - **Shadow Mario**: Psych Engine
-- **FunkinModchart**: Modchart libraries
+- **NebulaZorua**: Created this incredible [Modchart Backend](https://github.com/nebulazorua/psych-modchart-thing)
 - **Funkin Crew**: Obvious, right?

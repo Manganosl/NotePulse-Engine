@@ -33,6 +33,8 @@ class CopyNote extends Note {
         if (isSustainNote && !isSustainEnd) {
             this.scale.y = sourceNote.scale.y;
         }
+
+        this.defScale.copyFrom(sourceField.scale);
     }
 
     override function destroy() {
