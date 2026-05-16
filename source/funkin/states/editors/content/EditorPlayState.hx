@@ -319,7 +319,7 @@ class EditorPlayState extends MusicBeatSubstate
 		daNote.y = pos.y;
 		daNote.z = pos.z;
 		if (daNote.isSustainNote){
-			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / PlayState.holdSubdivisions, 10);
+			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / PlayState.SONG.holdSubdivisions, 10);
 			var futureSongPos = Conductor.songPosition + holdCrochet;
 			var diff = daNote.strumTime - futureSongPos;
 			var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
@@ -495,7 +495,7 @@ class EditorPlayState extends MusicBeatSubstate
 		noteData = songData.notes;
 
 		initialCrochet = Conductor.crochet;
-		var holdCrochet:Float = Math.max(Conductor.stepCrochet / PlayState.holdSubdivisions, 10);
+		var holdCrochet:Float = Math.max(Conductor.stepCrochet / PlayState.SONG.holdSubdivisions, 10);
 
 		for (section in noteData)
 		{

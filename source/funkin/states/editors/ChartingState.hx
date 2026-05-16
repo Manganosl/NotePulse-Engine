@@ -608,8 +608,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				mania: 3,
 				needsVoices: true,
 				lanes: 2,
-				holdSubdivisions: 4,
-				playfields: 1,
+				holdSubdivisions: 1,
 				player1: 'bf',
 				player2: 'dad',
 				gfVersion: 'gf',
@@ -1369,8 +1368,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 								var valueStr:String = (valueStepper != null) ? Std.string(valueStepper.value) : "";
 								var easeStr:String = (easeInput != null) ? easeInput.text : "";
 								var playerStr:String = (playerStepper != null) ? Std.string(playerStepper.value) : "";
-								var playfieldStr:String = (playfieldModStepper != null) ? Std.string(playfieldModStepper.value) : "";
-								var combined:String = action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + "," + playfieldStr;
+								var combined:String = action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + ",-1";
 
 								var evData:Array<Dynamic> = [strumTime, [["Modchart Event", combined, ""]]];
 								eventAdded = createEvent(evData);
@@ -1784,11 +1782,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 							try pVal = {Std.parseInt(parts[5]);} catch(e:Dynamic) {pVal = Std.int(playerStepper.value);}
 							playerStepper.value = pVal;
 						}
-						if (playfieldModStepper != null) {
-							var pfVal:Int = 0;
-							try pfVal = {Std.parseInt(parts[6]);} catch(e:Dynamic) {pfVal = Std.int(playfieldModStepper.value);}
-							playfieldModStepper.value = pfVal;
-						}
 					} else {
 						if (actionsDropdown != null) actionsDropdown.selectedIndex = 0;
 						if (modifierInput != null) modifierInput.text = "";
@@ -1796,7 +1789,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						if (valueStepper != null) valueStepper.value = 0;
 						if (easeInput != null) easeInput.text = "";
 						if (playerStepper != null) playerStepper.value = -1;
-						if (playfieldModStepper != null) playfieldModStepper.value = -1;
 					}
 				} else eventsBox.selectedName = "Events";
 			}
@@ -2716,14 +2708,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	}
 
 	var subdivisionsStepper:PsychUINumericStepper;
-	var playfieldStepper:PsychUINumericStepper;
 	var modifierInput:PsychUIInputText;
 	var actionsDropdown:PsychUIDropDownMenu;
 	var timeStepper:PsychUINumericStepper;
 	var valueStepper:PsychUINumericStepper;
 	var easeInput:PsychUIInputText;
 	var playerStepper:PsychUINumericStepper;
-	var playfieldModStepper:PsychUINumericStepper;
 
 	function updateModEvV1():Void {
 		if (selectedNotes.length != 1 || !selectedNotes[0].isEvent) return;
@@ -2745,9 +2735,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		var valueStr:String = (valueStepper != null) ? Std.string(valueStepper.value) : '';
 		var easeStr:String = (easeInput != null) ? easeInput.text : '';
 		var playerStr:String = (playerStepper != null) ? Std.string(playerStepper.value) : '';
-		var playfieldStr:String = (playfieldModStepper != null) ? Std.string(playfieldModStepper.value) : '';
 
-		var combined:String = action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + "," + playfieldStr;
+		var combined:String = action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + ",-1";
 
 		eventNote.events[curEventSelected][1] = combined;
 
@@ -2765,14 +2754,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		subdivisionsStepper.onValueChange = () -> {
 			PlayState.SONG.holdSubdivisions = Std.int(subdivisionsStepper.value);
 		};
-
-		playfieldStepper = new PsychUINumericStepper(posX + 150, posY, 1, 0, 1, 16, 1);
-		playfieldStepper.value = PlayState.SONG.playfields;	
-		playfieldStepper.onValueChange = function() {
-			PlayState.SONG.playfields = Std.int(playfieldStepper.value);
-		};
-
-		var playfieldsLabelText = new FlxText(playfieldStepper.x, playfieldStepper.y - 15, 80, 'Playfields:');
 
 		posY += 40;
 
@@ -2815,22 +2796,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			updateModEvV1();
 		};
 
-		playfieldModStepper = new PsychUINumericStepper(posX + 150, posY, 1, -1, -1, 16, 0);
-		playfieldModStepper.onValueChange = function() {
-			updateModEvV1();
-		};
-
 		var timeLabelText = new FlxText(timeStepper.x, timeStepper.y - 15, 80, 'Time (beats):');
 		var valueLabelText = new FlxText(valueStepper.x, valueStepper.y - 15, 80, 'Value:');
 		var easeLabelText = new FlxText(easeInput.x, easeInput.y - 15, 80, 'Ease (if ease):');
 		var playerLabelText = new FlxText(playerStepper.x, playerStepper.y - 15, 80, 'Player:');
-		var subdivisionsLabelText = new FlxText(subdivisionsStepper.x, subdivisionsStepper.y - 15, 80, 'Playfield:');
-		var playfieldModLabelText = new FlxText(playfieldModStepper.x, playfieldModStepper.y - 15, 80, 'Playfield:');
+		var subdivisionsLabelText = new FlxText(subdivisionsStepper.x, subdivisionsStepper.y - 15, 80, 'Subdivisions:');
 
 		tabGroupModchart.add(subdivisionsStepper);
 		tabGroupModchart.add(subdivisionsLabelText);
-		tabGroupModchart.add(playfieldStepper);
-		tabGroupModchart.add(playfieldsLabelText);
 		tabGroupModchart.add(modifierInput);
 		tabGroupModchart.add(modifierLabelText);
 		tabGroupModchart.add(actionsLabelText);
@@ -2838,12 +2811,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tabGroupModchart.add(valueStepper);
 		tabGroupModchart.add(easeInput);
 		tabGroupModchart.add(playerStepper);
-		tabGroupModchart.add(playfieldModStepper);
 		tabGroupModchart.add(timeLabelText);
 		tabGroupModchart.add(valueLabelText);
 		tabGroupModchart.add(easeLabelText);
 		tabGroupModchart.add(playerLabelText);
-		tabGroupModchart.add(playfieldModLabelText);
 		tabGroupModchart.add(actionsDropdown);
 	}
 

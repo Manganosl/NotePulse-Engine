@@ -124,7 +124,6 @@ class ScaleSimulationState extends MusicBeatState {
 				bpm: 1,
 				mania: i,
 				needsVoices: true,
-                gfStrums: false,
 				player1: 'bf',
 				player2: 'bf',
 				gfVersion: 'bf',

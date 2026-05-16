@@ -27,7 +27,6 @@ typedef SwagSong =
 	@:optional var lanes:Int;
 
 	@:optional var holdSubdivisions:Int;
-	@:optional var playfields:Int;
 
 	@:optional var gameOverChar:String;
 	@:optional var gameOverSound:String;
@@ -41,7 +40,6 @@ typedef SwagSong =
 	@:optional var arrowSkin:String;
 	@:optional var splashSkin:String;
 	@:optional var mania:Int;
-	@:optional var gfStrums:Bool;
 	@:optional var format:String;
 }
 
@@ -147,7 +145,7 @@ class Song
         }
 
         if (songJson.holdSubdivisions == null){
-            songJson.holdSubdivisions = 4;
+            songJson.holdSubdivisions = 1;
         }
 
         if (convertedChart && Std.is(songJson.notes, Array)) {

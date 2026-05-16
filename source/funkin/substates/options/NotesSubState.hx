@@ -59,7 +59,6 @@ class NotesSubState extends MusicBeatSubstate
 			bpm: 150.0,
 			mania: ExtraKeysHandler.instance.data.maxKeys,
 			needsVoices: true,
-			gfStrums: false,
 			player1: 'bf',
 			player2: 'dad',
 			gfVersion: 'gf',

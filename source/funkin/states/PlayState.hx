@@ -95,8 +95,6 @@ class PlayState extends MusicBeatState
 
 	public var judgementCounter:FlxText;
 
-	public static var holdSubdivisions:Int = 4;	// how many extra notes to spawn in for each hold note, set this to 1 to disable it
-
 	//event variables
 	private var isCameraOnForcedPos:Bool = false;
 
@@ -456,8 +454,6 @@ class PlayState extends MusicBeatState
 	override public function create()
 	{
 		Paths.clearStoredMemory();
-
-		holdSubdivisions = 4;
 
 		startCallback = startCountdown;
 		endCallback = endSong;
@@ -1126,8 +1122,6 @@ class PlayState extends MusicBeatState
 	}
 
 	override function destroy() {
-		holdSubdivisions = 4;
-		
 		#if LUA_ALLOWED
 		for (lua in luaArray)
 		{
@@ -1217,9 +1211,7 @@ class PlayState extends MusicBeatState
 	var debugNum:Int = 0;
 	private var noteTypes:Array<String> = [];
 	private var eventsPushed:Array<String> = [];
-	private function generateSong(dataPath:String):Void
-	{
-		holdSubdivisions = PlayState.SONG.holdSubdivisions;
+	private function generateSong(dataPath:String):Void {
 		// FlxG.log.add(ChartParser.parse());
 		songSpeed = PlayState.SONG.speed;
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype');
@@ -1305,7 +1297,7 @@ class PlayState extends MusicBeatState
 			noteRows.push([]);
 
 		initialCrochet = Conductor.crochet;
-		var holdCrochet:Float = Math.max(Conductor.stepCrochet / holdSubdivisions, 10);
+		var holdCrochet:Float = Math.max(Conductor.stepCrochet / PlayState.SONG.holdSubdivisions, 10);
 
 		for (section in noteData)
 		{
@@ -2850,7 +2842,7 @@ class PlayState extends MusicBeatState
 		daNote.y = pos.y;
 		daNote.z = pos.z;
 		if (daNote.isSustainNote){
-			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / holdSubdivisions, 10);
+			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / PlayState.SONG.holdSubdivisions, 10);
 			var futureSongPos = Conductor.songPosition + holdCrochet;
 			var diff = daNote.strumTime - futureSongPos;
 			var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
@@ -3084,7 +3076,7 @@ class PlayState extends MusicBeatState
 	function noteMissCommon(direction:Int, note:Note = null)
 	{
 		// score and data
-		final susMult:Float = (note.isSustainNote ? 1 / holdSubdivisions : 1);
+		final susMult:Float = (note.isSustainNote ? 1 / PlayState.SONG.holdSubdivisions : 1);
 		var subtract:Float = 0.05;
 		if(note != null) subtract = note.missHealth;
 
@@ -3419,7 +3411,7 @@ class PlayState extends MusicBeatState
 			noteMs.push((noteDiff));
 			noteTime.push(note.strumTime);
 		}
-		final susMult:Float = (note.isSustainNote ? 1 / holdSubdivisions : 1);
+		final susMult:Float = (note.isSustainNote ? 1 / PlayState.SONG.holdSubdivisions : 1);
 		var gainHealth:Bool = true; // prevent health gain, *if* sustains are treated as a singular note
 		if (guitarHeroSustains && note.isSustainNote) gainHealth = false;
 		if (gainHealth && !isPlayerOpponent) health += note.hitHealth * healthGain * susMult;

@@ -217,10 +217,6 @@ class ModchartEditor extends MusicBeatState
 		
 		generateSong(PlayState.SONG.song);
 
-		modManager = new ModManager(this);
-		modManager.receptors = [for(i in PlayField.fields) i.members];
-		modManager.registerDefaultModifiers();
-		modManager.registerScriptedModifiers();
 		reloadManager();
 		
 		#if DISCORD_ALLOWED
@@ -312,14 +308,12 @@ class ModchartEditor extends MusicBeatState
 	var selectedEvent:EventMetaNote;
 
 	var subdivisionsStepper:PsychUINumericStepper;
-	var playfieldStepper:PsychUINumericStepper;
 	var modifierInput:PsychUIInputText;
 	var actionsDropdown:PsychUIDropDownMenu;
 	var timeStepper:PsychUINumericStepper;
 	var valueStepper:PsychUINumericStepper;
 	var easeInput:PsychUIInputText;
 	var playerStepper:PsychUINumericStepper;
-	var playfieldModStepper:PsychUINumericStepper;
 	function updateModEvV1():Void {
 		if (selectedEvent == null) return;
 
@@ -339,9 +333,8 @@ class ModchartEditor extends MusicBeatState
 		var valueStr:String = (valueStepper != null) ? Std.string(valueStepper.value) : '';
 		var easeStr:String = (easeInput != null) ? easeInput.text : '';
 		var playerStr:String = (playerStepper != null) ? Std.string(playerStepper.value) : '';
-		var playfieldStr:String = (playfieldModStepper != null) ? Std.string(playfieldModStepper.value) : '';
 
-		var combined:String = action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + "," + playfieldStr;
+		var combined:String = action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + ",-1";
 
 		eventNote.events[0][1] = combined;
 
@@ -360,14 +353,6 @@ class ModchartEditor extends MusicBeatState
 		subdivisionsStepper.onValueChange = () -> {
 			PlayState.SONG.holdSubdivisions = Std.int(subdivisionsStepper.value);
 		};
-
-		playfieldStepper = new PsychUINumericStepper(posX + 150, posY, 1, 0, 1, 16, 1);
-		playfieldStepper.value = PlayState.SONG.playfields;	
-		playfieldStepper.onValueChange = function() {
-			PlayState.SONG.playfields = Std.int(playfieldStepper.value);
-		};
-
-		var playfieldsLabelText = new FlxText(playfieldStepper.x, playfieldStepper.y - 15, 80, 'Playfields:');
 
 		posY += 40;
 
@@ -410,22 +395,16 @@ class ModchartEditor extends MusicBeatState
 			updateModEvV1();
 		};
 
-		playfieldModStepper = new PsychUINumericStepper(posX + 150, posY, 1, -1, -1, 16, 0);
-		playfieldModStepper.onValueChange = function() {
-			updateModEvV1();
-		};
+
 
 		var timeLabelText = new FlxText(timeStepper.x, timeStepper.y - 15, 80, 'Time (beats):');
 		var valueLabelText = new FlxText(valueStepper.x, valueStepper.y - 15, 80, 'Value:');
 		var easeLabelText = new FlxText(easeInput.x, easeInput.y - 15, 80, 'Ease (if ease):');
 		var playerLabelText = new FlxText(playerStepper.x, playerStepper.y - 15, 80, 'Player:');
-		var subdivisionsLabelText = new FlxText(subdivisionsStepper.x, subdivisionsStepper.y - 15, 80, 'Hold Subdivisions:');
-		var playfieldModLabelText = new FlxText(playfieldModStepper.x, playfieldModStepper.y - 15, 80, 'Playfield:');
+		var subdivisionsLabelText = new FlxText(subdivisionsStepper.x, subdivisionsStepper.y - 15, 80, 'Subdivisions:');
 
 		tabGroupModchart.add(subdivisionsStepper);
 		tabGroupModchart.add(subdivisionsLabelText);
-		tabGroupModchart.add(playfieldStepper);
-		tabGroupModchart.add(playfieldsLabelText);
 		tabGroupModchart.add(modifierInput);
 		tabGroupModchart.add(modifierLabelText);
 		tabGroupModchart.add(actionsLabelText);
@@ -433,12 +412,10 @@ class ModchartEditor extends MusicBeatState
 		tabGroupModchart.add(valueStepper);
 		tabGroupModchart.add(easeInput);
 		tabGroupModchart.add(playerStepper);
-		tabGroupModchart.add(playfieldModStepper);
 		tabGroupModchart.add(timeLabelText);
 		tabGroupModchart.add(valueLabelText);
 		tabGroupModchart.add(easeLabelText);
 		tabGroupModchart.add(playerLabelText);
-		tabGroupModchart.add(playfieldModLabelText);
 		tabGroupModchart.add(actionsDropdown);
 	}
 
@@ -926,8 +903,10 @@ class ModchartEditor extends MusicBeatState
 			}
 		}
 
-		modManager.updateTimeline(curDecStep);
-		modManager.update(elapsed);
+		if(modManager != null){
+			modManager.updateTimeline(curDecStep);
+			modManager.update(elapsed);
+		}
 		notesFollow();
 
 		var minX:Float = gridBg.x;
@@ -1033,8 +1012,7 @@ class ModchartEditor extends MusicBeatState
 						var valueStr:String = (valueStepper != null) ? Std.string(valueStepper.value) : "";
 						var easeStr:String = (easeInput != null) ? easeInput.text : "";
 						var playerStr:String = (playerStepper != null) ? Std.string(playerStepper.value) : "";
-						var playfieldStr:String = (playfieldModStepper != null) ? Std.string(playfieldModStepper.value) : "";
-						var combined:String = action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + "," + playfieldStr;
+						var combined:String = action + "," + modifier + "," + timeStr + "," + valueStr + "," + easeStr + "," + playerStr + ",-1";
 
 						var evData:Array<Dynamic> = [strumTime, [["Modchart Event", combined, ""]]];
 						eventAdded = createEvent(evData);
@@ -1063,15 +1041,17 @@ class ModchartEditor extends MusicBeatState
 			}
 		} else dummyArrow.visible = false;
 
-		for(field in PlayField.fields){
-			field.forEachAlive(function(strum:StrumNote)
-			{
-				var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
-				modManager.updateObject(curDecBeat, strum, pos, field.player);
-				strum.modPos.x = pos.x;
-				strum.modPos.y = pos.y;
-				strum.z = pos.z;
-			});
+		if(modManager != null){
+			for(field in PlayField.fields){
+				field.forEachAlive(function(strum:StrumNote)
+				{
+					var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
+					modManager.updateObject(curDecBeat, strum, pos, field.player);
+					strum.modPos.x = pos.x;
+					strum.modPos.y = pos.y;
+					strum.z = pos.z;
+				});
+			}
 		}
 		strumLineNotes.sort(PlayState.sortByOrderStrumNote);
 		
@@ -1108,11 +1088,7 @@ class ModchartEditor extends MusicBeatState
 							try pVal = {Std.parseInt(parts[5]);} catch(e:Dynamic) {pVal = Std.int(playerStepper.value);}
 							playerStepper.value = pVal;
 						}
-						if (playfieldModStepper != null) {
-							var pfVal:Int = 0;
-							try pfVal = {Std.parseInt(parts[6]);} catch(e:Dynamic) {pfVal = Std.int(playfieldModStepper.value);}
-							playfieldModStepper.value = pfVal;
-						}
+
 					} else {
 						if (actionsDropdown != null) actionsDropdown.selectedIndex = 0;
 						if (modifierInput != null) modifierInput.text = "";
@@ -1120,7 +1096,6 @@ class ModchartEditor extends MusicBeatState
 						if (valueStepper != null) valueStepper.value = 0;
 						if (easeInput != null) easeInput.text = "";
 						if (playerStepper != null) playerStepper.value = -1;
-						if (playfieldModStepper != null) playfieldModStepper.value = -1;
 					}
 				}
 			}
@@ -1148,6 +1123,7 @@ class ModchartEditor extends MusicBeatState
 	}
 
 	public function noteFollowStrum(daNote:Note){
+		if(modManager == null) return;
 		var pN:Int = daNote.playField.player;
 		var pos = modManager.getPos(daNote.strumTime, modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed),
 			daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
@@ -1164,7 +1140,7 @@ class ModchartEditor extends MusicBeatState
 		daNote.y = pos.y;
 		daNote.z = pos.z;
 		if (daNote.isSustainNote){
-			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / PlayState.holdSubdivisions, 10);
+			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / PlayState.SONG.holdSubdivisions, 10);
 			var futureSongPos = Conductor.songPosition + holdCrochet;
 			var diff = daNote.strumTime - futureSongPos;
 			var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
@@ -1366,7 +1342,7 @@ class ModchartEditor extends MusicBeatState
 		noteData = songData.notes;
 
 		initialCrochet = Conductor.crochet;
-		var holdCrochet:Float = Math.max(Conductor.stepCrochet / PlayState.holdSubdivisions, 10);
+		var holdCrochet:Float = Math.max(Conductor.stepCrochet / PlayState.SONG.holdSubdivisions, 10);
 
 		for (section in noteData)
 		{
@@ -1684,6 +1660,11 @@ class ModchartEditor extends MusicBeatState
 	}
 
 	function reloadManager(){
+		modManager = new ModManager(this);
+		modManager.receptors = [for(i in PlayField.fields) i.members];
+		modManager.registerDefaultModifiers();
+		modManager.registerScriptedModifiers();
+		
 		for (songEvent in PlayState.SONG.events){
 			for (i in 0...songEvent[1].length){
 				var evName:String = songEvent[1][i][0];
