@@ -217,6 +217,8 @@ class ModchartEditor extends MusicBeatState
 		
 		generateSong(PlayState.SONG.song);
 
+		modManager = new ModManager(this);
+		modManager.receptors = [for(i in PlayField.fields) i.members];
 		reloadManager();
 		
 		#if DISCORD_ALLOWED
@@ -1660,8 +1662,7 @@ class ModchartEditor extends MusicBeatState
 	}
 
 	function reloadManager(){
-		modManager = new ModManager(this);
-		modManager.receptors = [for(i in PlayField.fields) i.members];
+		modManager.timeline = new funkin.game.modchart.EventTimeline();
 		modManager.registerDefaultModifiers();
 		modManager.registerScriptedModifiers();
 		

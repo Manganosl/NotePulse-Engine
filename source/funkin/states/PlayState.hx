@@ -1012,6 +1012,8 @@ class PlayState extends MusicBeatState
 		for(field in PlayField.fields){
 			field.forEachAlive(function(strum:StrumNote)
 			{
+				if(strum.alpha == 0 || strum.visible == false) return;
+
 				var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
 				modManager.updateObject(curDecBeat, strum, pos, field.player);
 				strum.modPos.x = pos.x;
@@ -2831,6 +2833,8 @@ class PlayState extends MusicBeatState
 			daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
 
     	daNote.distance = modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed);
+
+		if(daNote.alpha == 0 || daNote.visible == false) return;
 
 		modManager.updateObject(curDecBeat, daNote, pos, pN);
 
