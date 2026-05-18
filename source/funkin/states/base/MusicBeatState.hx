@@ -10,7 +10,7 @@ import sys.io.File;
 import haxe.io.Path;
 import funkin.scripting.LuaUtils;
 import funkin.scripting.lua.FunkinLua;
-import funkin.scripting.HScript;
+import funkin.scripting.FunkinScript;
 #if !flash
 import flixel.addons.display.FlxRuntimeShader;
 #end
@@ -22,14 +22,14 @@ class MusicBeatState extends FlxUIState
 	#if (!flash && sys)
 	public var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();
 	#end
-	public static var globalScript:HScript = null;
+	public static var globalScript:FunkinScript = null;
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
 
 	private var curStep:Int = 0;
 	private var curBeat:Int = 0;
 	#if HSCRIPT_ALLOWED
-	public var hscriptArray:Array<HScript> = [];
+	public var hscriptArray:Array<FunkinScript> = [];
 	public var instancesExclude:Array<String> = [];
 	#end
 
@@ -82,7 +82,7 @@ class MusicBeatState extends FlxUIState
 	}
 
 	public function initHScript(file:String) {
-		var newScript = new HScript(file);
+		var newScript = new FunkinScript(file);
 		if(newScript != null) hscriptArray.push(newScript);
 		return newScript;
 	}
@@ -99,7 +99,7 @@ class MusicBeatState extends FlxUIState
 		var len:Int = hscriptArray.length;
 		if (len < 1) return returnVal;
 		for(i in 0...len) {
-			var script:HScript = hscriptArray[i];
+			var script:FunkinScript = hscriptArray[i];
 			if(script == null || exclusions.contains(script.scriptName)) continue;
 
 			var myValue:Dynamic = null;
@@ -332,7 +332,7 @@ class MusicBeatState extends FlxUIState
 	public function importScript(path:String, absolute:Bool = false) {
 		var scriptPath = ((Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0) ? Paths.mods(Mods.currentModDirectory + '/' + path + (path.endsWith(".hx") ? "" : ".hx")) : Paths.mods(path));
 		try {
-			this.hscriptArray.push(new HScript((absolute ? path : scriptPath)));
+			this.hscriptArray.push(new FunkinScript((absolute ? path : scriptPath)));
 			return true;
 		} catch(e) {
 			FunkinLua.luaTrace('importScript: Path "${(absolute ? path : scriptPath)}" does not exist!', true, false, 0xFFFF0000);

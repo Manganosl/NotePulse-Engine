@@ -47,7 +47,7 @@ import funkin.scripting.*;
 import funkin.scripting.objects.*;
 #else
 import funkin.scripting.LuaUtils;
-import funkin.scripting.HScript;
+import funkin.scripting.FunkinScript;
 #end
 
 #if HSCRIPT_ALLOWED
@@ -1785,8 +1785,8 @@ class PlayState extends MusicBeatState
 						}
 					}
 
-					if (HScript.staticVariables.exists(value1)) {
-						var func = HScript.staticVariables.get(value1);
+					if (FunkinScript.staticVariables.exists(value1)) {
+						var func = FunkinScript.staticVariables.get(value1);
 						if (func != null && Reflect.isFunction(func))
 							Reflect.callMethod(null, func, args);
 					}

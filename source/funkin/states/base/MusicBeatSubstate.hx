@@ -1,7 +1,7 @@
 package funkin.states.base;
 
 import flixel.FlxSubState;
-import funkin.scripting.HScript;
+import funkin.scripting.FunkinScript;
 import funkin.scripting.LuaUtils;
 #if !flash
 import flixel.addons.display.FlxRuntimeShader;
@@ -49,7 +49,7 @@ class MusicBeatSubstate extends FlxSubState
 	}
 
 	public function initHScript(file:String) {
-		var newScript = new HScript(file);
+		var newScript = new FunkinScript(file);
 		if(newScript != null) hscriptArray.push(newScript);
 		return newScript;
 	}
@@ -66,7 +66,7 @@ class MusicBeatSubstate extends FlxSubState
 		var len:Int = hscriptArray.length;
 		if (len < 1) return returnVal;
 		for(i in 0...len) {
-			var script:HScript = hscriptArray[i];
+			var script:FunkinScript = hscriptArray[i];
 			if(script == null || exclusions.contains(script.scriptName)) continue;
 
 			var myValue:Dynamic = null;
@@ -107,7 +107,7 @@ class MusicBeatSubstate extends FlxSubState
 	private var curStep:Int = 0;
 	private var curBeat:Int = 0;
 	#if HSCRIPT_ALLOWED
-	public var hscriptArray:Array<HScript> = [];
+	public var hscriptArray:Array<FunkinScript> = [];
 	public var instancesExclude:Array<String> = [];
 	#end
 
@@ -223,7 +223,7 @@ class MusicBeatSubstate extends FlxSubState
 	public function importScript(path:String, absolute:Bool = false) {
 		var scriptPath = ((Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0) ? Paths.mods(Mods.currentModDirectory + '/' + path + (path.endsWith(".hx") ? "" : ".hx")) : Paths.mods(path));
 		try {
-			this.hscriptArray.push(new HScript((absolute ? path : scriptPath)));
+			this.hscriptArray.push(new FunkinScript((absolute ? path : scriptPath)));
 			return true;
 		} catch(e) {
 			FunkinLua.luaTrace('importScript: Path "${(absolute ? path : scriptPath)}" does not exist!', true, false, 0xFFFF0000);

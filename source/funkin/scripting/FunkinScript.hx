@@ -37,7 +37,7 @@ interface HscriptInterface {
 }
 
 #if HSCRIPT_ALLOWED
-class HScript implements HscriptInterface {
+class FunkinScript implements HscriptInterface {
 
 	/*
 	 * All the classes pre-imported into every haxe script / runHaxeCode.
@@ -172,7 +172,7 @@ class HScript implements HscriptInterface {
 	public var modFolder:Null<String>;
 
 	//Scripts attached to this script. You can make some goofy chains with this.
-	public var subScripts:Array<funkin.scripting.HScript> = [];
+	public var subScripts:Array<funkin.scripting.FunkinScript> = [];
 
 	/**
 	 * Creates a new haxe script instance that runs interpreted haxe code.
@@ -539,7 +539,7 @@ class HScript implements HscriptInterface {
 		var scriptPath = (absolute ? path : Paths.getScriptPath(path, this.modFolder));
 
 		if(#if sys FileSystem.exists(scriptPath) #else Assets.exists(scriptPath) #end) {
-			var hscriptToPush = new HScript(scriptPath, this.getScriptParent(), true, true);
+			var hscriptToPush = new FunkinScript(scriptPath, this.getScriptParent(), true, true);
 			hscriptToPush.call("onScriptImported", [this]);
 			subScripts.push(hscriptToPush);
 			return true;
@@ -627,9 +627,9 @@ class HScript implements HscriptInterface {
 #else
 
 /* Ignore this. It's for if hscript is removed */
-class HScript {
+class FunkinScript {
 	public function new(path:String, ?_parentClass:Dynamic, ?_autoRunScript:Bool, ?_ignoreErrors:Bool) {
-		throw "HScript is not supported on this platform!";
+		throw "FunkinScript is not supported on this platform!";
 	}
 }
 

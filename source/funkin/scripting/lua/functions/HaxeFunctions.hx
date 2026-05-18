@@ -4,9 +4,9 @@ import hscript.Interp;
 
 import funkin.scripting.lua.FunkinLua;
 import funkin.scripting.LuaUtils;
-import funkin.scripting.HScript;
+import funkin.scripting.FunkinScript;
 
-class HaxeFunctions extends HScript {
+class HaxeFunctions extends FunkinScript {
 	#if LUA_ALLOWED
 	public var parentLua:FunkinLua;
 	#else
@@ -28,13 +28,13 @@ class HaxeFunctions extends HScript {
 		if(FlxG.state is PlayState) this.setParent(PlayState.instance);
 		else this.setParent(LuaUtils.getHScriptParent());
 
-		for(key => value in HScript.classes) interp.variables.set(key, value);
+		for(key => value in FunkinScript.classes) interp.variables.set(key, value);
 
 		interp.variables.set('this', this);
 		interp.variables.set('Alphabet', funkin.objects.Alphabet);
 		interp.variables.set('CustomSubstate', funkin.scripting.CustomSubstate);
 
-		HScript.addHScriptExtras(interp, LuaUtils.isPlayStateScript(interp.scriptObject));
+		FunkinScript.addHScriptExtras(interp, LuaUtils.isPlayStateScript(interp.scriptObject));
 
 		if(parent != null) {
 			this.parentLua = parent;
@@ -79,7 +79,7 @@ class HaxeFunctions extends HScript {
 				FunkinLua.luaTrace('${funk.scriptName}:${funk.lastCalledFunction} - $e', false, false, FlxColor.RED);
 			}
 			#else
-			FunkinLua.luaTrace("runHaxeCode: HScript isn't supported on this platform!", false, false, FlxColor.RED);
+			FunkinLua.luaTrace("runHaxeCode: FunkinScript isn't supported on this platform!", false, false, FlxColor.RED);
 			#end
 			return returnVal;
 		});
@@ -97,7 +97,7 @@ class HaxeFunctions extends HScript {
 				FunkinLua.luaTrace('${funk.scriptName}:${funk.lastCalledFunction} - $e', false, false, FlxColor.RED);
 			}
 			#else
-			FunkinLua.luaTrace("runHaxeFunction: HScript isn't supported on this platform!", false, false, FlxColor.RED);
+			FunkinLua.luaTrace("runHaxeFunction: FunkinScript isn't supported on this platform!", false, false, FlxColor.RED);
 			#end
 
 			return null;
@@ -127,7 +127,7 @@ class HaxeFunctions extends HScript {
 			FunkinLua.luaTrace("addHaxeLibrary is deprecated! Import classes using the \"import\" keyword instead!", false, true);
 
 			#else
-			FunkinLua.luaTrace("addHaxeLibrary: HScript isn't supported on this platform!", false, false, FlxColor.RED);
+			FunkinLua.luaTrace("addHaxeLibrary: FunkinScript isn't supported on this platform!", false, false, FlxColor.RED);
 			#end
 		});
 	}

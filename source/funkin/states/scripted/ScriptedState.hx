@@ -1,7 +1,7 @@
 package funkin.states.scripted;
 
 import flixel.util.FlxColor;
-import funkin.scripting.HScript;
+import funkin.scripting.FunkinScript;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.text.FlxText;
 import flixel.FlxG;
@@ -12,7 +12,7 @@ import flixel.FlxBasic;
 class ScriptedState extends MusicBeatState
 {
 	static var lastScriptPath:String = "";
-	public var hscript:HScript = null;
+	public var hscript:FunkinScript = null;
 	private var initialScriptPath:String;
 	public static var instance:ScriptedState;
 

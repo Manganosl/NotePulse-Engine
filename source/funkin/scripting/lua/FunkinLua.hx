@@ -42,7 +42,7 @@ import funkin.substates.GameOverSubstate;
 import funkin.scripting.LuaUtils;
 import funkin.scripting.LuaUtils.LuaTweenOptions;
 #if HSCRIPT_ALLOWED
-import funkin.scripting.HScript;
+import funkin.scripting.FunkinScript;
 #end
 import funkin.scripting.objects.ModchartSprite;
 
@@ -51,6 +51,8 @@ import flixel.input.gamepad.FlxGamepadInputID;
 
 import haxe.Json;
 import haxe.PosInfos;
+
+import funkin.game.modchart.*;
 
 class FunkinLua {
 	public var lua:State = null;
@@ -213,6 +215,56 @@ class FunkinLua {
 				Lua_helper.add_callback(lua, name, func);
 		}
 
+		Lua_helper.add_callback(lua, "setPercent", function(modName:String, val:Float, player:Int=-1)
+		{
+			game.modManager.setPercent(modName, val, player);
+		});
+
+		Lua_helper.add_callback(lua, "addBlankMod", function(modName:String, defaultVal:Float=0, player:Int = -1)
+		{
+			game.modManager.quickRegister(new SubModifier(modName, game.modManager));
+			game.modManager.setValue(modName, defaultVal);
+		});
+
+		Lua_helper.add_callback(lua, "setValue", function(modName:String, val:Float, player:Int = -1)
+		{
+			game.modManager.setValue(modName, val, player);
+		});
+
+		Lua_helper.add_callback(lua, "getPercent", function(modName:String, player:Int)
+		{
+			return game.modManager.getPercent(modName, player);
+		});
+
+		Lua_helper.add_callback(lua, "getValue", function(modName:String, player:Int)
+		{
+			return game.modManager.getValue(modName, player);
+		});
+
+		Lua_helper.add_callback(lua, "queueSet", function(step:Float, modName:String, target:Float, player:Int = -1)
+		{
+			game.modManager.queueSet(step, modName, target, player);
+		});
+
+		Lua_helper.add_callback(lua, "queueSetP", function(step:Float, modName:String, perc:Float, player:Int = -1)
+		{
+			game.modManager.queueSetP(step, modName, perc, player);
+		});
+		
+		Lua_helper.add_callback(lua, "queueEase",
+			function(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1,
+					?startVal:Float) 
+		{
+			game.modManager.queueEase(step, endStep, modName, percent, style, player, startVal);
+		});
+
+		Lua_helper.add_callback(lua, "queueEaseP",
+			function(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1,
+					?startVal:Float)
+			{
+				game.modManager.queueEaseP(step, endStep, modName, percent, style, player, startVal);
+			});
+
 		//
 		Lua_helper.add_callback(lua, "getRunningScripts", function(){
 			var runningScripts:Array<String> = [];
@@ -358,7 +410,7 @@ class FunkinLua {
 			}
 			luaTrace("addHScript: Script doesn't exist!", false, false, FlxColor.RED);
 			#else
-			luaTrace("addHScript: HScript is not supported on this platform!", false, false, FlxColor.RED);
+			luaTrace("addHScript: FunkinScript is not supported on this platform!", false, false, FlxColor.RED);
 			#end
 		});
 		Lua_helper.add_callback(lua, "removeLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) {
@@ -396,7 +448,7 @@ class FunkinLua {
 			luaTrace('removeHScript: Script $luaFile isn\'t running!', false, false, FlxColor.RED);
 			return false;
 			#else
-			luaTrace("removeHScript: HScript is not supported on this platform!", false, false, FlxColor.RED);
+			luaTrace("removeHScript: FunkinScript is not supported on this platform!", false, false, FlxColor.RED);
 			#end
 		});
 

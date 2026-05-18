@@ -6,7 +6,7 @@ import sys.FileSystem;
 
 class GlobalHandler {
 	#if(HSCRIPT_ALLOWED && MODS_ALLOWED)
-	public static var globalHX:HScript;
+	public static var globalHX:FunkinScript;
 	public static var globalHXActive:Bool = false;
 
 	public static function loadGlobalHX(){
@@ -16,7 +16,7 @@ class GlobalHandler {
 
 		var input:String = Paths.mods('${Mods.currentModDirectory}/Global.hx');
 		if (FileSystem.exists(input)) {
-			globalHX = new HScript(input);
+			globalHX = new FunkinScript(input);
 			globalHXActive = true;
 			initGlobalHX();
 			return;

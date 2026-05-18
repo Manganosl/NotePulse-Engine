@@ -1,6 +1,6 @@
 package funkin.game.modchart;
 
-import funkin.scripting.HScript;
+import funkin.scripting.FunkinScript;
 
 class ScriptedModifier extends Modifier {
 	var name:String;
@@ -10,14 +10,14 @@ class ScriptedModifier extends Modifier {
 	var modOrder:Int = DEFAULT;
 	var modType:ModifierType = MISC_MOD;
 	
-	var script:Null<HScript> = null;
+	var script:Null<FunkinScript> = null;
 	
 	public function new(modMgr:ModManager, scriptPath:String, name:String = '')
 	{	
 		this.prefix = "";
 		modName = (this.name = name).toLowerCase();
 		
-		if (Paths.exists(scriptPath)) script = new HScript(scriptPath);
+		if (Paths.exists(scriptPath)) script = new FunkinScript(scriptPath);
 		
 		if (script == null){
 			Log.warn('Modifier script "$name" could not be loaded');
