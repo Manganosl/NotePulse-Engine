@@ -97,21 +97,21 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 
 		var mouse = FlxG.mouse.getPositionInCameraView(camera);
 
-		if(FlxG.mouse.justPressed && FlxG.mouse.overlaps(bg))
+		if(FlxG.mouse.justPressed && FlxG.mouse.overlaps(bg, camera))
 			toggleMenu();
 
 		if(!isOpen) return;
 
-		if(FlxG.mouse.justPressed && !FlxG.mouse.overlaps(panelBG) && !FlxG.mouse.overlaps(bg)){
+		if(FlxG.mouse.justPressed && !FlxG.mouse.overlaps(panelBG, camera) && !FlxG.mouse.overlaps(bg, camera)){
 			closeMenu();
 			return;
 		}
 
 		if(FlxG.mouse.justPressed){
-			if(FlxG.mouse.overlaps(svSquare))
+			if(FlxG.mouse.overlaps(svSquare, camera))
 				dragSV = true;
 
-			if(FlxG.mouse.overlaps(hueBar))
+			if(FlxG.mouse.overlaps(hueBar, camera))
 				dragHue = true;
 		}
 
