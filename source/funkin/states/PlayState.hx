@@ -26,7 +26,7 @@ import funkin.game.cutscenes.DialogueBoxPsych;
 import funkin.states.menus.StoryMenuState;
 import funkin.states.editors.ChartingState;
 import funkin.states.editors.CharacterEditorState;
-import funkin.states.editors.ModchartEditor;
+import funkin.states.editors.ModchartEditorState;
 import funkin.states.scripted.ScriptedSubstate;
 
 import funkin.substates.PauseSubState;
@@ -2677,7 +2677,7 @@ class PlayState extends MusicBeatState
 		if(FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 		#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
-		MusicBeatState.switchState(new ModchartEditor());
+		MusicBeatState.switchState(new ModchartEditorState());
 	}
 
 	//// Characters ////

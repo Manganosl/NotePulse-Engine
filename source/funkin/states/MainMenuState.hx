@@ -366,7 +366,7 @@ class MainMenuState extends MusicBeatState
 			}
 			if(FlxG.keys.justPressed.TAB){
 				selectedSomethin = true;
-				MusicBeatState.switchState(new funkin.states.editors.ModSelector(funkin.states.scripted.ScriptedState, [null]));
+				MusicBeatState.switchState(new funkin.states.editors.ModSelectorState(funkin.states.scripted.ScriptedState, [null]));
 			}
 			#end
 		}

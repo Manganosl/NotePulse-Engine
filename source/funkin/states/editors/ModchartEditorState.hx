@@ -27,7 +27,7 @@ import funkin.states.editors.content.*;
 import funkin.scripting.LuaUtils;
 
 import funkin.game.modchart.*;
-class ModchartEditor extends MusicBeatState
+class ModchartEditorState extends MusicBeatState
 {
 	var modManager:ModManager;
 	var initialCrochet:Float = 0;
@@ -96,7 +96,7 @@ class ModchartEditor extends MusicBeatState
 	var scoreTxt:FlxText;
 	var guitarHeroSustains:Bool = false;
 
-	public static var instance:ModchartEditor;
+	public static var instance:ModchartEditorState;
 
 	private var player:Int;
 

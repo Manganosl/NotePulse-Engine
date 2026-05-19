@@ -11,19 +11,19 @@ class EditorPicker extends MusicBeatSubstate {
 		{
 			name: "Chart Editor",
 			iconShit: "chart",
-			state: funkin.states.editors.ModSelector,
+			state: funkin.states.editors.ModSelectorState,
 			args: [funkin.states.editors.ChartingState]
 		},
 		{
 			name: "Character Editor",
 			iconShit: "character",
-			state: funkin.states.editors.ModSelector,
+			state: funkin.states.editors.ModSelectorState,
 			args: [funkin.states.editors.CharacterEditorState, [null, false]]
 		},
 		{
 			name: "Week Editor",
 			iconShit: "alphabet",
-			state: funkin.states.editors.ModSelector,
+			state: funkin.states.editors.ModSelectorState,
 			args: [funkin.states.editors.WeekEditorState]
 		},
 		{
@@ -35,25 +35,25 @@ class EditorPicker extends MusicBeatSubstate {
 		{
 			name: "Note Splash Debug",
 			iconShit: "noteskin",
-			state: funkin.states.editors.ModSelector,
+			state: funkin.states.editors.ModSelectorState,
 			args: [funkin.states.editors.NoteSplashDebugState]
 		},
 		{
 			name: "Stage Editor",
 			iconShit: "stage",
-			state: funkin.states.editors.ModSelector,
+			state: funkin.states.editors.ModSelectorState,
 			args: [funkin.states.editors.StageEditorState]
 		},
 		{
 			name: "Modchart Editor",
 			iconShit: "modchart",
-			state: funkin.states.editors.ModSelector,
-			args: [funkin.states.editors.ModchartEditor]
+			state: funkin.states.editors.ModSelectorState,
+			args: [funkin.states.editors.ModchartEditorState]
 		},
 		{
 			name: "Mod Config Editor",
 			iconShit: "debugOptions",
-			state: funkin.states.editors.ModSelector,
+			state: funkin.states.editors.ModSelectorState,
 			args: [funkin.states.editors.content.Prompt.BasePrompt]
 		}
 	];

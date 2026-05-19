@@ -5,6 +5,7 @@ import funkin.backend.ExtraKeysHandler;
 import funkin.states.init.ScaleSimulationState;
 import funkin.data.Highscore;
 import funkin.states.menus.TitleState;
+import funkin.states.scripted.ScriptedState;
 import funkin.states.init.OutdatedState;
 import funkin.backend.utils.helpers.FunkinRatioScaleMode;
 import flixel.addons.transition.FlxTransitionableState;
@@ -73,7 +74,10 @@ class Init extends FlxState {
 	    	FlxG.switchState(new OutdatedState());
 	    } else {
 			FlxTransitionableState.skipNextTransOut = true;
-	    	FlxG.switchState(new TitleState());
+			if(Mods.currentLoadedMod != "" && Mods.modPack != null && Mods.modPack.forceStates && Mods.modPack.titleState != null && Mods.modPack.titleState != "")
+	    		FlxG.switchState(new ScriptedState(Mods.modPack.titleState));
+			else
+				FlxG.switchState(new TitleState());
 	    }
     }
 

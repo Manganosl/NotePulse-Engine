@@ -247,8 +247,17 @@ class Mods {
 		
 		#if MODS_ALLOWED
 		var list:Array<String> = Mods.parseList().enabled;
-		if(list != null && list[0] != null)
+		if(list != null && list[0] != null){
+			for(mod in list){
+				Mods.currentLoadedMod = mod;
+				if(modPack != null && modPack.forceStates){
+					Mods.currentModDirectory = mod;
+					return;
+				}
+			}
+			Mods.currentLoadedMod = "";
 			Mods.currentModDirectory = list[0];
+		}
 		#end
 	}
 }
