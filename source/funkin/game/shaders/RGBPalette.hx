@@ -20,8 +20,8 @@ class RGBPalette
     public var angleX(default, set):Float;
     public var angleY(default, set):Float;
 
-	public var pivotX(default, set):Float;
-	public var pivotY(default, set):Float;
+    public var pivotX(default, set):Float;
+    public var pivotY(default, set):Float;
 
     public function copyValues(tempShader:RGBPalette)
     {
@@ -32,17 +32,16 @@ class RGBPalette
                 shader.r.value[i] = tempShader.shader.r.value[i];
                 shader.g.value[i] = tempShader.shader.g.value[i];
                 shader.b.value[i] = tempShader.shader.b.value[i];
-                shader.pivot.value[i] = tempShader.shader.pivot.value[i];
             }
-            shader.mult.value[0] = tempShader.shader.mult.value[0];
-            shader.u_alpha.value[0] = tempShader.shader.u_alpha.value[0];
-            shader.u_flash.value[0] = tempShader.shader.u_flash.value[0];
+            shader.mult.value[0]      = tempShader.shader.mult.value[0];
+            shader.u_alpha.value[0]   = tempShader.shader.u_alpha.value[0];
+            shader.u_flash.value[0]   = tempShader.shader.u_flash.value[0];
             shader.u_enabled.value[0] = tempShader.shader.u_enabled.value[0];
-            shader.angleX.value[0] = tempShader.shader.angleX.value[0];
-            shader.angleY.value[0] = tempShader.shader.angleY.value[0];
-            shader.pivot.value[0] = tempShader.shader.pivot.value[0];
-            shader.pivot.value[1] = tempShader.shader.pivot.value[1];
-            shader.pivot.value[2] = tempShader.shader.pivot.value[2];
+
+            shader.cosX.value[0]      = tempShader.shader.cosX.value[0];
+            shader.cosY.value[0]      = tempShader.shader.cosY.value[0];
+            shader.pivot.value[0]     = tempShader.shader.pivot.value[0];
+            shader.pivot.value[1]     = tempShader.shader.pivot.value[1];
         }
         else shader.mult.value[0] = 0.0;
     }
@@ -95,14 +94,23 @@ class RGBPalette
         return pivotY;
     }
     
-    function set_enabled(value:Bool):Bool {
+    private function set_enabled(value:Bool):Bool {
         enabled = value;
         shader.u_enabled.value = [value];
         return enabled;
     }
 
-    private function set_angleX(v:Float) { angleX = v; shader.angleX.value = [v]; return v; }
-    private function set_angleY(v:Float) { angleY = v; shader.angleY.value = [v]; return v; }
+    private function set_angleX(v:Float):Float {
+        angleX = v;
+        shader.cosX.value = [Math.abs(Math.cos(v))];
+        return v;
+    }
+
+    private function set_angleY(v:Float):Float {
+        angleY = v;
+        shader.cosY.value = [Math.abs(Math.cos(v))];
+        return v;
+    }
     
     public function setColors(colors:Array<FlxColor>) {
         while (colors.length < 3) colors.push(FlxColor.WHITE);
@@ -131,8 +139,8 @@ class RGBShaderReference
     public var angleX(default, set):Float;
     public var angleY(default, set):Float;
 
-	public var pivotX(default, set):Float;
-	public var pivotY(default, set):Float;
+    public var pivotX(default, set):Float;
+    public var pivotY(default, set):Float;
     
     public var shader:FlxShader;
     public var parent:RGBPalette;
@@ -156,17 +164,18 @@ class RGBShaderReference
         }
     }
     
-    private function set_r(value:FlxColor) { if (allowNew && value != _original.r) cloneOriginal(); return (r = parent.r = value); }
-    private function set_g(value:FlxColor) { if (allowNew && value != _original.g) cloneOriginal(); return (g = parent.g = value); }
-    private function set_b(value:FlxColor) { if (allowNew && value != _original.b) cloneOriginal(); return (b = parent.b = value); }
-    private function set_mult(value:Float) { if (allowNew && value != _original.mult) cloneOriginal(); return (mult = parent.mult = value); }
+    private function set_r(value:FlxColor)      { if (allowNew && value != _original.r)         cloneOriginal(); return (r = parent.r = value); }
+    private function set_g(value:FlxColor)      { if (allowNew && value != _original.g)         cloneOriginal(); return (g = parent.g = value); }
+    private function set_b(value:FlxColor)      { if (allowNew && value != _original.b)         cloneOriginal(); return (b = parent.b = value); }
+    private function set_mult(value:Float)      { if (allowNew && value != _original.mult)      cloneOriginal(); return (mult = parent.mult = value); }
     private function set_alphaMult(value:Float) { if (allowNew && value != _original.alphaMult) cloneOriginal(); return (alphaMult = parent.alphaMult = value); }
-    private function set_flash(value:Float) { if (allowNew && value != _original.flash) cloneOriginal(); return (flash = parent.flash = value); }
-    private function set_enabled(value:Bool) { if (allowNew && value != _original.enabled) cloneOriginal(); return (enabled = parent.enabled = value); }
-    private function set_angleX(value:Float) { if (allowNew && value != _original.angleX) cloneOriginal(); return (angleX = parent.angleX = value); }
-    private function set_angleY(value:Float) { if (allowNew && value != _original.angleY) cloneOriginal(); return (angleY = parent.angleY = value); }
-    private function set_pivotX(value:Float) { if (allowNew && value != _original.pivotX) cloneOriginal(); return (pivotX = parent.pivotX = value); }
-    private function set_pivotY(value:Float) { if (allowNew && value != _original.pivotY) cloneOriginal(); return (pivotY = parent.pivotY = value); }
+    private function set_flash(value:Float)     { if (allowNew && value != _original.flash)     cloneOriginal(); return (flash = parent.flash = value); }
+    private function set_enabled(value:Bool)    { if (allowNew && value != _original.enabled)   cloneOriginal(); return (enabled = parent.enabled = value); }
+    private function set_angleX(value:Float)    { if (allowNew && value != _original.angleX)    cloneOriginal(); return (angleX = parent.angleX = value); }
+    private function set_angleY(value:Float)    { if (allowNew && value != _original.angleY)    cloneOriginal(); return (angleY = parent.angleY = value); }
+    private function set_pivotX(value:Float)    { if (allowNew && value != _original.pivotX)    cloneOriginal(); return (pivotX = parent.pivotX = value); }
+    private function set_pivotY(value:Float)    { if (allowNew && value != _original.pivotY)    cloneOriginal(); return (pivotY = parent.pivotY = value); }
+
     public function setColors(colors:Array<FlxColor>) {
         r = colors[0]; g = colors[1]; b = colors[2];
         colorArray = colors;
@@ -188,31 +197,19 @@ class RGBPaletteShader extends FlxShader
     @:glVertexHeader('
         #pragma header
 
-        uniform float angleX;
-        uniform float angleY;
-        uniform vec3 pivot;
+        uniform float cosX;
+        uniform float cosY;
+        uniform vec2 pivot;
 
         varying vec2 vTexCoord;
     ')
     @:glVertexBody('
         vec4 pos = openfl_Position;
 
-        float cosX = abs(cos(angleX));
-        float cosY = abs(cos(angleY));
-
-        mat2 rotX = mat2(
-            1.0, 0.0,
-            0.0, cosX
-        );
-
-        mat2 rotY = mat2(
-            cosY, 0.0,
-            0.0, 1.0
-        );
-
-        vec2 centered = pos.xy - pivot.xy;
-        centered = rotY * rotX * centered;
-        pos.xy = centered + pivot.xy;
+        vec2 centered = pos.xy - pivot;
+        centered.y *= cosX;
+        centered.x *= cosY;
+        pos.xy = centered + pivot;
 
         gl_Position = openfl_Matrix * pos;
         vTexCoord = openfl_TextureCoordv;
@@ -259,21 +256,21 @@ class RGBPaletteShader extends FlxShader
             gl_FragColor = texOutput;
         }
     ')
-	
+
     public function new()
     {
         super();
 
-        this.r.value = [1, 0, 0];
-        this.g.value = [0, 1, 0];
-        this.b.value = [0, 0, 1];
-        this.mult.value = [1];
+        this.r.value       = [1, 0, 0];
+        this.g.value       = [0, 1, 0];
+        this.b.value       = [0, 0, 1];
+        this.mult.value    = [1];
         this.u_alpha.value = [1];
         this.u_flash.value = [0];
         this.u_enabled.value = [true];
 
-        this.angleX.value = [0];
-        this.angleY.value = [0];
-        this.pivot.value = [0, 0, 0];
+        this.cosX.value  = [1.0];
+        this.cosY.value  = [1.0];
+        this.pivot.value = [0.0, 0.0];
     }
 }
