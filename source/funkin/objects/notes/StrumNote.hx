@@ -233,9 +233,6 @@ class StrumNote extends FlxSkewedSprite {
 				if (sustainSplash.animation.curAnim.name != "splash" && animation.curAnim.name == "static" && !cpuControlled)
 					sustainSplash.hide(true);  // You may ask, why 2 times? Well, BPM changes fucks with everything and I dont know why
 
-		rgbShader.pivotX = (FlxG.width/2) - (x + width/2);
-        rgbShader.pivotY = (FlxG.height/2) - (y + height/2);
-
 		super.update(elapsed);
 	}
 

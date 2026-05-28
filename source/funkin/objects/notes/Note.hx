@@ -618,13 +618,8 @@ class Note extends FlxSkewedSprite {
 		}
 
 		if (tooLate && !inEditor)
-		{
 			if (alpha > 0.3)
 				alpha = 0.3;
-		}
-
-		rgbShader.pivotX = (FlxG.width/2) - (x + width/2);
-        rgbShader.pivotY = (FlxG.height/2) - (y + height/2);
 	}
 
 	public function clip(strumNote:StrumNote, isDownScroll:Bool)

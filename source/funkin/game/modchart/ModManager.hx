@@ -72,13 +72,14 @@ class ModManager {
     public var modArray:Array<Modifier> = [];
 
     public var activeMods:Array<Array<String>> = [[], []]; // by player
+
+	private var activeModsDirty:Array<Bool> = [false, false];
     
     inline public function quickRegister(mod:Modifier)
         registerMod(mod.getName(), mod);
 
     public function registerMod(modName:String, mod:Modifier, ?registerSubmods = true){
         register.set(modName, mod);
-		//registerByType.get(mod.getModType()).set(modName, mod);
 		switch (mod.getModType()){
 			case NOTE_MOD:
 				notemodRegister.set(modName, mod);
@@ -143,6 +144,21 @@ class ModManager {
 		}
 	}
 
+	private function flushActiveMods(player:Int){
+		if (activeModsDirty[player]){
+			activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
+			activeModsDirty[player] = false;
+		}
+	}
+
+	private function shouldKeepParentActive(parent:Modifier, player:Int):Bool {
+		if (parent.shouldExecute(player, parent.getValue(player))) return true;
+		for (subname => submod in parent.submods){
+			if (submod.shouldExecute(player, submod.getValue(player))) return true;
+		}
+		return false;
+	}
+
 	public function setValue(modName:String, val:Float, player:Int=-1){
 		player = getP(player);
 		if (player == -1)
@@ -158,7 +174,7 @@ class ModManager {
 				Log.warn("The modifier " + modName + " cannot be set as it's null");
 				return;
 			}
-			var mod = daMod.parent==null?daMod:daMod.parent;
+			var mod = daMod.parent == null ? daMod : daMod.parent;
 			var name = mod.getName();
             // optimization shit!! :)
             // thanks 4mbr0s3 for giving an alternative way to do all of this cus andromeda has smth similar in Flexy but like
@@ -170,47 +186,39 @@ class ModManager {
 			// so if you turn a submod off
 			// it turns the parent mod off, too, when it shouldnt
 			// so what I need to do is like, check other submods before removing the parent
-            
-			if (activeMods[player] == null)
-				activeMods[player]=[];
 
-			register.get(modName).setValue(val, player);
-			
+			if (activeMods[player] == null)
+				activeMods[player] = [];
+
+			daMod.setValue(val, player);
+
 			if (!activeMods[player].contains(name) && mod.shouldExecute(player, val)){
 				if (daMod.getName() != name)
 					activeMods[player].push(daMod.getName());
 				activeMods[player].push(name);
-			}else if (!mod.shouldExecute(player, val)){
+			} else if (!mod.shouldExecute(player, val)){
 
 				// there is prob a better way to do this
 				// i just dont know it
 				var modParent = daMod.parent;
-				if(modParent==null){
+				if (modParent == null){
 					for (name => mod in daMod.submods)
 					{
 						modParent = daMod; // because if this gets called at all, there's atleast 1 submod!!
 						break;
 					}
 				}
-				if(daMod!=modParent)
+				if (daMod != modParent)
 					activeMods[player].remove(daMod.getName());
-				if (modParent!=null){
-					if (modParent.shouldExecute(player, modParent.getValue(player))){
-						activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
-						return;
+				if (modParent != null){
+					if (!shouldKeepParentActive(modParent, player)){
+						activeMods[player].remove(modParent.getName());
 					}
-					for (subname => submod in modParent.submods){
-						if(submod.shouldExecute(player, submod.getValue(player))){
-							activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
-							return;
-						}
-					}
-					activeMods[player].remove(modParent.getName());
-				}else
+				} else
 					activeMods[player].remove(daMod.getName());
 			}
 
-			activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
+			activeModsDirty[player] = true;
 		}
     }
 
@@ -258,6 +266,7 @@ class ModManager {
 		
 		if (activeMods[player] != null)
 		{
+			flushActiveMods(player);
 			for (name in activeMods[player])
 			{
 				var mod:Modifier = notemodRegister.get(name);
@@ -265,8 +274,6 @@ class ModManager {
 				
 				if (obj is Note) mod.updateNote(beat, cast obj, pos, player);
 				else if (obj is StrumNote) mod.updateReceptor(beat, cast obj, pos, player);
-				//else if (obj is NoteSplash) mod.updateNoteSplash(beat, cast obj, pos, player);
-				//else if (obj is SustainSplash) mod.updateSustainSplash(beat, cast obj, pos, player);
 			}
 		}
 		
@@ -287,22 +294,22 @@ class ModManager {
 	
 	public function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, ?exclusions:Array<String>, ?pos:Vector3):Vector3
 	{
-		if(exclusions==null)exclusions=[]; // since [] cant be a default value for.. some reason?? "its not constant!!" kys haxe
 		if (pos == null)
 			pos = new Vector3();
 
-		if (!obj.active)return pos;
+		if (!obj.active) return pos;
 
 		pos.x = getBaseX(data, player);
 		pos.y = PlayField.fields[player].members[data].y + diff;
 		pos.z = 0;
 
-		if(activeMods[player] != null){
+		if (activeMods[player] != null){
+			flushActiveMods(player);
 			for (name in activeMods[player]){
-				if (exclusions.contains(name))continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
+				if (exclusions != null && exclusions.contains(name)) continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
 				var mod:Modifier = notemodRegister.get(name);
-				if (mod==null)continue;
-				if(!obj.active)continue;
+				if (mod == null) continue;
+				if (!obj.active) continue;
 				pos = mod.getPos(time, diff, tDiff, beat, pos, data, player, obj);
 			}
 		}
@@ -319,6 +326,8 @@ class ModManager {
 				var newEase = Reflect.getProperty(FlxEase, style);
 				if (newEase != null)
 					easeFunc = newEase;
+			} catch(e) {
+				Log.warn('Unknown ease style: $style');
 			}
 			timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this));
 		}
