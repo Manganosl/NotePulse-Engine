@@ -17,6 +17,11 @@ class FlxSkewedSprite extends FlxSprite
 	public var skew(default, null):FlxPoint = FlxPoint.get();
 
 	/**
+	 * Skew offset mainly added for SkewModifier on modchart but can be used for other purposes.
+	 */
+	public var skewOffset(default, null):FlxPoint = FlxPoint.get();
+
+	/**
 	 * Tranformation matrix for this sprite.
 	 * Used only when matrixExposed is set to true
 	 */
@@ -41,6 +46,7 @@ class FlxSkewedSprite extends FlxSprite
 	override public function destroy():Void
 	{
 		skew = FlxDestroyUtil.put(skew);
+		skewOffset = FlxDestroyUtil.put(skewOffset);
 		_skewMatrix = null;
 		transformMatrix = null;
 
@@ -93,10 +99,10 @@ class FlxSkewedSprite extends FlxSprite
 	{
 		_skewMatrix.identity();
 
-		if (skew.x != 0 || skew.y != 0)
+		if (skew.x != 0 || skew.y != 0 || skewOffset.x != 0 || skewOffset.y != 0)
 		{
-			_skewMatrix.b = Math.tan(skew.y * FlxAngle.TO_RAD);
-			_skewMatrix.c = Math.tan(skew.x * FlxAngle.TO_RAD);
+			_skewMatrix.b = Math.tan((skew.y + skewOffset.y) * FlxAngle.TO_RAD);
+			_skewMatrix.c = Math.tan((skew.x + skewOffset.x) * FlxAngle.TO_RAD);
 		}
 	}
 
@@ -104,7 +110,7 @@ class FlxSkewedSprite extends FlxSprite
 	{
 		if (FlxG.renderBlit)
 		{
-			return super.isSimpleRender(camera) && (skew.x == 0) && (skew.y == 0) && !matrixExposed;
+			return super.isSimpleRender(camera) && (skew.x == 0) && (skew.y == 0) && (skewOffset.x == 0) && (skewOffset.y == 0) && !matrixExposed;
 		}
 		else
 		{

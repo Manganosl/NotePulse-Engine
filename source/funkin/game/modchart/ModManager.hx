@@ -22,6 +22,7 @@ class ModManager {
 			AlphaModifier,
 			ReceptorScrollModifier, 
 			ScaleModifier, 
+			SkewModifier, 
 			ConfusionModifier, 
 			OpponentModifier, 
 			TransformModifier, 

@@ -104,7 +104,7 @@ class ScaleModifier extends NoteModifier {
 
     override function getSubmods() {
         var subMods:Array<String> = ["mini", "zoom", "squish", "stretch", "tinyX", "tinyY", "scale", "scaleX", "scaleY"];
-        for (i in 0...4) {
+        for (i in 0...PlayState.SONG.mania) {
             subMods.push('tiny${i}X');
             subMods.push('tiny${i}Y');
             subMods.push('squish${i}');
