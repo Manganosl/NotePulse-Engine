@@ -38,6 +38,9 @@ class ModManager {
 		quickRegister(new LocalRotateModifier(this, 'local'));
 		quickRegister(new SubModifier("noteSpawnTime", this));
 		setValue("noteSpawnTime", 2000);
+		setValue("scale", 1);
+		setValue("scaleX", 1);
+		setValue("scaleY", 1);
 		setValue("xmod", 1);
 		for(i in 0...4)
 			setValue('xmod$i', 1);
