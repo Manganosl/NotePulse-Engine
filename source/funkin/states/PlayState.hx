@@ -726,6 +726,7 @@ class PlayState extends MusicBeatState
 		noteGroup.add(playerStrums);
 		if(SONG.lanes >= 3){
 			gfStrums = new PlayField();
+			noteGroup.add(gfStrums);
 			for(lane in 0...(SONG.lanes-3)){
 				extraStrums[lane] = new PlayField();
 				noteGroup.add(extraStrums[lane]);
