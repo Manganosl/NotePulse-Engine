@@ -853,6 +853,7 @@ class PlayState extends MusicBeatState
 		modManager.registerDefaultModifiers();
 		modManager.registerScriptedModifiers();
 		for(func in modManagerEvArray) func();
+
 		callOnScripts('initModchart');
 
 		add(uiGroup);
@@ -1322,7 +1323,7 @@ class PlayState extends MusicBeatState
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 				final fieldID:Int = songNotes[4];
 				swagNote.mustPress = (fieldID == 0 ? false : (fieldID == 1 ? true : false));
-				swagNote.playField = PlayField.fields[fieldID];
+				if(PlayField.fields[fieldID] != null) swagNote.playField = PlayField.fields[fieldID];
 				swagNote.gfStrum = (songNotes[4] == 2 ? true : false);
 				if(swagNote.gfStrum) swagNote.mustPress = false;
 				swagNote.characters = (fieldID == 0 ? [dad] : (fieldID == 1 ? [boyfriend] : [gf]));
@@ -1466,6 +1467,7 @@ class PlayState extends MusicBeatState
 				for(strums in extraStrums){
 					for(i in 0...strums.length){
 						strums.members[i].x = gfStrums.members[i].x;
+						strums.members[i].y = gfStrums.members[i].y;
 					}
 				}
 			}
@@ -2921,8 +2923,7 @@ class PlayState extends MusicBeatState
 		var strumLineY:Float = 50; // Now we invert reverse mod
 
 		var playField:PlayField = null;
-		switch (player)
-		{
+		switch (player){
 			case 0: playField = opponentStrums;
 			case 1: playField = playerStrums;
 			case 2: playField = gfStrums;
@@ -2936,8 +2937,7 @@ class PlayState extends MusicBeatState
 			if (babyArrow == null) continue;
 
 			var targetAlpha:Float = 1;
-			if (player < 1)
-			{
+			if (player < 1){
 				if(!ClientPrefs.data.opponentStrums) targetAlpha = 0;
 				else if(ClientPrefs.data.middleScroll) targetAlpha = 0.35;
 			}
