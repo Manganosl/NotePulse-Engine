@@ -2837,6 +2837,8 @@ class PlayState extends MusicBeatState
 
     	daNote.distance = modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed);
 
+		if(daNote.copyAlpha) daNote.alpha = daNote.strum.alpha;
+
 		if(daNote.alpha == 0 || daNote.visible == false) return;
 
 		modManager.updateObject(curDecBeat, daNote, pos, pN);
