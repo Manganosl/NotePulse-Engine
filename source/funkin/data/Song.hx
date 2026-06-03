@@ -145,7 +145,7 @@ class Song
         }
 
         if (songJson.holdSubdivisions == null){
-            songJson.holdSubdivisions = 1;
+            songJson.holdSubdivisions = 2;
         }
 
         if (convertedChart && Std.is(songJson.notes, Array)) {
