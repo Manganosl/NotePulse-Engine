@@ -132,7 +132,7 @@ class ModSelectorState extends MusicBeatState {
 		}
 
 		if (controls.ACCEPT) onAccept();
-		if (controls.BACK)   onBack();
+		if (controls.BACK) onBack();
 	}
 
 	function onAccept() {

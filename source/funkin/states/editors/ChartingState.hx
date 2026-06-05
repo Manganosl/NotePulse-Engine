@@ -1238,6 +1238,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						var lane:Int = note.songData[1];
 
 						note.changeNoteData(lane+diff);
+						note.setSustainLength(susLengthStepper.value, Conductor.stepCrochet, curZoom);
 
 						positionNoteXByData(note);
 					}
@@ -1248,23 +1249,23 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				{
 					FlxG.sound.play(Paths.sound("chartingSounds/stretchSNAP_UI"));
 					var diff:Float = dummyArrow.y - movingNotesLastY;
-					var curSecRow:Int = 0;
 					for (note in movingNotes)
 					{
 						if(note == null) continue;
 
 						note.chartY += diff;
 						var row:Float = (note.chartY / GRID_SIZE) * curZoom;
-						while(curSecRow + 1 < cachedSectionRow.length && cachedSectionRow[curSecRow] <= row)
+						var noteSecRow:Int = 0;
+						while(noteSecRow + 1 < cachedSectionRow.length && cachedSectionRow[noteSecRow + 1] <= row)
 						{
-							curSecRow++;
+							noteSecRow++;
 						}
 
-						note.setStrumTime(Math.max(-5000, note.strumTime + (diff * cachedSectionCrochets[curSecRow] / 4) / GRID_SIZE * curZoom));
-						positionNoteYOnTime(note, curSecRow);
+						note.setStrumTime(Math.max(-5000, note.strumTime + (diff * cachedSectionCrochets[noteSecRow] / 4) / GRID_SIZE * curZoom));
+						positionNoteYOnTime(note, noteSecRow);
 						
 						if(!note.isEvent && note.hasSustain)
-							note.updateSustainToZoom(cachedSectionCrochets[curSecRow] / 4, curZoom);
+							note.updateSustainToZoom(cachedSectionCrochets[noteSecRow] / 4, curZoom);
 						
 						if(note.isEvent) cast (note, EventMetaNote).updateEventText();
 					}
@@ -2378,7 +2379,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		{
 			if(note != null && curSecFilter(note))
 			{
-				if(!firstNote) sectionFirstNoteID = num;
+				if(!firstNote) { sectionFirstNoteID = num; firstNote = true; }
 				curRenderedNotes.add(note);
 				note.alpha = (note.strumTime >= Conductor.songPosition) ? 1 : 0.6;
 				if(note.hasSustain) note.updateSustainToZoom(cachedSectionCrochets[curSec] / 4, curZoom);
@@ -2391,7 +2392,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			{
 				if(event != null && curSecFilter(event))
 				{
-					if(!firstEvent) sectionFirstEventID = num;
+					if(!firstEvent) { sectionFirstEventID = num; firstEvent = true; }
 					curRenderedNotes.add(event);
 					event.alpha = (event.strumTime >= Conductor.songPosition) ? 1 : 0.6;
 					event.eventText.visible = true;
@@ -2417,7 +2418,16 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				{
 					behindRenderedNotes.add(note);
 					note.alpha = 0.4;
-					if(note.hasSustain) note.updateSustainToZoom(cachedSectionCrochets[curSec] / 4, curZoom);
+					if(note.hasSustain)
+					{
+						var noteSec:Int = curSec;
+						if(prevGridBg.visible && note.strumTime >= prevMinTime && note.strumTime < prevMaxTime)
+							noteSec = curSec - 1;
+						else if(nextGridBg.visible && note.strumTime >= nextMinTime && note.strumTime < nextMaxTime)
+							noteSec = curSec + 1;
+						noteSec = Std.int(FlxMath.bound(noteSec, 0, cachedSectionCrochets.length - 1));
+						note.updateSustainToZoom(cachedSectionCrochets[noteSec] / 4, curZoom);
+					}
 				}
 
 				if(SHOW_EVENT_COLUMN)
@@ -2435,7 +2445,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	function getMinNoteTime(sec:Int)
 	{
-		var minTime:Float = Math.NEGATIVE_INFINITY;
+		var minTime:Float = 0;
 		if(sec > 0)
 			minTime = cachedSectionTimes[sec];
 		return minTime;
@@ -2764,7 +2774,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		var modifierLabelText = new FlxText(modifierInput.x, modifierInput.y - 15, 80, 'Modifier:');
 
-		actionsDropdown = new PsychUIDropDownMenu(posX, posY, ["Add Modifier", "Set", "Ease", "EaseAdd", "SetAdd"], function(index:Int, name:String){
+		actionsDropdown = new PsychUIDropDownMenu(posX, posY, ["Set", "Ease"], function(index:Int, name:String){
 			updateModEvV1();
 		});
 

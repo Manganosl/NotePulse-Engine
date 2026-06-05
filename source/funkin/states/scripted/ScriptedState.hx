@@ -20,15 +20,14 @@ class ScriptedState extends MusicBeatState
 
 	public function new(?scriptPath:String = null, ?isCode:Bool = false)
 	{
-		lastScriptPath = scriptPath;
+		if(scriptPath != null) lastScriptPath = scriptPath;
 		instance = this;
 		super();
 		this.initialScriptPath = Paths.modState(scriptPath != null ? scriptPath : lastScriptPath);
 	}
 
 	override public function create():Void {
-		if (initialScriptPath != null)
-		{
+		if (initialScriptPath != null){
 			startHScript(initialScriptPath);
 		}
 
@@ -97,8 +96,7 @@ class ScriptedState extends MusicBeatState
 
 	#if HSCRIPT_ALLOWED
 	override public function insert(pos:Int, obj:flixel.FlxBasic):flixel.FlxBasic {   // Just why...
-		super.insert(pos, obj);
-		return obj;
+		return super.insert(pos, obj);
 	}
 	#end
 }

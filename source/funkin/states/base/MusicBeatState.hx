@@ -239,20 +239,19 @@ class MusicBeatState extends FlxUIState
 
 	public static function switchState(nextState:FlxState = null) {
 		if(nextState == null) nextState = FlxG.state;
-		if(nextState == FlxG.state)
-		{
+		if(nextState == FlxG.state){
 			resetState();
 			return;
 		}
 
 		if(Mods.modPack != null){
-			if(Mods.modPack.titleState != null && nextState is funkin.states.menus.TitleState)
+			if((Mods.modPack.titleState != null && Mods.modPack.titleState != "") && nextState is funkin.states.menus.TitleState)
 				nextState = new ScriptedState(Mods.modPack.titleState);
-			if(Mods.modPack.mainMenuState != null && nextState is funkin.states.MainMenuState)
+			if((Mods.modPack.mainMenuState != null && Mods.modPack.mainMenuState != "") && nextState is funkin.states.MainMenuState)
 				nextState = new ScriptedState(Mods.modPack.mainMenuState);
-			if(Mods.modPack.storyMenuState != null && nextState is funkin.states.menus.StoryMenuState)
+			if((Mods.modPack.storyMenuState != null && Mods.modPack.storyMenuState != "") && nextState is funkin.states.menus.StoryMenuState)
 				nextState = new ScriptedState(Mods.modPack.storyMenuState);
-			if(Mods.modPack.freeplayMenuState != null && nextState is funkin.states.menus.FreeplayState)
+			if((Mods.modPack.freeplayMenuState != null && Mods.modPack.freeplayMenuState != "") && nextState is funkin.states.menus.FreeplayState)
 				nextState = new ScriptedState(Mods.modPack.freeplayMenuState);
 		}
 		if(FlxTransitionableState.skipNextTransIn) FlxG.switchState(nextState);

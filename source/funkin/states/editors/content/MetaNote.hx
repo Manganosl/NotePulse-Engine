@@ -174,6 +174,8 @@ class MetaNote extends Note {
 
         if (Note.globalRgbShaders.contains(rgbShader.parent))
             rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(noteData, PlayState.SONG.mania));
+        if(sustain != null && Note.globalRgbShaders.contains(sustain.rgbShader.parent))
+            sustain.rgbShader = new RGBShaderReference(sustain, Note.initializeGlobalRGBShader(noteData, PlayState.SONG.mania));
 
         animation.play(Note.colArray[this.noteData % Note.colArray.length] + "Scroll");
         updateHitbox();
@@ -325,12 +327,6 @@ class EventMetaNote extends MetaNote
                 loadGraphic(Paths.image('editors/events/Modcharting/set'));
             } else if(name == "ease"){
                 loadGraphic(Paths.image('editors/events/Modcharting/ease'));
-            } else if(name == "add modifier"){
-                loadGraphic(Paths.image('editors/events/Modcharting/addMod'));
-            } else if(name == "easeadd"){
-                loadGraphic(Paths.image('editors/events/Modcharting/easeAdd'));
-            } else if(name == "setadd"){
-                loadGraphic(Paths.image('editors/events/Modcharting/setAdd'));
             } else { // Failsafe
                 loadGraphic(Paths.image('editors/eventArrow'));
             }
