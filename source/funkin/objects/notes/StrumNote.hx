@@ -236,11 +236,6 @@ class StrumNote extends FlxSkewedSprite {
 		super.update(elapsed);
 	}
 
-	override private function set_y(valor:Float):Float {
-    	if(valor != y) trace(valor + " - " + haxe.CallStack.toString(haxe.CallStack.callStack()));
-		return super.set_y(valor);
-	}
-
 	public function playAnim(anim:String, ?force:Bool = false) {
 		animation.play(anim, force);
 		if(animation.curAnim != null)

@@ -575,7 +575,7 @@ class FlxObject extends FlxBasic
 	/**
 	 * Y position of the upper left corner of this object in world space.
 	 */
-	@:isVar public var y(default, set):Float = 0;
+	public var y(default, set):Float = 0;
 
 	/**
 	 * The width of this object's hitbox. For sprites, use `offset` to control the hitbox position.
