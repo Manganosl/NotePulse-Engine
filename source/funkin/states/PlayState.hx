@@ -1012,8 +1012,7 @@ class PlayState extends MusicBeatState
 		}
 
 		for(field in PlayField.fields){
-			field.forEachAlive(function(strum:StrumNote)
-			{
+			field.forEachAlive(function(strum:StrumNote){
 				if(strum.alpha == 0 || strum.visible == false) return;
 
 				var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);

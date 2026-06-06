@@ -376,18 +376,37 @@ class ModSelectorState extends MusicBeatState {
 	}
 
 	function promptNewSong() {
-		openSubState(new NewJson("Enter new song name (No spaces)", function(songName) {
-			openSubState(new NewJson("Enter new difficulty name (No spaces)", function(diffName) {
-				saveLevel(makeBlankSong(songName), true, diffName);
-				openSubState(new GoodBye());
+		openSubState(new BasePrompt(FlxG.width / 2, 300, "Enter new song name (No spaces)", function(state:BasePrompt) {
+			var input = new PsychUIInputText(state.bg.x + 20, state.bg.y + 90, 250, "", 16);
+			state.add(input);
+
+			state.add(new PsychUIButton(state.bg.x + 20, input.y + 40, "Confirm", function() {
+				var songName = input.text;
+				state.close();
+				openSubState(new BasePrompt(FlxG.width / 2, 300, "Enter new difficulty name (No spaces)", function(state2:BasePrompt) {
+					var input2 = new PsychUIInputText(state2.bg.x + 20, state2.bg.y + 90, 250, "", 16);
+					state2.add(input2);
+
+					state2.add(new PsychUIButton(state2.bg.x + 20, input2.y + 40, "Confirm", function() {
+						saveLevel(makeBlankSong(songName), true, input2.text);
+						state2.close();
+						openSubState(new GoodBye());
+					}));
+				}));
 			}));
 		}));
 	}
 
 	function promptNewDifficulty(song:SongMetadata, _) {
-		openSubState(new NewJson("Enter new difficulty name (No spaces)", function(diffName) {
-			saveLevel(makeBlankSong(song.songName), true, diffName);
-			openSubState(new GoodBye());
+		openSubState(new BasePrompt(FlxG.width / 2, 300, "Enter new difficulty name (No spaces)", function(state:BasePrompt) {
+			var input = new PsychUIInputText(state.bg.x + 20, state.bg.y + 90, 250, "", 16);
+			state.add(input);
+
+			state.add(new PsychUIButton(state.bg.x + 20, input.y + 40, "Confirm", function() {
+				saveLevel(makeBlankSong(song.songName), true, input.text);
+				state.close();
+				openSubState(new GoodBye());
+			}));
 		}));
 	}
 
@@ -519,43 +538,6 @@ class ModSelectorState extends MusicBeatState {
 			if (Mods.modPack.forceStates     != null) d.forceStates     = Mods.modPack.forceStates;
 		} catch(_) {}
 		return d;
-	}
-}
-
-class NewJson extends MusicBeatSubstate {
-	var prompt:String;
-	var callback:String->Void;
-
-	public function new(prompt:String, callback:String->Void) {
-		this.prompt = prompt;
-		this.callback = callback;
-		super();
-	}
-
-	override public function create() {
-		var bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xff000000);
-		bg.alpha = 0.25;
-		bg.scrollFactor.set();
-		add(bg);
-
-		var input = new PsychUIInputText(0, 0, 300, "", 16);
-		input.screenCenter();
-		input.scrollFactor.set();
-		add(input);
-
-		var label = new FlxText(0, input.y - input.height - 10, 0, prompt, 32);
-		label.setFormat(Paths.font("default.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		label.scrollFactor.set();
-		label.screenCenter(X);
-		add(label);
-
-		var btn = new PsychUIButton(0, input.y + input.height, "Confirm", function() {
-			callback(input.text);
-			close();
-		});
-		btn.screenCenter(X);
-		btn.scrollFactor.set();
-		add(btn);
 	}
 }
 
