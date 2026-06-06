@@ -1018,7 +1018,7 @@ class PlayState extends MusicBeatState
 				var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
 				modManager.updateObject(curDecBeat, strum, pos, field.player);
 				strum.modPos.x = pos.x;
-				strum.modPos.y = pos.y;
+				strum.modPos.y = pos.y + strum.y - 50;
 				strum.z = pos.z;
 			});
 		}

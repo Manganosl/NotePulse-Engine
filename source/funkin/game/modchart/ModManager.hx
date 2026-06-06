@@ -303,7 +303,7 @@ class ModManager {
 
 		if (!obj.active) return pos;
 
-		pos.x = getBaseX(data, player);
+		pos.x = PlayField.fields[player].members[data].x;
 		pos.y = PlayField.fields[player].members[data].y + diff;
 		pos.z = 0;
 
