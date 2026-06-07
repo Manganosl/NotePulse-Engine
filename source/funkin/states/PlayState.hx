@@ -1035,7 +1035,6 @@ class PlayState extends MusicBeatState
 				{
 					if(startedCountdown)
 					{
-						var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
 						notes.sort(sortByOrderNote);
 						notes.forEachAlive(function(daNote:Note)
 						{

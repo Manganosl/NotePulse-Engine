@@ -42,6 +42,7 @@ class SustainSplash extends FlxSkewedSprite {
 	}
 
 	public inline function show(note:Note) {
+		if(strum.animation.curAnim != null && strum.animation.curAnim.name == "static") return;
 		updatedThisFrame = true;
 
 		var tempShader:RGBPalette = null;

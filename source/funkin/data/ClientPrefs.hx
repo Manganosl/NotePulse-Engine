@@ -33,7 +33,6 @@ import funkin.states.menus.TitleState;
 	public var language:Int = 0; //for english at begin
 	public var judgecounter:Bool = true;
 	public var noteOffset:Int = 0;
-	public var complexFMHolds:Bool = false;
 	public var devMode:Bool = false;
 
 	public var transition:String = "Stickers";
