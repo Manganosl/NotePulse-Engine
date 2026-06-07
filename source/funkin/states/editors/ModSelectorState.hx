@@ -476,24 +476,26 @@ class ModSelectorState extends MusicBeatState {
 			inline function label(x:Float, y:Float, t:String) { state.add(new FlxText(x, y - 14, 0, t, ts)); }
 			inline function input(x:Float, y:Float, v:String) { var i = new PsychUIInputText(x, y, iw, v); state.add(i); return i; }
 
-			label(sx, sy,         "Mod Name:");             var nameInput       = input(sx, sy,         cfg.name);
-			label(sx, sy+sp,      "Description:");          var descInput       = input(sx, sy+sp,      cfg.description);
-			label(sx, sy+sp*2,    "Title State:");          var titleInput      = input(sx, sy+sp*2,    cfg.titleState);
-			label(sx, sy+sp*3,    "Main Menu State:");      var mainMenuInput   = input(sx, sy+sp*3,    cfg.mainMenuState);
-			label(sx, sy+sp*4,    "Story Menu State:");     var storyMenuInput  = input(sx, sy+sp*4,    cfg.storyMenuState);
-			label(sx, sy+sp*5,    "Freeplay State:");       var freeplayInput   = input(sx, sy+sp*5,    cfg.freeplayState);
-			label(sx, sy+sp*6,    "Pause Substate:");       var pauseInput      = input(sx, sy+sp*6,    cfg.pauseSubState);
-			label(sx, sy+sp*7,    "Discord RPC ID:");       var discordInput    = input(sx, sy+sp*7,    cfg.discordRPC);
-			label(sx, sy+sp*8,    "Default Transition:");   var transInput    = input(sx, sy+sp*8,    cfg.defaultTransition);
+			label(sx, sy,      "Mod Name:");           var nameInput      = input(sx, sy,      cfg.name);
+			label(sx, sy+sp,   "Description:");        var descInput      = input(sx, sy+sp,   cfg.description);
+			label(sx, sy+sp*2, "Title State:");        var titleInput     = input(sx, sy+sp*2, cfg.titleState);
+			label(sx, sy+sp*3, "Main Menu State:");    var mainMenuInput  = input(sx, sy+sp*3, cfg.mainMenuState);
+			label(sx, sy+sp*4, "Story Menu State:");   var storyMenuInput = input(sx, sy+sp*4, cfg.storyMenuState);
+			label(sx, sy+sp*5, "Freeplay State:");     var freeplayInput  = input(sx, sy+sp*5, cfg.freeplayState);
+			label(sx, sy+sp*6, "Pause Substate:");     var pauseInput     = input(sx, sy+sp*6, cfg.pauseSubState);
+			label(sx, sy+sp*7, "Discord RPC ID:");     var discordInput   = input(sx, sy+sp*7, cfg.discordRPC);
+			label(sx, sy+sp*8, "Default Transition:"); var transInput     = input(sx, sy+sp*8, cfg.defaultTransition);
 
 			var checkY = transInput.y + 35;
-			var globalCheck  = new PsychUICheckBox(sx, checkY, "Has Global Script?", 100);
-			var globallyCheck= new PsychUICheckBox(sx + 180, checkY, "Runs Globally?",     100);
-			var forceCheck   = new PsychUICheckBox(sx + 180 * 2, checkY, "Forces its states?", 100);
-			globalCheck.checked   = cfg.hasGlobalScript;
+			var globalCheck = new PsychUICheckBox(sx, checkY, "Has Global Script?", 100);
+			var globallyCheck = new PsychUICheckBox(sx + 180, checkY, "Runs Globally?", 100);
+			var forceCheck = new PsychUICheckBox(sx + 180 * 2, checkY, "Forces its states?", 100);
+			globalCheck.checked = cfg.hasGlobalScript;
 			globallyCheck.checked = cfg.runsGlobally;
-			forceCheck.checked    = cfg.forceStates;
-			state.add(globalCheck); state.add(globallyCheck); state.add(forceCheck);
+			forceCheck.checked = cfg.forceStates;
+			state.add(globalCheck);
+			state.add(globallyCheck);
+			state.add(forceCheck);
 
 			var saveBtn = new PsychUIButton(sx, globalCheck.y + 45, "Save", function() {
 				var newData = {

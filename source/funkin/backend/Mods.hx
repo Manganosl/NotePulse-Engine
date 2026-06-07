@@ -243,6 +243,7 @@ class Mods {
 
 	public static function loadTopMod()
 	{
+		if(Mods.currentLoadedMod != null && Mods.currentLoadedMod != "") return;
 		Mods.currentModDirectory = '';
 		
 		#if MODS_ALLOWED

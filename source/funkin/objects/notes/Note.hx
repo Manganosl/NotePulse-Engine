@@ -13,7 +13,6 @@ import funkin.game.shaders.RGBPalette.RGBShaderReference;
 import funkin.objects.notes.splashes.NoteSplash;
 import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.PlayField;
-import funkin.objects.notes.copy.CopyNote;
 
 import funkin.game.modchart.math.Vector3;
 
@@ -119,21 +118,7 @@ class Note extends FlxSkewedSprite {
 	public var prevNote:Note;
 	public var nextNote:Note;
 
-	public var spawned(default, set):Bool = false;
-	function set_spawned(value:Bool):Bool {
-		if(value == true){
-			for(copy in copyingNotes){
-				copy.spawned = true;
-				createdFrom.add(copy);
-			}
-		} else {
-			for(copy in copyingNotes){
-				copy.spawned = false;
-				createdFrom.remove(copy, true);
-			}
-		}
-		return spawned = value;
-	}
+	public var spawned:Bool = false;
 
 	public var tail:Array<Note> = []; // for sustains
 	public var parent:Note;
@@ -192,8 +177,6 @@ class Note extends FlxSkewedSprite {
 	public var copyY:Bool = true;
 	public var copyAngle:Bool = true;
 	public var copyAlpha:Bool = true;
-
-	public var copyingNotes:Array<CopyNote> = [];
 
 	public var hitHealth:Float = 0.02;
 	public var missHealth:Float = 0.1;

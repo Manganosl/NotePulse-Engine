@@ -1039,8 +1039,6 @@ class PlayState extends MusicBeatState
 						notes.sort(sortByOrderNote);
 						notes.forEachAlive(function(daNote:Note)
 						{
-							for(copy in daNote.copyingNotes)
-								noteFollowStrum(copy);
 							noteFollowStrum(daNote);
 
 							if(!daNote.strum.cpuControlled)

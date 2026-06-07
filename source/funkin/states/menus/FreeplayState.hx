@@ -27,7 +27,6 @@ import openfl.display.BitmapData;
 import openfl.filters.ShaderFilter;
 
 import funkin.game.shaders.ColorSwap;
-import funkin.game.shaders.ChromaticWarp;
 
 import funkin.states.menus.StoryMenuState;
 import funkin.states.MainMenuState;
@@ -50,8 +49,6 @@ class FreeplayState extends MusicBeatState
 	var lerpRating:Float = 0;
 	var intendedScore:Int = 0;
 	var intendedRating:Float = 0;
-
-	var daShader:ChromaticWarp;
 
 	var backdrop:flixel.addons.display.FlxBackdrop;
 	var titleText:FlxText;
@@ -254,10 +251,6 @@ class FreeplayState extends MusicBeatState
 
 		FlxG.sound.music.stop();
 		FlxG.sound.playMusic(Paths.music("freeplayRandom"), 0);
-
-		daShader = new ChromaticWarp();
-		daShader.distortion = 0.01;
-		FlxG.camera.setFilters([new ShaderFilter(daShader.shader)]);
 	}
 
 	override function closeSubState() {
@@ -489,8 +482,6 @@ class FreeplayState extends MusicBeatState
 			FlxTween.tween(playerText, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
 			FlxTween.tween(bottomBG, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
 			FlxTween.tween(bottomText, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
-			daShader.distortion = 0.5;
-			FlxTween.tween(daShader, {distortion: 0.1}, 1, {ease: FlxEase.sineInOut});
 			for (i in 0...iconArray.length)
 			{
 				FlxTween.tween(iconArray[i], {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
