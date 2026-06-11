@@ -24,15 +24,12 @@
 - Using inputs from newer versions to avoid problems with specific keyboards (Such as my own)
 - Using FlxDrawQuadsItem and FlxDrawTrianglesItem from newer versions as it improves performance significantly.
 
-### Modcharting Framework - FunkinModchart
+### [Modcharting Framework](https://github.com/nebulazorua)
 
-- Integrated to make as less calls to the Adapter as possible.
-- Added a simple hold renderer (Can be toggled in Graphics Settings)
-- More modifiers added by default (How is transform not by default?)
-- Renamed PlayField to ModPlayField to avoid problems with PlayField class.
-- Added Troll Engine functions.
-- Optimized multiple modifiers and fixed others.
-- Added more modifiers (Such as stretch or squish)
+- RGBShader now has a perspective shader.
+- Functions that add compatibility for FunkinModchart.
+- StrumNotes render using modPos.x and modPos.y, (x and y still work)
+- Sustains can use more subdivisions, the count can be changed on the charting editor (2 is the default value)
 
 ### Others
 
@@ -49,14 +46,13 @@
 - Fifth rating
 - Play as opponent
 - Support for more PlayFields
-- Support for "CopyFields" (Which just visually copies a PlayField)
 - CustomShader utility
 - NDLL support.
 - Camera movement on note hit.
 - Changing Key Count.
 - Judgement counter.
 - Sustain splashes.
-- Stage editor.
+- Psych 1.0 Stage editor.
 - Psych 1.0 Charting Editor
 
 ###### Probably more things but I forgot

@@ -44,12 +44,6 @@ From there you can just
 ndll(val)
 ```
 
-### Modchart on HScript
-- [FunkinModchart](https://github.com/theoo-h/FunkinModchart/blob/main/README.md)
-
-- There's an integrated instance on songs with "nativeModchart", that is activated in Charting State > Actions > Modchart.
-This instance is called "modManager", can be used the same way as one that you create yourself
-
 # Extra LUA functions
 Here you'll find multiple LUA functions added to make coding easier and do some things without the need of runHaxeCode() or a separate HScript file
 
@@ -151,38 +145,4 @@ initNdll(tag, path, name, args)
 - Change a Ndll's bool value
 ```
 setNdllBool(tag, bool)
-```
-
-### Modchart on LUA
-- **You can use a special call specific for modcharting as alternative to onCreatePost()**
-```
-function initModchart()
-```
-- Create a modchart instance under a tag
-```
-modchart.newInstance(tag)
-```
-- Add a modifier to a modchart instance
-```
-modchart.addModifier(tag, modifier, field)
-```
-- Set a modifier's value
-```
-modchart.setPercent(tag, modifier, value, player, field)
-```
-- Get a modifier's value
-```
-modchart.getPercent(tag, modifier, player, field)
-```
-- Set a modifier's value at a specific beat
-```
-modchart.set(tag, modifier, beat, value, player, field)
-```
-- Tween a modifier's value at a specific beat
-```
-modchart.ease(tag, modifier, beat, value, ease, player, field)
-```
-- Add a playfield
-```
-modchart.addPlayfield(tag)
 ```
