@@ -9,6 +9,7 @@ import funkin.states.scripted.ScriptedState;
 import funkin.states.init.OutdatedState;
 import funkin.backend.utils.helpers.FunkinRatioScaleMode;
 import flixel.addons.transition.FlxTransitionableState;
+import funkin.scripting.GlobalHandler;
 
 class Init extends FlxState {
 	var mustUpdate:Bool = false;
@@ -74,10 +75,16 @@ class Init extends FlxState {
 	    	FlxG.switchState(new OutdatedState());
 	    } else {
 			FlxTransitionableState.skipNextTransOut = true;
-			if(Mods.currentLoadedMod != "" && Mods.modPack != null && Mods.modPack.forceStates && Mods.modPack.titleState != null && Mods.modPack.titleState != "")
-	    		FlxG.switchState(new ScriptedState(Mods.modPack.titleState));
-			else
+			if(Mods.currentLoadedMod != "" && Mods.modPack != null){
+				if(Mods.modPack.hasGlobalScript == true) GlobalHandler.loadGlobalHX();
+	    		if(Mods.modPack.forceStates && Mods.modPack.titleState != null && Mods.modPack.titleState != "") {
+					FlxG.switchState(new ScriptedState(Mods.modPack.titleState));
+				} else {
+					FlxG.switchState(new TitleState());
+				}
+			} else {
 				FlxG.switchState(new TitleState());
+			}
 	    }
     }
 

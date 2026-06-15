@@ -17,7 +17,6 @@ import funkin.states.menus.TitleState;
 	public var showFPS:Bool = true;
 	public var flashing:Bool = true;
 	public var autoPause:Bool = true;
-	public var judgement:Bool = true;
 	public var antialiasing:Bool = true;
 	public var noteSkin:String = 'Default';
 	public var splashSkin:String = 'Psych';
@@ -31,11 +30,8 @@ import funkin.states.menus.TitleState;
 	public var ratingCam:String = "HUD";
 	public var hideHud:Bool = false;
 	public var language:Int = 0; //for english at begin
-	public var judgecounter:Bool = true;
 	public var noteOffset:Int = 0;
 	public var devMode:Bool = false;
-
-	public var transition:String = "Stickers";
 
 	public var arrowRGB:Array<Array<FlxColor>> = [
 		[0xFFC24B99, 0xFFFFFFFF, 0xFF3C1F56],

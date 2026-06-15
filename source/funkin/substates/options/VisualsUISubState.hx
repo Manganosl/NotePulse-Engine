@@ -77,12 +77,6 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.decimals = 1;
 		addOption(option);
 
-		var option:Option = new Option('Judgement Counter',
-		    'Adds a judgement counter on the left side of the screen',
-		    'judgecounter',
-		    'bool');
-	    addOption(option);
-
 		var option:Option = new Option('Ratings Camera:',
 		    "In which camera do you want rating to be displayed?",
 		    'ratingCam',

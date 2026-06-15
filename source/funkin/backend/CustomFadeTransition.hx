@@ -20,12 +20,8 @@ class CustomFadeTransition extends MusicBeatSubstate {
         var modPack = Mods.modPack;
         if (modPack != null && modPack.customTransition != null) {
             openSubState(new ScriptedSubstate(modPack.customTransition));
-        } 
-        else if (ClientPrefs.data.transition == "Stickers") {
-            openSubState(new StickerTransition(duration, isTransIn));
-        } 
-        else {
-            openSubState(new ShaderTransition(duration, isTransIn));
+        } else {
+            openSubState(new VanillaTransition());
         }
 
         super.create();

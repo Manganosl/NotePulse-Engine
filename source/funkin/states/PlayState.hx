@@ -677,18 +677,6 @@ class PlayState extends MusicBeatState
 		add(noteGroup);
 		uiGroup = new FlxSpriteGroup();
 
-		if(ClientPrefs.data.judgecounter){
-			judgementCounter = new FlxText(20, 0, 0, "", 18);
-			judgementCounter.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			judgementCounter.borderSize = 1;
-			judgementCounter.borderQuality = 2;
-			judgementCounter.scrollFactor.set();
-			judgementCounter.cameras = [camHUD];
-			judgementCounter.screenCenter(Y);
-			judgementCounter.visible = ClientPrefs.data.judgecounter;
-			uiGroup.add(judgementCounter);
-		}
-
 		Conductor.songPosition = -5000 / Conductor.songPosition;
 		var showTime:Bool = (ClientPrefs.data.timeBarType != 'Disabled');
 		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
@@ -2267,13 +2255,10 @@ class PlayState extends MusicBeatState
 				Log.hxTrace('WENT BACK TO FREEPLAY??');
 				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
                     rsCheck = true;
-					if(!cpuControlled) openSubState(new funkin.substates.ResultsScreen(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
-					else {
-						Mods.loadTopMod();
-						MusicBeatState.switchState(new funkin.states.menus.FreeplayState());
-						FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);
-						FlxG.sound.music.fadeIn(4, 0, 0.7);
-					}
+					Mods.loadTopMod();
+					MusicBeatState.switchState(new funkin.states.menus.FreeplayState());
+					FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 0);
+					FlxG.sound.music.fadeIn(4, 0, 0.7);
 				changedDifficulty = false;
 			}
 			transitioning = true;
@@ -3643,8 +3628,6 @@ class PlayState extends MusicBeatState
 
 		if (!miss && !cpuControlled)
 			doScoreBop();
-
-		if(ClientPrefs.data.judgecounter) judgementCounter.text = 'Note Hits: ${songHits}\nCombo: ${combo}\n\nEpic: ${ratingsData[0].hits}\nSick: ${ratingsData[1].hits}\nGood: ${ratingsData[2].hits}\nBad: ${ratingsData[3].hits}\nShit: ${ratingsData[4].hits}\nMiss: ${songMisses}';
 
 		callOnScripts('onUpdateScore', [miss]);
 	}
