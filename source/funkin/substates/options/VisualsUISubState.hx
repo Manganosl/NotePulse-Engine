@@ -17,12 +17,14 @@ class VisualsUISubState extends BaseOptionsMenu
 
 		// for note skins
 		notes = new FlxTypedGroup<StrumNote>();
-		for (i in 0...Note.colArray.length)
+		for (i in 0...(Note.colArray.length))
 		{
-			var note:StrumNote = new StrumNote(370 + (560 / Note.colArray.length) * i, -200, i, 0);
+			var note:StrumNote = new StrumNote(370 + (560 / (Note.colArray.length)) * i, -200, i, 0);
 			note.centerOffsets();
 			note.centerOrigin();
 			note.playAnim('static');
+			note.modPos.x = note.x;
+			note.modPos.y = note.y;
 			notes.add(note);
 		}
 
@@ -162,9 +164,9 @@ class VisualsUISubState extends BaseOptionsMenu
 			var note:StrumNote = notes.members[i];
 			if(notesTween[i] != null) notesTween[i].cancel();
 			if(curSelected == noteOptionID)
-				notesTween[i] = FlxTween.tween(note, {y: noteY}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
+				notesTween[i] = FlxTween.tween(note.modPos, {y: noteY}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
 			else
-				notesTween[i] = FlxTween.tween(note, {y: -200}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
+				notesTween[i] = FlxTween.tween(note.modPos, {y: -200}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
 		}
 	}
 
@@ -201,7 +203,7 @@ class VisualsUISubState extends BaseOptionsMenu
 
 	override function destroy()
 	{
-		if(changedMusic && !funkin.states.options.OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic), 1, true);
+		if(changedMusic && !funkin.states.options.OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music('freakyMenu'), 1, true);
 		super.destroy();
 	}
 

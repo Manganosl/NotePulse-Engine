@@ -2,6 +2,7 @@ package funkin.objects.notes;
 
 import flixel.FlxBasic;
 import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
 
 import funkin.backend.InputFormatter;
 import funkin.backend.ExtraKeysHandler;
@@ -290,6 +291,57 @@ class StrumNote extends FlxSkewedSprite {
 			result.floor();
 
 		return result.subtract(camera.scroll.x * scrollFactor.x, camera.scroll.y * scrollFactor.y);
+	}
+
+	/**
+	 * Calculates the smallest globally aligned bounding box that encompasses this sprite's graphic as it
+	 * would be displayed. Honors scrollFactor, rotation, scale, offset and origin.
+	 * For StrumNote, this uses `modPos` instead of the usual `x` and `y`
+	 * @param newRect Optional output `FlxRect`, if `null`, a new one is created.
+	 * @param camera  Optional camera used for scrollFactor, if null `FlxG.camera` is used.
+	 * @return A globally aligned `FlxRect` that fully contains the input sprite.
+	 * @since 4.11.0
+	 */
+	override public function getScreenBounds(?newRect:FlxRect, ?camera:FlxCamera):FlxRect
+	{
+    	if (camera == null)
+    	    camera = FlxG.camera;
+
+    	if (newRect == null)
+        	newRect = FlxRect.get();
+
+    	newRect.setPosition(modPos.x, modPos.y);
+    	if (pixelPerfectPosition)
+        	newRect.floor();
+
+    	_scaledOrigin.set(origin.x * scale.x, origin.y * scale.y);
+
+    	newRect.x += -Std.int(camera.scroll.x * scrollFactor.x) - offset.x + origin.x - _scaledOrigin.x;
+    	newRect.y += -Std.int(camera.scroll.y * scrollFactor.y) - offset.y + origin.y - _scaledOrigin.y;
+
+    	if (isPixelPerfectRender(camera))
+        	newRect.floor();
+
+    	newRect.setSize(frameWidth * Math.abs(scale.x), frameHeight * Math.abs(scale.y));
+    	newRect = newRect.getRotatedBounds(angle, _scaledOrigin, newRect);
+
+    	if (__shouldDoZoomFactor())
+    	{
+       		newRect.x -= camera.width / 2;
+        	newRect.y -= camera.height / 2;
+
+        	var ratio = (camera.zoom > 0 ? Math.max : Math.min)(0, FlxMath.lerp(1 / camera.zoom, 1, zoomFactor));
+
+        	newRect.x *= ratio;
+        	newRect.y *= ratio;
+        	newRect.width *= ratio;
+        	newRect.height *= ratio;
+
+        	newRect.x += camera.width / 2;
+     	    newRect.y += camera.height / 2;
+    	}
+
+    	return newRect;
 	}
 }
 

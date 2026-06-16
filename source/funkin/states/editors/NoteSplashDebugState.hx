@@ -195,7 +195,7 @@ class NoteSplashDebugState extends MusicBeatState
 		if(controls.BACK && notTyping)
 		{
 			MusicBeatState.switchState(new funkin.states.MainMenuState());
-			FlxG.sound.playMusic(Paths.music('freakyMenu-'+ClientPrefs.data.menuMusic));
+			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 			FlxG.mouse.visible = false;
 		}
 		super.update(elapsed);
