@@ -3751,7 +3751,7 @@ class PlayState extends MusicBeatState
 		} else if (camMode == "Bellow Note") {
 			ratingCamArr = [camHUD];
 			baseX = linkStrum.modPos.x;
-			baseY = linkStrum.modPos.y + (linkStrum.downScroll ? -10 : linkStrum.height + 10);
+			baseY = linkStrum.modPos.y + (linkStrum.downScroll ? -75 : linkStrum.height + 10);
 		}
 
 		var daRating:Rating = Conductor.judgeNote(ratingsData, noteDiff / playbackRate);
@@ -3868,7 +3868,7 @@ class PlayState extends MusicBeatState
 
 		if (camMode == "Bellow Note") {
 			rating.x = linkStrum.modPos.x + (linkStrum.width - rating.width) * 0.5;
-			rating.y = linkStrum.modPos.y + (linkStrum.downScroll ? -25 : linkStrum.height + 10);
+			rating.y = linkStrum.modPos.y + (linkStrum.downScroll ? -75 : linkStrum.height + 10);
 			comboSpr.x = rating.x + 40;
 			comboSpr.y = rating.y + 60;
 			if(PlayState.isPixelStage) rating.x -= rating.width/2;
@@ -4237,9 +4237,18 @@ class PlayState extends MusicBeatState
 		#end
 	}
 
+	var pausedByFocus:Bool = false;
 	override public function onFocus():Void
 	{
 		if (health > 0 && !paused) resetRPC(Conductor.songPosition > 0.0);
+
+		if(FlxG.autoPause && pausedByFocus && FlxG.sound.music != null && !startingSong) {
+			pausedByFocus = false;
+			paused = false;
+
+			resyncVocals();
+		}
+		
 		super.onFocus();
 	}
 
@@ -4248,6 +4257,17 @@ class PlayState extends MusicBeatState
 		#if DISCORD_ALLOWED
 		if (health > 0 && !paused && autoUpdateRPC) DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
 		#end
+
+		if(FlxG.autoPause && !paused && FlxG.sound.music != null && !startingSong){
+			paused = true;
+			pausedByFocus = true;
+
+			if(FlxG.sound.music != null) {
+				FlxG.sound.music.pause();
+				vocals.pause();
+				opponentVocals.pause();
+			}
+		}
 
 		super.onFocusLost();
 	}

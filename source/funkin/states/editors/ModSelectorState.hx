@@ -137,7 +137,18 @@ class ModSelectorState extends MusicBeatState {
 
 	function onAccept() {
 		if (goto == ScriptedState) {
-			setMod(modArray[curSelected]);
+			if (curSelected == 0) {
+				Mods.currentModDirectory = null;
+				Mods.currentLoadedMod = null;
+				Mods.modPack = null;
+				funkin.scripting.GlobalHandler.stopGlobalHX();
+				FlxG.sound.music.stop();
+				FlxTween.cancelTweensOf(Main.fpsVar);
+				Main.fpsVar.y = 10;
+				MusicBeatState.switchState(new funkin.states.menus.TitleState());
+				return;
+			}
+			setMod(modArray[curSelected - 1]);
 			if (Mods.modPack?.hasGlobalScript == true) GlobalHandler.loadGlobalHX();
 			FlxG.sound.music.stop();
 			FlxTween.cancelTweensOf(Main.fpsVar);
@@ -147,8 +158,9 @@ class ModSelectorState extends MusicBeatState {
 		}
 
 		if (goto == BasePrompt) {
+			var oldMod = Mods.currentLoadedMod;
 			setMod(modArray[curSelected]);
-			openConfigPrompt();
+			openConfigPrompt(oldMod);
 			return;
 		}
 
@@ -273,9 +285,13 @@ class ModSelectorState extends MusicBeatState {
 		add(grpAlph);
 		iconArray = [];
 
+		if (goto == ScriptedState) {
+			addExtraOption("No mod", null, 255, 0, 0);
+		}
+
 		for (i in 0...modArray.length) {
 			var txt = new Alphabet(90, 320, modArray[i], true);
-			txt.targetY = i;
+			txt.targetY = (goto == ScriptedState) ? i + 1 : i;
 			setupAlphaItem(txt);
 			grpAlph.add(txt);
 		}
@@ -464,7 +480,7 @@ class ModSelectorState extends MusicBeatState {
 		if (!sys.FileSystem.exists(path)) sys.FileSystem.createDirectory(path);
 	}
 
-	function openConfigPrompt() {
+	function openConfigPrompt(oldMod:String) {
 		openSubState(new BasePrompt(FlxG.width / 2, 600, 'Edit $currentMod Config File', function(state:BasePrompt) {
 			var cfg = readModPackConfig();
 			var sx = state.bg.x + 20;
@@ -514,9 +530,11 @@ class ModSelectorState extends MusicBeatState {
 			});
 			state.add(saveBtn);
 			state.add(new PsychUIButton(saveBtn.x + 110, saveBtn.y, "Cancel", function() {
-				Mods.currentLoadedMod = null;
 				state.close();
 			}));
+			state.onClose = (_) -> {
+				Mods.currentLoadedMod = oldMod;
+			}
 		}));
 	}
 

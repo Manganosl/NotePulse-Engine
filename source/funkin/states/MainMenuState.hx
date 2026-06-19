@@ -359,7 +359,7 @@ class MainMenuState extends MusicBeatState
 				if (controls.justPressed('debug_1')){
 					selectedSomethin = true;
 					//FlxG.mouse.visible = false;
-					openSubState(new funkin.substates.EditorPicker());
+					openSubState(new funkin.substates.EditorSelectorSubstate());
 				}
 			} else {
 				if(controls.justPressed('debug_1')) FlxG.sound.play(Paths.sound('cancelMenu'));

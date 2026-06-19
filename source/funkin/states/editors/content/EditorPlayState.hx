@@ -194,21 +194,23 @@ class EditorPlayState extends MusicBeatSubstate
 		modManager.registerDefaultModifiers();
 		modManager.registerScriptedModifiers();
 
-		for (songEvent in PlayState.SONG.events){
-			for (i in 0...songEvent[1].length){
-				var evName:String = songEvent[1][i][0];
-				if(evName == "Modchart Event"){
-					var value1:String = songEvent[1][i][1];
-					if(value1 == null) continue;
-					var info = value1.split(',');
-					final daBeat:Float = Conductor.getBeat(songEvent[0] + ClientPrefs.data.noteOffset);
-					var ease = FlxEase.linear;
-					if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
+		if(ChartingState.doModchartOnEditor){
+			for (songEvent in PlayState.SONG.events){
+				for (i in 0...songEvent[1].length){
+					var evName:String = songEvent[1][i][0];
+					if(evName == "Modchart Event"){
+						var value1:String = songEvent[1][i][1];
+						if(value1 == null) continue;
+						var info = value1.split(',');
+						final daBeat:Float = Conductor.getBeat(songEvent[0] + ClientPrefs.data.noteOffset);
+						var ease = FlxEase.linear;
+						if(info[4] != null) ease = LuaUtils.getTweenEaseByString(info[4]);
 
-					switch(info[0]){
-						case "Ease": modManager.ease(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
-						case "Set": modManager.set(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
-					}	
+						switch(info[0]){
+							case "Ease": modManager.ease(info[1], daBeat, Std.parseFloat(info[2]), Std.parseFloat(info[3]), ease, Std.parseInt(info[5]), Std.parseInt(info[6]));
+							case "Set": modManager.set(info[1], daBeat, Std.parseFloat(info[3]), Std.parseInt(info[5]), Std.parseInt(info[6]));
+						}	
+					}
 				}
 			}
 		}

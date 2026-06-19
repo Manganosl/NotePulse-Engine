@@ -74,13 +74,15 @@ class BasePrompt extends MusicBeatSubstate
 
 	public var onCreate:BasePrompt->Void;
 	public var onUpdate:BasePrompt->Float->Void;
-	public function new(?sizeX:Float = 420, ?sizeY:Float = 160, title:String, ?onCreate:BasePrompt->Void, ?onUpdate:BasePrompt->Float->Void)
+	public var onClose:BasePrompt->Void;
+	public function new(?sizeX:Float = 420, ?sizeY:Float = 160, title:String, ?onCreate:BasePrompt->Void, ?onUpdate:BasePrompt->Float->Void, ?onClose:BasePrompt->Void)
 	{
 		this._sizeX = sizeX;
 		this._sizeY = sizeY;
 		this._title = title;
 		this.onCreate = onCreate;
 		this.onUpdate = onUpdate;
+		this.onClose = onClose;
 		super();
 	}
 
@@ -173,5 +175,10 @@ class BasePrompt extends MusicBeatSubstate
 		});
 		for (member in members) FlxDestroyUtil.destroy(member);
 		super.destroy();
+	}
+
+	override public function close(){
+		if(onClose != null) onClose(this);
+		super.close();
 	}
 }

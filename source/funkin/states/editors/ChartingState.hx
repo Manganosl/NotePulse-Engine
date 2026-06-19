@@ -1238,7 +1238,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						var lane:Int = note.songData[1];
 
 						note.changeNoteData(lane+diff);
-						note.setSustainLength(susLengthStepper.value, Conductor.stepCrochet, curZoom);
+						note.setSustainLength(note.sustainLength, Conductor.stepCrochet, curZoom); // Refresh the sustain
 
 						positionNoteXByData(note);
 					}
@@ -4756,11 +4756,17 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		}
 	}
 
+	public static var doModchartOnEditor:Bool = true;
+	var modchartCheckBox:PsychUICheckBox;
 	function editorPlayStatePrompt(){
 		FlxG.sound.play(Paths.sound('chartingSounds/openWindow'));
-		openSubState(new BasePrompt( 'Preview\nChoose the strums to play.', function(state:BasePrompt){
+		openSubState(new BasePrompt(420, 200, 'Preview\nChoose the strums to play.', function(state:BasePrompt){
 			var btnY = 390;
 			var buttons:Array<PsychUIButton> = [];
+
+			modchartCheckBox = new PsychUICheckBox(0, btnY - 37, 'Preview Modchart?', 100, function() doModchartOnEditor = modchartCheckBox.checked);
+			modchartCheckBox.checked = doModchartOnEditor;
+			modchartCheckBox.cameras = state.cameras;
 
 			buttons.push(new PsychUIButton(0, btnY, 'Opponent', function(){
 				openEditorPlayState(0);
@@ -4790,6 +4796,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				btn.cameras = state.cameras;
 				state.add(btn);
 			}
+			modchartCheckBox.screenCenter(X);
+			modchartCheckBox.x -= spacing - totalWidth / 2;
+			state.add(modchartCheckBox);
 		}));
 	}
 
