@@ -24,7 +24,6 @@ class EditorSelectorSubstate extends MusicBeatSubstate {
 	var grpAlph:FlxTypedGroup<Alphabet>;
 	var bg:FlxSprite;
 	var titleText:FlxText;
-	var descText:FlxText;
 
 	var curSelected:Int = 0;
 	var lerpSelected:Float = 0;
@@ -53,7 +52,10 @@ class EditorSelectorSubstate extends MusicBeatSubstate {
 		backdrop.alpha = 0.18;
 		add(backdrop);
 
-		var bar = new FlxSprite().makeGraphic(FlxG.width, 80, 0xFF000000);
+		grpAlph = new FlxTypedGroup<Alphabet>();
+		add(grpAlph);
+
+		var bar = new FlxSprite().makeGraphic(FlxG.width, 50, 0xFF000000);
 		bar.alpha = 0.7;
 		bar.scrollFactor.set();
 		add(bar);
@@ -62,25 +64,6 @@ class EditorSelectorSubstate extends MusicBeatSubstate {
 		titleText.setFormat(Paths.font("default.ttf"), 30, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		titleText.scrollFactor.set();
 		add(titleText);
-
-		descText = new FlxText(0, 48, FlxG.width, "Press ACCEPT to open editor  |  Press BACK to close", 14);
-		descText.setFormat(Paths.font("default.ttf"), 14, 0xFFCCCCCC, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		descText.scrollFactor.set();
-		add(descText);
-
-		var bottomBar = new FlxSprite().makeGraphic(FlxG.width, 30, 0xFF000000);
-		bottomBar.alpha = 0.5;
-		bottomBar.scrollFactor.set();
-		bottomBar.y = FlxG.height - 30;
-		add(bottomBar);
-
-		var hintText = new FlxText(0, FlxG.height - 26, FlxG.width, "↑↓ Navigate   ENTER Accept   ESC Back", 12);
-		hintText.setFormat(Paths.font("default.ttf"), 12, 0xFF999999, CENTER);
-		hintText.scrollFactor.set();
-		add(hintText);
-
-		grpAlph = new FlxTypedGroup<Alphabet>();
-		add(grpAlph);
 
 		for (i in 0...OPTIONS.length) {
 			var opt = OPTIONS[i];
@@ -108,8 +91,14 @@ class EditorSelectorSubstate extends MusicBeatSubstate {
 
 		var shiftMult:Int = FlxG.keys.pressed.SHIFT ? 3 : 1;
 
-		if (controls.UI_UP_P)   { changeSelection(-shiftMult); holdTime = 0; }
-		if (controls.UI_DOWN_P) { changeSelection(shiftMult);  holdTime = 0; }
+		if (controls.UI_UP_P){
+			changeSelection(-shiftMult);
+			holdTime = 0;
+		}
+		if (controls.UI_DOWN_P){
+			changeSelection(shiftMult);
+			holdTime = 0;
+		}
 
 		if (controls.UI_UP || controls.UI_DOWN) {
 			var prevHold = Math.floor((holdTime - 0.5) * 10);
@@ -125,7 +114,7 @@ class EditorSelectorSubstate extends MusicBeatSubstate {
 		}
 
 		if (controls.ACCEPT) onAccept();
-		if (controls.BACK)   close();
+		if (controls.BACK) close();
 
 		updateList(elapsed);
 	}

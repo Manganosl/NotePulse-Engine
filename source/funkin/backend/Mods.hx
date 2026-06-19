@@ -1,6 +1,7 @@
 package funkin.backend;
 
 import haxe.Json;
+import flixel.util.FlxSave;
 
 typedef ModsList = {
 	enabled:Array<String>,
@@ -10,7 +11,8 @@ typedef ModsList = {
 
 class Mods {
 	static public var currentModDirectory:String = '';
-	static public var currentLoadedMod:String = '';
+	static public var currentLoadedMod(default, set):String = '';
+	public static var save:FlxSave;
 	static public var modPack(get, default):Dynamic;
 	public static var ignoreModFolders:Array<String> = [
 		'characters',
@@ -31,6 +33,19 @@ class Mods {
 		"states",
 		"ndlls"
 	];
+
+	private static function set_currentLoadedMod(newMod:String){
+		if(newMod != null && newMod != ""){
+			if (save != null) {
+				save.flush(); 
+			} else {
+				save = new FlxSave();
+			}
+
+			save.bind('${newMod}_saveData');
+		}
+		return currentLoadedMod = newMod;
+	}
 
 	private static function get_modPack(){
 		#if MODS_ALLOWED

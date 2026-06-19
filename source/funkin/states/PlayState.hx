@@ -514,7 +514,8 @@ class PlayState extends MusicBeatState
 		#end
 
 		Application.current.window.title = (chartingMode ? "* " : "") + 
-		"NotePulse Engine | " + SONG.song + " - " + Difficulty.getString() + 
+		(((Mods.currentLoadedMod != null && Mods.currentLoadedMod != "" && Mods.modPack.name != null && Mods.modPack.name != "") ? Mods.modPack.name : "NotePulse Engine"))
+		 + " | " + SONG.song + " - " + Difficulty.getString() + 
 		" [x" + playbackRate + "]" + 
 		(isPlayerOpponent ? " - Playing as Opponent" : "");
 

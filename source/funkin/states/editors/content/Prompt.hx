@@ -110,7 +110,6 @@ class BasePrompt extends MusicBeatSubstate
 
 		cameras = [promptCam];
 
-		// Center the background box
 		bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		bg.alpha = 0.8;
 		bg.scale.set(_sizeX, _sizeY);
@@ -120,7 +119,6 @@ class BasePrompt extends MusicBeatSubstate
 		bg.cameras = cameras;
 		add(bg);
 
-		// Center the title text inside the box
 		titleText = new FlxText(0, 0, _sizeX - 40, _title, 16);
 		titleText.x = bg.x + 20;
 		titleText.y = bg.y + 30;

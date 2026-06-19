@@ -80,7 +80,7 @@ class FreeplayState extends MusicBeatState
 		//Paths.clearStoredMemory();
 		//Paths.clearUnusedMemory();
 		
-		Application.current.window.title = "NotePulse Engine" + " | " + "Freeplay";
+		Application.current.window.title = (((Mods.currentLoadedMod != null && Mods.currentLoadedMod != "" && Mods.modPack.name != null && Mods.modPack.name != "") ? Mods.modPack.name : "NotePulse Engine")) + " | " + "Freeplay";
 		persistentUpdate = true;
 		PlayState.isStoryMode = false;
 		WeekData.reloadWeekFiles(false);
@@ -442,7 +442,7 @@ class FreeplayState extends MusicBeatState
 		}
 		else if (controls.ACCEPT && !player.playingMusic && controlsActive)
 		{
-			Application.current.window.title = "NotePulse Engine" + " | " + "Loading...";
+			Application.current.window.title = (((Mods.currentLoadedMod != null && Mods.currentLoadedMod != "" && Mods.modPack.name != null && Mods.modPack.name != "") ? Mods.modPack.name : "NotePulse Engine")) + " | " + "Loading...";
 			persistentUpdate = false;
 			var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
 			var poop:String = Highscore.formatSong(songLowercase, curDifficulty);
