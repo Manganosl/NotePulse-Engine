@@ -247,6 +247,7 @@ class EditorPlayState extends MusicBeatSubstate
 			var time:Float = spawnTime * playbackRate;
 			if(songSpeed < 1) time /= songSpeed;
 			if(unspawnNotes[0].multSpeed < 1) time /= unspawnNotes[0].multSpeed;
+			if(unspawnNotes[0].modSpeed < 1) time /= unspawnNotes[0].modSpeed;
 
 			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
 			{
@@ -1083,7 +1084,7 @@ class EditorPlayState extends MusicBeatSubstate
 		if(note != null) {
 			var strum:StrumNote = note.strum;
 			if(strum != null)
-				spawnNoteSplash(strum.x, strum.y, note.noteData, note, strum);
+				spawnNoteSplash(strum.modPos.x, strum.modPos.y, note.noteData, note, strum);
 		}
 	}
 

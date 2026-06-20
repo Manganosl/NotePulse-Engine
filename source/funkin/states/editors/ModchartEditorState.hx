@@ -352,6 +352,7 @@ class ModchartEditorState extends MusicBeatState
 		subdivisionsStepper.value = PlayState.SONG.holdSubdivisions;	
 		subdivisionsStepper.onValueChange = () -> {
 			PlayState.SONG.holdSubdivisions = Std.int(subdivisionsStepper.value);
+			regenerateNotes();
 		};
 
 		posY += 40;
@@ -363,7 +364,7 @@ class ModchartEditorState extends MusicBeatState
 
 		var modifierLabelText = new FlxText(modifierInput.x, modifierInput.y - 15, 80, 'Modifier:');
 
-		actionsDropdown = new PsychUIDropDownMenu(posX, posY, ["Add Modifier", "Set", "Ease", "EaseAdd", "SetAdd"], function(index:Int, name:String){
+		actionsDropdown = new PsychUIDropDownMenu(posX, posY, ["Set", "Ease"], function(index:Int, name:String){
 			updateModEvV1();
 		});
 
@@ -890,6 +891,7 @@ class ModchartEditorState extends MusicBeatState
 			var time:Float = spawnTime * playbackRate;
 			if(songSpeed < 1) time /= songSpeed;
 			if(unspawnNotes[0].multSpeed < 1) time /= unspawnNotes[0].multSpeed;
+			if(unspawnNotes[0].modSpeed < 1) time /= unspawnNotes[0].modSpeed;
 
 			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
 			{
@@ -1336,10 +1338,13 @@ class ModchartEditorState extends MusicBeatState
 		notes.cameras = [camHUD];
 		add(notes);
 
-		var noteData:Array<SwagSection>;
+		buildNotes();
+	}
 
-		// NEW SHIT
-		noteData = songData.notes;
+	function buildNotes()
+	{
+		var songData = PlayState.SONG;
+		var noteData:Array<SwagSection> = songData.notes;
 
 		initialCrochet = Conductor.crochet;
 		var holdCrochet:Float = Math.max(Conductor.stepCrochet / PlayState.SONG.holdSubdivisions, 10);
@@ -1439,6 +1444,22 @@ class ModchartEditorState extends MusicBeatState
 
 		unspawnNotes.sort(CoolUtil.sortByTime);
 	}
+
+	function regenerateNotes()
+	{
+		for (note in allNotes)
+		{
+			note.destroy();
+		}
+		allNotes = [];
+		unspawnNotes = [];
+		notes.clear();
+
+		buildNotes();
+		applyNoteStates(Conductor.songPosition);
+
+		showOutput('Reloaded Notes!');
+	}
 	
 	private function generateStaticArrows(player:Int):Void
 	{
@@ -1504,9 +1525,9 @@ class ModchartEditorState extends MusicBeatState
 	public function endSong()
 	{
 		vocals.pause();
-		vocals.destroy();
+		vocals.time = 0;
 		opponentVocals.pause();
-		opponentVocals.destroy();
+		opponentVocals.time = 0;
 		if(finishTimer != null)
 		{
 			finishTimer.cancel();
@@ -1601,15 +1622,8 @@ class ModchartEditorState extends MusicBeatState
 		}
 	}
 
-	function seek(delta:Float){
-		var newTime = Math.max(0, FlxG.sound.music.time + delta);
-
-		// Audio
-		FlxG.sound.music.time = newTime;
-		vocals.time = newTime;
-		opponentVocals.time = newTime;
-		Conductor.songPosition = newTime;
-
+	function applyNoteStates(time:Float)
+	{
 		for (note in notes)
 		{
 			note.kill();
@@ -1632,13 +1646,13 @@ class ModchartEditorState extends MusicBeatState
 				if(note.clipRect != null)
 					note.clipRect = null;
 
-			if (note.strumTime >= newTime)
+			if (note.strumTime >= time)
 			{
 				unspawnNotes.push(note);
 			}
 			else if (note.isSustainNote)
 			{
-				if (note.parent != null && note.parent.strumTime + note.parent.sustainLength >= newTime)
+				if (note.parent != null && note.parent.strumTime + note.parent.sustainLength >= time)
 				{
 					notes.add(note);
 					note.spawned = true;
@@ -1655,6 +1669,18 @@ class ModchartEditorState extends MusicBeatState
 		}
 
 		unspawnNotes.sort(CoolUtil.sortByTime);
+	}
+
+	function seek(delta:Float){
+		var newTime = Math.max(0, FlxG.sound.music.time + delta);
+
+		FlxG.sound.music.time = newTime;
+		vocals.time = newTime;
+		opponentVocals.time = newTime;
+		Conductor.songPosition = newTime;
+
+		applyNoteStates(newTime);
+
 		if(delta > 0) return;
 		reloadManager();
 	}

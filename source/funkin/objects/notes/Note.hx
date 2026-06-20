@@ -172,6 +172,7 @@ class Note extends FlxSkewedSprite {
 	public var offsetDirection:Float = 0;
 	public var multAlpha:Float = 1;
 	public var multSpeed:Float = 1;
+	public var modSpeed:Float = 1;
 
 	public var copyX:Bool = true;
 	public var copyY:Bool = true;
