@@ -137,12 +137,17 @@ class Interp {
 
 	public var errorHandler:Error->Void;
 	public var warnHandler:Error->Void;
+	// TODO: set this callback as a Global Resolver
+	/**
+	 * Custom Import resolver. It's called when an import couldn't be resolved.
+	 */
 	public var importFailedCallback:Array<String>->Null<String>->Bool;
 	public var onMetadata:String->Array<Expr>->Expr->Dynamic;
 
 	public var customClasses:Map<String, CustomClassHandler>;
 	public var variables:Map<String, Dynamic>;
 	public var publicVariables:Map<String, Dynamic>;
+	// TODO: maybe turn this completely static
 	public var staticVariables:Map<String, Dynamic>;
 
 	// warning can be null
@@ -170,8 +175,12 @@ class Interp {
 
 	var usingHandler:UsingHandler;
 
-	var varLocationCache:Map<String, VarLocation> = new Map();
-	var cacheValid:Bool = true;
+	// TODO: separate cache into a class
+	var varLocationCache:Map<String, VarLocation> = [];
+	public var cacheValid(default, set):Bool = true;
+	function set_cacheValid(valid:Bool):Bool {
+		return cacheValid = valid;
+	}
 
 	#if hscriptPos
 	var curExpr:Expr;
@@ -294,14 +303,14 @@ class Interp {
 						var obj = resolve(id, false, false);
 						if (obj != null && obj is Property) {
 							var prop:Property = cast obj;
-							return prop.callSetter(id, v);
+							return prop.set(v, isBypassAccessor);
 						}
 						varLocationCache.remove(id);
 						setVar(id, v);
 					}
 				} else if (l.r is Property) {
 					var prop:Property = cast l.r;
-					return prop.callSetter(id, v);
+					return prop.set(v, isBypassAccessor);
 				} else {
 					l.r = v;
 					if (l.depth == 0) {
@@ -375,7 +384,7 @@ class Interp {
 						var obj = resolve(id, true, false);
 						if (obj != null && obj is Property) {
 							var prop:Property = cast obj;
-							return prop.callSetter(id, v);
+							return prop.set(v, isBypassAccessor);
 						}
 						varLocationCache.remove(id);
 						setVar(id, v);
@@ -385,7 +394,7 @@ class Interp {
 					var l = locals.get(id);
 					if (l.r is Property) {
 						var prop:Property = cast l.r;
-						return prop.callSetter(id, v);
+						return prop.set(v, isBypassAccessor);
 					}
 					l.r = v;
 					if (l.depth == 0) {
@@ -429,18 +438,18 @@ class Interp {
 					var prop:Property = null;
 					if (v is Property) {
 						prop = cast v;
-						v = prop.callGetter(id);
+						v = prop.get(isBypassAccessor);
 					}
 
 					if (prefix) {
 						v += delta;
 						if (prop != null)
-							prop.callSetter(id, v);
+							prop.set(v, isBypassAccessor);
 						else
 							l.r = v;
 					} else {
 						if (prop != null)
-							prop.callSetter(id, v + delta);
+							prop.set(v + delta, isBypassAccessor);
 						else
 							l.r = v + delta;
 					}
@@ -451,20 +460,20 @@ class Interp {
 					var prop:Property = null;
 					if (v is Property) {
 						prop = cast v;
-						v = prop.callGetter(id);
+						v = prop.get(isBypassAccessor);
 					}
 
 					if (prefix) {
 						v += delta;
 						if (prop != null)
-							prop.callSetter(id, v);
+							prop.set(v, isBypassAccessor);
 						else {
 							varLocationCache.remove(id);
 							setVar(id, v);
 						}
 					} else {
 						if (prop != null)
-							prop.callSetter(id, v + delta);
+							prop.set(v + delta, isBypassAccessor);
 						else {
 							varLocationCache.remove(id);
 							setVar(id, v + delta);
@@ -604,10 +613,10 @@ class Interp {
 	}
 
 	inline function getProperty(o:Null<Dynamic>, n:String, allowProperty:Bool = true):Dynamic {
-		if(allowProperty && o != null && o is Property)
-			return cast(o, Property).callGetter(n);
-		else
-			return o;
+		if(allowProperty && o != null && o is Property) {
+			var prop:Property = cast o;
+			return prop.get(isBypassAccessor);
+		} else return o;
 	}
 
 	public function resolve(id:String, doException:Bool = true, allowProperty:Bool = true):Dynamic {
@@ -728,12 +737,8 @@ class Interp {
 	}
 
 	public function invalidateCache():Void {
-		varLocationCache = new Map();
+		varLocationCache.clear();
 		cacheValid = true;
-	}
-
-	public function setCacheValid(valid:Bool):Void {
-		cacheValid = valid;
 	}
 
 	public static var importRedirects:Map<String, String> = new Map();
@@ -751,6 +756,7 @@ class Interp {
 		return className;
 	}
 
+	// TODO: separate large declarations (EClass, EEnum, etc...) into inline functions
 	public function expr(e:Expr):Dynamic {
 		#if hscriptPos
 		curExpr = e;
@@ -1008,20 +1014,14 @@ class Interp {
 					return null;
 				}
 				declared.push({n: n, old: locals.get(n), depth: depth});
-				var r:Dynamic = (e == null) ? null : expr(e);
-				var declProp:Property = null;
-				if (hasGetSet) {
-					declProp = {
-						r: r,
-						getter: getter,
-						setter: setter,
-						isVar: isVar,
-						isStatic: isStatic,
-						interp: this,
-					}
-				}
+				var v:Dynamic = (e == null) ? null : expr(e);
+				var r:Dynamic = null;
+				if (hasGetSet) 
+					r = new Property(n, v, getter, setter, isVar, isStatic, this);
+				else
+					r = v;
 				var declVar:DeclaredVar = {
-					r: (declProp == null) ? r : declProp,
+					r: r,
 					depth: depth
 				};
 				locals.set(n, declVar);
