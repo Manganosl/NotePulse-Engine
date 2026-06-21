@@ -36,13 +36,13 @@ class CreditsState extends MusicBeatState
 		add(grpOptions);
 
 		var defaultList:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
-			['Main NP Pals'],
+			['NotePulse'],
 			['Manganos', 			'mang',				'Main Coder - I have nothing else to do',			 		 'https://github.com/Manganosl', 		'6a329f'],
 			[''],
-			['More'],
-			['tposejank', 			'tposejank',		'Made the EK fork NP is based on',			 				 'https://twitter.com/tposejank', 		'B9AF27'],	//mensajes subliminales
+			['Other thanks'],
+			['tposejank', 			'tposejank',		'Made the EK fork NotePulse is based on',			 		 'https://twitter.com/tposejank', 		'B9AF27'],
 			['srPerez', 			'perez', 			'1-9 keys art', 											 'https://twitter.com/NewSrPerez', 		'FF9E00'],
-			['CNE Team', 			'face',				'NdllUtils, away3d, debug menu and HScript-Improved',		 'https://codename-engine.com/', 		'6a329f'],
+			['CNE Team', 			'face',				'NdllUtils, away3d, HScript-Improved',		 				 'https://codename-engine.com/', 		'6a329f'],
 			['NebulaZorua', 		'neb', 				'Modchart backend', 										 'https://twitter.com/Nebula_Zorua', '0x9B00B3'],
 			['NMV Engine', 			'face',				'WindowUtils and adjusted Modchart Modifiers',		 		 'https://github.com/NMVTeam/NightmareVision/tree/dev', 		'6a329f'],
 			[''],

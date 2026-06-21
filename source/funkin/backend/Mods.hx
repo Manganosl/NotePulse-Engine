@@ -10,7 +10,7 @@ typedef ModsList = {
 };
 
 class Mods {
-	static public var currentModDirectory:String = '';
+	static public var currentModDirectory(get, default):String = '';
 	static public var currentLoadedMod(default, set):String = '';
 	public static var save:FlxSave;
 	static public var modPack(get, default):Dynamic;
@@ -33,6 +33,11 @@ class Mods {
 		"states",
 		"ndlls"
 	];
+
+	private static function get_currentModDirectory(){
+		if(currentLoadedMod != null && currentLoadedMod != "") return currentLoadedMod;
+		return currentModDirectory;
+	}
 
 	private static function set_currentLoadedMod(newMod:String){
 		if(newMod != null && newMod != ""){
