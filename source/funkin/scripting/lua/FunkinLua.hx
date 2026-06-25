@@ -52,8 +52,6 @@ import flixel.input.gamepad.FlxGamepadInputID;
 import haxe.Json;
 import haxe.PosInfos;
 
-import funkin.game.modchart.*;
-
 class FunkinLua {
 	public var lua:State = null;
 	public var camTarget:FlxCamera;
@@ -214,56 +212,6 @@ class FunkinLua {
 			if(func != null)
 				Lua_helper.add_callback(lua, name, func);
 		}
-
-		Lua_helper.add_callback(lua, "setPercent", function(modName:String, val:Float, player:Int=-1)
-		{
-			game.modManager.setPercent(modName, val, player);
-		});
-
-		Lua_helper.add_callback(lua, "addBlankMod", function(modName:String, defaultVal:Float=0, player:Int = -1)
-		{
-			game.modManager.quickRegister(new SubModifier(modName, game.modManager));
-			game.modManager.setValue(modName, defaultVal);
-		});
-
-		Lua_helper.add_callback(lua, "setValue", function(modName:String, val:Float, player:Int = -1)
-		{
-			game.modManager.setValue(modName, val, player);
-		});
-
-		Lua_helper.add_callback(lua, "getPercent", function(modName:String, player:Int)
-		{
-			return game.modManager.getPercent(modName, player);
-		});
-
-		Lua_helper.add_callback(lua, "getValue", function(modName:String, player:Int)
-		{
-			return game.modManager.getValue(modName, player);
-		});
-
-		Lua_helper.add_callback(lua, "queueSet", function(step:Float, modName:String, target:Float, player:Int = -1)
-		{
-			game.modManager.queueSet(step, modName, target, player);
-		});
-
-		Lua_helper.add_callback(lua, "queueSetP", function(step:Float, modName:String, perc:Float, player:Int = -1)
-		{
-			game.modManager.queueSetP(step, modName, perc, player);
-		});
-		
-		Lua_helper.add_callback(lua, "queueEase",
-			function(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1,
-					?startVal:Float) 
-		{
-			game.modManager.queueEase(step, endStep, modName, percent, style, player, startVal);
-		});
-
-		Lua_helper.add_callback(lua, "queueEaseP",
-			function(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1,
-					?startVal:Float)
-			{
-				game.modManager.queueEaseP(step, endStep, modName, percent, style, player, startVal);
-			});
 
 		//
 		Lua_helper.add_callback(lua, "getRunningScripts", function(){
@@ -1813,6 +1761,7 @@ class FunkinLua {
 		ReflectionFunctions.implement(this);
 		TextFunctions.implement(this);
 		ExtraFunctions.implement(this);
+		ModchartFunctions.implement(this);
 		CustomSubstate.implement(this);
 		ShaderFunctions.implement(this);
 		DeprecatedFunctions.implement(this);
