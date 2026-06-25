@@ -123,7 +123,7 @@ class FreeplayState extends MusicBeatState
 
 		backdrop = new flixel.addons.display.FlxBackdrop(Paths.image('grid'));
 		backdrop.velocity.set(50, 30);
-		backdrop.alpha = 0.9;
+		backdrop.alpha = 0.4;
 		add(backdrop);	
 
 		grpSongs = new FlxTypedGroup<Alphabet>();

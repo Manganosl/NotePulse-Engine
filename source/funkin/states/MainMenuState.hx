@@ -23,7 +23,7 @@ class MainMenuState extends MusicBeatState
 	var leftItem:FlxSprite;
 	var rightItem:FlxSprite;
 	public static var block:FlxSprite;
-	var cosanegra:FlxSprite;
+	var topBar:FlxSprite;
 	var descText:FlxText;
 
 	//Centered/Text options
@@ -72,8 +72,7 @@ class MainMenuState extends MusicBeatState
 		var backdrop:flixel.addons.display.FlxBackdrop = new flixel.addons.display.FlxBackdrop(Paths.image('grid'));
 		backdrop.velocity.set(50, 30);
 		backdrop.scrollFactor.set(2, 2);
-		backdrop.alpha = 0.9;
-		//backdrop.color = FlxColor.GREEN;
+		backdrop.alpha = 0.4;
 		add(backdrop);	
 
 		camFollow = new FlxObject(0, 0, 1, 1);
@@ -106,33 +105,34 @@ class MainMenuState extends MusicBeatState
 			rightItem = createMenuItem(rightOption, FlxG.width - 60, 490);
 			rightItem.x -= rightItem.width;
 		}
-			cosanegra = new FlxSprite().makeGraphic(FlxG.width, 325, 0xff000000);
-			cosanegra.antialiasing = ClientPrefs.data.antialiasing;
-			cosanegra.screenCenter();
-			cosanegra.scrollFactor.set();
-			cosanegra.alpha = 0.5;
-			cosanegra.y = -210;
-			add(cosanegra);
 
-			var titleText:FlxText = new FlxText(0, 10, 1145, "Main Menu", 32);
-			titleText.alpha = 1;
-			titleText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			titleText.scrollFactor.set();
-			add(titleText);
+		topBar = new FlxSprite().makeGraphic(FlxG.width, 325, 0xff000000);
+		topBar.antialiasing = ClientPrefs.data.antialiasing;
+		topBar.screenCenter();
+		topBar.scrollFactor.set();
+		topBar.alpha = 0.5;
+		topBar.y = -210;
+		add(topBar);
+
+		var titleText:FlxText = new FlxText(0, 10, 1145, "Main Menu", 32);
+		titleText.alpha = 1;
+		titleText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		titleText.scrollFactor.set();
+		add(titleText);
 	
-			if (DiscordClient.user != null)
-				descText = new FlxText(0, 50, 1180, "Connected to discord - " + DiscordClient.user.globalName + " (" + DiscordClient.user.username + 
-				")\nNotePulse Engine " + (Main.GIT_COMMIT != null ? "- Commit " + Main.GIT_COMMIT : "v" + Main.npeVersion) + "\nPsych Engine v" + Main.psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
-			else
-				descText = new FlxText(0, 50, 1180, "NotePulse Engine " + (Main.GIT_COMMIT != null ? "Commit " + Main.GIT_COMMIT : "v" + Main.npeVersion) + "\nPsych Engine v" + Main.psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
-			descText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			descText.scrollFactor.set();
-			add(descText);
+		if (DiscordClient.user != null)
+			descText = new FlxText(0, 50, 1180, "Connected to discord - " + DiscordClient.user.globalName + " (" + DiscordClient.user.username + 
+			")\nNotePulse Engine " + (Main.GIT_COMMIT != null ? "- Commit " + Main.GIT_COMMIT : "v" + Main.npeVersion) + "\nPsych Engine v" + Main.psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
+		else
+			descText = new FlxText(0, 50, 1180, "NotePulse Engine " + (Main.GIT_COMMIT != null ? "Commit " + Main.GIT_COMMIT : "v" + Main.npeVersion) + "\nPsych Engine v" + Main.psychEngineVersion + "\nFriday Night Funkin' v" + Application.current.meta.get('version'), 15);
+		descText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		descText.scrollFactor.set();
+		add(descText);
 
-			var modsText:FlxText = new FlxText(12, FlxG.height - 44, 0, "[TAB] Mod Loader", 12);
-			modsText.scrollFactor.set();
-			modsText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
-			add(modsText);
+		var modsText:FlxText = new FlxText(12, FlxG.height - 44, 0, "[TAB] Mod Loader", 12);
+		modsText.scrollFactor.set();
+		modsText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
+		add(modsText);
 		
 		changeItem();
 
@@ -151,8 +151,7 @@ class MainMenuState extends MusicBeatState
 		FlxG.camera.follow(camFollow, null, 0.15);
 	}
 
-	function createMenuItem(name:String, x:Float, y:Float):FlxSprite
-	{
+	function createMenuItem(name:String, x:Float, y:Float):FlxSprite {
 		var menuItem:FlxSprite = new FlxSprite(x, y);
 		menuItem.frames = Paths.getSparrowAtlas('mainmenu/menu_$name');
 		menuItem.animation.addByPrefix('idle', '$name idle', 24, true);
@@ -169,13 +168,11 @@ class MainMenuState extends MusicBeatState
 	var selectedSomethin:Bool = false;
 
 	var timeNotMoving:Float = 0;
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float){
 		if (FlxG.sound.music.volume < 0.8)
 			FlxG.sound.music.volume = Math.min(FlxG.sound.music.volume + 0.5 * elapsed, 0.8);
 
-		if (!selectedSomethin)
-		{
+		if (!selectedSomethin){
 			if (controls.UI_UP_P)
 				changeItem(-1);
 
@@ -183,8 +180,7 @@ class MainMenuState extends MusicBeatState
 				changeItem(1);
 
 			var allowMouse:Bool = allowMouse;
-			if (allowMouse && ((FlxG.mouse.deltaScreenX != 0 && FlxG.mouse.deltaScreenY != 0) || FlxG.mouse.justPressed)) //FlxG.mouse.deltaScreenX/Y checks is more accurate than FlxG.mouse.justMoved
-			{
+			if (allowMouse && ((FlxG.mouse.deltaScreenX != 0 && FlxG.mouse.deltaScreenY != 0) || FlxG.mouse.justPressed)){ //FlxG.mouse.deltaScreenX/Y checks is more accurate than FlxG.mouse.justMoved
 				allowMouse = false;
 				FlxG.mouse.visible = true;
 				timeNotMoving = 0;
