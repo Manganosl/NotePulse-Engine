@@ -32,3 +32,6 @@
 ## 06/04/2026
 - [X] Make CopyField compatible with modchart. **Fixed 08/04/2026 - Just dont create new PlayFields after Manager**
 - [X] Make PlayField's variables affect its notes, not only strums. **Done 08/04/2026**
+
+## 29/06/2026
+- [ ] Fix lag on sustain notes when using perspective (Most probably the shader's fault)
