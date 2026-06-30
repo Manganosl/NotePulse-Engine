@@ -1164,8 +1164,6 @@ class ModchartEditorState extends MusicBeatState
 
 			var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
 
-			daNote.rgbShader.angleX = Math.atan2(diffY, diffZ) + (Math.PI / 2);
-
 			if(daNote.frameHeight != 0) {
 				if(!daNote.isSustainEnd){
 					daNote.scale.y = (visualDist / daNote.frameHeight);
