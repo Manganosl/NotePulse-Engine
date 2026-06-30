@@ -1,6 +1,5 @@
 package funkin.scripting.lua.functions;
 
-
 import funkin.game.modchart.*;
 
 class ModchartFunctions

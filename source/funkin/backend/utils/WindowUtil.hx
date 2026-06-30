@@ -29,11 +29,6 @@ class WindowUtil
 	
 	static function get_defaultAppTitle():String return Application.current.meta['name'];
 	
-	public static function crashTheFuckingGame()
-	{
-		System.exit(0);
-	}
-	
 	public static function getWindow()
 	{
 		return Application.current.window;
