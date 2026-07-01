@@ -26,7 +26,7 @@ import openfl.Vector;
 import openfl.display.BlendMode;
 import openfl.filters.BitmapFilter;
 import openfl.filters.ShaderFilter;
-import flixel.addons.display.FlxRuntimeShader;
+import flixel.graphics.tile.FlxGraphicsShader;
 import flixel.graphics.tile.FlxDrawQuadsItem;
 
 using flixel.util.FlxColorTransformUtil;
@@ -1042,8 +1042,7 @@ class FlxCamera extends FlxBasic
 	 * @param shader Shader to add
 	 * @return ShaderFilter
 	 */
-	public function addShader(shader:FlxRuntimeShader):Bool
-	{
+	public function addShader(shader:FlxGraphicsShader):Bool {
 		try {
 			if (this.filters == null) this.filters = [];
 			this.filters.push(new ShaderFilter(shader));
@@ -1056,8 +1055,7 @@ class FlxCamera extends FlxBasic
 	 * @param shader Shader to remove
 	 * @return Whenever the shader has been successfully removed or not.
 	 */
-	public function removeShader(shader:FlxRuntimeShader):Bool
-	{
+	public function removeShader(shader:FlxGraphicsShader):Bool {
 		if (filters == null) filters = [];
 		for (f in filters) {
 			if (f is ShaderFilter) {

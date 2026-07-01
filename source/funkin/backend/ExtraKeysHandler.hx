@@ -1,10 +1,9 @@
 package funkin.backend;
 
-import flixel.input.keyboard.FlxKey;
+import json2object.JsonParser;
 
 class ExtraKeysHandler {
     public static var instance:ExtraKeysHandler;
-
     public var data:ExtraKeysData;
 
     public function new() {
@@ -12,15 +11,11 @@ class ExtraKeysHandler {
     }
 
     public function reloadExtraKeys() {
-        Log.hxTrace('Loading Extra Keys data...');
-
         var parser = new json2object.JsonParser<ExtraKeysData>();
         var dataPath:String = 'data/extrakeys.json';
         var dataText:String = Paths.getTextFromFile(dataPath);
 		parser.fromJson(dataText);
 		data = parser.value;
-
-        Log.info('Load complete.');
     }
 }
 

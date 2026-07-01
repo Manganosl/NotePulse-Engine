@@ -10,11 +10,11 @@ typedef ModsList = {
 };
 
 class Mods {
-	static public var currentModDirectory(get, default):String = '';
-	static public var currentLoadedMod(default, set):String = '';
+	public static var currentModDirectory(get, default):String = '';
+	public static var currentLoadedMod(default, set):String = '';
 	public static var save:FlxSave;
-	static public var modPack(get, default):Dynamic;
-	public static var ignoreModFolders:Array<String> = [
+	public static var modPack(get, default):Dynamic;
+	public static final ignoreModFolders:Array<String> = [
 		'characters',
 		'custom_events',
 		'custom_notetypes',

@@ -14,12 +14,6 @@ import funkin.states.scripted.ScriptedState;
 import funkin.scripting.GlobalHandler;
 
 class ModSelectorState extends MusicBeatState {
-	static final EXCLUDED_DIRS:Array<String> = [
-		"assets","data","fonts","images","music","sounds","videos",
-		"ndlls","scripts","shaders","characters","songs","stages",
-		"weeks","states","custom_events","custom_notetypes"
-	];
-
 	var goto:Class<Dynamic>;
 	var gotoArgs:Array<Dynamic>;
 
@@ -57,7 +51,7 @@ class ModSelectorState extends MusicBeatState {
 		goto = state;
 		gotoArgs = args ?? [];
 		for (folder in Mods.getModDirectories())
-			if (!EXCLUDED_DIRS.contains(folder)) modArray.push(folder);
+			if (!Mods.ignoreModFolders.contains(folder)) modArray.push(folder);
 		super();
 	}
 

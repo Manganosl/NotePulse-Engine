@@ -2,9 +2,6 @@ package funkin.backend;
 
 import haxe.Constraints.Function;
 import haxe.PosInfos;
-import lime.app.Application;
-import sys.FileSystem;
-import sys.io.File;
 import sys.io.FileOutput;
 
 using StringTools;
@@ -108,5 +105,5 @@ enum LogColor {
 	CUSTOM(color:Int);
 }
 #else
-typedef Log = haxe.Log; //TODO: Add support for no Pretty Traces
+typedef Log = haxe.Log;
 #end

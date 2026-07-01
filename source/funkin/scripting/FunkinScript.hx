@@ -44,6 +44,7 @@ class FunkinScript implements HscriptInterface {
 	 * These variables are free to be edited to allow for custom pre-imported classes.
 	 */
     public static var classes:Map<String, Dynamic> = [
+		// Haxe classes
 		"Math" 						=> Math, 
 		"Std" 						=> Std,
 		"StringTools" 				=> StringTools,
@@ -100,6 +101,7 @@ class FunkinScript implements HscriptInterface {
 		"NdllUtil" 					=> funkin.backend.utils.NdllUtil,
 		"LuaUtils" 					=> funkin.scripting.LuaUtils,
 
+		// Modcharting Classes
 		"ModManager" 				=> funkin.game.modchart.ModManager,
 		"SubModifier" 				=> funkin.game.modchart.SubModifier,
 		"NoteModifier" 				=> funkin.game.modchart.NoteModifier,
@@ -138,7 +140,6 @@ class FunkinScript implements HscriptInterface {
 		"FlxTypedGroup" 			=> flixel.group.FlxGroup.FlxTypedGroup,
 		"FlxSpriteGroup"	 		=> flixel.group.FlxSpriteGroup,
 		"FlxSound" 					=> #if(flixel >= "5.3.0") flixel.sound.FlxSound #else flixel.system.FlxSound #end,
-		#if flxanimate "FlxAnimate" => flxanimate.FlxAnimate, #end
 		#if !flash 
 		"FlxRuntimeShader" 			=> flixel.addons.display.FlxRuntimeShader, 
 		#end
