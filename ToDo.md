@@ -34,4 +34,4 @@
 - [X] Make PlayField's variables affect its notes, not only strums. **Done 08/04/2026**
 
 ## 29/06/2026
-- [ ] Fix lag on sustain notes when using perspective (Most probably the shader's fault)
+- [X] Fix lag on sustain notes when using perspective (Most probably the shader's fault) **Fixed somehow? 01/07/2026**
