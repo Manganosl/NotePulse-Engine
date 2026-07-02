@@ -41,12 +41,9 @@ import funkin.objects.notes.Note;
 import funkin.objects.notes.StrumNote;
 import funkin.objects.OurLittleFriend;
 
-import moonchart.formats.fnf.legacy.FNFPsych;
+import moonchart.formats.OsuMania;
+import moonchart.formats.fnf.legacy.FNFNotepulse;
 import moonchart.formats.fnf.FNFCodename;
-import moonchart.formats.BasicFormat.DynamicFormat;
-import moonchart.backend.Util.OneOfArray;
-import moonchart.formats.fnf.legacy.FNFLegacy;
-import moonchart.formats.BasicFormat.FormatDifficulty;
 import moonchart.formats.fnf.FNFVSlice;
 
 import openfl.net.FileFilter;
@@ -3867,6 +3864,266 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		btnY++;
 		btnY += 20;
+		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Import from V-Slice', function()
+		{
+			if(upperBox != null) {
+				upperBox.isMinimized = true;
+				if(upperBox.bg != null) upperBox.bg.visible = false;
+			}
+
+			var chartFile:openfl.net.FileReference = new openfl.net.FileReference();
+			var jsonFilter:openfl.net.FileFilter = new openfl.net.FileFilter("JSON Files (*.json)", "*.json");
+
+			chartFile.addEventListener(openfl.events.Event.SELECT, function(e:openfl.events.Event)
+			{
+				var pathToChart:String = @:privateAccess chartFile.__path;
+				if (pathToChart == null || pathToChart.toLowerCase().contains('meta')) {
+					showOutput('Error: Please select the chart file first.', true);
+					return;
+				}
+				
+				var metaFile:openfl.net.FileReference = new openfl.net.FileReference();
+				
+				metaFile.addEventListener(openfl.events.Event.SELECT, function(e2:openfl.events.Event)
+				{
+					var pathToMeta:String = @:privateAccess metaFile.__path;
+					if (pathToMeta == null || !pathToMeta.toLowerCase().contains('meta')) {
+						showOutput('Error: The file must be a valid metadata file.', true);
+						return;
+					}
+
+					try {
+						var vsliceChart = new FNFVSlice().fromFile(pathToChart, pathToMeta);
+						var finalChart = new FNFNotepulse().fromFormat(vsliceChart);
+						
+						if (finalChart == null || finalChart.data == null || finalChart.data.song == null) {
+							showOutput('Error: The chart data conversion failed.', true);
+							return;
+						}
+						
+						var loadedChart:SwagSong = cast finalChart.data.song;
+						
+						if(!Reflect.hasField(loadedChart, 'notes'))
+						{
+							showOutput('Error: The loaded chart does not contain valid notes.', true);
+							return;
+						}
+						
+						var func:Void->Void = function()
+						{
+							var formattedPath:String = pathToChart.replace('\\', '/');
+							loadChart(loadedChart);
+							Song.chartPath = null;
+							reloadNotesDropdowns();
+							prepareReload();
+							showOutput('Imported V-Slice chart successfully!');
+						}
+						
+						var ignoreProgress:Bool = false;
+						if(ignoreProgressCheckBox != null) {
+							ignoreProgress = ignoreProgressCheckBox.checked;
+						}
+						
+						if(!ignoreProgress)
+						{
+							if(FlxG.sound != null) FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
+							openSubState(new Prompt('Warning: This will overwrite the current chart.\nAny unsaved progress\nwill be lost.', func));
+						}
+						else func();
+					}
+					catch(err:Dynamic)
+					{
+						showOutput('ERROR: ${err}', true);
+					}
+				});
+
+				metaFile.addEventListener(openfl.events.Event.CANCEL, function(e:openfl.events.Event) {
+					showOutput('Metadata file selection cancelled.', true);
+				});
+
+				metaFile.browse([jsonFilter]);
+			});
+
+			chartFile.addEventListener(openfl.events.Event.CANCEL, function(e:openfl.events.Event) {
+				showOutput('Chart file selection cancelled.', true);
+			});
+
+			chartFile.browse([jsonFilter]);
+
+		}, btnWid);
+
+		btn.text.alignment = LEFT;
+		tab_group.add(btn);
+
+		btnY += 20;
+		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Import from CNE', function()
+		{
+			if(upperBox != null) {
+				upperBox.isMinimized = true;
+				if(upperBox.bg != null) upperBox.bg.visible = false;
+			}
+
+			var chartFile:openfl.net.FileReference = new openfl.net.FileReference();
+			var jsonFilter:openfl.net.FileFilter = new openfl.net.FileFilter("JSON Files (*.json)", "*.json");
+
+			chartFile.addEventListener(openfl.events.Event.SELECT, function(e:openfl.events.Event)
+			{
+				var pathToChart:String = @:privateAccess chartFile.__path;
+				if (pathToChart == null || pathToChart.toLowerCase().contains('meta')) {
+					showOutput('Error: Please select the chart file first.', true);
+					return;
+				}
+				
+				var metaFile:openfl.net.FileReference = new openfl.net.FileReference();
+				
+				metaFile.addEventListener(openfl.events.Event.SELECT, function(e2:openfl.events.Event)
+				{
+					var pathToMeta:String = @:privateAccess metaFile.__path;
+					if (pathToMeta == null || !pathToMeta.toLowerCase().contains('meta')) {
+						showOutput('Error: The file must be a valid metadata file.', true);
+						return;
+					}
+
+					try
+					{
+						var cneChart = new FNFCodename().fromFile(pathToChart, pathToMeta);
+						var finalChart = new FNFNotepulse().fromFormat(cneChart);
+						
+						if (finalChart == null || finalChart.data == null || finalChart.data.song == null) {
+							showOutput('Error: The chart data conversion failed.', true);
+							return;
+						}
+						
+						var loadedChart:SwagSong = cast finalChart.data.song;
+						
+						if(!Reflect.hasField(loadedChart, 'notes'))
+						{
+							showOutput('Error: The loaded chart does not contain valid notes.', true);
+							return;
+						}
+						
+						var func:Void->Void = function()
+						{
+							var formattedPath:String = pathToChart.replace('\\', '/');
+							loadChart(loadedChart);
+							Song.chartPath = null;
+							reloadNotesDropdowns();
+							prepareReload();
+							showOutput('Imported Codename Engine chart successfully!');
+						}
+						
+						var ignoreProgress:Bool = false;
+						if(ignoreProgressCheckBox != null) {
+							ignoreProgress = ignoreProgressCheckBox.checked;
+						}
+						
+						if(!ignoreProgress)
+						{
+							if(FlxG.sound != null) FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
+							openSubState(new Prompt('Warning: This will overwrite the current chart.\nAny unsaved progress\nwill be lost.', func));
+						}
+						else func();
+					}
+					catch(err:Dynamic)
+					{
+						showOutput('ERROR: ${err}', true);
+					}
+				});
+
+				metaFile.addEventListener(openfl.events.Event.CANCEL, function(e:openfl.events.Event) {
+					showOutput('Metadata file selection cancelled.', true);
+				});
+
+				metaFile.browse([jsonFilter]);
+			});
+
+			chartFile.addEventListener(openfl.events.Event.CANCEL, function(e:openfl.events.Event) {
+				showOutput('Chart file selection cancelled.', true);
+			});
+
+			chartFile.browse([jsonFilter]);
+
+		}, btnWid);
+
+		btn.text.alignment = LEFT;
+		tab_group.add(btn);
+
+		btnY += 20;
+		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Import from Osu', function()
+		{
+			if(upperBox != null) {
+				upperBox.isMinimized = true;
+				if(upperBox.bg != null) upperBox.bg.visible = false;
+			}
+
+			var chartFile:openfl.net.FileReference = new openfl.net.FileReference();
+			var oszFilter:openfl.net.FileFilter = new openfl.net.FileFilter("OSZ Files (*.osz)", "*.osz");
+
+			chartFile.addEventListener(openfl.events.Event.SELECT, function(e:openfl.events.Event)
+			{
+				var pathToChart:String = @:privateAccess chartFile.__path;
+				if (pathToChart == null) {
+					showOutput('Error: Please select a valid Osu Mania chart file.', true);
+					return;
+				}
+				
+				try {
+					var cneChart = new OsuMania().fromFile(pathToChart);
+					var finalChart = new FNFNotepulse().fromFormat(cneChart);
+						
+					if (finalChart == null || finalChart.data == null || finalChart.data.song == null) {
+						showOutput('Error: The chart data conversion failed.', true);
+						return;
+					}
+						
+					var loadedChart:SwagSong = cast finalChart.data.song;
+						
+					if(!Reflect.hasField(loadedChart, 'notes'))
+					{
+						showOutput('Error: The loaded chart does not contain valid notes.', true);
+						return;
+					}
+						
+					var func:Void->Void = function()
+					{
+						var formattedPath:String = pathToChart.replace('\\', '/');
+						loadChart(loadedChart);
+						Song.chartPath = null;
+						reloadNotesDropdowns();
+						prepareReload();
+						showOutput('Imported Osu Mania chart successfully!');
+					}
+						
+					var ignoreProgress:Bool = false;
+					if(ignoreProgressCheckBox != null) {
+						ignoreProgress = ignoreProgressCheckBox.checked;
+					}
+						
+					if(!ignoreProgress)
+					{
+						if(FlxG.sound != null) FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
+						openSubState(new Prompt('Warning: This will overwrite the current chart.\nAny unsaved progress\nwill be lost.', func));
+					}
+					else func();
+				}
+				catch(err:Dynamic){
+					showOutput('ERROR: ${err}', true);
+				}
+			});
+
+			chartFile.addEventListener(openfl.events.Event.CANCEL, function(e:openfl.events.Event) {
+				showOutput('Chart file selection cancelled.', true);
+			});
+
+			chartFile.browse([oszFilter]);
+
+		}, btnWid);
+
+		btn.text.alignment = LEFT;
+		tab_group.add(btn);
+
+		btnY++;
+		btnY += 20;
 		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Preview (F12)', editorPlayStatePrompt, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
@@ -4536,6 +4793,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), Song.chartPath);
+			chartPath = Song.chartPath;
 		}
 	}
 

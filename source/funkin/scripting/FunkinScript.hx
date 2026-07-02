@@ -177,9 +177,9 @@ class FunkinScript implements HscriptInterface {
 	 *
 	 * @param	path			The path to the haxe script.
 	 *							NOTE: This does not support direct code strings. See the
-	 *							`HaxeCode` class for a version supporting code strings.
+	 *							`HaxeFunctions` class for a version supporting code strings.
 	 * @param	_parentClass	The parent state instance this script will be assigned to. 
-	 * @param	_autoRunScript	(This is used internally by `HaxeCode` and is not recommened to use)
+	 * @param	_autoRunScript	(This is used internally by `HaxeFunctions` and is not recommened to use)
 	 * @param  	_ignoreErrors	Whether the script should ignore the critical error popup if an error is found.
 	 */
     public function new(path:String, ?_parentClass:Dynamic = null, ?_autoRunScript:Bool = true, ?_ignoreErrors:Bool = false) {
