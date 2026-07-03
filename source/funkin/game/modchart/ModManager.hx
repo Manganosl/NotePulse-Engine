@@ -1,16 +1,22 @@
 // @author Nebula_Zorua
 
 package funkin.game.modchart;
+
+import funkin.scripting.LuaUtils;
 import flixel.tweens.FlxEase;
 import funkin.game.modchart.events.*;
 import funkin.game.modchart.modifiers.*;
 
-// Need to add nodes, aliases and all that shit -Manganos
+// Need to add nodes, aliases and all that shit
 
 // Weird amalgamation of Schmovin' modifier system, Andromeda modifier system and my own new shit -neb
 
 class ModManager {
 	public var swapPlayers:Bool = false;
+
+	static inline function normalizeModName(modName:String):String
+		return modName == null ? modName : modName.toLowerCase();
+
 	public function registerDefaultModifiers()
 	{
 		var quickRegs:Array<Any> = [
@@ -83,6 +89,7 @@ class ModManager {
         registerMod(mod.getName(), mod);
 
     public function registerMod(modName:String, mod:Modifier, ?registerSubmods = true){
+        modName = normalizeModName(modName);
         register.set(modName, mod);
 		switch (mod.getModType()){
 			case NOTE_MOD:
@@ -112,13 +119,13 @@ class ModManager {
     }
 
 	inline public function get(modName:String)
-		return register.get(modName);
+		return register.get(normalizeModName(modName));
 	
 	inline public function getPercent(modName:String, player:Int)
-		return !register.exists(modName) ? 0 : get(modName).getPercent(player);
+		return !register.exists(normalizeModName(modName)) ? 0 : get(modName).getPercent(player);
 
 	inline public function getValue(modName:String, player:Int):Float
-		return !register.exists(modName) ? 0 : get(modName).getValue(player);
+		return !register.exists(normalizeModName(modName)) ? 0 : get(modName).getValue(player);
 
     inline public function setPercent(modName:String, val:Float, player:Int=-1)
 		setValue(modName, val / 100, player);
@@ -127,10 +134,10 @@ class ModManager {
 		setCurrentValue(modName, val / 100, player);
 
 	inline public function getTargetPercent(modName:String, player:Int)
-		return !register.exists(modName) ? 0 : get(modName).getTargetPercent(player);
+		return !register.exists(normalizeModName(modName)) ? 0 : get(modName).getTargetPercent(player);
 
 	inline public function getTargetValue(modName:String, player:Int)
-		return !register.exists(modName) ? 0 : get(modName).getTargetValue(player);
+		return !register.exists(normalizeModName(modName)) ? 0 : get(modName).getTargetValue(player);
 
 	public function setCurrentValue(modName:String, val:Float, player:Int = -1)
 	{
@@ -172,14 +179,14 @@ class ModManager {
 		}
 		else
 		{
-			var daMod = register.get(modName);
+			var daMod = register.get(normalizeModName(modName));
 			if (daMod == null)
 			{
 				Log.warn("The modifier " + modName + " cannot be set as it's null");
 				return;
 			}
 			var mod = daMod.parent == null ? daMod : daMod.parent;
-			var name = mod.getName();
+			var name = normalizeModName(mod.getName());
             // optimization shit!! :)
             // thanks 4mbr0s3 for giving an alternative way to do all of this cus andromeda has smth similar in Flexy but like
             // this is a better way to do it
@@ -197,8 +204,8 @@ class ModManager {
 			daMod.setValue(val, player);
 
 			if (!activeMods[player].contains(name) && mod.shouldExecute(player, val)){
-				if (daMod.getName() != name)
-					activeMods[player].push(daMod.getName());
+				if (normalizeModName(daMod.getName()) != name)
+					activeMods[player].push(normalizeModName(daMod.getName()));
 				activeMods[player].push(name);
 			} else if (!mod.shouldExecute(player, val)){
 
@@ -213,13 +220,13 @@ class ModManager {
 					}
 				}
 				if (daMod != modParent)
-					activeMods[player].remove(daMod.getName());
+					activeMods[player].remove(normalizeModName(daMod.getName()));
 				if (modParent != null){
 					if (!shouldKeepParentActive(modParent, player)){
-						activeMods[player].remove(modParent.getName());
+						activeMods[player].remove(normalizeModName(modParent.getName()));
 					}
 				} else
-					activeMods[player].remove(daMod.getName());
+					activeMods[player].remove(normalizeModName(daMod.getName()));
 			}
 
 			activeModsDirty[player] = true;
@@ -327,13 +334,15 @@ class ModManager {
 		} else {
 			var easeFunc = FlxEase.linear;
 			try {
-				var newEase = Reflect.getProperty(FlxEase, style);
+				var newEase = LuaUtils.getTweenEaseByString(style);
 				if (newEase != null)
 					easeFunc = newEase;
+				else
+					Log.warn('Unknown ease style: $style');
 			} catch(e) {
 				Log.warn('Unknown ease style: $style');
 			}
-			timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this));
+			timeline.addEvent(new ModEaseEvent(step, endStep, normalizeModName(modName), target, easeFunc, player, this));
 		}
 	}
 
@@ -343,7 +352,7 @@ class ModManager {
 				queueSet(step, modName, target, field.player);
 		}
 		else
-			timeline.addEvent(new SetEvent(step, modName, target, player, this));
+			timeline.addEvent(new SetEvent(step, normalizeModName(modName), target, player, this));
 	}
 
 	public function queueEaseL(step:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
@@ -410,7 +419,7 @@ class ModManager {
 			for (field in PlayField.fields)
 				ease(modName, beat, len, val, easeFunc, field.player);
 		} else {
-			timeline.addEvent(new ModEaseEvent(beat * 4, (beat + len) * 4, modName, val, easeFunc, player, this));
+			timeline.addEvent(new ModEaseEvent(beat * 4, (beat + len) * 4, normalizeModName(modName), val, easeFunc, player, this));
 		}
 	}
 
@@ -419,7 +428,7 @@ class ModManager {
 			for (field in PlayField.fields)
 				set(modName, beat, val, field.player);
 		} else {
-			timeline.addEvent(new SetEvent(beat * 4, modName, val, player, this));
+			timeline.addEvent(new SetEvent(beat * 4, normalizeModName(modName), val, player, this));
 		}
 	}
 }

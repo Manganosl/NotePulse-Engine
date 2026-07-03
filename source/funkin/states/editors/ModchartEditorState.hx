@@ -107,6 +107,8 @@ class ModchartEditorState extends MusicBeatState
 
 	var _file:FileReference;
 
+	var pendingSeekTime:Null<Float> = null;
+
 	public function new()
 	{
 		super();
@@ -275,9 +277,7 @@ class ModchartEditorState extends MusicBeatState
 				FlxG.sound.music.pause();
 				if(vocals != null) vocals.pause();
 				if(opponentVocals != null) opponentVocals.pause();
-				FlxG.sound.music.time = v;
-				Conductor.songPosition = v;
-				seek(0);
+				pendingSeekTime = v;
 			}
 		}, Conductor.songPosition, 0, songLen, FlxG.width, 0xFF4D4D4D, FlxColor.WHITE);
 		songPosSlider.y = thatBG.y;
@@ -842,7 +842,23 @@ class ModchartEditorState extends MusicBeatState
 	private var isCrosshair:Bool = false;
 	override function update(elapsed:Float)
 	{
-		if(FlxG.sound.music.playing) songPosSlider.value = Conductor.songPosition;
+		if(pendingSeekTime != null)
+		{
+			var oldTime:Float = Conductor.songPosition;
+			var newTime:Float = pendingSeekTime;
+			pendingSeekTime = null;
+
+			if(FlxG.sound.music != null) FlxG.sound.music.time = newTime;
+			if(vocals != null) vocals.time = newTime;
+			if(opponentVocals != null) opponentVocals.time = newTime;
+			Conductor.songPosition = newTime;
+
+			applyNoteStates(newTime);
+
+			if(newTime < oldTime) reloadManager();
+		}
+
+		if(FlxG.sound.music != null && FlxG.sound.music.playing) songPosSlider.value = Conductor.songPosition;
 
 		ClientPrefs.toggleVolumeKeys(PsychUIInputText.focusOn == null);
 		updateScrollY();
@@ -911,12 +927,37 @@ class ModchartEditorState extends MusicBeatState
 		}
 		notesFollow();
 
+		if(FlxG.keys.justPressed.Z != FlxG.keys.justPressed.X)
+		{
+			var zoomIndex:Int = zoomList.indexOf(curZoom);
+			if(zoomIndex < 0) zoomIndex = zoomList.indexOf(1);
+
+			if(FlxG.keys.justPressed.Z)
+				curZoom = zoomList[Std.int(Math.max(zoomIndex - 1, 0))];
+			else
+				curZoom = zoomList[Std.int(Math.min(zoomIndex + 1, zoomList.length - 1))];
+
+			for (event in events)
+			{
+				var secNum:Int = 0;
+				for (time in cachedSectionTimes)
+				{
+					if(time > event.strumTime) break;
+					secNum++;
+				}
+				positionNoteYOnTime(event, secNum);
+			}
+			loadSection();
+			showOutput('Zoom: ${Math.round(curZoom * 100)}%');
+			updateScrollY();
+		}
+
 		var minX:Float = gridBg.x;
 		if(FlxG.mouse.x >= minX && FlxG.mouse.x < gridBg.x + gridBg.width)
 		{
 			//if((!FlxG.mouse.overlaps(mainBox.bg) || !FlxG.mouse.overlaps(infoBox.bg))){
-				Mouse.cursor = MouseCursor.CROSSHAIR;
-				isCrosshair = true;
+			//	Mouse.cursor = MouseCursor.CROSSHAIR;
+			//	isCrosshair = true;
 			//}
 			var diffX:Float = FlxG.mouse.x - gridBg.x;
 			var diffY:Float = (FlxG.mouse.y+camUI.scroll.y) - gridBg.y;
@@ -933,28 +974,6 @@ class ModchartEditorState extends MusicBeatState
 			dummyArrow.x = gridBg.x + noteData * ChartingState.GRID_SIZE;
 			dummyArrow.visible = true;
 			noteData--;
-
-			if(FlxG.keys.justPressed.Z != FlxG.keys.justPressed.X) //Decrease/Increase Zoom
-				{
-					if(FlxG.keys.justPressed.Z)
-						curZoom = zoomList[Std.int(Math.max(zoomList.indexOf(curZoom) - 1, 0))];
-					else
-						curZoom = zoomList[Std.int(Math.min(zoomList.indexOf(curZoom) + 1, zoomList.length - 1))];
-	
-					for (event in events)
-					{
-						var secNum:Int = 0;
-						for (time in cachedSectionTimes)
-						{
-							if(time > event.strumTime) break;
-							secNum++;
-						}
-						positionNoteYOnTime(event, secNum);
-					}
-					loadSection();
-					showOutput('Zoom: ${Math.round(curZoom * 100)}%');
-					updateScrollY();
-				}
 
 			if(FlxG.keys.pressed.SHIFT || (FlxG.mouse.y+camUI.scroll.y) >= gridBg.y || !prevGridBg.visible)
 				dummyArrow.y = gridBg.y + diffY;
@@ -973,7 +992,14 @@ class ModchartEditorState extends MusicBeatState
 						var chartY:Float = (FlxG.mouse.y+camUI.scroll.y) - note.chartY;
 						return (note.isEvent && noteData < 0) && chartY >= 0 && chartY < ChartingState.GRID_SIZE;
 					});
-					closeNotes.sort(function(a:MetaNote, b:MetaNote) return Math.abs(a.strumTime - (FlxG.mouse.y+camUI.scroll.y)) < Math.abs(b.strumTime - (FlxG.mouse.y+camUI.scroll.y)) ? 1 : -1);
+
+					closeNotes.sort(function(a:MetaNote, b:MetaNote)
+					{
+						var mouseY:Float = FlxG.mouse.y + camUI.scroll.y;
+						var distA:Float = Math.abs(a.chartY - mouseY);
+						var distB:Float = Math.abs(b.chartY - mouseY);
+						return distA < distB ? -1 : (distA > distB ? 1 : 0);
+					});
 
 					var closest = closeNotes[0];
 					if(closest != null)
@@ -1086,8 +1112,11 @@ class ModchartEditorState extends MusicBeatState
 						}
 						if (easeInput != null) easeInput.text = parts[4];
 						if (playerStepper != null) {
-							var pVal:Int = 0;
-							try pVal = {Std.parseInt(parts[5]);} catch(e:Dynamic) {pVal = Std.int(playerStepper.value);}
+							var pVal:Int = Std.int(playerStepper.value);
+							try {
+								var parsed:Null<Int> = Std.parseInt(parts[5]);
+								if (parsed != null) pVal = parsed;
+							} catch(e:Dynamic) {}
 							playerStepper.value = pVal;
 						}
 
@@ -1469,7 +1498,11 @@ class ModchartEditorState extends MusicBeatState
 		{
 			case 1: playField = playerStrums;
 			case 2: playField = gfStrums;
-			default: playField = opponentStrums;
+			default:
+				if (player >= 3 && extraStrums.length > (player - 3))
+					playField = extraStrums[player - 3];
+				else
+					playField = opponentStrums;
 		}
 
 		var i:Int = 0;
@@ -1780,14 +1813,6 @@ class ModchartEditorState extends MusicBeatState
 			var chartDir = haxe.io.Path.directory(chartPath);
 			if (!sys.FileSystem.exists(chartDir))
 			{
-				var ensureDirectory = function(path:String)
-				{
-					var parent = haxe.io.Path.directory(path);
-					if (parent != "" && !sys.FileSystem.exists(parent))
-						ChartingState.ensureDirectory(parent);
-					if (!sys.FileSystem.exists(path))
-						sys.FileSystem.createDirectory(path);
-				}
 				ChartingState.ensureDirectory(chartDir);
 			}
 
