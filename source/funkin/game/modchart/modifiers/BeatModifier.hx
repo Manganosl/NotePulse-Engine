@@ -6,8 +6,7 @@ class BeatModifier extends NoteModifier {
         if(getValue(player)==0)return pos;
         var accelTime:Float = 0.3;
         var totalTime:Float = 0.7;
-        @:privateAccess
-        var beat = PlayState.instance.curDecBeat + accelTime;
+        var beat = Conductor.curDecBeat + accelTime;
         var evenBeat = beat%2!=0;
 
         if(beat<0)return pos;

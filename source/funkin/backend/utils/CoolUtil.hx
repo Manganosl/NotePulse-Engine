@@ -84,7 +84,7 @@ class CoolUtil
 	}
 
 	inline public static function snap(f:Float, snap:Float):Float
-		return Math.fround(f / snap) * snap;
+		return snap == 0 ? f : Math.fround(f / snap) * snap;
 
 	inline public static function boundTo(value:Float, min:Float, max:Float):Float
 		return Math.max(min, Math.min(max, value));

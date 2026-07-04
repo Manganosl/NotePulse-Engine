@@ -2,6 +2,7 @@ package funkin.scripting;
 
 #if HSCRIPT_ALLOWED
 import hscript.Expr.Error;
+import hscript.Parser;
 import hscript.Expr;
 import hscript.*;
 import haxe.PosInfos;
@@ -548,7 +549,7 @@ class FunkinScript implements HscriptInterface {
 	}
 
 	public function initParser() {
-		parser = new hscript.Parser();
+		parser = new Parser();
 		parser.allowJSON = parser.allowMetadata = parser.allowTypes = parser.allowRegex = true;
 		parser.preprocessorValues = LuaUtils.preprocessors;
 	}

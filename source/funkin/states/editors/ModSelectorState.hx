@@ -6,8 +6,7 @@ import funkin.states.menus.FreeplayState.SongMetadata;
 import funkin.objects.HealthIcon;
 import funkin.objects.AttachedSprite;
 import openfl.net.FileReference;
-import openfl.events.Event;
-import openfl.events.IOErrorEvent;
+import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxSort;
 import haxe.Json;
 import funkin.states.scripted.ScriptedState;
@@ -63,7 +62,7 @@ class ModSelectorState extends MusicBeatState {
 		bg.screenCenter();
 		add(bg);
 
-		backdrop = new flixel.addons.display.FlxBackdrop(Paths.image('grid'));
+		backdrop = new FlxBackdrop(Paths.image('grid'));
 		backdrop.velocity.set(50, 30);
 		backdrop.alpha = 0.9;
 		add(backdrop);
@@ -297,7 +296,8 @@ class ModSelectorState extends MusicBeatState {
 		for (i in 0...WeekData.weeksList.length) {
 			var week = WeekData.weeksLoaded.get(WeekData.weeksList[i]);
 			WeekData.setDirectoryFromWeek(week);
-			for (song in week.songs) {
+			for(song in week.songs){
+				if(Mods.currentLoadedMod != null && Mods.currentLoadedMod != "" && week.folder != Mods.currentLoadedMod) continue;
 				var colors:Array<Int> = song[2];
 				if (colors == null || colors.length < 3) colors = [146, 113, 253];
 				songs.push(new SongMetadata(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2])));

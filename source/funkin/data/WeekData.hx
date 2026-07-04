@@ -89,15 +89,14 @@ class WeekData {
 		for (i in 0...sexList.length) {
 			for (j in 0...directories.length) {
 				var fileToCheck:String = directories[j] + 'weeks/' + sexList[i] + '.json';
-				if(!weeksLoaded.exists(sexList[i])) {
+				if(!weeksLoaded.exists(sexList[i])){
 					var week:WeekFile = getWeekFile(fileToCheck);
-					if(week != null) {
+					if(week != null){
 						var weekFile:WeekData = new WeekData(week, sexList[i]);
 
 						#if MODS_ALLOWED
-						if(j >= originalLength) {
+						if(j >= originalLength)
 							weekFile.folder = directories[j].substring(Paths.mods().length, directories[j].length-1);
-						}
 						#end
 
 						if(weekFile != null && (isStoryMode == null || (isStoryMode && !weekFile.hideStoryMode) || (!isStoryMode && !weekFile.hideFreeplay))) {
@@ -110,17 +109,14 @@ class WeekData {
 		}
 
 		#if MODS_ALLOWED
-		for (i in 0...directories.length) {
+		for (i in 0...directories.length){
 			var directory:String = directories[i] + 'weeks/';
-			if(FileSystem.exists(directory)) {
+			if(FileSystem.exists(directory)){
 				var listOfWeeks:Array<String> = CoolUtil.coolTextFile(directory + 'weekList.txt');
-				for (daWeek in listOfWeeks)
-				{
+				for (daWeek in listOfWeeks){
 					var path:String = directory + daWeek + '.json';
 					if(FileSystem.exists(path))
-					{
 						addWeek(daWeek, path, directories[i], i, originalLength);
-					}
 				}
 
 				for (file in FileSystem.readDirectory(directory))

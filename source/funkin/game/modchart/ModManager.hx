@@ -34,6 +34,8 @@ class ModManager {
 			TransformModifier, 
 			InfinitePathModifier, 
 			PerspectiveModifier, 
+			SnapModifier,
+			SpiralModifier,
 			AccelModifier, 
 			XModifier
 		];

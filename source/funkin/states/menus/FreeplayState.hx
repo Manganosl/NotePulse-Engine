@@ -97,6 +97,8 @@ class FreeplayState extends MusicBeatState
 			var leSongs:Array<String> = [];
 			var leChars:Array<String> = [];
 
+			if(Mods.currentLoadedMod != null && Mods.currentLoadedMod != "" && leWeek.folder != Mods.currentLoadedMod) continue;
+			
 			for (j in 0...leWeek.songs.length)
 			{
 				leSongs.push(leWeek.songs[j][0]);
