@@ -8,6 +8,13 @@ import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
 
+enum abstract FunkinDebugDisplayMode(Int) from Int to Int
+{
+  var SIMPLE;
+  var ADVANCED;
+  var DEBUG;
+}
+
 /**
  * A debug overlay showing useful info.
  */
@@ -20,14 +27,18 @@ class FunkinDebugDisplay extends Sprite
   static final INNER_RECT_DIFF:Int = 3;
   static final OUTER_RECT_DIMENSIONS:Array<Int> = [234, 201];
   static final OTHERS_OFFSET:Int = 8;
+  static final DEBUG_BOX_GAP:Int = 6;
+  static final DEBUG_BOX_MIN_HEIGHT:Int = 20;
 
   /**
-   * Indicates whether the debug display is in advanced mode.
+   * The current display mode. See `FunkinDebugDisplayMode`.
    */
-  public var isAdvanced(default, set):Bool = false;
+  public var mode(default, set):FunkinDebugDisplayMode = SIMPLE;
+
+  public var isAdvanced(get, set):Bool;
 
   /**
-   * The opacity of the debug display's background.
+   * The opacity of the debug display's background(s).
    */
   public var backgroundOpacity(default, set):Float = 0.5;
 
@@ -52,6 +63,12 @@ class FunkinDebugDisplay extends Sprite
 
   var infoDisplay:TextField;
 
+  // Cool Debug info box thingy
+  var debugBackground:Shape;
+  var debugInfoDisplay:TextField;
+  var debugBoxWidth:Float;
+  var debugBoxY:Float;
+
   public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000):Void
   {
     super();
@@ -69,12 +86,30 @@ class FunkinDebugDisplay extends Sprite
     this.times = [];
     this.color = color;
     this.backgroundOpacity = ClientPrefs.data.alphaFPS;
-    this.isAdvanced = false;
+    this.mode = SIMPLE;
   }
 
-  function buildDebugDisplay(advanced:Bool):Void
+  /**
+   * Cycles through SIMPLE -> ADVANCED -> DEBUG -> SIMPLE ...
+   */
+  public function cycleMode():Void
+  {
+    mode = switch (mode)
+    {
+      case SIMPLE: ADVANCED;
+      case ADVANCED: DEBUG;
+      case DEBUG: SIMPLE;
+      default: SIMPLE;
+    }
+  }
+
+  function buildDebugDisplay(mode:FunkinDebugDisplayMode):Void
   {
     removeChildren(0, numChildren);
+    debugBackground = null;
+    debugInfoDisplay = null;
+
+    final advanced:Bool = mode != SIMPLE;
 
     final BG_WIDTH_MULTIPLIER:Float = #if html5 advanced ? 1 : 0.3 #else 1 #end;
 
@@ -84,10 +119,12 @@ class FunkinDebugDisplay extends Sprite
     final BG_HEIGHT_MULTIPLIER:Float = advanced ? 1 : (MemoryUtil.supportsTaskMem()) ? 0.3 : 0.2;
     #end
 
+    final bgWidth:Float = (OUTER_RECT_DIMENSIONS[0] * BG_WIDTH_MULTIPLIER) + (INNER_RECT_DIFF * 2);
+    final bgHeight:Float = (OUTER_RECT_DIMENSIONS[1] * BG_HEIGHT_MULTIPLIER) + (INNER_RECT_DIFF * 2);
+
     background = new Shape();
     background.graphics.beginFill(0x3d3f41, 1);
-    background.graphics.drawRect(0, 0, (OUTER_RECT_DIMENSIONS[0] * BG_WIDTH_MULTIPLIER) + (INNER_RECT_DIFF * 2),
-      (OUTER_RECT_DIMENSIONS[1] * BG_HEIGHT_MULTIPLIER) + (INNER_RECT_DIFF * 2));
+    background.graphics.drawRect(0, 0, bgWidth, bgHeight);
     background.graphics.endFill();
     background.graphics.beginFill(0x2c2f30, 1);
     background.graphics.drawRect(INNER_RECT_DIFF, INNER_RECT_DIFF, OUTER_RECT_DIMENSIONS[0] * BG_WIDTH_MULTIPLIER,
@@ -105,6 +142,11 @@ class FunkinDebugDisplay extends Sprite
     {
       createSimpleElements();
       updateSimpleDisplay();
+    }
+
+    if (mode == DEBUG){  // Only update the thingy on DEBUG mode to prevent lag
+      createDebugElements(bgHeight);
+      updateDebugDisplay();
     }
   }
 
@@ -147,6 +189,56 @@ class FunkinDebugDisplay extends Sprite
     addChild(infoDisplay);
   }
 
+  /**
+   * Builds the extra box shown under the simple/advanced display when `mode == DEBUG`.
+   * Its own size is computed dynamically in `redrawDebugBox()` based on the text content.
+   * @param prevBoxHeight  Height of the box directly above, so this one is placed right under it.
+   */
+  function createDebugElements(prevBoxHeight:Float):Void
+  {
+    debugBoxY = prevBoxHeight + DEBUG_BOX_GAP;
+
+    debugBackground = new Shape();
+    debugBackground.y = debugBoxY;
+    addChild(debugBackground);
+
+    debugInfoDisplay = new TextField();
+    debugInfoDisplay.x = OTHERS_OFFSET;
+    debugInfoDisplay.selectable = false;
+    debugInfoDisplay.mouseEnabled = false;
+    debugInfoDisplay.defaultTextFormat = new TextFormat('Monsterrat', 12, color, JUSTIFY);
+    debugInfoDisplay.antiAliasType = NORMAL;
+    debugInfoDisplay.multiline = true;
+    debugInfoDisplay.wordWrap = false;
+    debugInfoDisplay.autoSize = LEFT;
+    addChild(debugInfoDisplay);
+
+    redrawDebugBox();
+  }
+
+  function redrawDebugBox():Void
+  {
+    if (debugBackground == null || debugInfoDisplay == null) return;
+
+    final textWidth:Float = Math.max(debugInfoDisplay.width, 1);
+    final textHeight:Float = Math.max(debugInfoDisplay.textHeight, DEBUG_BOX_MIN_HEIGHT - (OTHERS_OFFSET * 2));
+
+    final boxWidth:Float = textWidth + (OTHERS_OFFSET * 2);
+    final boxHeight:Float = textHeight + (OTHERS_OFFSET * 2);
+
+    debugBoxWidth = boxWidth;
+    debugInfoDisplay.y = debugBoxY + OTHERS_OFFSET;
+
+    debugBackground.graphics.clear();
+    debugBackground.graphics.beginFill(0x3d3f41, 1);
+    debugBackground.graphics.drawRect(0, 0, boxWidth, boxHeight);
+    debugBackground.graphics.endFill();
+    debugBackground.graphics.beginFill(0x2c2f30, 1);
+    debugBackground.graphics.drawRect(INNER_RECT_DIFF, INNER_RECT_DIFF, boxWidth - (INNER_RECT_DIFF * 2), boxHeight - (INNER_RECT_DIFF * 2));
+    debugBackground.graphics.endFill();
+    debugBackground.alpha = backgroundOpacity;
+  }
+
   override function __enterFrame(deltaTime:Int):Void
   {
     #if cpp
@@ -185,13 +277,18 @@ class FunkinDebugDisplay extends Sprite
     }
     #end
 
-    if (isAdvanced)
+    if (mode == SIMPLE)
     {
-      updateAdvancedDisplay();
+      updateSimpleDisplay();
     }
     else
     {
-      updateSimpleDisplay();
+      updateAdvancedDisplay();
+
+      if (mode == DEBUG)
+      {
+        updateDebugDisplay();
+      }
     }
 
     deltaTimeout = 0.0;
@@ -240,6 +337,38 @@ class FunkinDebugDisplay extends Sprite
     }
   }
 
+  function updateDebugDisplay():Void
+  {
+    if (debugInfoDisplay == null) return;
+
+    final info:Array<String> = [];
+
+    final stateName:String = FlxG.state != null ? Type.getClassName(Type.getClass(FlxG.state)) : 'null';
+    final subStateName:String = FlxG.state != null && FlxG.state.subState != null ? Type.getClassName(Type.getClass(FlxG.state.subState)) : 'none';
+
+    info.push('State: $stateName');
+    info.push('Substate: $subStateName');
+    info.push('Members: ${FlxG.state != null ? FlxG.state.members.length : 0}');
+    info.push('Cameras: ${FlxG.cameras.list.length}');
+    info.push('Sounds: ${FlxG.sound.list.length}');
+    info.push('Elapsed: ${Math.round(FlxG.elapsed * 1000)}ms');
+    info.push('');
+    info.push('Step: ${Conductor.curStep}');
+    info.push('Beat: ${Conductor.curBeat}');
+    info.push('Song Position: ${Math.round(Conductor.songPosition)}');
+    info.push('BPM: ${Conductor.bpm}');
+    info.push('Crochet: ${Conductor.crochet}');
+
+    #if FLX_DEBUG
+    if (FlxG.watch != null) info.push('WATCH ENTRIES: ${FlxG.watch.entries.length}');
+    if (FlxG.log != null) info.push('LOG ENTRIES: ${FlxG.log.data.length}');
+    #end
+
+    debugInfoDisplay.text = info.join('\n');
+
+    redrawDebugBox();
+  }
+
   function updateFPSGraph(?currentFPS:Int = 0):Void
   {
     fpsGraph.maxValue = FlxG.drawFramerate;
@@ -263,16 +392,29 @@ class FunkinDebugDisplay extends Sprite
   }
   #end
 
-  function set_isAdvanced(value:Bool):Bool
+  function set_mode(value:FunkinDebugDisplayMode):FunkinDebugDisplayMode
   {
     buildDebugDisplay(value);
 
-    return isAdvanced = value;
+    return mode = value;
+  }
+
+  function get_isAdvanced():Bool
+  {
+    return mode != SIMPLE;
+  }
+
+  function set_isAdvanced(value:Bool):Bool
+  {
+    mode = value ? ADVANCED : SIMPLE;
+
+    return value;
   }
 
   function set_backgroundOpacity(value:Float):Float
   {
     if (background != null) background.alpha = value;
+    if (debugBackground != null) debugBackground.alpha = value;
 
     return backgroundOpacity = value;
   }

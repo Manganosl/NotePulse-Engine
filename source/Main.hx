@@ -170,17 +170,19 @@ class Main extends Sprite
 		}
 	}
 
-  	function handleDebugDisplayKeys():Void
-  	{
-  	  	if (!FlxG.keys.justPressed.F3) return;
+	function handleDebugDisplayKeys():Void {
+		if(!FlxG.keys.justPressed.F3) return;
 
-		if(!fpsVar.visible)
+		if(!fpsVar.visible){
 			fpsVar.visible = true;
-		else if(!fpsVar.isAdvanced)
-			fpsVar.isAdvanced = true;
-		else {
-			fpsVar.isAdvanced = false;
+			fpsVar.mode = SIMPLE;
+		} else if(fpsVar.mode == SIMPLE){
+			fpsVar.mode = ADVANCED;
+		} else if(fpsVar.mode == ADVANCED){
+			fpsVar.mode = DEBUG;
+		} else {
+			fpsVar.mode = SIMPLE;
 			fpsVar.visible = false;
 		}
-  	}
+	}
 }
