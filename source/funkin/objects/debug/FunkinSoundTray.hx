@@ -24,8 +24,7 @@ class FunkinSoundTray extends FlxSoundTray
 	
 	public function new()
 	{
-		// calls super, then removes all children to add our own
-		// graphics
+		// calls super, then removes all children to add our own graphics
 		super();
 		removeChildren();
 		

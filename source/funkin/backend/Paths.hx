@@ -101,34 +101,38 @@ class Paths
 	}
 
 	public static function getPath(file:String, ?type:AssetType = TEXT, ?library:Null<String> = null, ?modsAllowed:Bool = true):String
-	{
-		#if MODS_ALLOWED
-		if(modsAllowed)
-		{
-			var customFile:String = file;
-			if (library != null)
-				customFile = '$library/$file';
+    {
+        #if MODS_ALLOWED
+        if(modsAllowed)
+        {
+            var customFile:String = file;
+            if (library != null)
+                customFile = '$library/$file';
 
-			var modded:String = modFolders(customFile);
-			if(FileSystem.exists(modded)) return modded;
-		}
-		#end
+            var modded:String = modFolders(customFile);
+            if(FileSystem.exists(modded)) return modded;
+        }
+        #end
 
-		if (library != null)
-			return getLibraryPath(file, library);
+        if (library != null)
+            return getLibraryPath(file, library);
 
-		if (currentLevel != null)
-		{
-			var levelPath:String = '';
-			if(currentLevel != 'shared') {
-				levelPath = getLibraryPathForce(file, 'week_assets', currentLevel);
-				if (OpenFlAssets.exists(levelPath, type))
-					return levelPath;
-			}
-		}
+        if (currentLevel != null)
+        {
+            var levelPath:String = '';
+            if(currentLevel != 'shared') {
+                levelPath = getLibraryPathForce(file, 'week_assets', currentLevel);
+                if (OpenFlAssets.exists(levelPath, type))
+                    return levelPath;
+            }
+        }
 
-		return getSharedPath(file);
-	}
+        var embedPath:String = 'assets/embed/' + (library != null ? '$library/$file' : file);
+        if (OpenFlAssets.exists(embedPath, type) || FileSystem.exists(embedPath))
+            return embedPath;
+
+        return getSharedPath(file);
+    }
 
 	static public function getLibraryPath(file:String, library = "shared")
 	{

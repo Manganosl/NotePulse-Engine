@@ -250,9 +250,6 @@ class FreeplayState extends MusicBeatState
 		changeSelection();
 		updateTexts();
 		super.create();
-
-		FlxG.sound.music.stop();
-		FlxG.sound.playMusic(Paths.music("freeplayRandom"), 0);
 	}
 
 	override function closeSubState() {
@@ -374,7 +371,7 @@ class FreeplayState extends MusicBeatState
 				player.playingMusic = false;
 				player.switchPlayMusic();
 
-				FlxG.sound.playMusic(Paths.music("freeplayRandom"), 0);
+				FlxG.sound.playMusic(Paths.music("freakyMenu"), 0);
 				FlxTween.tween(FlxG.sound.music, {volume: 1}, 1);
 			}
 			else 
@@ -384,8 +381,6 @@ class FreeplayState extends MusicBeatState
 					colorTween.cancel();
 				}
 				FlxG.sound.play(Paths.sound('cancelMenu'));
-				FlxG.sound.music.stop();
-				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 				MusicBeatState.switchState(new funkin.states.MainMenuState());
 			}
 		}
