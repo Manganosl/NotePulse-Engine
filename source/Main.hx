@@ -128,8 +128,6 @@ class Main extends Sprite
 		}
 		#end
 
-		FlxG.signals.postUpdate.add(handleDebugDisplayKeys);
-
 		#if linux
 		var icon = Image.fromFile("icon.png");
 		Lib.current.stage.window.setIcon(icon);
@@ -167,22 +165,6 @@ class Main extends Sprite
 		@:privateAccess {
 		        sprite.__cacheBitmap = null;
 			sprite.__cacheBitmapData = null;
-		}
-	}
-
-	function handleDebugDisplayKeys():Void {
-		if(!FlxG.keys.justPressed.F3) return;
-
-		if(!fpsVar.visible){
-			fpsVar.visible = true;
-			fpsVar.mode = SIMPLE;
-		} else if(fpsVar.mode == SIMPLE){
-			fpsVar.mode = ADVANCED;
-		} else if(fpsVar.mode == ADVANCED){
-			fpsVar.mode = DEBUG;
-		} else {
-			fpsVar.mode = SIMPLE;
-			fpsVar.visible = false;
 		}
 	}
 }

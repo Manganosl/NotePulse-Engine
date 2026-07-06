@@ -216,8 +216,8 @@ class NotesSubState extends MusicBeatSubstate
 			var diffY:Float = 200;
 			if (targetY < 0) diffY = -200;
 
-			note.x = FlxMath.lerp((targetY * diffX) + (notesBG.x + ((notesBG.width / 2) - (note.width / 2))), note.x, lerpVal);
-			note.y = FlxMath.lerp((targetY * 1.3 * diffY) + (notesBG.y + ((notesBG.height / 2) - (note.height / 2))), note.y, lerpVal);
+			note.modPos.x = FlxMath.lerp((targetY * diffX) + (notesBG.x + ((notesBG.width / 2) - (note.width / 2))), note.modPos.x, lerpVal);
+			note.modPos.y = FlxMath.lerp((targetY * 1.3 * diffY) + (notesBG.y + ((notesBG.height / 2) - (note.height / 2))), note.modPos.y, lerpVal);
 		}
 
 		super.update(elapsed);
@@ -661,9 +661,9 @@ class NotesSubState extends MusicBeatSubstate
 		for (i in 0...dataArray.length)
 		{
 			Note.initializeGlobalRGBShader(i, ExtraKeysHandler.instance.data.maxKeys);
-			var newNote:StrumNote = new StrumNote(150 + (480 / dataArray.length * i), 200, i, 0);
-			newNote.modPos.x = newNote.x;
-			newNote.modPos.y = newNote.y;
+			var newNote:StrumNote = new StrumNote(0, 0, i, 0);
+			newNote.modPos.x = 150 + (480 / dataArray.length * i);
+			newNote.modPos.y = 200;
 			newNote.useRGBShader = true;
 			newNote.setGraphicSize(102);
 			newNote.updateHitbox();

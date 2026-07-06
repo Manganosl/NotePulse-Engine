@@ -138,6 +138,7 @@ class ClientPrefs {
 		'volume_down'    => [NUMPADMINUS, MINUS],
 		'debug_1'        => [SEVEN],
 		'debug_2'        => [EIGHT],
+		'debug_3'        => [NINE],
 
 		'0_key_0'  => [SPACE],
 		'1_key_0'  => [D, LEFT], '1_key_1' => [K, RIGHT],

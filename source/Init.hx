@@ -102,5 +102,19 @@ class Init extends FlxState {
 			funkin.scripting.GlobalHandler.stopGlobalHX();
 			MusicBeatState.switchState(new TitleState());
 		}
+
+		if(!FlxG.keys.justPressed.F3) return;
+
+		if(!Main.fpsVar.visible){
+			Main.fpsVar.visible = true;
+			Main.fpsVar.mode = SIMPLE;
+		} else if(Main.fpsVar.mode == SIMPLE){
+			Main.fpsVar.mode = ADVANCED;
+		} else if(Main.fpsVar.mode == ADVANCED){
+			Main.fpsVar.mode = DEBUG;
+		} else {
+			Main.fpsVar.mode = SIMPLE;
+			Main.fpsVar.visible = false;
+		}
 	}
 }

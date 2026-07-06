@@ -268,7 +268,7 @@ class ModchartEditorState extends MusicBeatState
 		thatBG.scrollFactor.set();
 		add(thatBG);
 
-		var songLen:Float = (FlxG.sound.music != null ? FlxG.sound.music.length : 0.0001);
+		var songLen:Float = (inst != null ? inst.length : 0.0001);
 		songPosSlider = new PsychUIBar(0, thatBG.y, function(v:Float)
 		{
 			paused = true;
@@ -466,8 +466,7 @@ class ModchartEditorState extends MusicBeatState
 		cachedSectionCrochets = [];
 		cachedSectionBPMs = [];
 
-		if(PlayState.SONG == null)
-		{
+		if(PlayState.SONG == null){
 			cachedSectionRow.push(0);
 			cachedSectionTimes.push(0);
 			cachedSectionCrochets.push(0);
@@ -477,8 +476,7 @@ class ModchartEditorState extends MusicBeatState
 
 		var bpm:Float = PlayState.SONG.bpm;
 		var reachedLimit:Bool = false;
-		for (secNum => section in PlayState.SONG.notes)
-		{
+		for (secNum => section in PlayState.SONG.notes){
 			var secs:Null<Float> = cast section.sectionBeats;
 			if(secs == null || Math.isNaN(secs) || secs <= 0) section.sectionBeats = 4;
 	
@@ -495,14 +493,12 @@ class ModchartEditorState extends MusicBeatState
 			row += rowRound;
 			time += beat * (rowRound / 4);
 
-			for (note in section.sectionNotes)
-			{
+			for (note in section.sectionNotes){
 				if(secNum > 0 && note[0] < lastTime) note[0] = lastTime;
 				else if(secNum < PlayState.SONG.notes.length && note[0] >= time - 0.000001) note[0] = time - 0.000001;
 			}
 
-			if(FlxG.sound.music != null && time >= FlxG.sound.music.length)
-			{
+			if(inst != null && time >= inst.length){
 				var lastSectionNum:Int = PlayState.SONG.notes.length - 1;
 				if(secNum < lastSectionNum) //Delete extra sections
 				{
@@ -520,7 +516,7 @@ class ModchartEditorState extends MusicBeatState
 			}
 		}
 
-		if(FlxG.sound.music != null && !reachedLimit) //Created sections to fill blank space
+		if(inst != null && !reachedLimit) //Created sections to fill blank space
 		{
 			var lastSection = PlayState.SONG.notes[PlayState.SONG.notes.length-1];
 			var beat:Float = Conductor.calculateCrochet(bpm);
@@ -532,8 +528,7 @@ class ModchartEditorState extends MusicBeatState
 			var altAnimSec:Bool = lastSection != null ? lastSection.altAnim : false;
 			var gfSec:Bool = lastSection != null ? lastSection.gfSection : false;
 
-			while(!reachedLimit)
-			{
+			while(!reachedLimit){
 				PlayState.SONG.notes.push({
 					sectionNotes: [],
 					sectionBeats: sectionBeats,
@@ -553,8 +548,7 @@ class ModchartEditorState extends MusicBeatState
 				row += rowRound;
 				time += timeAdd;
 
-				if(time >= FlxG.sound.music.length)
-				{
+				if(time >= inst.length){
 					reachedLimit = true;
 				}
 			}
@@ -585,9 +579,8 @@ class ModchartEditorState extends MusicBeatState
 			curSec = 0;
 		}
 		
-		if(FlxG.sound.music != null && time >= FlxG.sound.music.length)
-		{
-			time = FlxG.sound.music.length - 1;
+		if(inst != null && time >= inst.length){
+			time = inst.length - 1;
 			curSec = PlayState.SONG.notes.length - 1;
 		}
 		FlxG.sound.music.time = time;
@@ -927,7 +920,7 @@ class ModchartEditorState extends MusicBeatState
 		}
 		notesFollow();
 
-		if(FlxG.keys.justPressed.Z != FlxG.keys.justPressed.X)
+		if(PsychUIInputText.focusOn == null && FlxG.keys.justPressed.Z != FlxG.keys.justPressed.X)
 		{
 			var zoomIndex:Int = zoomList.indexOf(curZoom);
 			if(zoomIndex < 0) zoomIndex = zoomList.indexOf(1);

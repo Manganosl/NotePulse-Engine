@@ -202,7 +202,7 @@ class ModSelectorState extends MusicBeatState {
 		}
 	}
 
-	function onBack() {
+	function onBack(){
 		if (!inDifSelect && !inSongSelect) {
 			try MusicBeatState.switchState(new funkin.states.MainMenuState());
 		} else if (inDifSelect) {
@@ -216,6 +216,7 @@ class ModSelectorState extends MusicBeatState {
 			titleText.text = "Mod Selector > ";
 			descText.text = "Press ACCEPT to select a mod.";
 			clearIcons();
+			Mods.currentModDirectory = Mods.currentLoadedMod = null;
 			reloadMods();
 			resetSelection();
 		}

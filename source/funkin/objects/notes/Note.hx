@@ -464,8 +464,7 @@ class Note extends FlxSkewedSprite {
 	var _lastNoteOffX:Float = 0;
 	public var originalHeight:Float = 6;
 	static var _lastValidChecked:String;
-	public function reloadNote(texture:String = '', postfix:String = '')
-	{
+	public function reloadNote(texture:String = '', postfix:String = ''){
 		if(texture == null) texture = '';
 		if(postfix == null) postfix = '';
 		var skin:String = texture + postfix;
@@ -483,14 +482,13 @@ class Note extends FlxSkewedSprite {
 		var skinPostfix:String = getNoteSkinPostfix();
 		var customSkin:String = skin + skinPostfix;
 		var path:String = PlayState.isPixelStage ? 'pixelUI/' : '';
-		if(customSkin == _lastValidChecked || Paths.fileExists('images/' + path + customSkin + '.png', IMAGE))
-		{
+		if(customSkin == _lastValidChecked || Paths.fileExists('images/' + path + customSkin + '.png', IMAGE)){
 			skin = customSkin;
 			_lastValidChecked = customSkin;
 		}
 		else skinPostfix = '';
-		if(PlayState.isPixelStage) {
-			if(isSustainNote) {
+		if(PlayState.isPixelStage){
+			if(isSustainNote){
 				var graphic = Paths.image('pixelUI/' + skinPixel + 'ENDS' + skinPostfix);
 				loadGraphic(graphic, true, Math.floor(graphic.width / getPixelColumns()), Math.floor(graphic.height / 2));
 				originalHeight = graphic.height / 2;
@@ -498,12 +496,11 @@ class Note extends FlxSkewedSprite {
 				var graphic = Paths.image('pixelUI/' + skinPixel + skinPostfix);
 				loadGraphic(graphic, true, Math.floor(graphic.width / getPixelColumns()), Math.floor(graphic.height / 5));
 			}
-			var mania = 3;
-			if (PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
+			var mania = (playField != null ? playField.keyCount - 1 : (PlayState.SONG != null ? PlayState.SONG.mania : 3));
 			setGraphicSize((width * (ExtraKeysHandler.instance.data.pixelScales[mania] + 0.3)) * PlayState.daPixelZoom);
 			loadPixelNoteAnims();
 			antialiasing = false;
-			if(isSustainNote) {
+			if(isSustainNote){
 				offsetX += _lastNoteOffX;
 				_lastNoteOffX = (width - 7) * (PlayState.daPixelZoom / 2);
 				offsetX -= _lastNoteOffX;
@@ -511,15 +508,13 @@ class Note extends FlxSkewedSprite {
 		} else {
 			frames = Paths.getSparrowAtlas(skin);
 			loadNoteAnims();
-			if(!isSustainNote)
-			{
+			if(!isSustainNote){
 				centerOffsets();
 				centerOrigin();
 			}
 		}
-		if(isSustainNote) {
+		if(isSustainNote)
 			scale.y = lastScaleY;
-		}
 		updateHitbox();
 		defScale.copyFrom(scale);
 		if(animName != null)

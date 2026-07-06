@@ -7,22 +7,13 @@ import funkin.data.WeekData;
 import funkin.data.Highscore;
 import funkin.data.Song;
 
-import openfl.Lib;
 import flixel.util.FlxAxes;
-import openfl.utils.Assets;
-import openfl.display.BitmapData;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.addons.transition.FlxTransitionableState;
 
 import funkin.backend.utils.NdllUtil;
-import lime.app.Application;
 
-#if (!flash && sys)
-import flixel.addons.display.FlxRuntimeShader;
-#end
-
-import hxvlc.flixel.*;
 import funkin.objects.FunkinVideoSprite;
 
 import funkin.game.cutscenes.DialogueBoxPsych;
@@ -32,7 +23,6 @@ import funkin.objects.notes.Note;
 import funkin.objects.notes.splashes.NoteSplash;
 import funkin.objects.Character;
 
-import funkin.states.MainMenuState;
 import funkin.states.menus.StoryMenuState;
 import funkin.states.menus.FreeplayState;
 
@@ -41,15 +31,8 @@ import funkin.substates.GameOverSubstate;
 
 import funkin.scripting.LuaUtils;
 import funkin.scripting.LuaUtils.LuaTweenOptions;
-#if HSCRIPT_ALLOWED
-import funkin.scripting.FunkinScript;
-#end
 import funkin.scripting.objects.ModchartSprite;
 
-import flixel.input.keyboard.FlxKey;
-import flixel.input.gamepad.FlxGamepadInputID;
-
-import haxe.Json;
 import haxe.PosInfos;
 
 class FunkinLua {

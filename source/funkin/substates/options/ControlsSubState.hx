@@ -12,8 +12,7 @@ import flixel.input.gamepad.FlxGamepad;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.gamepad.FlxGamepadManager;
 
-class ControlsSubState extends MusicBeatSubstate
-{
+class ControlsSubState extends MusicBeatSubstate {
 	var curSelected:Int = 0;
 	var curEKPage:Int = 3;
 	var curAlt:Bool = false;
@@ -85,12 +84,12 @@ class ControlsSubState extends MusicBeatSubstate
 		text.setScale(0.4);
 		add(text);
 
-		var cosanegra:FlxSprite = new FlxSprite().makeGraphic(5000, 300, 0xff000000);
-		cosanegra.antialiasing = ClientPrefs.data.antialiasing;
-		cosanegra.screenCenter();
-		cosanegra.alpha = 0.5;
-		cosanegra.y = -210;
-		add(cosanegra);
+		var topBar:FlxSprite = new FlxSprite().makeGraphic(5000, 300, 0xff000000);
+		topBar.antialiasing = ClientPrefs.data.antialiasing;
+		topBar.screenCenter();
+		topBar.alpha = 0.5;
+		topBar.y = -210;
+		add(topBar);
 
 		var titleText:FlxText = new FlxText(0, 10, 1145, "Options > Controls", 32); //ControlsAlph(75, 45, title, true);
 		titleText.alpha = 1;
@@ -164,6 +163,7 @@ class ControlsSubState extends MusicBeatSubstate
 			[false, 'DEBUG'],
 			[false, 'Key 1', 'debug_1', 'Debug Key #1'],
 			[false, 'Key 2', 'debug_2', 'Debug Key #2'],
+			[false, 'Key 3', 'debug_3', 'Debug Key #3'],
 			[true],
 			[true],
 			[true, defaultKey]

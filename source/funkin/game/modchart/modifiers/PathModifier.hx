@@ -103,7 +103,7 @@ class PathModifier extends NoteModifier {
       var offset = getSubmodValue("zigzagZOffset", player);
       var period = getSubmodValue("zigzagZPeriod", player);
       var result:Float = CoolUtil.triangle((Math.PI * (1 / (period + 1)) * ((diff + 100 * offset) / Note.swagWidth)));
-      outPos.z += (zigzagZ * (Note.swagWidth * 0.5)) * result;
+      outPos.z += ((zigzagZ * (Note.swagWidth * 0.5)) * result) / 1280;
     }
 
     var sawtooth = getSubmodValue("sawtooth", player);
@@ -137,7 +137,7 @@ class PathModifier extends NoteModifier {
       var period = getSubmodValue("bounceZPeriod", player);
       if (period != -1.0) {
         var bounce = Math.abs(Math.sin((diff + offset) / (90.0 + 90.0 * period)));
-        outPos.z += bounceZVal * (Note.swagWidth * 0.5) * bounce;
+        outPos.z += (bounceZVal * (Note.swagWidth * 0.5) * bounce) / 1280;
       }
     }
 
@@ -174,7 +174,7 @@ class PathModifier extends NoteModifier {
       var phaseShift = (diff / 135) * (1 + getSubmodValue("tornadoZPeriod", player));
       var returnReceptorToZeroOffsetX = (-Math.sin(-columnPhaseShift) + 1) * (Note.swagWidth * 0.5) * keyCunt;
       var offsetX = (-Math.sin(phaseShift - columnPhaseShift) + 1) * (Note.swagWidth * 0.5) * keyCunt - returnReceptorToZeroOffsetX;
-      outPos.z += offsetX * tornadoZVal;
+      outPos.z += (offsetX * tornadoZVal) / 1280;
     }
 
     var tornadoTanZVal = getSubmodValue("tornadoTanZ", player);
@@ -184,7 +184,7 @@ class PathModifier extends NoteModifier {
       var phaseShift = (diff / 135) * (1 + getSubmodValue("tornadoTanZPeriod", player));
       var returnReceptorToZeroOffsetX = (-Math.sin(-columnPhaseShift) + 1) * (Note.swagWidth * 0.5) * keyCunt;
       var offsetX = (-Math.tan(phaseShift - columnPhaseShift) + 1) * (Note.swagWidth * 0.5) * keyCunt - returnReceptorToZeroOffsetX;
-      outPos.z += offsetX * tornadoTanZVal;
+      outPos.z += (offsetX * tornadoTanZVal) / 1280;
     }
 
     var itgTornadoVal = getSubmodValue("itgTornado", player);
@@ -236,7 +236,7 @@ class PathModifier extends NoteModifier {
       var period = this.getSubmodValue("digitalZPeriod", player);
       var offset = this.getSubmodValue("digitalZOffset", player);
 
-      outPos.z += (digitalZVal * (Note.swagWidth * 0.5)) * Math.floor(0.5 + (steps * Math.sin(getDigitalAngle(diff, offset, period)))) / steps;
+      outPos.z += ((digitalZVal * (Note.swagWidth * 0.5)) * Math.floor(0.5 + (steps * Math.sin(getDigitalAngle(diff, offset, period)))) / steps) / 1280;
     }
 
     return outPos;
