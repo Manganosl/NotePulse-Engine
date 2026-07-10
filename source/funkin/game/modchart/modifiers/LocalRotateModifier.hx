@@ -3,18 +3,10 @@ package funkin.game.modchart.modifiers;
 class LocalRotateModifier extends NoteModifier
 { // this'll be rotateX in ModManager
 	override function getName() return '${prefix}rotateX';
-	
 	override function getOrder() return Modifier.ModifierOrder.POST_REVERSE;
-	
-	inline function lerp(a:Float, b:Float, c:Float)
-	{
-		return a + (b - a) * c;
-	}
-	
 	var prefix:String;
 	
-	public function new(modMgr:ModManager, ?prefix:String = '', ?parent:Modifier)
-	{
+	public function new(modMgr:ModManager, ?prefix:String = '', ?parent:Modifier){
 		this.prefix = prefix;
 		super(modMgr, parent);
 	}
@@ -22,13 +14,13 @@ class LocalRotateModifier extends NoteModifier
 	// thanks schmoovin'
 	function rotateV3(vec:Vector3, xA:Float, yA:Float, zA:Float):Vector3
 	{
-		var rotateZ = CoolUtil.rotate(vec.x, vec.y, zA);
+		var rotateZ = MathUtil.rotate(vec.x, vec.y, zA);
 		var offZ = Vector3.get(rotateZ.x, rotateZ.y, vec.z);
 		
-		var rotateX = CoolUtil.rotate(offZ.z, offZ.y, xA);
+		var rotateX = MathUtil.rotate(offZ.z, offZ.y, xA);
 		var offX = Vector3.get(offZ.x, rotateX.y, rotateX.x);
 		
-		var rotateY = CoolUtil.rotate(offX.x, offX.z, yA);
+		var rotateY = MathUtil.rotate(offX.x, offX.z, yA);
 		var offY = Vector3.get(rotateY.x, offX.y, rotateY.y);
 		
 		offZ.put();

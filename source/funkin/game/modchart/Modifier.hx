@@ -74,19 +74,16 @@ class Modifier {
 	public function getPercent(player:Int):Float
 		return getValue(player) * 100;
 
-	public function setValue(value:Float, player:Int = -1) // because most the time when you setValue you wanna set the TARGET value, not the current
-	{
+	public function setValue(value:Float, player:Int = -1){ // because most the time when you setValue you wanna set the TARGET value, not the current
 		setCurrentValue(value, player);
 		if (player == -1)
 			for (idx in 0...percents.length)
 				percents[idx] = value;
 		else
 			percents[player] = value;
-		
 	}
 
-	public function setCurrentValue(value:Float, player:Int = -1)
-	{
+	public function setCurrentValue(value:Float, player:Int = -1){
 		if (player == -1)
 			for (idx in 0...percents.length)
 				percents[idx] = value;
@@ -101,6 +98,8 @@ class Modifier {
 	public function getSubmods():Array<String>
 		return [];
 	
+	inline function lerp(a:Float, b:Float, c:Float)
+		return a + (b - a) * c;
 
 	public function getSubmodPercent(modName:String, player:Int)
 	{

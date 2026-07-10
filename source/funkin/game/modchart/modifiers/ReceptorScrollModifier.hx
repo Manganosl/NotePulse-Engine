@@ -1,10 +1,6 @@
 package funkin.game.modchart.modifiers;
 
 class ReceptorScrollModifier extends NoteModifier {
-  inline function lerp(a:Float,b:Float,c:Float){
-    return a+(b-a)*c;
-  }
-  //var moveSpeed:Float = 800;
   var moveSpeed:Float = Conductor.crochet * 3; // gotta keep da sustain segments together so it doesnt look so shit
 	override function getName()
 		return 'receptorScroll';

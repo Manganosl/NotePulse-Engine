@@ -1,12 +1,6 @@
 package funkin.game.modchart.modifiers;
 
-class TransformModifier extends NoteModifier
-{ // this'll be transformX in ModManager
-	inline function lerp(a:Float, b:Float, c:Float)
-	{
-		return a + (b - a) * c;
-	}
-	
+class TransformModifier extends NoteModifier { // this'll be transformX in ModManager
 	override function getName() return 'transformX';
 	
 	override function getOrder() return Modifier.ModifierOrder.LAST;

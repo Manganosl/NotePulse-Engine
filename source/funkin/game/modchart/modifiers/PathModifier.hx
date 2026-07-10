@@ -94,7 +94,7 @@ class PathModifier extends NoteModifier {
     if (zigzag != 0) {
       var offset = getSubmodValue("zigzagOffset", player);
       var period = getSubmodValue("zigzagPeriod", player);
-      var result:Float = CoolUtil.triangle((Math.PI * (1 / (period + 1)) * ((diff + 100 * offset) / Note.swagWidth)));
+      var result:Float = MathUtil.triangle((Math.PI * (1 / (period + 1)) * ((diff + 100 * offset) / Note.swagWidth)));
       outPos.x += (zigzag * (Note.swagWidth * 0.5)) * result;
     }
 
@@ -102,7 +102,7 @@ class PathModifier extends NoteModifier {
     if (zigzagZ != 0) {
       var offset = getSubmodValue("zigzagZOffset", player);
       var period = getSubmodValue("zigzagZPeriod", player);
-      var result:Float = CoolUtil.triangle((Math.PI * (1 / (period + 1)) * ((diff + 100 * offset) / Note.swagWidth)));
+      var result:Float = MathUtil.triangle((Math.PI * (1 / (period + 1)) * ((diff + 100 * offset) / Note.swagWidth)));
       outPos.z += ((zigzagZ * (Note.swagWidth * 0.5)) * result) / 1280;
     }
 
@@ -118,7 +118,7 @@ class PathModifier extends NoteModifier {
       var offset = getSubmodValue("squareOffset", player);
       var period = getSubmodValue("squarePeriod", player);
       var cum = (Math.PI * (diff + offset) / (Note.swagWidth + (period * Note.swagWidth)));
-      outPos.x += squareVal * (Note.swagWidth * 0.5) * CoolUtil.square(cum);
+      outPos.x += squareVal * (Note.swagWidth * 0.5) * MathUtil.square(cum);
     }
 
     var bounceVal = getSubmodValue("bounce", player);
@@ -193,21 +193,21 @@ class PathModifier extends NoteModifier {
     if (itgTornadoVal != 0 || itgTornadoTanVal != 0) {
       var wide = keyCount > 4;
       var width = wide ? 2 : 3;
-      var startColumn:Int = Std.int(CoolUtil.boundTo(column - width, 0, keyCount - 1));
-      var endColumn:Int = Std.int(CoolUtil.boundTo(column + width, 0, keyCount - 1));
+      var startColumn:Int = Std.int(MathUtil.boundTo(column - width, 0, keyCount - 1));
+      var endColumn:Int = Std.int(MathUtil.boundTo(column + width, 0, keyCount - 1));
 
       var minX = startColumn * Note.swagWidth;
       var maxX = endColumn * Note.swagWidth;
       var realPixel = column * Note.swagWidth;
 
-      var posBetween = CoolUtil.scale(realPixel, minX, maxX, -1, 1);
+      var posBetween = MathUtil.scale(realPixel, minX, maxX, -1, 1);
 
       if (itgTornadoVal != 0) {
         var rads = Math.acos(posBetween);
         var period = getSubmodValue("itgTornadoPeriod", player);
         var offset = getSubmodValue("itgTornadoOffset", player);
         rads += (diff + offset) * (6 + period * 6) / FlxG.height;
-        var adjusted = CoolUtil.scale(Math.cos(rads), -1, 1, minX, maxX);
+        var adjusted = MathUtil.scale(Math.cos(rads), -1, 1, minX, maxX);
         outPos.x += (adjusted - realPixel) * itgTornadoVal;
       }
 
@@ -216,7 +216,7 @@ class PathModifier extends NoteModifier {
         var period = getSubmodValue("itgTornadoTanPeriod", player);
         var offset = getSubmodValue("itgTornadoTanOffset", player);
         rads += (diff + offset) * (6 + period * 6) / FlxG.height;
-        var adjusted = CoolUtil.scale(Math.tan(rads), -1, 1, minX, maxX);
+        var adjusted = MathUtil.scale(Math.tan(rads), -1, 1, minX, maxX);
         outPos.x += (adjusted - realPixel) * itgTornadoTanVal;
       }
     }

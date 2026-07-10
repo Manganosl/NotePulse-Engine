@@ -4,10 +4,6 @@ class ScaleModifier extends NoteModifier {
     override function getName() return 'tiny';
     override function getOrder() return PRE_REVERSE;
 
-    inline function lerp(a:Float, b:Float, c:Float) {
-        return a + (b - a) * c;
-    }
-
     function getScale(sprite:Dynamic, scale:FlxPoint, data:Int, player:Int) {
         var y = scale.y;
 

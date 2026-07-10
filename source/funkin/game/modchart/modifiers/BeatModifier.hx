@@ -18,15 +18,15 @@ class BeatModifier extends NoteModifier {
         
         var amount:Float = 0;
         if(beat<accelTime){
-            amount = CoolUtil.scale(beat, 0, accelTime, 0, 1);
+            amount = MathUtil.scale(beat, 0, accelTime, 0, 1);
             amount *= amount;
         }else{
-            amount = CoolUtil.scale(beat, accelTime, totalTime, 1, 0);
+            amount = MathUtil.scale(beat, accelTime, totalTime, 1, 0);
             amount = 1 - (1-amount) * (1-amount);
         }
         if(evenBeat)amount*=-1;
 
-        var shift = 40*amount*FlxMath.fastSin((visualDiff / 30) + Math.PI/2);
+        var shift = 40*amount*Math.sin((visualDiff / 30) + Math.PI/2);
         pos.x += getValue(player)*shift;
         return pos;
     }

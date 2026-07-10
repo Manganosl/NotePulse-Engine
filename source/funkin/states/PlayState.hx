@@ -134,9 +134,6 @@ class PlayState extends MusicBeatState
 	public static var curSShit:Float = 1;
 	public static var curBShit:Float = 1;
 
-	public var sickCount:Int = 0;
-	public var marvCount:Int = 0;
-
 	var noteRows:Array<Array<Array<Note>>> = [];
 
 	public var boyfriendGroup:FlxSpriteGroup;
@@ -745,10 +742,10 @@ class PlayState extends MusicBeatState
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
 		moveCameraSection();
 
-			healthBar = new Bar(0, FlxG.height * (!ClientPrefs.data.downScroll ? 0.89 : 0.11), 'healthBar', function(){
-				healthLerp = FlxMath.lerp(healthLerp, health, 0.15);
-				return healthLerp;
-			}, 0, 2);
+		healthBar = new Bar(0, FlxG.height * (!ClientPrefs.data.downScroll ? 0.89 : 0.11), 'healthBar', function(){
+			healthLerp = FlxMath.lerp(healthLerp, health, 0.15);
+			return healthLerp;
+		}, 0, 2);
 		healthBar.screenCenter(X);
 		healthBar.leftToRight = false;
 		healthBar.scrollFactor.set();
@@ -3029,6 +3026,8 @@ class PlayState extends MusicBeatState
 
 	public static var isSongFC:Bool = true;
 	function noteMiss(daNote:Note):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
+		var result:Dynamic = callOnLuas('noteMissPre', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote]);
+		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('noteMissPre', [daNote]);
 		//Dupe note remove
 		if(isSongFC) isSongFC = false;
 		notes.forEachAlive(function(note:Note) {
@@ -3038,7 +3037,7 @@ class PlayState extends MusicBeatState
 
 		noteMissCommon(daNote.noteData, daNote);
 		stagesFunc(function(stage:BaseStage) stage.noteMiss(daNote));
-		var result:Dynamic = callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote]);
+		result = callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('noteMiss', [daNote]);
 	}
 
@@ -3459,7 +3458,7 @@ class PlayState extends MusicBeatState
 				
 				if (fKey >= 0 && fKey < field.members.length) {
 					var strum:StrumNote = field.members[fKey];
-					if (strum != null && !strum.cpuControlled && strum.animation.curAnim.name != 'confirm') {
+					if (strum != null && !strum.cpuControlled && strum.inControl && strum.animation.curAnim.name != 'confirm') {
 						strum.playAnim("pressed", true);
 						strum.resetAnim = 0;
 					}
