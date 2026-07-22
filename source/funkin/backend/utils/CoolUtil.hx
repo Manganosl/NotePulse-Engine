@@ -103,14 +103,14 @@ class CoolUtil
 		return FlxMath.bound(ratio * 60 * FlxG.elapsed, 0, 1);
 	}
 
+	public static inline function fpsLerp(v1:Float, v2:Float, ratio:Float):Float {
+		return FlxMath.lerp(v1, v2, getFPSRatio(ratio));
+	}
+
 	public static inline function lerpColor(color1:FlxColor, color2:FlxColor, ratio:Float, fpsSensitive:Bool = false) {
 		if (!fpsSensitive)
 			ratio = getFPSRatio(ratio);
 		return FlxColor.interpolate(color1, color2, ratio);
-	}
-	
-	public static inline function fpsLerp(v1:Float, v2:Float, ratio:Float):Float {
-		return FlxMath.lerp(v1, v2, getFPSRatio(ratio));
 	}
 
 	inline public static function quantize(f:Float, snap:Float){

@@ -3,7 +3,6 @@ package funkin.objects;
 // Borrowed (Definitely not stolen) from NMV Engine.
 #if VIDEOS_ALLOWED
 import hxvlc.flixel.FlxVideoSprite;
-import hxvlc.util.Location;
 
 // with hxvlcs improvements this is less needed but still has its values
 
