@@ -1,5 +1,7 @@
 package funkin.game.modchart.modifiers;
 
+import flixel.math.FlxAngle;
+
 typedef PathInfo = {
   var position:Vector3;
   var dist:Float;
@@ -141,10 +143,19 @@ class PathModifier extends NoteModifier {
       }
     }
 
-    var xmode = getSubmodValue("xmode", player);
-    if (xmode != 0) {
+    // I'll use this mod to handle Psych's note directions
+    var xmode = getSubmodValue("xmode", player) + getSubmodValue('xmode$data', player);
+    var noteDegrees:Float = (PlayField.fields[player].members[data].direction - 90);
+    if (xmode != 0 || noteDegrees != 0) {
       var mod = (player + 1) * 2 - 3;
-      outPos.x += xmode * (diff * mod);
+      if(obj is Note) noteDegrees += cast(obj, Note).offsetDirection;
+      outPos.x += (xmode + FlxAngle.asRadians(noteDegrees)) * (diff * mod);
+    }
+
+    var zmode = getSubmodValue("zmode", player) + getSubmodValue('zmode$data', player);
+    if (zmode != 0) {
+      var mod = (player + 1) * 2 - 3;
+      outPos.z += (zmode * (diff * mod)) / 1280;
     }
 
     var tornadoVal = getSubmodValue("tornado", player);
@@ -242,10 +253,12 @@ class PathModifier extends NoteModifier {
     return outPos;
   }
 
-  override function getSubmods() {
-    return [
+  override function getSubmods(){
+    var submods = [
       'tornado',
       'xmode',
+      'ymode',
+      'zmode',
       'zigzag',
       'zigzagPeriod',
       'zigzagOffset',
@@ -289,5 +302,11 @@ class PathModifier extends NoteModifier {
       'itgTornadoTanOffset',
       'itgTornadoTanPeriod'
     ];
+    for(i in 0...PlayState.SONG.mania+1){
+      submods.push('xmode$i');
+      submods.push('ymode$i');
+      submods.push('zmode$i');
+    }
+    return submods;
   }
 }
