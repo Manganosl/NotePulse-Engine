@@ -35,6 +35,11 @@ class CreditsState extends MusicBeatState
 		grpOptions = new FlxTypedGroup<ControlsAlph>();
 		add(grpOptions);
 
+		#if MODS_ALLOWED
+		if(Mods.currentLoadedMod != null && Mods.currentLoadedMod != "") pushModCreditsToList(Mods.currentLoadedMod);
+		else for(mod in Mods.parseList().enabled) pushModCreditsToList(mod);
+		#end
+
 		var defaultList:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
 			['NotePulse'],
 			['Manganos', 			'mang',				'Main Coder - I have nothing else to do',			 		 'https://github.com/Manganosl', 		'6a329f'],
