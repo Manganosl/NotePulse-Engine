@@ -17,7 +17,7 @@
 
 - FlxCamera:
   - Camera rotation from cne-flixel.
-  - Functions for adding and removing FlxRuntimeShaders.
+  - Functions for adding and removing FlxGraphicShader as ShaderFilter.
 - FlxSprite zoomFactor property.
 - FlxBasic extraData map.
 - Added wait() function from newer versions to FlxTimer.
@@ -50,7 +50,6 @@
 - NDLL support.
 - Camera movement on note hit.
 - Changing Key Count.
-- Judgement counter.
 - Sustain splashes.
 - Psych 1.0 Stage editor.
 - Psych 1.0 Charting Editor
