@@ -1,6 +1,7 @@
 package moonchart.formats.fnf.legacy;
 
 import moonchart.backend.FormatData;
+import moonchart.backend.Util;
 import moonchart.formats.BasicFormat;
 import moonchart.formats.fnf.legacy.FNFLegacy;
 import moonchart.formats.fnf.legacy.FNFPsych;
@@ -36,6 +37,22 @@ class FNFNotepulseBasic<T:NotepulseJsonFormat> extends FNFPsychBasic<T>
 	public function new(?data:T)
 	{
 		super(data);
+	}
+
+	override function resolvePsychEvent(event:BasicEvent):PsychEvent
+	{
+		var values:Array<Dynamic> = Util.resolveEventValues(event);
+
+		var value1:String = Std.string(values[0] ?? "");
+
+		var extra:Array<String> = [];
+		for (i in 1...values.length)
+		{
+			extra.push(Std.string(values[i] ?? ""));
+		}
+		var value2:String = extra.join(",");
+
+		return [event.time, [[event.name, value1, value2]]];
 	}
 
 	override function fromBasicFormat(chart:BasicChart, ?diff:FormatDifficulty):FNFNotepulseBasic<T>
