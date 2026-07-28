@@ -1194,7 +1194,7 @@ class ModchartEditorState extends MusicBeatState
 				}
 			}
 
-			daNote.clip(daNote.playField.members[daNote.noteData], (diffY < 0));
+			daNote.clip(daNote.playField.members[daNote.noteData]);
 		}
 	}
 	

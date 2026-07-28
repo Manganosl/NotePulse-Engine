@@ -601,16 +601,25 @@ class Note extends FlxSkewedSprite {
 				alpha = 0.3;
 	}
 
-	public function clip(strumNote:StrumNote, isDownScroll:Bool)
+	var rectCache:Null<FlxRect> = null;
+	public function clip(strum:StrumNote)
 	{
-		if ((mustPress || !ignoreNote) && wasGoodHit) {
-			var clipDistance:Float = Math.max(-distance, 0);
-			clipRect ??= new FlxRect(0, 0, frameWidth);
+		if (strum.sustainReduce && wasGoodHit && Conductor.songPosition >= strumTime)
+		{
+			final x:Float = (x - strum.x - (strum.width - width) * .5), y:Float = (y - strum.y - strum.height * .5);
+			final mag:Float = Math.sqrt(x * x + y * y);
 			
-			clipRect.y = clipDistance / scale.y;
-			clipRect.height = frameHeight - clipRect.y;
+			var swagRect:FlxRect = (clipRect ?? rectCache ?? (rectCache = FlxRect.get()));
+
+			swagRect.x = 0;
+			swagRect.y = 0;
+			swagRect.width = frameWidth;
+			swagRect.height = frameHeight;
 			
-			clipRect = clipRect;
+			swagRect.y = (mag / scale.y);
+			swagRect.height -= swagRect.y;
+			
+			clipRect = swagRect;
 		}
 	}
 

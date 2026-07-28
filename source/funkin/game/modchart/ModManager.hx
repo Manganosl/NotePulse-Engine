@@ -20,6 +20,7 @@ class ModManager {
 	public function registerDefaultModifiers()
 	{
 		var quickRegs:Array<Any> = [
+			XModifier,
 			FlipModifier,
 			ReverseModifier,
 			InvertModifier,
@@ -36,8 +37,7 @@ class ModManager {
 			PerspectiveModifier, 
 			SnapModifier,
 			SpiralModifier,
-			AccelModifier, 
-			XModifier
+			AccelModifier
 		];
 		for (mod in quickRegs)
 			quickRegister(Type.createInstance(mod, [this]));
