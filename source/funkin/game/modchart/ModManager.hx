@@ -51,7 +51,7 @@ class ModManager {
 		setValue("scaleX", 1);
 		setValue("scaleY", 1);
 		setValue("xmod", 1);
-		for(i in 0...4)
+		for(i in 0...PlayState.SONG.mania+1)
 			setValue('xmod$i', 1);
 	}
 

@@ -51,7 +51,6 @@ class LocalRotateModifier extends NoteModifier
 	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
 	{
 		var origin = getFieldOrigin(PlayField.fields[player]);
-		origin.x += Note.swagWidth / 2;
 		
 		var diff = pos.subtract(origin);
 		var scale = FlxG.height;

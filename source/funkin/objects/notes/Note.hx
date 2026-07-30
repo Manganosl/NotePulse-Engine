@@ -606,7 +606,7 @@ class Note extends FlxSkewedSprite {
 	{
 		if (strum.sustainReduce && wasGoodHit && Conductor.songPosition >= strumTime)
 		{
-			final x:Float = (x - strum.x - (strum.width - width) * .5), y:Float = (y - strum.y - strum.height * .5);
+			final x:Float = (x - strum.modPos.x - (strum.width - width) * .5), y:Float = (y - strum.modPos.y - strum.height * .5);
 			final mag:Float = Math.sqrt(x * x + y * y);
 			
 			var swagRect:FlxRect = (clipRect ?? rectCache ?? (rectCache = FlxRect.get()));
