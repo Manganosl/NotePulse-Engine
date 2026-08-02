@@ -146,7 +146,7 @@ class PathModifier extends NoteModifier {
     // I'll use this mod to handle Psych's note directions
     var xmode = getSubmodValue("xmode", player) + getSubmodValue('xmode$data', player);
     var noteDegrees:Float = (PlayField.fields[player].members[data].direction - 90);
-    if (xmode != 0 || noteDegrees != 0) {
+    if (xmode != 0 && noteDegrees != 0) {
       var mod = (player + 1) * 2 - 3;
       if(obj is Note) noteDegrees += cast(obj, Note).offsetDirection;
       outPos.x += (xmode + FlxAngle.asRadians(noteDegrees)) * (diff * mod);

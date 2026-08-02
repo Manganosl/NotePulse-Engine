@@ -64,6 +64,8 @@ class SustainSplash extends FlxSkewedSprite {
 
 		visible = true;
 
+		angle = note.angle + offsetAngle;
+
 		if (animation.curAnim == null || animation.curAnim.name != "loop") {
 			animation.play("loop");
 			centerSplash();
@@ -106,7 +108,6 @@ class SustainSplash extends FlxSkewedSprite {
 		centerOffsets();
 		scale.x = strum.scale.x * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleX;
 		scale.y = strum.scale.y * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleY;
-		angle = strum.direction-90 + offsetAngle;
 		alpha = strum.alpha + offsetAlpha - (1 - strum.rgbShader.alphaMult);
 		x = strum.modPos.x + (strum.width / 2) - (width / 2) + offsetX;
 		y = strum.modPos.y + (strum.height / 2) - (height / 2) + offsetY;

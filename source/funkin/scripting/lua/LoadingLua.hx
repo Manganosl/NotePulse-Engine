@@ -137,6 +137,12 @@ class LoadingLua {
 				Lua_helper.add_callback(lua, name, func);
 		}
 
+		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, ?x:Float = 0, ?y:Float = 0, ?isPlayer:Bool = false) {
+			LoadingState.charactersToPrepare.push(character);
+		});
+		Lua_helper.add_callback(lua, "addCharacterToList", function(name:String, type:String) {
+			LoadingState.charactersToPrepare.push(name);
+		});
 		Lua_helper.add_callback(lua, "precacheImage", function(name:String, ?allowGPU:Bool = true) {
 			LoadingState.imagesToPrepare.push(name);
 		});
@@ -198,7 +204,6 @@ class LoadingLua {
 		Lua_helper.add_callback(lua, "setLuaSpriteCamera", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
 		Lua_helper.add_callback(lua, "addHealth", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
 		Lua_helper.add_callback(lua, "getHealth", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
-		Lua_helper.add_callback(lua, "makeLuaCharacter", function(?v1:Dynamic, ?v2:Dynamic, ?v3:Dynamic, ?v4:Dynamic, ?v5:Dynamic, ?v6:Dynamic) {});
 
 		try{
 			if (!isString) isString = !FileSystem.exists(scriptName);
