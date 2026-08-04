@@ -7,11 +7,15 @@ import flixel.tweens.FlxEase;
 import funkin.game.modchart.events.*;
 import funkin.game.modchart.modifiers.*;
 
-// Need to add nodes, aliases and all that shit
-
 // Weird amalgamation of Schmovin' modifier system, Andromeda modifier system and my own new shit -neb
+typedef Node = {
+	var in_mods:Array<String>;
+	var out_mods:Array<String>;
+	var nodeFunc:(values:Array<Float>, player:Int) -> Array<Float>;
+}
 
 class ModManager {
+	public var doTraces:Bool = true;
 	public var swapPlayers:Bool = false;
 
 	static inline function normalizeModName(modName:String):String
@@ -60,7 +64,8 @@ class ModManager {
 			for (file in FileSystem.readDirectory(folder)){
 				if(file.toLowerCase().endsWith('.hx')){
 					quickRegister(new ScriptedModifier(this, folder + file, file));
-					Log.info('Registered scripted modifier: $file');
+					if (doTraces)
+						Log.info('Registered scripted modifier: $file');
 				}
 			}
 		}
@@ -86,7 +91,13 @@ class ModManager {
     public var activeMods:Array<Array<String>> = [[], []]; // by player
 
 	private var activeModsDirty:Array<Bool> = [false, false];
-    
+
+	var aliases:Map<String, String> = [];
+
+	var nodes:Map<String, Array<Node>> = [];
+	var nodeArray:Array<Node> = [];
+	var touchedMods:Array<Array<String>> = [[], []];
+
     inline public function quickRegister(mod:Modifier)
         registerMod(mod.getName(), mod);
 
@@ -102,6 +113,9 @@ class ModManager {
 		timeline.addMod(modName);
 		modArray.push(mod);
 
+		for (a => m in mod.getAliases())
+			registerAlias(a, m);
+
 		if (registerSubmods){
 			for (name in mod.submods.keys())
 			{
@@ -115,19 +129,118 @@ class ModManager {
         // TODO: sort by mod.getOrder()
     }
 
+	inline public function registerAux(name:String)
+		quickRegister(new SubModifier(name, this));
+
+	public function registerAlias(alias:String, mod:String)
+		aliases.set(normalizeModName(alias), normalizeModName(mod));
+
+	function getActualModName(m:String):String {
+		var norm = normalizeModName(m);
+		return aliases.exists(norm) ? aliases.get(norm) : norm;
+	}
+
+	public function registerNode(node:Node){
+		for (inp in node.in_mods){
+			var key = getActualModName(inp);
+			if (!nodes.exists(key))
+				nodes.set(key, []);
+			nodes.get(key).push(node);
+		}
+		nodeArray.push(node);
+	}
+
+	public function quickNode(inputMods:Array<String>, nodeFunc:(values:Array<Float>, player:Int) -> Array<Float>, ?outputMods:Array<String>){
+		registerNode({
+			in_mods: inputMods,
+			out_mods: outputMods ?? [],
+			nodeFunc: nodeFunc
+		});
+	}
+
+	inline public function registerAltNode(mod:String) {
+		registerAux(mod + "-a");
+		quickNode([mod + "-a"], function(values:Array<Float>, pN:Int) {
+			return values;
+		}, [mod]);
+	}
+
+	public function touchMod(name:String, player:Int)
+	{
+		if (player < 0) return;
+
+		name = getActualModName(name);
+		if (touchedMods[player] == null)
+			touchedMods[player] = [];
+
+		if (!touchedMods[player].contains(name))
+			touchedMods[player].push(name);
+	}
+
+	function runNodes()
+	{
+		if (nodeArray.length == 0) return;
+
+		for (player => mods in touchedMods){
+			if (mods == null) continue;
+
+			var runningNodes:Array<Node> = [];
+
+			for (mod in mods){
+				var nodeList = nodes.get(mod);
+				if (nodeList == null) continue;
+				for (node in nodeList)
+					if (!runningNodes.contains(node))
+						runningNodes.push(node);
+			}
+
+			for (node in runningNodes){
+				var input:Array<Float> = [];
+				for (mod in node.in_mods)
+					input.push(getValue(mod, player));
+
+				var output:Array<Float> = node.nodeFunc(input, player);
+
+				if (node.out_mods.length > 0 && output.length < node.out_mods.length){
+					for (i in output.length...node.out_mods.length)
+						output.push(node.in_mods.contains(node.out_mods[i]) ? getValue(node.out_mods[i], player) : 0); // If input mods contains the output mod, use the current value, else use 0.
+				}
+
+				for (idx in 0...node.out_mods.length){
+					var outputValue:Float = output[idx];
+					var outputName:String = node.out_mods[idx];
+					var outputMod:Modifier = get(outputName);
+
+					if (outputMod == null){
+						if (doTraces)
+							Log.warn('$outputName is not a valid node output!');
+						continue;
+					}
+
+					var currentValue = outputMod.getValue(player);
+
+					if (node.in_mods.contains(outputName))
+						outputMod.setCurrentValue(outputValue, player);
+					else
+						outputMod.setCurrentValue(currentValue + outputValue, player);
+				}
+			}
+		}
+	}
+
 	private inline function getP(player:Int):Int {
         if (!swapPlayers || (player != 0 && player != 1)) return player;
         return 1 - player;
     }
 
 	inline public function get(modName:String)
-		return register.get(normalizeModName(modName));
+		return register.get(getActualModName(modName));
 	
 	inline public function getPercent(modName:String, player:Int)
-		return !register.exists(normalizeModName(modName)) ? 0 : get(modName).getPercent(player);
+		return !register.exists(getActualModName(modName)) ? 0 : get(modName).getPercent(player);
 
 	inline public function getValue(modName:String, player:Int):Float
-		return !register.exists(normalizeModName(modName)) ? 0 : get(modName).getValue(player);
+		return !register.exists(getActualModName(modName)) ? 0 : get(modName).getValue(player);
 
     inline public function setPercent(modName:String, val:Float, player:Int=-1)
 		setValue(modName, val / 100, player);
@@ -136,10 +249,10 @@ class ModManager {
 		setCurrentValue(modName, val / 100, player);
 
 	inline public function getTargetPercent(modName:String, player:Int)
-		return !register.exists(normalizeModName(modName)) ? 0 : get(modName).getTargetPercent(player);
+		return !register.exists(getActualModName(modName)) ? 0 : get(modName).getTargetPercent(player);
 
 	inline public function getTargetValue(modName:String, player:Int)
-		return !register.exists(normalizeModName(modName)) ? 0 : get(modName).getTargetValue(player);
+		return !register.exists(getActualModName(modName)) ? 0 : get(modName).getTargetValue(player);
 
 	public function setCurrentValue(modName:String, val:Float, player:Int = -1)
 	{
@@ -181,10 +294,11 @@ class ModManager {
 		}
 		else
 		{
-			var daMod = register.get(normalizeModName(modName));
+			var daMod = register.get(getActualModName(modName));
 			if (daMod == null)
 			{
-				Log.warn("The modifier " + modName + " cannot be set as it's null");
+				if (doTraces)
+					Log.warn('Tried to set null modifier "$modName"');
 				return;
 			}
 			var mod = daMod.parent == null ? daMod : daMod.parent;
@@ -239,13 +353,18 @@ class ModManager {
 		this.state = daState;
 	}
 
-	public function update(elapsed:Float)
-	{
+	public function update(elapsed:Float){
+		for (pN => mods in activeMods)
+			touchedMods[pN] = mods == null ? [] : mods.copy();
+
 		for (mod in modArray)
-		{
 			if (mod.active && mod.doesUpdate())
 			    mod.update(elapsed);
-		}
+
+		runNodes();
+
+		for (pN in 0...touchedMods.length)
+			touchedMods[pN] = [];
 	}
 
     public function updateTimeline(curStep:Float)
@@ -340,9 +459,11 @@ class ModManager {
 				if (newEase != null)
 					easeFunc = newEase;
 				else
-					Log.warn('Unknown ease style: $style');
+					if (doTraces)
+						Log.warn('Unknown ease style: $style');
 			} catch(e) {
-				Log.warn('Unknown ease style: $style');
+				if (doTraces)
+					Log.warn('Unknown ease style: $style');
 			}
 			timeline.addEvent(new ModEaseEvent(step, endStep, normalizeModName(modName), target, easeFunc, player, this));
 		}

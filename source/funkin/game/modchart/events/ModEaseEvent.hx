@@ -23,7 +23,8 @@ class ModEaseEvent extends ModEvent {
 	override function run(curStep:Float)
 	{
 		if (mod == null && !finished){
-			Log.warn("Tried to ease modifier " + modName + " but it's null");
+			if (manager.doTraces)
+				Log.warn('Tried to ease null modifier "' + modName + '"');
 			finished = true;
 			return;
 		}

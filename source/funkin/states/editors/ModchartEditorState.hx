@@ -1649,15 +1649,12 @@ class ModchartEditorState extends MusicBeatState
 	function applyNoteStates(time:Float)
 	{
 		for (note in notes)
-		{
 			note.kill();
-		}
 		notes.clear();
 
 		unspawnNotes = [];
 
-		for (note in allNotes)
-		{
+		for (note in allNotes){
 			note.revive();
 			note.spawned = false;
 			note.wasGoodHit = false;
@@ -1671,25 +1668,13 @@ class ModchartEditorState extends MusicBeatState
 					note.clipRect = null;
 
 			if (note.strumTime >= time)
-			{
 				unspawnNotes.push(note);
-			}
-			else if (note.isSustainNote)
-			{
-				if (note.parent != null && note.parent.strumTime + note.parent.sustainLength >= time)
-				{
+			else if(note.isSustainNote){
+				if(note.parent != null && note.parent.strumTime + note.parent.sustainLength >= time){
 					notes.add(note);
 					note.spawned = true;
-				}
-				else
-				{
-					note.kill();
-				}
-			}
-			else
-			{
-				note.kill();
-			}
+				} else note.kill();
+			} else note.kill();
 		}
 
 		unspawnNotes.sort(CoolUtil.sortByTime);
@@ -1711,6 +1696,7 @@ class ModchartEditorState extends MusicBeatState
 
 	function reloadManager(){
 		modManager = new ModManager(this);
+		modManager.doTraces = false;
 		modManager.receptors = [for(i in PlayField.fields) i.members];
 		modManager.registerDefaultModifiers();
 		modManager.registerScriptedModifiers();

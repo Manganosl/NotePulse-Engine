@@ -56,6 +56,10 @@ class Modifier {
 		return '';
 	}
 
+	public function getAliases():Map<String,String> {
+		return [];
+	}
+
 	inline public function getTargetOtherValue(modName:String, player:Int)
 		return modMgr.getTargetValue(modName, player);
 
@@ -84,11 +88,15 @@ class Modifier {
 	}
 
 	public function setCurrentValue(value:Float, player:Int = -1){
-		if (player == -1)
-			for (idx in 0...percents.length)
+		if(player == -1){
+			for(idx in 0...percents.length){
+				modMgr.touchMod(getName(), idx);
 				percents[idx] = value;
-		else
+			} 
+		} else {
+			modMgr.touchMod(getName(), player);
 			percents[player] = value;
+		}
 	}
 
 	public function setPercent(percent:Float, player:Int = -1)
