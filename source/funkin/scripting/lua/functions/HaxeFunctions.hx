@@ -47,7 +47,6 @@ class HaxeFunctions extends FunkinScript {
 	#if HSCRIPT_ALLOWED
 	override function initInterp() {
 		interp = new Interp();
-		interp.onMetadata = this.onMetadata;
 		interp.importFailedCallback = this.onImportFailed;
 	}
 

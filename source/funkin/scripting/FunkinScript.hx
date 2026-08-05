@@ -202,6 +202,8 @@ class FunkinScript implements HscriptInterface {
 			parser.line = 1; //Reset the parser position.
 			expr = parser.parseString(#if sys File.getContent(path) #else Assets.getText(path) #end, path);
 
+			expr = stripScriptMetadata(expr);
+
 			interp.variables.set("this", this);
 			for(varToBring => val in classes) interp.variables.set(varToBring, val);
 
@@ -558,42 +560,61 @@ class FunkinScript implements HscriptInterface {
 		interp = new Interp();
 		interp.allowStaticVariables = interp.allowPublicVariables = true;
 		interp.staticVariables = staticVariables;
-
-		interp.onMetadata = onMetadata;
 		interp.errorHandler = onError;
 		interp.warnHandler = onWarn;
 		interp.importFailedCallback = onImportFailed;
 	}
 
-	/*
-	 * All of the custom metadatas (@:exampleMeta) that can be used in hscript.
-	 */
-	public function onMetadata(name:String, args:Array<Expr>, exp:Expr) {
+	function stripScriptMetadata(e:Expr):Expr {
+		#if hscriptPos
+		return switch(e.e) {
+			case EBlock(exprs):
+				{e: EBlock([for (s in exprs) stripScriptMetadata(s)]), pmin: e.pmin, pmax: e.pmax, origin: e.origin, line: e.line};
+			case EMeta(name, args, inner):
+				if(name == ":bypassAccessor")
+					e;
+				else if(resolveMetadataTag(name, args))
+					{e: EBlock([]), pmin: e.pmin, pmax: e.pmax, origin: e.origin, line: e.line};
+				else
+					{e: EMeta(name, args, stripScriptMetadata(inner)), pmin: e.pmin, pmax: e.pmax, origin: e.origin, line: e.line}; // unknown tag, keep looking (stacked metadata)
+			default:
+				e;
+		}
+		#else
+		return switch(e) {
+			case EBlock(exprs):
+				EBlock([for (s in exprs) stripScriptMetadata(s)]);
+			case EMeta(name, args, inner):
+				if(name == ":bypassAccessor")
+					e;
+				else if(resolveMetadataTag(name, args))
+					EBlock([]);
+				else
+					EMeta(name, args, stripScriptMetadata(inner));
+			default:
+				e;
+		}
+		#end
+	}
+
+	function resolveMetadataTag(name:String, args:Array<Expr>):Bool {
 		switch(name) {
 			case ":ignoreException": this.parser.resumeErrors = true;
-			case ":noDebug": this.interp.errorHandler = (e) -> {};
+			case ":noDebug": this.interp.errorHandler = (err) -> {};
 			case ":noLibraries": this._librariesAllowed = false;
-
-			/* //Useless
-			case ":allowJSON":
-				switch(args[0].e) {
-					case EIdent(id): this.parser.allowJSON = (id.trim() == "true");
-					default: //nothing
-				}
-				return null;
-			*/
-
 			case ":include": //legacy importScript from older versions
 				var _isAbsolute:Bool = false;
-				if(args.length > 1) _isAbsolute = switch(args[1].e) { case EIdent(abs): (abs.trim() == "true"); default: false; }
+				if(args.length > 1) _isAbsolute = switch(#if hscriptPos args[1].e #else args[1] #end) { case EIdent(abs): (abs.trim() == "true"); default: false; }
 
-				switch(args[0].e) {
+				switch(#if hscriptPos args[0].e #else args[0] #end) {
 					case EConst(CString(scriptPath)): _includeSubscript(Std.string(scriptPath.trim()), _isAbsolute);
 					default: //nothing
 				}
-				return null;
+
+			default:
+				return false;
 		}
-		return null;
+		return true;
 	}
 
 	//SCRIPT CALLBACKS

@@ -28,4 +28,7 @@ class Config {
 		"hxp.Path"
 	];
 	public static final DISALLOW_ABSTRACT_AND_ENUM = [];
+
+	@:unreflective
+	public static final IMPORT_BLACKLIST:Array<String> = [];
 }
