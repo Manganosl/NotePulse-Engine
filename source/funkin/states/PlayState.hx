@@ -2825,7 +2825,7 @@ class PlayState extends MusicBeatState
 		pos.y += daNote.offsetY;
 		if(daNote.isSustainNote) pos.y += daNote.parent.height/2;
 		daNote.x = pos.x;
-		daNote.y = pos.y;
+		daNote.y = pos.y + daNote.strum.y - 50;
 		daNote.z = pos.z;
 		if (daNote.isSustainNote){
 			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / PlayState.SONG.holdSubdivisions, 10);

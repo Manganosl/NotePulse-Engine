@@ -387,11 +387,11 @@ class ModManager {
 		
 		if (note != null && note.isSustainNote)
 		{
-			note.y = pos.y + note.offsetY;
+			note.y = pos.y + note.offsetY + (note.strum.y - 50);
 		}
 		else
 		{
-			if(strum != null) strum.modPos.y = (pos.y - obj.height * .5);
+			if(strum != null) strum.modPos.y = (pos.y - obj.height * .5 + strum.y - 50);
 			else if (note != null) note.y = (note.offsetY + pos.y - obj.height * .5);
 			else obj.y = (pos.y - obj.height * .5);
 		}

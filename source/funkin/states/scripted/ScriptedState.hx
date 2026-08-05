@@ -27,14 +27,12 @@ class ScriptedState extends MusicBeatState
 	}
 
 	override public function create():Void {
-		if (initialScriptPath != null){
-			startHScript(initialScriptPath);
-		}
-
 		super.create();
+
+		if (initialScriptPath != null) startHScript(initialScriptPath);
+
 		stagesFunc(function(stage:BaseStage) stage.createPost());
-		if (hscript != null)
-			callOnHScript('onCreatePost');
+		if (hscript != null) callOnHScript('onCreatePost');
 	}
 
 	public function startHScript(scriptToLoad:String):Bool
@@ -60,7 +58,7 @@ class ScriptedState extends MusicBeatState
 
 	override public function update(elapsed:Float):Void
 	{
-		callOnHScript("onUpdate", [elapsed]);
+		if (hscript != null) callOnHScript("onUpdate", [elapsed]);
 
 		super.update(elapsed);
 
@@ -74,12 +72,12 @@ class ScriptedState extends MusicBeatState
 			return;
 		}
 
-		callOnHScript("onUpdatePost", [elapsed]);
+		if (hscript != null) callOnHScript("onUpdatePost", [elapsed]);
 	}
 
 	override public function destroy():Void
 	{
-		callOnHScript('onDestroy');
+		if (hscript != null) callOnHScript('onDestroy');
 
 		if (hscriptArray != null)
 		{
