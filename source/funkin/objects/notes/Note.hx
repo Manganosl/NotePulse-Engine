@@ -602,10 +602,8 @@ class Note extends FlxSkewedSprite {
 	}
 
 	var rectCache:Null<FlxRect> = null;
-	public function clip(strum:StrumNote)
-	{
-		if (strum.sustainReduce && wasGoodHit && Conductor.songPosition >= strumTime)
-		{
+	public function clip(strum:StrumNote){
+		if (strum.sustainReduce && wasGoodHit && Conductor.songPosition >= strumTime){
 			final x:Float = (x - strum.modPos.x - (strum.width - width) * .5), y:Float = (y - strum.modPos.y - strum.height * .5);
 			final mag:Float = Math.sqrt(x * x + y * y);
 			

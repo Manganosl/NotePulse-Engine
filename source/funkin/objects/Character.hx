@@ -493,20 +493,16 @@ class Character extends FlxAnimate
 		}
 	}
 
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
-	{
+	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void {
 		specialAnim = false;
-		anim.play(AnimName, Force, Reversed, Frame);
+		animation.play(AnimName, Force, Reversed, Frame);
 
-		if (animOffsets.exists(AnimName))
-		{
+		if (animOffsets.exists(AnimName)){
 			var daOffset = animOffsets.get(AnimName);
 			offset.set(daOffset[0], daOffset[1]);
 		}
-		// else offset.set(0, 0);
 
-		if (curCharacter.startsWith('gf-') || curCharacter == 'gf')
-		{
+		if (curCharacter.startsWith('gf-') || curCharacter == 'gf'){
 			if (AnimName == 'singLEFT')
 				danced = true;
 			else if (AnimName == 'singRIGHT')

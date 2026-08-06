@@ -30,8 +30,8 @@ class PerspectiveModifier extends NoteModifier {
   }
 
 
-  public function getVector(curZ:Float,pos:Vector3):Vector3{
-    var halfOffset = new Vector3(FlxG.width/2, FlxG.height/2);
+  public function getVector(curZ:Float,pos:Vector3):Vector3 {
+    var halfOffset = new Vector3((FlxG.width / 2) - (Note.swagWidth / 2), (FlxG.height / 2) - (Note.swagWidth / 2));
     pos = pos.subtract(halfOffset);
     var oX = pos.x;
     var oY = pos.y;
