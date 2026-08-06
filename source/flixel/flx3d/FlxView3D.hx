@@ -1,10 +1,12 @@
 package flixel.flx3d;
 
+#if THREE_D_SUPPORT
+import flixel.flx3d._internal.TextureView3D;
 import away3d.containers.View3D;
 import away3d.library.assets.IAsset;
 import flixel.FlxG;
 import openfl.display.BitmapData;
-
+#end
 import flixel.FlxSprite;
 
 /**
@@ -16,7 +18,36 @@ import flixel.FlxSprite;
  */
 class FlxView3D extends FlxSprite
 {
-	@:noCompletion private var bmp:BitmapData;
+	#if THREE_D_SUPPORT
+	@:noCompletion private var bmp:BitmapData = null;
+	private var _textureView:TextureView3D;
+	private var legacyRender:Bool = false;
+
+	// With new rendering, it seems to only work if 2 or more views are being rendered.
+	// This workaround creates a second instance if there is only one view.
+	// "There is nothing more permanent than a temporary solution"
+	// -idk who said this i just wanted to quote it
+	private static var workaroundInstance:FlxView3D;
+	private static var createdWorkaround:Bool = false;
+
+	private inline function createWorkaround()
+	{
+		if (!createdWorkaround && !legacyRender)
+		{
+			createdWorkaround = true;
+			workaroundInstance = new FlxView3D(0, 0, 1, 1);
+			FlxG.state.add(workaroundInstance);
+		}
+	}
+
+	private inline function destroyWorkaround()
+	{
+		if (workaroundInstance == this)
+		{
+			workaroundInstance = null;
+			createdWorkaround = false;
+		}
+	}
 
 	/**
 	 * The Away3D View
@@ -36,20 +67,41 @@ class FlxView3D extends FlxSprite
 	 * @param width Leave as -1 for screen width
 	 * @param height Leave as -1 for screen height
 	 */
-	public function new(x:Float = 0, y:Float = 0, width:Int = -1, height:Int = -1) {
-		super(x, y);
+	public function new(x:Float = 0, y:Float = 0, width:Int = -1, height:Int = -1)
+	{
+		legacyRender = false;
 
-		view = new View3D();
+		super(x, y);
+		if (legacyRender)
+		{
+			view = new View3D();
+		}
+		else
+		{
+			_textureView = new TextureView3D();
+			_textureView.onUpdateBitmap = function(bitmap)
+			{
+				bmp = bitmap;
+				loadGraphic(bmp);
+			}
+
+			view = _textureView;
+		}
+
 		view.visible = false;
 
-		view.width = width == -1 ? FlxG.width : width;
-		view.height = height == -1 ? FlxG.height : height;
+		this.width = width == -1 ? FlxG.width : width;
+		this.height = height == -1 ? FlxG.height : height;
+		if (legacyRender)
+		{
+			bmp = new BitmapData(Std.int(view.width), Std.int(view.height), true, 0x0);
+			loadGraphic(bmp);
+		}
 
 		view.backgroundAlpha = 0;
 		FlxG.stage.addChildAt(view, 0);
 
-		bmp = new BitmapData(Std.int(view.width), Std.int(view.height), true, 0x0);
-		loadGraphic(bmp);
+		createWorkaround();
 	}
 
 	/**
@@ -57,53 +109,70 @@ class FlxView3D extends FlxSprite
 	 * @param obj
 	 * @return T null
 	 */
-	public static function dispose<T:IAsset>(obj:Null<T>):T {
+	public static function dispose<T:IAsset>(obj:Null<T>):T
+	{
 		return Flx3DUtil.dispose(obj);
 	}
 
 	/**
 	 * Disposes of all the Away3D assets associated with the FlxView3D
 	 */
-	override function destroy() {
+	override function destroy()
+	{
 		FlxG.stage.removeChild(view);
 		super.destroy();
 
-		if (bmp != null) {
+		if (bmp != null)
+		{
 			bmp.dispose();
 			bmp = null;
 		}
 
-		if (view != null) {
+		if (view != null)
+		{
 			view.dispose();
 			view = null;
 		}
+
+		destroyWorkaround();
 	}
 
-	@:noCompletion override function draw() {
-		super.draw();
+	@:noCompletion override function draw()
+	{
+		if (dirty3D)
+		{
+			if (legacyRender)
+			{
+				view.visible = false;
+				FlxG.stage.addChildAt(view, 0);
 
-		if (dirty3D) {
-			view.visible = false;
-			FlxG.stage.addChildAt(view, 0);
+				var old = FlxG.game.filters;
+				FlxG.game.filters = null;
 
-			var old = FlxG.game.filters;
-			FlxG.game.filters = null;
+				view.renderer.queueSnapshot(bmp);
+				view.render();
 
-			view.renderer.queueSnapshot(bmp);
-			view.render();
-
-			FlxG.game.filters = old;
-			FlxG.stage.removeChild(view);
+				FlxG.game.filters = old;
+				FlxG.stage.removeChild(view);
+			}
+			else
+			{
+				view.render();
+			}
 		}
+		super.draw();
 	}
 
-	@:noCompletion override function set_width(newWidth:Float):Float {
+	@:noCompletion override function set_width(newWidth:Float):Float
+	{
 		super.set_width(newWidth);
 		return view != null ? view.width = width : width;
 	}
 
-	@:noCompletion override function set_height(newHeight:Float):Float {
+	@:noCompletion override function set_height(newHeight:Float):Float
+	{
 		super.set_height(newHeight);
 		return view != null ? view.height = height : height;
 	}
+	#end
 }
