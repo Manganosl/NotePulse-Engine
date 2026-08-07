@@ -526,9 +526,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		btnY += 50;
 		var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Solid Color', function() {
 			var meta:StageEditorMetaSprite = new StageEditorMetaSprite({type: 'square', scale: [200, 200], name: findUnoccupiedName()}, new ModchartSprite());
-			meta.sprite.makeGraphic(1, 1, FlxColor.WHITE);
-			meta.sprite.scale.set(200, 200);
-			meta.sprite.updateHitbox();
+			meta.setScale(200, 200);
 			meta.sprite.screenCenter();
 			insertMeta(meta);
 		});
@@ -664,7 +662,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		if(stageJson.camera_opponent != null && stageJson.camera_opponent.length > 1)
 		{
 			cx = stageJson.camera_opponent[0];
-			cy = stageJson.camera_opponent[0];
+			cy = stageJson.camera_opponent[1];
 		}
 		camDadStepperX = new PsychUINumericStepper(objX, objY, 50, cx, -10000, 10000, 0);
 		camDadStepperY = new PsychUINumericStepper(objX + 80, objY, 50, cy, -10000, 10000, 0);
@@ -681,7 +679,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		if(stageJson.camera_girlfriend != null && stageJson.camera_girlfriend.length > 1)
 		{
 			cx = stageJson.camera_girlfriend[0];
-			cy = stageJson.camera_girlfriend[0];
+			cy = stageJson.camera_girlfriend[1];
 		}
 		tab_group.add(new FlxText(objX, objY - 18, 100, 'Girlfriend:'));
 		camGfStepperX = new PsychUINumericStepper(objX, objY, 50, cx, -10000, 10000, 0);
@@ -699,7 +697,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		if(stageJson.camera_boyfriend != null && stageJson.camera_boyfriend.length > 1)
 		{
 			cx = stageJson.camera_boyfriend[0];
-			cy = stageJson.camera_boyfriend[0];
+			cy = stageJson.camera_boyfriend[1];
 		}
 		tab_group.add(new FlxText(objX, objY - 18, 100, 'Boyfriend:'));
 		camBfStepperX = new PsychUINumericStepper(objX, objY, 50, cx, -10000, 10000, 0);
@@ -1211,12 +1209,15 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 		var displayX:Float = Math.round(selected.x);
 		var displayY:Float = Math.round(selected.y);
-		
-		var char:Character = cast selected.sprite;
-		if(char != null)
+
+		if(StageData.reservedNames.contains(selected.type))
 		{
-			displayX -= char.positionArray[0];
-			displayY -= char.positionArray[1];
+			var char:Character = cast selected.sprite;
+			if(char != null)
+			{
+				displayX -= char.positionArray[0];
+				displayY -= char.positionArray[1];
+			}
 		}
 
 		posTxt.text = 'X: $displayX\nY: $displayY';
@@ -1908,7 +1909,14 @@ class StageEditorMetaSprite
 	{
 		scale[0] = (wid != null ? wid : scale[0]);
 		scale[1] = (hei != null ? hei : scale[1]);
-		sprite.scale.set(scale[0], scale[1]);
+
+		if(type == 'square')
+		{
+			sprite.makeGraphic(Std.int(Math.max(1, scale[0])), Std.int(Math.max(1, scale[1])), FlxColor.WHITE);
+			sprite.scale.set(1, 1);
+		}
+		else sprite.scale.set(scale[0], scale[1]);
+
 		sprite.updateHitbox();
 	}
 	

@@ -226,10 +226,10 @@ class ModchartEditorState extends MusicBeatState
 		DiscordClient.changePresence('Modcharting a Song', PlayState.SONG.song, null, true, songLength);
 		#end
 
-		gridBg = new ChartingGridSprite(1, 0xFF3F3F3F, 0xFF2F2F2F);
+		gridBg = new ChartingGridSprite(1, 0xFFDFDFDF, 0xFFBFBFBF);
 		gridBg.screenCenter(X);
-		prevGridBg = new ChartingGridSprite(1, 0xFF1F1F1F, 0xFF111111);
-		nextGridBg = new ChartingGridSprite(1, 0xFF1F1F1F, 0xFF111111);
+		prevGridBg = new ChartingGridSprite(1, 0xFF5F5F5F, 0xFF4A4A4A);
+		nextGridBg = new ChartingGridSprite(1, 0xFF5F5F5F, 0xFF4A4A4A);
 		prevGridBg.x = nextGridBg.x = gridBg.x = camUI.width-gridBg.width-25;
 		prevGridBg.stripes = nextGridBg.stripes = gridBg.stripes = [1];
 		gridBg.cameras = prevGridBg.cameras = nextGridBg.cameras = [camUI];
@@ -358,9 +358,6 @@ class ModchartEditorState extends MusicBeatState
 		posY += 40;
 
 		modifierInput = new PsychUIInputText(posX+150, posY, 120, '', 8);
-    	modifierInput.onChange = function(old:String, cur:String){
-			updateModEvV1();
-		}
 
 		var modifierLabelText = new FlxText(modifierInput.x, modifierInput.y - 15, 80, 'Modifier:');
 
@@ -832,7 +829,7 @@ class ModchartEditorState extends MusicBeatState
 		ClientPrefs.toggleVolumeKeys(true);
 	}
 
-	private var isCrosshair:Bool = false;
+	private var wasInputting:Bool = false;
 	override function update(elapsed:Float)
 	{
 		if(pendingSeekTime != null)
@@ -856,6 +853,11 @@ class ModchartEditorState extends MusicBeatState
 		ClientPrefs.toggleVolumeKeys(PsychUIInputText.focusOn == null);
 		updateScrollY();
 		camUI.scroll.y = scrollY;
+
+		if(wasInputting && PsychUIInputText.focusOn == null){
+			wasInputting = false;
+			updateModEvV1();
+		} else wasInputting = true;
 
 		if(FlxG.sound.music != null)
 		{
@@ -944,12 +946,7 @@ class ModchartEditorState extends MusicBeatState
 		}
 
 		var minX:Float = gridBg.x;
-		if(FlxG.mouse.x >= minX && FlxG.mouse.x < gridBg.x + gridBg.width)
-		{
-			//if((!FlxG.mouse.overlaps(mainBox.bg) || !FlxG.mouse.overlaps(infoBox.bg))){
-			//	Mouse.cursor = MouseCursor.CROSSHAIR;
-			//	isCrosshair = true;
-			//}
+		if(FlxG.mouse.x >= minX && FlxG.mouse.x < gridBg.x + gridBg.width){
 			var diffX:Float = FlxG.mouse.x - gridBg.x;
 			var diffY:Float = (FlxG.mouse.y+camUI.scroll.y) - gridBg.y;
 			if(!FlxG.keys.pressed.SHIFT)
