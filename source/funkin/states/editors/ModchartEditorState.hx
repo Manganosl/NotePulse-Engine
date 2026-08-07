@@ -899,8 +899,6 @@ class ModchartEditorState extends MusicBeatState
 		{
 			var time:Float = spawnTime * playbackRate;
 			if(songSpeed < 1) time /= songSpeed;
-			if(unspawnNotes[0].multSpeed < 1) time /= unspawnNotes[0].multSpeed;
-			if(unspawnNotes[0].modSpeed < 1) time /= unspawnNotes[0].modSpeed;
 
 			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
 			{
