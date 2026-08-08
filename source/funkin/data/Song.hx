@@ -69,7 +69,7 @@ class Song
         if(songJson.format == null)
             throw new haxe.Exception('No chart format found!');
 
-        Log.info('Loaded ${songJson.format} Song!');
+        Log.info('Loaded ${songJson.format} Song');
 
         if(songJson.gfVersion == null)
         {
