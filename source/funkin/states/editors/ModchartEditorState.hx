@@ -854,10 +854,10 @@ class ModchartEditorState extends MusicBeatState
 		updateScrollY();
 		camUI.scroll.y = scrollY;
 
-		if(wasInputting && PsychUIInputText.focusOn == null){
-			wasInputting = false;
+		var inputFocused:Bool = (PsychUIInputText.focusOn != null);
+		if(wasInputting && !inputFocused)
 			updateModEvV1();
-		} else wasInputting = true;
+		wasInputting = inputFocused;
 
 		if(FlxG.sound.music != null)
 		{
