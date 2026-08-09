@@ -155,7 +155,7 @@ class MetaNote extends Note {
 
     public function new(time:Float, data:Int, songData:Array<Dynamic>) {
         super(time, data, null, false, true);
-        this.fieldID = Std.int(songData[1]);
+        this.fieldID = Std.int(songData[1] / ChartingState.GRID_COLUMNS_PER_PLAYER);
         this.songData = songData;
         this.strumTime = time;
         this.chartNoteData = data;
@@ -165,6 +165,7 @@ class MetaNote extends Note {
         this.chartNoteData = v;
         this.songData[1] = v;
         this.noteData = v % ChartingState.GRID_COLUMNS_PER_PLAYER;
+        this.fieldID = Std.int(v / ChartingState.GRID_COLUMNS_PER_PLAYER);
         this.mustPress = (v < ChartingState.GRID_COLUMNS_PER_PLAYER);
 
         if (!PlayState.isPixelStage)

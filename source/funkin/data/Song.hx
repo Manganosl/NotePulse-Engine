@@ -24,6 +24,8 @@ typedef SwagSong =
 	var gfVersion:String;
 	var stage:String;
 
+	@:optional var extraPlayers:Array<String>;
+
 	@:optional var lanes:Int;
 
 	@:optional var holdSubdivisions:Int;
@@ -147,6 +149,10 @@ class Song
         if (songJson.holdSubdivisions == null){
             songJson.holdSubdivisions = 2;
         }
+
+		if (songJson.extraPlayers == null){
+			songJson.extraPlayers = [];
+		}
 
         if (convertedChart && Std.is(songJson.notes, Array)) {
             var sections:Array<Dynamic> = cast songJson.notes;
