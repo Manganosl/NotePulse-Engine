@@ -193,9 +193,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var characterBoxes:Array<PsychUIBox> = [];
 	var characterDropdowns:Array<PsychUIDropDownMenu> = [];
 	var hitsoundSliders:Array<PsychUISlider> = [];
-	var characterBoxesVirtual:Array<Bool> = [];
 	var cachedCharacterList:Array<String> = [''];
 	var lastCharacterBoxesColumns:Int = -1;
+
+	var lanesBox:PsychUIBox;
 	
 	var camUI:FlxCamera;
 
@@ -418,6 +419,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		cachedCharacterList = characterList;
 		for (dropDown in characterDropdowns)
 			if(dropDown != null) dropDown.list = cachedCharacterList;
+		if(lanesGfDropDown != null) lanesGfDropDown.list = cachedCharacterList;
 
 		gameOverCharacters.insert(0, '');
 		gameOverCharacters.sort(function(a:String, b:String)
@@ -659,6 +661,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		if(playerDropDown != null) playerDropDown.selectedLabel = PlayState.SONG.player1;
 		if(opponentDropDown != null) opponentDropDown.selectedLabel = PlayState.SONG.player2;
 		if(girlfriendDropDown != null) girlfriendDropDown.selectedLabel = PlayState.SONG.gfVersion;
+		if(lanesGfDropDown != null) lanesGfDropDown.selectedLabel = PlayState.SONG.gfVersion;
 		for (i in 3...characterDropdowns.length)
 		{
 			var dropDown:PsychUIDropDownMenu = characterDropdowns[i];
@@ -701,6 +704,18 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var intendedCamX:Float = 0;
 	override function update(elapsed:Float)
 	{
+		if(pendingLaneAdd){
+			pendingLaneAdd = false;
+			var oldLanes:Int = GRID_PLAYERS;
+			var newLanes:Int = oldLanes + 1;
+			if(newLanes <= 999) changeLanes(newLanes, oldLanes);
+		}
+		if(pendingLaneRemoveIndex >= 0){
+			var laneIndex:Int = pendingLaneRemoveIndex;
+			pendingLaneRemoveIndex = -1;
+			removeLane(laneIndex);
+		}
+
 		FlxG.camera.zoom = CoolUtil.fpsLerp(FlxG.camera.zoom, intendedCamZoom, 0.1);
 		FlxG.camera.scroll.x = CoolUtil.fpsLerp(FlxG.camera.scroll.x, intendedCamX, 0.1);
 		var topY:Float = (FlxG.camera.height / 2) * (1 - (1 / FlxG.camera.zoom));
@@ -710,15 +725,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			icon.y = topY + 5;
 		eventIcon.y = topY + 50;
 		mustHitIndicator.y = topY + 30;
-
-		if(FlxG.mouse.justPressed)
-			for(i => box in characterBoxes){
-				var dd = (i < characterDropdowns.length) ? characterDropdowns[i] : null;
-				var overBox = FlxG.mouse.overlaps(box.bg, FlxG.camera);
-				var overDropdown = (dd != null) ? FlxG.mouse.overlaps(dd.bg, FlxG.camera) : false;
-				if(!overBox && !overDropdown)
-					box.isMinimized = true;
-			}
 
 		if(!FlxG.keys.pressed.CONTROL){
 			if(FlxG.keys.justPressed.I) intendedCamX += 40;
@@ -1204,9 +1210,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		}
 
 		var overlapsUI:Bool = false;
-		if(FlxG.mouse.overlaps(mainBox.bg, camUI) || FlxG.mouse.overlaps(infoBox.bg, camUI)) overlapsUI = true;
+		if(FlxG.mouse.overlaps(mainBox.bg, camUI) || FlxG.mouse.overlaps(infoBox.bg, camUI) || FlxG.mouse.overlaps(lanesBox.bg, camUI)) overlapsUI = true;
 		for(box in characterBoxes) if(FlxG.mouse.overlaps(box.bg, FlxG.camera)) overlapsUI = true;
 		for(dropdown in characterDropdowns) if(FlxG.mouse.overlaps(dropdown.bg, FlxG.camera)) overlapsUI = true;
+		if(lanesGfDropDown != null && FlxG.mouse.overlaps(lanesGfDropDown.bg, FlxG.camera)) overlapsUI = true;
 		if(FlxG.mouse.justPressed && overlapsUI)
 			ignoreClickForThisFrame = true;
 
@@ -1835,7 +1842,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		else selectedEventText.visible = false;
 	}
 
-	function applyLanesChange(newLanes:Int, oldLanes:Int){
+	function changeLanes(newLanes:Int, oldLanes:Int){
 		if(newLanes < oldLanes){
 			var removedNotes:Array<MetaNote> = [for (note in notes) if(Std.int(note.songData[1] / GRID_COLUMNS_PER_PLAYER) >= newLanes) note];
 			if(removedNotes.length > 0){
@@ -1871,10 +1878,84 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		updateHeads(true);
 	}
 
+	function getLaneCharacter(i:Int):String{
+		return switch(i){
+			case 0: PlayState.SONG.player2;
+			case 1: PlayState.SONG.player1;
+			case 2: PlayState.SONG.gfVersion;
+			default:
+				var extraChars:Array<String> = Reflect.hasField(PlayState.SONG, 'extraPlayers') ? Reflect.field(PlayState.SONG, 'extraPlayers') : null;
+				(extraChars != null && extraChars.length > i - 3) ? extraChars[i - 3] : '';
+		}
+	}
+
+	function setLaneCharacter(i:Int, name:String):Void{
+		switch(i){
+			case 0: PlayState.SONG.player2 = name;
+			case 1: PlayState.SONG.player1 = name;
+			case 2: PlayState.SONG.gfVersion = name;
+			default:
+				var extraChars:Array<String> = Reflect.hasField(PlayState.SONG, 'extraPlayers') ? Reflect.field(PlayState.SONG, 'extraPlayers') : null;
+				if(extraChars == null) extraChars = [];
+				while(extraChars.length <= i - 3)
+					extraChars.push('');
+				extraChars[i - 3] = name;
+				Reflect.setField(PlayState.SONG, 'extraPlayers', extraChars);
+		}
+	}
+
+	function removeLane(laneIndex:Int){
+		var oldLanes:Int = GRID_PLAYERS;
+		var newLanes:Int = oldLanes - 1;
+		if(newLanes < 2 || laneIndex < 2 || laneIndex >= oldLanes) return;
+
+		var removedNotes:Array<MetaNote> = [for (note in notes) if(Std.int(note.songData[1] / GRID_COLUMNS_PER_PLAYER) == laneIndex) note];
+		if(removedNotes.length > 0){
+			resetSelectedNotes();
+			addUndoAction(DELETE_NOTE, {notes: removedNotes});
+			for(note in removedNotes){
+				var idx:Int = notes.indexOf(note);
+				if(idx >= 0) notes.splice(idx, 1);
+			}
+		}
+
+		for(note in notes){
+			var noteLane:Int = Std.int(note.songData[1] / GRID_COLUMNS_PER_PLAYER);
+			if(noteLane > laneIndex)
+				note.songData[1] -= GRID_COLUMNS_PER_PLAYER;
+		}
+
+		for(i in laneIndex...(oldLanes - 1))
+			setLaneCharacter(i, getLaneCharacter(i + 1));
+		setLaneCharacter(oldLanes - 1, '');
+
+		var extraChars:Array<String> = Reflect.hasField(PlayState.SONG, 'extraPlayers') ? Reflect.field(PlayState.SONG, 'extraPlayers') : null;
+		if(extraChars != null){
+			var keepExtra:Int = newLanes - 3;
+			if(keepExtra < 0) keepExtra = 0;
+			if(extraChars.length > keepExtra){
+				extraChars.splice(keepExtra, extraChars.length - keepExtra);
+				Reflect.setField(PlayState.SONG, 'extraPlayers', extraChars);
+			}
+		}
+
+		GRID_PLAYERS = PlayState.SONG.lanes = newLanes;
+		lastCharacterBoxesColumns = -1;
+		createGrids();
+		for(note in notes)
+			positionNoteXByData(note);
+		for(note in events){
+			positionNoteXByData(note, null, true);
+			note.eventText.x = note.x - note.eventText.width - 10;
+		}
+		loadSection();
+		updateJsonData();
+		updateHeads(true);
+	}
+
 	function createCharacterBoxes(){
-		var displayPlayers:Int = (GRID_PLAYERS < 3) ? 3 : GRID_PLAYERS;
+		var displayPlayers:Int = GRID_PLAYERS;
 		var boxWidth:Int = Std.int(GRID_SIZE * GRID_COLUMNS_PER_PLAYER);
-		var virtualThirdBoxWidth:Int = Std.int(GRID_SIZE * Std.int(Math.min(GRID_COLUMNS_PER_PLAYER, 4)));
 
 		if(lastCharacterBoxesColumns != GRID_COLUMNS_PER_PLAYER){
 			for(characterBox in characterBoxes)
@@ -1882,7 +1963,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			characterBoxes = [];
 			characterDropdowns = [];
 			hitsoundSliders = [];
-			characterBoxesVirtual = [];
 			lastCharacterBoxesColumns = GRID_COLUMNS_PER_PLAYER;
 		}
 
@@ -1891,33 +1971,23 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			if(extraBox != null) extraBox.destroy();
 			characterDropdowns.pop();
 			hitsoundSliders.pop();
-			characterBoxesVirtual.pop();
 		}
 
 		for(i in 0...displayPlayers){
 			var fieldIndex:Int = i;
-			var isVirtualThird:Bool = (i == 2 && i >= GRID_PLAYERS);
-			var thisBoxWidth:Int = isVirtualThird ? virtualThirdBoxWidth : boxWidth;
-			var includeHitsound:Bool = !isVirtualThird;
-			var thisBoxHeight:Int = includeHitsound ? 250 : 175;
+			var thisBoxWidth:Int = boxWidth;
+			var includeHitsound:Bool = true;
+			var thisBoxHeight:Int = 250;
 			var boxX:Float = gridBg.x + (GRID_SIZE * GRID_COLUMNS_PER_PLAYER * i) + GRID_SIZE;
 
 			if(i < characterBoxes.length){
-				if(characterBoxesVirtual[i] == isVirtualThird){
-					var characterBox = characterBoxes[i];
-					characterBox.x = boxX;
-					characterBox.y = 0;
-					characterBox.resize(thisBoxWidth, thisBoxHeight);
-					characterBox.isMinimized = true;
-					continue;
-				}
-
-				var oldBox = characterBoxes[i];
-				if(oldBox != null) oldBox.destroy();
-				characterBoxes.splice(i, 1);
-				characterDropdowns.splice(i, 1);
-				hitsoundSliders.splice(i, 1);
-				characterBoxesVirtual.splice(i, 1);
+				var characterBox = characterBoxes[i];
+				characterBox.x = boxX;
+				characterBox.y = 0;
+				characterBox.resize(thisBoxWidth, thisBoxHeight);
+				characterBox.isMinimized = true;
+				characterBox.minimizeOnFocusLost = true;
+				continue;
 			}
 
 			var boxName:String = ((i == 0) ? PlayState.SONG.player2 : ((i == 1) ? PlayState.SONG.player1 : ((i == 2) ? PlayState.SONG.gfVersion : ((PlayState.SONG.extraPlayers[i-3] != null && PlayState.SONG.extraPlayers[i-3] != "") ? PlayState.SONG.extraPlayers[i-3] : 'Player ${i+1}'))));
@@ -1926,9 +1996,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			characterBox.canMove = false;
 			characterBox.canMinimize = true;
 			characterBox.isMinimized = true;
+			characterBox.minimizeOnFocusLost = true;
 			add(characterBox);
 			characterBoxes.push(characterBox);
-			characterBoxesVirtual.push(isVirtualThird);
 
 			var tab_group = characterBox.getTab(boxName).menu;
 
@@ -1940,8 +2010,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			}
 			hitsoundSliders.push(hitsoundSlider);
 
-			var showDeleteCharBtn:Bool = fieldIndex >= 3;
-			var leftBound:Float = showDeleteCharBtn ? 35 : 10;
+			var leftBound:Float = fieldIndex >= 3 ? 35 : 10;
 			var rightBound:Float = thisBoxWidth - 10;
 			var dropDownY:Float = includeHitsound ? 175 : 100;
 
@@ -1984,7 +2053,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					charDropDown.selectedLabel = (extraChars != null && extraChars.length > fieldIndex - 3) ? extraChars[fieldIndex - 3] : '';
 			}
 
-			if(showDeleteCharBtn){
+			if(fieldIndex >= 3){
 				var deleteCharBtn:PsychUIButton = new PsychUIButton(10, dropDownY, 'X', function(){
 					charDropDown.selectedLabel = '';
 					switch(fieldIndex){
@@ -2005,14 +2074,88 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				tab_group.add(deleteCharBtn);
 			}
 
-			tab_group.add(new FlxText(leftBound, charDropDown.y - 15, rightBound - leftBound, 'Character:'));
+			if(fieldIndex >= 2){
+				var btn:PsychUIButton = new PsychUIButton(0, 210, '  Remove Lane', function(){
+					if(GRID_PLAYERS - 1 < 2) return;
+
+					var confirmFunc:Void->Void = function(){
+						pendingLaneRemoveIndex = fieldIndex;
+					}
+					FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
+					openSubState(new Prompt('Warning: Removing this lane\nwill delete all notes in it.', confirmFunc));
+				}, Std.int(characterBoxes[fieldIndex].bg.width));
+				btn.normalStyle.bgColor = FlxColor.RED;
+				btn.normalStyle.textColor = FlxColor.WHITE;
+				btn.text.alignment = CENTER;
+				tab_group.add(btn);
+			}
+
+			tab_group.add(new FlxText(charDropDown.x, charDropDown.y - 15, rightBound - leftBound, 'Character:'));
 			tab_group.add(charDropDown);
 			characterDropdowns.push(charDropDown);
 		}
 
+		createLanesTab();
+
 		opponentDropDown = characterDropdowns.length > 0 ? characterDropdowns[0] : null;
 		playerDropDown = characterDropdowns.length > 1 ? characterDropdowns[1] : null;
 		girlfriendDropDown = characterDropdowns.length > 2 ? characterDropdowns[2] : null;
+	}
+
+	function createLanesTab(){
+		if(lanesBox == null){
+			lanesBox = new PsychUIBox(0, 0, 120, 300, ['Lanes']);
+			lanesBox.scrollFactor.set(1, 0);
+			lanesBox.isMinimized = true;
+			lanesBox.minimizeOnFocusLost = true;
+			lanesBox.canMove = false;
+			add(lanesBox);
+		}
+		var tab_group = lanesBox.getTab("Lanes").menu;
+
+		for(item in tab_group.members){
+			if(item == null) continue;
+			tab_group.remove(item);
+			item.destroy();
+		}
+		lanesGfDropDown = null;
+
+		var tab = lanesBox.getTab('Lanes');
+		var tab_group = tab.menu;
+		var btnX = tab.x - lanesBox.x;
+		var btnY = 1;
+		var btnWid = Std.int(tab.width);
+
+		if(GRID_PLAYERS <= 2)
+			lanesBox.resize(btnWid, 80);
+		else
+			lanesBox.resize(btnWid, 20);
+
+		lanesBox.isMinimized = true;
+		lanesBox.bg.visible = true;
+
+		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, 'Add new lane', function(){
+			if(GRID_PLAYERS + 1 > 999) return;
+			pendingLaneAdd = true;
+		}, btnWid);
+		btn.normalStyle.bgColor = FlxColor.GREEN;
+		btn.normalStyle.textColor = FlxColor.WHITE;
+		btn.text.alignment = CENTER;
+		tab_group.add(btn);
+
+		btnY += 40;
+		var charDropDown:PsychUIDropDownMenu = new PsychUIDropDownMenu(btnX, btnY, cachedCharacterList, function(id:Int, character:String){
+			PlayState.SONG.gfVersion = character;
+			updateJsonData();
+			updateHeads(true);
+		});
+		charDropDown.selectedLabel = PlayState.SONG.gfVersion;
+		if(GRID_PLAYERS >= 3) charDropDown.visible = false;
+		if(GRID_PLAYERS < 3) tab_group.add(new FlxText(charDropDown.x, charDropDown.y - 15, btnWid, 'Girlfriend:'));
+		tab_group.add(charDropDown);
+		lanesGfDropDown = charDropDown;
+
+		lanesBox.x = characterBoxes[characterBoxes.length - 1].x + characterBoxes[characterBoxes.length - 1].width;
 	}
 
 	function createGrids(){
@@ -3732,7 +3875,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var playerDropDown:PsychUIDropDownMenu;
 	var opponentDropDown:PsychUIDropDownMenu;
 	var girlfriendDropDown:PsychUIDropDownMenu;
-	var lanesStepper:PsychUINumericStepper;
+	var lanesGfDropDown:PsychUIDropDownMenu;
+	var pendingLaneAdd:Bool = false;
+	var pendingLaneRemoveIndex:Int = -1;
 	
 	function addSongTab()
 	{
@@ -3810,23 +3955,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			remove(mustHitIndicator); add(mustHitIndicator);
 		};
 
-		lanesStepper = new PsychUINumericStepper(objX + 180, objY + 40, 1, PlayState.SONG.lanes, 2, 999, 0);
-		lanesStepper.onValueChange = function(){
-			var newLanes:Int = Std.int(lanesStepper.value);
-			var oldLanes:Int = GRID_PLAYERS;
-			if(newLanes == oldLanes) return;
-
-			if(newLanes < oldLanes){
-				lanesStepper.value = oldLanes;
-				var confirmFunc:Void->Void = function(){
-					lanesStepper.value = newLanes;
-					applyLanesChange(newLanes, oldLanes);
-				}
-				FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
-				openSubState(new Prompt('Warning: Lowering the Strum Count\nwill remove a lane and\nall notes in it will be deleted.', confirmFunc));
-			} else applyLanesChange(newLanes, oldLanes);
-		}
-
 		audioOffsetStepper = new PsychUINumericStepper(objX, objY + 40, 1, 0, -500, 500, 0);
 		audioOffsetStepper.onValueChange = function(){
 			Reflect.setField(PlayState.SONG, "offset", audioOffsetStepper.value);
@@ -3857,12 +3985,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tab_group.add(new FlxText(bpmStepper.x, bpmStepper.y - 15, 50, 'BPM:'));
 		tab_group.add(new FlxText(scrollSpeedStepper.x, scrollSpeedStepper.y - 15, 80, 'Scroll Speed:'));
 		tab_group.add(new FlxText(audioOffsetStepper.x, audioOffsetStepper.y - 15, 100, 'Audio Offset (ms):'));
-		tab_group.add(new FlxText(lanesStepper.x, lanesStepper.y - 15, 100, 'Strum Count:'));
 		tab_group.add(stepperMania);
 		tab_group.add(bpmStepper);
 		tab_group.add(scrollSpeedStepper);
 		tab_group.add(audioOffsetStepper);
-		tab_group.add(lanesStepper);
 		tab_group.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 80, 'Stage:'));
 		tab_group.add(stageDropDown);
 	}
