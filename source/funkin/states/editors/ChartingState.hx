@@ -451,7 +451,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		songPosSlider.cameras = [camUI];
 		add(songPosSlider);
 
-		var tipText:FlxText = new FlxText(FlxG.width - 210, FlxG.height - 30, 200, 'Press F1 for Help', 20);
+		var tipText:FlxText = new FlxText(FlxG.width - 220, FlxG.height - 30, 200, 'Press F1 for Help', 20);
 		tipText.cameras = [camUI];
 		tipText.setFormat(null, 16, FlxColor.WHITE, RIGHT);
 		tipText.borderColor = FlxColor.BLACK;
@@ -490,13 +490,16 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			"",
 			"R - Reset Section",
 			"Shift + R - Go Back to the Start of the Song",
-			"Z/X - Zoom in/out",
+			"Z/X - Zoom grid in/out",
+			"I/O - Move grid left/right",
 			"Left/Right - Change Snap",
 			#if FLX_PITCH
 			"Left Bracket / Right Bracket - Change Song Playback Rate",
 			"ALT + Left Bracket / Right Bracket - Reset Song Playback Rate",
 			#end
 			"",
+			"Ctrl + + - Zoom in camera",
+			"Ctrl + - - Zoom out camera",
 			"Ctrl + Z - Undo",
 			"Ctrl + Y - Redo",
 			"Ctrl + X - Cut Selected Notes",
@@ -695,9 +698,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var lastBeatHit:Int = 0;
 	var isCrosshair:Bool = false;
 	var intendedCamZoom:Float = 1;
+	var intendedCamX:Float = 0;
 	override function update(elapsed:Float)
 	{
 		FlxG.camera.zoom = CoolUtil.fpsLerp(FlxG.camera.zoom, intendedCamZoom, 0.1);
+		FlxG.camera.scroll.x = CoolUtil.fpsLerp(FlxG.camera.scroll.x, intendedCamX, 0.1);
 		var topY:Float = (FlxG.camera.height / 2) * (1 - (1 / FlxG.camera.zoom));
 		for(charBox in characterBoxes)
 			charBox.y = topY;
@@ -714,6 +719,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				if(!overBox && !overDropdown)
 					box.isMinimized = true;
 			}
+
+		if(!FlxG.keys.pressed.CONTROL){
+			if(FlxG.keys.justPressed.I) intendedCamX += 40;
+			if(FlxG.keys.justPressed.O) intendedCamX -= 40;
+		}
 			
 		if(FlxG.mouse.justPressed || FlxG.mouse.justPressedRight || FlxG.mouse.justPressedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickDown'));
 		if(FlxG.mouse.justReleased || FlxG.mouse.justReleasedRight || FlxG.mouse.justReleasedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickUp'));
@@ -1912,7 +1922,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 			var boxName:String = ((i == 0) ? PlayState.SONG.player2 : ((i == 1) ? PlayState.SONG.player1 : ((i == 2) ? PlayState.SONG.gfVersion : 'Player ${i+1}')));
 			var characterBox = new PsychUIBox(boxX, 0, thisBoxWidth, thisBoxHeight, [boxName]);
-			characterBox.scrollFactor.set();
+			characterBox.scrollFactor.set(1, 0);
 			characterBox.canMove = false;
 			characterBox.canMinimize = true;
 			characterBox.isMinimized = true;
@@ -2029,27 +2039,31 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		var columnCount:Int = (GRID_COLUMNS_PER_PLAYER * GRID_PLAYERS) + (SHOW_EVENT_COLUMN ? 1 : 0);
 		gridBg = new ChartingGridSprite(columnCount, gridColors[0], gridColors[1]);
 		gridBg.screenCenter(X);
+		gridBg.x -= 20;
 
 		prevGridBg = new ChartingGridSprite(columnCount, gridColorsOther[0], gridColorsOther[1]);
 		nextGridBg = new ChartingGridSprite(columnCount, gridColorsOther[0], gridColorsOther[1]);
+
+		@:privateAccess
+		prevGridBg.scrollFactor.x = nextGridBg.scrollFactor.x = gridBg.scrollFactor.x = 
+		prevGridBg.stripe.scrollFactor.x = nextGridBg.stripe.scrollFactor.x = gridBg.stripe.scrollFactor.x = 
+		prevGridBg.vortexLine.scrollFactor.x = nextGridBg.vortexLine.scrollFactor.x = gridBg.vortexLine.scrollFactor.x = 1;
+
 		prevGridBg.x = nextGridBg.x = gridBg.x;
 		prevGridBg.stripes = nextGridBg.stripes = gridBg.stripes = stripes;
 		
-		if(destroyed)
-		{
+		if(destroyed){
 			insert(getFirstNull(), prevGridBg);
 			insert(getFirstNull(), nextGridBg);
 			insert(getFirstNull(), gridBg);
 			loadSection();
-		}
-		else
-		{
+		} else {
 			add(prevGridBg);
 			add(nextGridBg);
 			add(gridBg);
 		}
 		waveformSprite = new FlxSprite(gridBg.x + (SHOW_EVENT_COLUMN ? GRID_SIZE : 0), 0).makeGraphic(1, 1, 0x00FFFFFF);
-		waveformSprite.scrollFactor.x = 0;
+		waveformSprite.scrollFactor.x = 1;
 		waveformSprite.visible = false;
 		if(chartEditorSave.data.waveformColor != null)
 			waveformSprite.color = CoolUtil.colorFromString(chartEditorSave.data.waveformColor);
@@ -2058,13 +2072,13 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		dummyArrow = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
 		dummyArrow.setGraphicSize(GRID_SIZE, GRID_SIZE);
 		dummyArrow.updateHitbox();
-		dummyArrow.scrollFactor.x = 0;
+		dummyArrow.scrollFactor.x = 1;
 		add(dummyArrow);
 
 		vortexIndicator = new FlxSprite(gridBg.x - GRID_SIZE, FlxG.height/2).loadGraphic(Paths.image('editors/vortex_indicator'));
 		vortexIndicator.setGraphicSize(GRID_SIZE);
 		vortexIndicator.updateHitbox();
-		vortexIndicator.scrollFactor.set();
+		vortexIndicator.scrollFactor.set(1, 0);
 		vortexIndicator.active = false;
 		updateVortexColor();
 		add(vortexIndicator);
@@ -2077,7 +2091,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		eventLockOverlay = new FlxSprite(gridBg.x, 0).makeGraphic(1, 1, FlxColor.BLACK);
 		eventLockOverlay.alpha = 0.6;
 		eventLockOverlay.visible = false;
-		eventLockOverlay.scrollFactor.x = 0;
+		eventLockOverlay.scrollFactor.x = 1;
 		eventLockOverlay.scale.x = GRID_SIZE;
 		eventLockOverlay.updateHitbox();
 		add(eventLockOverlay);
@@ -2086,7 +2100,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		timeLine.setGraphicSize(Std.int(gridBg.width), 4);
 		timeLine.updateHitbox();
 		timeLine.screenCenter(Y);
-		timeLine.scrollFactor.set();
+		timeLine.scrollFactor.set(1, 0);
 		add(timeLine);
 		
 		var startX:Float = gridBg.x;
@@ -2102,7 +2116,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			var note:StrumNote = new StrumNote(startX + (GRID_SIZE * i), startY, i % GRID_COLUMNS_PER_PLAYER, 0);
 			note.modPos.x = note.x;
 			note.modPos.y = note.y;
-			note.scrollFactor.set();
+			note.scrollFactor.set(1, 0);
 			note.playAnim('static');
 			note.alpha = 0.4;
 			note.updateHitbox();
@@ -2130,7 +2144,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				eventIcon.alpha = 0.6;
 				eventIcon.setGraphicSize(30, 30);
 				eventIcon.updateHitbox();
-				eventIcon.scrollFactor.set();
+				eventIcon.scrollFactor.set(1, 0);
 				add(eventIcon);
             }
             eventIcon.x = iconX + (GRID_SIZE * 0.5) - eventIcon.width/2;
@@ -2141,7 +2155,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		if(mustHitIndicator == null){
 			mustHitIndicator = FlxSpriteUtil.drawTriangle(new FlxSprite(0, iconY - 20).makeGraphic(16, 16, FlxColor.TRANSPARENT), 0, 0, 16);
-			mustHitIndicator.scrollFactor.set();
+			mustHitIndicator.scrollFactor.set(1, 0);
 			mustHitIndicator.flipY = true;
 			mustHitIndicator.offset.x += mustHitIndicator.width/2;
 			add(mustHitIndicator);
@@ -2154,7 +2168,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				var icon:HealthIcon = new HealthIcon();
 				icon.y = 5;
 				icon.alpha = 0.6;
-				icon.scrollFactor.set();
+				icon.scrollFactor.set(1, 0);
 				icon.scale.set(0.3, 0.3);
 				icon.updateHitbox();
 				icon.ID = i+1;
@@ -2358,7 +2372,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		swagNote.setSustainLength(note[2], cachedSectionCrochets[secNum] / 4, curZoom);
 		swagNote.gfNote = (section.gfSection && swagNote.mustPress == section.mustHitSection);
 		swagNote.noteType = note[3];
-		swagNote.scrollFactor.x = 0;
+		swagNote.scrollFactor.x = 1;
 		var txt:FlxText = swagNote.findNoteTypeText(swagNote.noteType != null ? noteTypes.indexOf(swagNote.noteType) : 0);
 		if(txt != null) txt.visible = showNoteTypeLabels;
 
@@ -2381,7 +2395,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		var swagEvent:EventMetaNote = new EventMetaNote(daStrumTime, event);
 		swagEvent.x = gridBg.x;
 		swagEvent.eventText.x = swagEvent.x - swagEvent.eventText.width - 10;
-		swagEvent.scrollFactor.x = 0;
+		swagEvent.scrollFactor.x = 1;
 		swagEvent.active = false;
 
 		var secNum:Int = 0;

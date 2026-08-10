@@ -141,7 +141,7 @@ class ModSelectorState extends MusicBeatState {
 				MusicBeatState.switchState(new funkin.states.menus.TitleState());
 				return;
 			}
-			setMod(modArray[curSelected - 1]);
+			setMod(modArray[curSelected - 1], true);
 			if (Mods.modPack?.hasGlobalScript == true) GlobalHandler.loadGlobalHX();
 			FlxG.sound.music.stop();
 			FlxTween.cancelTweensOf(Main.fpsVar);
@@ -152,7 +152,7 @@ class ModSelectorState extends MusicBeatState {
 
 		if (goto == BasePrompt) {
 			var oldMod = Mods.currentLoadedMod;
-			setMod(modArray[curSelected]);
+			setMod(modArray[curSelected], false);
 			openConfigPrompt(oldMod);
 			return;
 		}
@@ -193,7 +193,7 @@ class ModSelectorState extends MusicBeatState {
 				enterDifSelect();
 			}
 		} else {
-			setMod(modArray[curSelected]);
+			setMod(modArray[curSelected], false);
 			PlayState.isStoryMode = false;
 			titleText.text = "Mod Selector > " + currentMod;
 			descText.text = "Press ACCEPT to select a song.";
@@ -324,7 +324,7 @@ class ModSelectorState extends MusicBeatState {
 			var spr = new AttachedSprite(icon);
 			spr.sprTracker = txt;
 			spr.scale.set(1.6, 1.6);
-			spr.offset.set(-15, -25);
+			spr.offset.set(-txt.width - (spr.width / 2), 0);
 			spr.visible = spr.active = false;
 			iconArray.push(spr);
 			iconGroup.add(spr);
@@ -430,9 +430,10 @@ class ModSelectorState extends MusicBeatState {
 		};
 	}
 
-	inline function setMod(mod:String) {
+	inline function setMod(mod:String, ?updateLoaded:Bool = false) {
 		currentMod = mod;
-		Mods.currentLoadedMod = Mods.currentModDirectory = mod;
+		Mods.currentModDirectory = mod;
+		if(updateLoaded) Mods.currentLoadedMod = mod;
 	}
 
 	function clearIcons() {
