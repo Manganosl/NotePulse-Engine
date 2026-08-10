@@ -1920,7 +1920,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				characterBoxesVirtual.splice(i, 1);
 			}
 
-			var boxName:String = ((i == 0) ? PlayState.SONG.player2 : ((i == 1) ? PlayState.SONG.player1 : ((i == 2) ? PlayState.SONG.gfVersion : 'Player ${i+1}')));
+			var boxName:String = ((i == 0) ? PlayState.SONG.player2 : ((i == 1) ? PlayState.SONG.player1 : ((i == 2) ? PlayState.SONG.gfVersion : ((PlayState.SONG.extraPlayers[i-3] != null && PlayState.SONG.extraPlayers[i-3] != "") ? PlayState.SONG.extraPlayers[i-3] : 'Player ${i+1}'))));
 			var characterBox = new PsychUIBox(boxX, 0, thisBoxWidth, thisBoxHeight, [boxName]);
 			characterBox.scrollFactor.set(1, 0);
 			characterBox.canMove = false;
@@ -1971,6 +1971,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						updateJsonData();
 						updateHeads(true);
 				}
+				characterBoxes[fieldIndex].tabs[0].name = ((fieldIndex == 0) ? PlayState.SONG.player2 : ((fieldIndex == 1) ? PlayState.SONG.player1 : ((fieldIndex == 2) ? PlayState.SONG.gfVersion : ((PlayState.SONG.extraPlayers[fieldIndex-3] != null && PlayState.SONG.extraPlayers[fieldIndex-3] != "") ? PlayState.SONG.extraPlayers[fieldIndex-3] : 'Player ${fieldIndex+1}'))));
 			});
 			charDropDown.x = leftBound + ((rightBound - leftBound) - charDropDown.width) / 2;
 
@@ -1995,6 +1996,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 							if(extraChars != null && extraChars.length > fieldIndex - 3)
 								extraChars[fieldIndex - 3] = '';
 					}
+					updateJsonData();
+					updateHeads(true);
+					characterBoxes[fieldIndex].tabs[0].name = ((fieldIndex == 0) ? PlayState.SONG.player2 : ((fieldIndex == 1) ? PlayState.SONG.player1 : ((fieldIndex == 2) ? PlayState.SONG.gfVersion : ((PlayState.SONG.extraPlayers[fieldIndex-3] != null && PlayState.SONG.extraPlayers[fieldIndex-3] != "") ? PlayState.SONG.extraPlayers[fieldIndex-3] : 'Player ${fieldIndex+1}'))));
 				}, 20);
 				deleteCharBtn.normalStyle.bgColor = FlxColor.RED;
 				deleteCharBtn.normalStyle.textColor = FlxColor.WHITE;
