@@ -101,6 +101,7 @@ class PlayState extends MusicBeatState
 	public var boyfriendMap:Map<String, Character> = new Map<String, Character>();
 	public var dadMap:Map<String, Character> = new Map<String, Character>();
 	public var gfMap:Map<String, Character> = new Map<String, Character>();
+	public var extraCharacterMaps:Array<Map<String, Character>> = [];
 	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	#if LUA_ALLOWED
@@ -139,6 +140,7 @@ class PlayState extends MusicBeatState
 	public var boyfriendGroup:FlxSpriteGroup;
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
+	public var extraCharacterGroups:Array<FlxSpriteGroup> = [];
 	public static var curStage:String = '';
 	public static var stageUI:String = "normal";
 	public static var isPixelStage(get, never):Bool;
@@ -162,6 +164,7 @@ class PlayState extends MusicBeatState
 	public var dad:Character = null;
 	public var gf:Character = null;
 	public var boyfriend:Character = null;
+	public var extraCharacters:Array<Character> = [];
 
 	public var notes:FlxTypedGroup<Note>;
 	public var unspawnNotes:Array<Note> = [];
@@ -336,7 +339,7 @@ class PlayState extends MusicBeatState
 	public var startCallback:Void->Void = null;
 	public var endCallback:Void->Void = null;
 
-	private var modManagerEvArray:Array<Dynamic> = []; // LEAVING HERE FOR NOW
+	private var modManagerEvArray:Array<Dynamic> = [];
 
 	//// Sets ////
 
@@ -456,8 +459,7 @@ class PlayState extends MusicBeatState
 
 	//// Overrides ////
 
-	override public function create()
-	{
+	override public function create(){
 		Paths.clearStoredMemory();
 
 		startCallback = startCountdown;
@@ -584,6 +586,14 @@ class PlayState extends MusicBeatState
 		boyfriendGroup = new FlxSpriteGroup(BF_X, BF_Y);
 		dadGroup = new FlxSpriteGroup(DAD_X, DAD_Y);
 		gfGroup = new FlxSpriteGroup(GF_X, GF_Y);
+		if(SONG.extraPlayers != null){
+			for(i in 0...SONG.extraPlayers.length){
+				var charMap = new Map<String, Character>();
+				extraCharacterMaps.push(charMap);
+				var charGroup = new FlxSpriteGroup();
+				extraCharacterGroups.push(charGroup);
+			}
+		}
 
 		switch (curStage)
 		{
@@ -616,6 +626,8 @@ class PlayState extends MusicBeatState
 			add(gfGroup);
 			add(dadGroup);
 			add(boyfriendGroup);
+			for(charGroup in extraCharacterGroups)
+				add(charGroup);
 		}
 
 		// "GLOBAL" SCRIPTS
@@ -663,6 +675,14 @@ class PlayState extends MusicBeatState
 		startCharacterPos(boyfriend);
 		boyfriendGroup.add(boyfriend);
 		startCharacterScripts(boyfriend.curCharacter);
+
+		for(i => charGroup in extraCharacterGroups){
+			if(SONG.extraPlayers[i] == "") continue;
+			extraCharacters[i] = new Character(0, 0, SONG.extraPlayers[i]);
+			startCharacterPos(extraCharacters[i]);
+			charGroup.add(extraCharacters[i]);
+			startCharacterScripts(extraCharacters[i].curCharacter);
+		}
 
 		var camPos:FlxPoint = FlxPoint.get(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
 		if(gf != null)
@@ -1317,7 +1337,7 @@ class PlayState extends MusicBeatState
 				if(PlayField.fields[fieldID] != null) swagNote.playField = PlayField.fields[fieldID];
 				swagNote.gfStrum = (songNotes[4] == 2 ? true : false);
 				if(swagNote.gfStrum) swagNote.mustPress = false;
-				swagNote.characters = (fieldID == 0 ? [dad] : (fieldID == 1 ? [boyfriend] : [gf]));
+				swagNote.characters = (fieldID == 0 ? [dad] : (fieldID == 1 ? [boyfriend] : fieldID == 2 ? [gf] : [extraCharacters[fieldID - 3]]));
 				if(swagNote.gfNote) swagNote.characters = [gf];
 
 				swagNote.scrollFactor.set();
@@ -1759,6 +1779,14 @@ class PlayState extends MusicBeatState
 		if(Math.isNaN(flValue1)) flValue1 = null;
 		if(Math.isNaN(flValue2)) flValue2 = null;
 
+		function resolveExtraIndex(key:String):Int {
+			if(key.startsWith('extra')) {
+				var idx:Int = Std.parseInt(key.substr(5));
+				if(!Math.isNaN(idx) && idx >= 0) return idx;
+			}
+			return -1;
+		}
+
 		switch(eventName) {
 			case "HScript Call":
 				var args:Array<Dynamic> = [];
@@ -1804,18 +1832,31 @@ class PlayState extends MusicBeatState
 				changeMania(newMania);
 				return;*/
 			case 'Hey!':
-				var value:Int = 2;
-				switch(value1.toLowerCase().trim()) {
-					case 'bf' | 'boyfriend' | '0':
-						value = 0;
-					case 'gf' | 'girlfriend' | '1':
-						value = 1;
+				var doCheer:Bool = false;
+				var doBf:Bool = false;
+				var extraIdx:Int = -1;
+
+				var key:String = value1 != null ? value1.toLowerCase().trim() : '';
+				switch(key) {
+					case 'dad' | 'opponent' | '0':
+						doCheer = true;
+					case 'bf' | 'boyfriend' | '1':
+						doBf = true;
+					case 'gf' | 'girlfriend' | '2':
+						doCheer = true;
+					case '':
+						doCheer = true;
+						doBf = true;
+					default:
+						var idx:Int = resolveExtraIndex(key);
+						if(idx >= 0) extraIdx = idx;
+						else { doCheer = true; doBf = true; }
 				}
 
 				if(flValue2 == null || flValue2 <= 0) flValue2 = 0.6;
 
-				if(value != 0) {
-					if(dad.curCharacter.startsWith('gf')) { //Tutorial GF is actually Dad! The GF is an imposter!! ding ding ding ding ding ding ding, dindinding, end my suffering
+				if(doCheer){
+					if(dad.curCharacter.startsWith('gf')){ //Tutorial GF is actually Dad! The GF is an imposter!! ding ding ding ding ding ding ding, dindinding, end my suffering
 						dad.playAnim('cheer', true);
 						dad.specialAnim = true;
 						dad.heyTimer = flValue2;
@@ -1825,12 +1866,19 @@ class PlayState extends MusicBeatState
 						gf.heyTimer = flValue2;
 					}
 				}
-				if(value != 1) {
+				if(doBf) {
 					boyfriend.playAnim('hey', true);
 					boyfriend.specialAnim = true;
 					boyfriend.heyTimer = flValue2;
 				}
-
+				if(extraIdx >= 0 && extraIdx < extraCharacters.length) {
+					var extraChar:Character = extraCharacters[extraIdx];
+					if(extraChar != null) {
+						extraChar.playAnim('cheer', true);
+						extraChar.specialAnim = true;
+						extraChar.heyTimer = flValue2;
+					}
+				}
 			case 'Camera Zoom':
 				FlxTween.cancelTweensOf(FlxG.camera, ['zoom']);
 				
@@ -1866,18 +1914,31 @@ class PlayState extends MusicBeatState
 				}
 
 			case 'Play Animation':
-				//trace('Anim to play: ' + value1);
 				var char:Character = dad;
-				switch(value2.toLowerCase().trim()) {
+				var key2:String = value2.toLowerCase().trim();
+				switch(key2) {
+					case 'dad' | 'opponent':
+						char = dad;
 					case 'bf' | 'boyfriend':
 						char = boyfriend;
 					case 'gf' | 'girlfriend':
 						char = gf;
 					default:
-						if(flValue2 == null) flValue2 = 0;
-						switch(Math.round(flValue2)) {
-							case 1: char = boyfriend;
-							case 2: char = gf;
+						var extraIdx:Int = resolveExtraIndex(key2);
+						if(extraIdx >= 0 && extraIdx < extraCharacters.length) {
+							char = extraCharacters[extraIdx];
+						} else {
+							if(flValue2 == null) flValue2 = 0;
+							var idx:Int = Math.round(flValue2);
+							switch(idx) {
+								case 0: char = dad;
+								case 1: char = boyfriend;
+								case 2: char = gf;
+								default:
+									var extraIndex:Int = idx - 3;
+									if(extraIndex >= 0 && extraIndex < extraCharacters.length)
+										char = extraCharacters[extraIndex];
+							}
 						}
 				}
 
@@ -1902,18 +1963,31 @@ class PlayState extends MusicBeatState
 
 			case 'Alt Idle Animation':
 				var char:Character = dad;
-				switch(value1.toLowerCase().trim()) {
+				var key1:String = value1.toLowerCase().trim();
+				switch(key1) {
 					case 'gf' | 'girlfriend':
 						char = gf;
 					case 'boyfriend' | 'bf':
 						char = boyfriend;
+					case 'dad' | 'opponent':
+						char = dad;
 					default:
-						var val:Int = Std.parseInt(value1);
-						if(Math.isNaN(val)) val = 0;
+						var extraIdx:Int = resolveExtraIndex(key1);
+						if(extraIdx >= 0 && extraIdx < extraCharacters.length) {
+							char = extraCharacters[extraIdx];
+						} else {
+							var val:Int = Std.parseInt(value1);
+							if(Math.isNaN(val)) val = 0;
 
-						switch(val) {
-							case 1: char = boyfriend;
-							case 2: char = gf;
+							switch(val) {
+								case 0: char = dad;
+								case 1: char = boyfriend;
+								case 2: char = gf;
+								default:
+									var extraIndex:Int = val - 3;
+									if(extraIndex >= 0 && extraIndex < extraCharacters.length)
+										char = extraCharacters[extraIndex];
+							}
 						}
 				}
 
@@ -1942,15 +2016,23 @@ class PlayState extends MusicBeatState
 
 
 			case 'Change Character':
-				var charType:Int = 0;
-				switch(value1.toLowerCase().trim()) {
+				var charType:Int = 1;
+				var key0:String = value1.toLowerCase().trim();
+				switch(key0) {
+					case 'dad' | 'opponent':
+						charType = 0;
+					case 'bf' | 'boyfriend':
+						charType = 1;
 					case 'gf' | 'girlfriend':
 						charType = 2;
-					case 'dad' | 'opponent':
-						charType = 1;
 					default:
-						charType = Std.parseInt(value1);
-						if(Math.isNaN(charType)) charType = 0;
+						var extraIdx:Int = resolveExtraIndex(key0);
+						if(extraIdx >= 0) {
+							charType = 3 + extraIdx;
+						} else {
+							var parsed:Int = Std.parseInt(value1);
+							charType = Math.isNaN(parsed) ? 1 : parsed;
+						}
 				}
 				changeCharacter(value2, charType);
 
@@ -2660,24 +2742,10 @@ class PlayState extends MusicBeatState
 	}
 
 	//// Characters ////
-	
+
 	public function changeCharacter(charName:String, charType:Int){
 		switch(charType) {
 			case 0:
-				if(boyfriend.curCharacter != charName) {
-					if(!boyfriendMap.exists(charName)) {
-						addCharacterToList(charName, charType);
-					}
-
-					var lastAlpha:Float = boyfriend.alpha;
-					boyfriend.alpha = 0.00001;
-					boyfriend = boyfriendMap.get(charName);
-					boyfriend.alpha = lastAlpha;
-					iconP1.changeIcon(boyfriend.healthIcon);
-				}
-				setOnScripts('boyfriendName', boyfriend.curCharacter);
-
-			case 1:
 				if(dad.curCharacter != charName) {
 					if(!dadMap.exists(charName)) {
 						addCharacterToList(charName, charType);
@@ -2699,6 +2767,20 @@ class PlayState extends MusicBeatState
 				}
 				setOnScripts('dadName', dad.curCharacter);
 
+			case 1:
+				if(boyfriend.curCharacter != charName) {
+					if(!boyfriendMap.exists(charName)) {
+						addCharacterToList(charName, charType);
+					}
+
+					var lastAlpha:Float = boyfriend.alpha;
+					boyfriend.alpha = 0.00001;
+					boyfriend = boyfriendMap.get(charName);
+					boyfriend.alpha = lastAlpha;
+					iconP1.changeIcon(boyfriend.healthIcon);
+				}
+				setOnScripts('boyfriendName', boyfriend.curCharacter);
+
 			case 2:
 				if(gf != null)
 				{
@@ -2714,6 +2796,27 @@ class PlayState extends MusicBeatState
 						gf.alpha = lastAlpha;
 					}
 					setOnScripts('gfName', gf.curCharacter);
+				}
+
+			default:
+				var extraIndex:Int = charType - 3;
+				if(extraIndex >= 0 && extraIndex < extraCharacters.length)
+				{
+					var curExtra:Character = extraCharacters[extraIndex];
+					if(curExtra.curCharacter != charName)
+					{
+						var extraMap = extraCharacterMaps[extraIndex];
+						if(!extraMap.exists(charName)) {
+							addCharacterToList(charName, charType);
+						}
+
+						var lastAlpha:Float = curExtra.alpha;
+						curExtra.alpha = 0.00001;
+						curExtra = extraMap.get(charName);
+						curExtra.alpha = lastAlpha;
+						extraCharacters[extraIndex] = curExtra;
+					}
+					setOnScripts('extraName' + extraIndex, curExtra.curCharacter);
 				}
 		}
 		reloadHealthBarColors();
@@ -2746,16 +2849,6 @@ class PlayState extends MusicBeatState
 	public function addCharacterToList(newCharacter:String, type:Int) {
 		switch(type) {
 			case 0:
-				if(!boyfriendMap.exists(newCharacter)) {
-					var newBoyfriend:Character = new Character(0, 0, newCharacter, true);
-					boyfriendMap.set(newCharacter, newBoyfriend);
-					boyfriendGroup.add(newBoyfriend);
-					startCharacterPos(newBoyfriend);
-					newBoyfriend.alpha = 0.00001;
-					startCharacterScripts(newBoyfriend.curCharacter);
-				}
-
-			case 1:
 				if(!dadMap.exists(newCharacter)) {
 					var newDad:Character = new Character(0, 0, newCharacter);
 					dadMap.set(newCharacter, newDad);
@@ -2763,6 +2856,16 @@ class PlayState extends MusicBeatState
 					startCharacterPos(newDad, true);
 					newDad.alpha = 0.00001;
 					startCharacterScripts(newDad.curCharacter);
+				}
+
+			case 1:
+				if(!boyfriendMap.exists(newCharacter)) {
+					var newBoyfriend:Character = new Character(0, 0, newCharacter, true);
+					boyfriendMap.set(newCharacter, newBoyfriend);
+					boyfriendGroup.add(newBoyfriend);
+					startCharacterPos(newBoyfriend);
+					newBoyfriend.alpha = 0.00001;
+					startCharacterScripts(newBoyfriend.curCharacter);
 				}
 
 			case 2:
@@ -2774,6 +2877,20 @@ class PlayState extends MusicBeatState
 					startCharacterPos(newGf);
 					newGf.alpha = 0.00001;
 					startCharacterScripts(newGf.curCharacter);
+				}
+			default:
+				var extraIndex:Int = type - 3;
+				if(extraIndex >= 0 && extraIndex < extraCharacterGroups.length){
+					var charMap = extraCharacterMaps[extraIndex];
+					var charGroup = extraCharacterGroups[extraIndex];
+					if(!charMap.exists(newCharacter)){
+						var newChar:Character = new Character(0, 0, newCharacter);
+						charMap.set(newCharacter, newChar);
+						charGroup.add(newChar);
+						startCharacterPos(newChar);
+						newChar.alpha = 0.00001;
+						startCharacterScripts(newChar.curCharacter);
+					}
 				}
 		}
 	}
@@ -2788,17 +2905,23 @@ class PlayState extends MusicBeatState
 		char.y += char.positionArray[1];
 	}
 
-	public function characterBopper(beat:Int):Void
-	{
+	public function characterBopper(beat:Int):Void {
 		if (gf != null && beat % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && !gf.getAnimationName().startsWith('sing') && !gf.stunned)
 			gf.dance();
 
-		var characters = [boyfriend, dad];
+		var characters:Array<Character> = [boyfriend, dad];
+		for(char in extraCharacters)
+			if(char != null) characters.push(char);
+
+		#if LUA_ALLOWED
 		if(modchartCharacters != null){
-			for(char in characters){
-				if(char != boyfriend && char != dad) characters.push(char);
+			for(char in modchartCharacters){
+				if(char != null && characters.indexOf(char) == -1)
+					characters.push(char);
 			}
 		}
+		#end
+
 		for(char in characters)
 			if (char != null && beat % char.danceEveryNumBeats == 0 && !char.getAnimationName().startsWith('sing') && !char.stunned)
 				char.dance();
@@ -3130,7 +3253,17 @@ class PlayState extends MusicBeatState
 				if(char == boyfriend || boyfriendGroup.members.contains(char)) chars.push(boyfriend);
 				else if(char == dad || dadGroup.members.contains(char)) chars.push(dad);
 				else if(char == gf || gfGroup.members.contains(char)) chars.push(gf);
-				else chars.push(char);
+				else {
+					var found:Bool = false;
+					for(i => charGroup in extraCharacterGroups){
+						if(char == extraCharacters[i] || charGroup.members.contains(char)){
+							chars.push(extraCharacters[i]);
+							found = true;
+							break;
+						}
+					}
+					if(!found) chars.push(char);
+				}
 			}
 		} else {
 			chars = isPlayerOpponent ? [dad] : [boyfriend];
@@ -3179,7 +3312,17 @@ class PlayState extends MusicBeatState
 			if(char == boyfriend || boyfriendGroup.members.contains(char)) chars.push(boyfriend);
 			else if(char == dad || dadGroup.members.contains(char)) chars.push(dad);
 			else if(char == gf || gfGroup.members.contains(char)) chars.push(gf);
-			else chars.push(char);
+			else {
+				var found:Bool = false;
+				for(i => charGroup in extraCharacterGroups){
+					if(char == extraCharacters[i] || charGroup.members.contains(char)){
+						chars.push(extraCharacters[i]);
+						found = true;
+						break;
+					}
+				}
+				if(!found) chars.push(char);
+			}
 		}
 		for(char in chars){
 			if(char == null) continue;
@@ -3280,7 +3423,17 @@ class PlayState extends MusicBeatState
 			if(char == boyfriend || boyfriendGroup.members.contains(char)) chars.push(boyfriend);
 			else if(char == dad || dadGroup.members.contains(char)) chars.push(dad);
 			else if(char == gf || gfGroup.members.contains(char)) chars.push(gf);
-			else chars.push(char);
+			else {
+				var found:Bool = false;
+				for(i => charGroup in extraCharacterGroups){
+					if(char == extraCharacters[i] || charGroup.members.contains(char)){
+						chars.push(extraCharacters[i]);
+						found = true;
+						break;
+					}
+				}
+				if(!found) chars.push(char);
+			}
 		}
 		for(char in chars){
 			if(char != null){

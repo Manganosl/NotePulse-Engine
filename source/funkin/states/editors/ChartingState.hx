@@ -193,6 +193,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var characterBoxes:Array<PsychUIBox> = [];
 	var characterDropdowns:Array<PsychUIDropDownMenu> = [];
 	var hitsoundSliders:Array<PsychUISlider> = [];
+	var characterBoxesVirtual:Array<Bool> = [];
 	var cachedCharacterList:Array<String> = [''];
 	var lastCharacterBoxesColumns:Int = -1;
 	
@@ -1284,14 +1285,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						if(note == null) continue;
 
 						note.chartY += diff;
-						var row:Float = (note.chartY / GRID_SIZE) * curZoom;
+						var row:Float = (note.chartY / GRID_SIZE) / curZoom;
 						var noteSecRow:Int = 0;
 						while(noteSecRow + 1 < cachedSectionRow.length && cachedSectionRow[noteSecRow + 1] <= row)
 						{
 							noteSecRow++;
 						}
 
-						note.setStrumTime(Math.max(-5000, note.strumTime + (diff * cachedSectionCrochets[noteSecRow] / 4) / GRID_SIZE * curZoom));
+						note.setStrumTime(Math.max(-5000, note.strumTime + (diff * cachedSectionCrochets[noteSecRow] / 4) / GRID_SIZE / curZoom));
 						positionNoteYOnTime(note, noteSecRow);
 						
 						if(!note.isEvent && note.hasSustain)
@@ -1835,6 +1836,16 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					if(idx >= 0) notes.splice(idx, 1);
 				}
 			}
+
+			var extraChars:Array<String> = Reflect.hasField(PlayState.SONG, 'extraPlayers') ? Reflect.field(PlayState.SONG, 'extraPlayers') : null;
+			if(extraChars != null){
+				var keepExtra:Int = newLanes - 3;
+				if(keepExtra < 0) keepExtra = 0;
+				if(extraChars.length > keepExtra){
+					extraChars.splice(keepExtra, extraChars.length - keepExtra);
+					Reflect.setField(PlayState.SONG, 'extraPlayers', extraChars);
+				}
+			}
 		}
 
 		GRID_PLAYERS = PlayState.SONG.lanes = newLanes;
@@ -1846,11 +1857,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			note.eventText.x = note.x - note.eventText.width - 10;
 		}
 		loadSection();
+		updateJsonData();
 		updateHeads(true);
 	}
 
 	function createCharacterBoxes(){
+		var displayPlayers:Int = (GRID_PLAYERS < 3) ? 3 : GRID_PLAYERS;
 		var boxWidth:Int = Std.int(GRID_SIZE * GRID_COLUMNS_PER_PLAYER);
+		var virtualThirdBoxWidth:Int = Std.int(GRID_SIZE * Std.int(Math.min(GRID_COLUMNS_PER_PLAYER, 4)));
 
 		if(lastCharacterBoxesColumns != GRID_COLUMNS_PER_PLAYER){
 			for(characterBox in characterBoxes)
@@ -1858,48 +1872,70 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			characterBoxes = [];
 			characterDropdowns = [];
 			hitsoundSliders = [];
+			characterBoxesVirtual = [];
 			lastCharacterBoxesColumns = GRID_COLUMNS_PER_PLAYER;
 		}
 
-		while(characterBoxes.length > GRID_PLAYERS){
+		while(characterBoxes.length > displayPlayers){
 			var extraBox = characterBoxes.pop();
 			if(extraBox != null) extraBox.destroy();
 			characterDropdowns.pop();
 			hitsoundSliders.pop();
+			characterBoxesVirtual.pop();
 		}
 
-		for(i in 0...GRID_PLAYERS){
+		for(i in 0...displayPlayers){
 			var fieldIndex:Int = i;
+			var isVirtualThird:Bool = (i == 2 && i >= GRID_PLAYERS);
+			var thisBoxWidth:Int = isVirtualThird ? virtualThirdBoxWidth : boxWidth;
+			var includeHitsound:Bool = !isVirtualThird;
+			var thisBoxHeight:Int = includeHitsound ? 250 : 175;
 			var boxX:Float = gridBg.x + (GRID_SIZE * GRID_COLUMNS_PER_PLAYER * i) + GRID_SIZE;
 
 			if(i < characterBoxes.length){
-				var characterBox = characterBoxes[i];
-				characterBox.x = boxX;
-				characterBox.y = 0;
-				continue;
+				if(characterBoxesVirtual[i] == isVirtualThird){
+					var characterBox = characterBoxes[i];
+					characterBox.x = boxX;
+					characterBox.y = 0;
+					characterBox.resize(thisBoxWidth, thisBoxHeight);
+					characterBox.isMinimized = true;
+					continue;
+				}
+
+				var oldBox = characterBoxes[i];
+				if(oldBox != null) oldBox.destroy();
+				characterBoxes.splice(i, 1);
+				characterDropdowns.splice(i, 1);
+				hitsoundSliders.splice(i, 1);
+				characterBoxesVirtual.splice(i, 1);
 			}
 
 			var boxName:String = ((i == 0) ? PlayState.SONG.player2 : ((i == 1) ? PlayState.SONG.player1 : ((i == 2) ? PlayState.SONG.gfVersion : 'Player ${i+1}')));
-			var characterBox = new PsychUIBox(boxX, 0, boxWidth, 250, [boxName]);
+			var characterBox = new PsychUIBox(boxX, 0, thisBoxWidth, thisBoxHeight, [boxName]);
 			characterBox.scrollFactor.set();
 			characterBox.canMove = false;
 			characterBox.canMinimize = true;
 			characterBox.isMinimized = true;
 			add(characterBox);
 			characterBoxes.push(characterBox);
+			characterBoxesVirtual.push(isVirtualThird);
 
 			var tab_group = characterBox.getTab(boxName).menu;
 
-			var hitsoundSlider:PsychUISlider = new PsychUISlider(10, 100, function(v:Float) {}, 1, 0, 1, boxWidth - 20);
-			hitsoundSlider.label = 'Hitsound Volume';
-			tab_group.add(hitsoundSlider);
+			var hitsoundSlider:PsychUISlider = null;
+			if(includeHitsound){
+				hitsoundSlider = new PsychUISlider(10, 100, function(v:Float) {}, 0, 0, 1, thisBoxWidth - 20);
+				hitsoundSlider.label = 'Hitsound Volume';
+				tab_group.add(hitsoundSlider);
+			}
 			hitsoundSliders.push(hitsoundSlider);
 
 			var showDeleteCharBtn:Bool = fieldIndex >= 3;
 			var leftBound:Float = showDeleteCharBtn ? 35 : 10;
-			var rightBound:Float = boxWidth - 10;
+			var rightBound:Float = thisBoxWidth - 10;
+			var dropDownY:Float = includeHitsound ? 175 : 100;
 
-			var charDropDown:PsychUIDropDownMenu = new PsychUIDropDownMenu(leftBound, 175, cachedCharacterList, function(id:Int, character:String){
+			var charDropDown:PsychUIDropDownMenu = new PsychUIDropDownMenu(leftBound, dropDownY, cachedCharacterList, function(id:Int, character:String){
 				switch(fieldIndex){
 					case 0:
 						PlayState.SONG.player2 = character;
@@ -1913,6 +1949,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						loadMusic();
 					case 2:
 						PlayState.SONG.gfVersion = character;
+						updateJsonData();
+						updateHeads(true);
 					default:
 						var extraChars:Array<String> = Reflect.hasField(PlayState.SONG, 'extraPlayers') ? Reflect.field(PlayState.SONG, 'extraPlayers') : null;
 						if(extraChars == null) extraChars = [];
@@ -1920,6 +1958,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 							extraChars.push('');
 						extraChars[fieldIndex - 3] = character;
 						Reflect.setField(PlayState.SONG, 'extraPlayers', extraChars);
+						updateJsonData();
+						updateHeads(true);
 				}
 			});
 			charDropDown.x = leftBound + ((rightBound - leftBound) - charDropDown.width) / 2;
@@ -1934,7 +1974,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			}
 
 			if(showDeleteCharBtn){
-				var deleteCharBtn:PsychUIButton = new PsychUIButton(10, 175, 'X', function(){
+				var deleteCharBtn:PsychUIButton = new PsychUIButton(10, dropDownY, 'X', function(){
 					charDropDown.selectedLabel = '';
 					switch(fieldIndex){
 						case 0: PlayState.SONG.player2 = '';
@@ -2653,8 +2693,17 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	{
 		for (i in 1...GRID_PLAYERS+1)
 		{
-			var data:CharacterFile = loadCharacterFile(Reflect.field(PlayState.SONG, 'player$i'));
-			if(i == 3) data = loadCharacterFile(Reflect.field(PlayState.SONG, 'gfVersion'));
+			var charName:String = null;
+			switch(i){
+				case 1: charName = PlayState.SONG.player1;
+				case 2: charName = PlayState.SONG.player2;
+				case 3: charName = PlayState.SONG.gfVersion;
+				default:
+					var extraChars:Array<String> = Reflect.hasField(PlayState.SONG, 'extraPlayers') ? Reflect.field(PlayState.SONG, 'extraPlayers') : null;
+					if(extraChars != null && extraChars.length > i - 4)
+						charName = extraChars[i - 4];
+			}
+			var data:CharacterFile = loadCharacterFile(charName);
 			Reflect.setField(characterData, 'iconP$i', !characterFailed ? data.healthicon : 'face');
 			Reflect.setField(characterData, 'vocalsP$i', data.vocals_file != null ? data.vocals_file : '');
 		}
@@ -5728,6 +5777,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			{
 				if(event != null)
 				{
+					var evIdx:Int = events.indexOf(event);
+					if(evIdx >= 0) events.splice(evIdx, 1);
+
 					selectedNotes.remove(event);
 
 					if(event.exists)

@@ -711,11 +711,16 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "getColorFromHex", function(color:String) return FlxColor.fromString('#$color'));
 
 		// precaching
-		Lua_helper.add_callback(lua, "addCharacterToList", function(name:String, type:String) {
+		Lua_helper.add_callback(lua, "addCharacterToList", function(name:String, type:Dynamic) {
 			var charType:Int = 0;
-			switch(type.toLowerCase()) {
-				case 'dad': charType = 1;
-				case 'gf' | 'girlfriend': charType = 2;
+			if (Std.isOfType(type, Int) || Std.isOfType(type, Float)) {
+				charType = Std.int(type);
+			} else {
+				switch (Std.string(type).toLowerCase()) {
+					case 'dad': charType = 0;
+					case 'bf' | 'boyfriend': charType = 1;
+					case 'gf' | 'girlfriend': charType = 2;
+				}
 			}
 			game.addCharacterToList(name, charType);
 		});
