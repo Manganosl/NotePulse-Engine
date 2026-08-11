@@ -51,11 +51,6 @@
       "version": "3.2.3"
     },
     {
-      "name": "flixel-ui",
-      "type": "haxelib",
-      "version": "2.6.1"
-    },
-    {
       "name": "hxcpp",
       "type": "git",
       "dir": null,

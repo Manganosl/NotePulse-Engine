@@ -89,7 +89,6 @@
 	<!-- _______________________________ Libraries _______________________________ -->
 
 	<haxelib name="flixel" />
-	<haxelib name="flixel-ui" />
 	<haxelib name="flixel-addons" />
 	<haxelib name="tjson" />
 	<haxelib name="nape-haxe4" />

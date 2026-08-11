@@ -1,5 +1,6 @@
 package funkin.substates;
 
+import funkin.states.editors.MenuCharacterEditorState;
 import funkin.states.editors.content.Prompt.BasePrompt;
 import funkin.states.editors.ModSelectorState;
 
@@ -15,6 +16,7 @@ class EditorSelectorSubstate extends MusicBeatSubstate {
 		{ label: "Week Editor" },
 		{ label: "Dialogue Editor" },
 		{ label: "Dialogue Character Editor" },
+		{ label: "Menu Character Editor" },
 		{ label: "Stage Editor", color: 0xFFFFCC55 },
 		{ label: "Modchart Editor" },
 		{ label: "Note Splash Debug" },
@@ -166,23 +168,25 @@ class EditorSelectorSubstate extends MusicBeatSubstate {
 
 	function onAccept() {
 		switch (curSelected) {
-			case 0: // Chart Editor
+			case 0:
 				MusicBeatState.switchState(new ModSelectorState(funkin.states.editors.ChartingState, []));
-			case 1: // Character Editor
+			case 1:
 				MusicBeatState.switchState(new ModSelectorState(funkin.states.editors.CharacterEditorState, [null, false]));
-			case 2: // Week Editor
+			case 2:
 				MusicBeatState.switchState(new ModSelectorState(funkin.states.editors.WeekEditorState, []));
 			case 3:
-				MusicBeatState.switchState(new funkin.states.editors.DialogueEditorState());
+				MusicBeatState.switchState(new ModSelectorState(funkin.states.editors.DialogueEditorState, []));
 			case 4:
-				MusicBeatState.switchState(new funkin.states.editors.DialogueCharacterEditorState());
-			case 5: // Stage Editor
+				MusicBeatState.switchState(new ModSelectorState(funkin.states.editors.DialogueCharacterEditorState, []));
+			case 5:
+				MusicBeatState.switchState(new ModSelectorState(funkin.states.editors.MenuCharacterEditorState, []));
+			case 6:
 				MusicBeatState.switchState(new ModSelectorState(funkin.states.editors.StageEditorState, []));
-			case 6: // Modchart Editor
+			case 7:
 				MusicBeatState.switchState(new ModSelectorState(funkin.states.editors.ModchartEditorState, []));
-			case 7: // Note Splash Debug
+			case 8:
 				MusicBeatState.switchState(new ModSelectorState(funkin.states.editors.NoteSplashDebugState, []));
-			case 8: // Mod Config Editor
+			case 9:
 				MusicBeatState.switchState(new ModSelectorState(BasePrompt, []));
 		}
 	}

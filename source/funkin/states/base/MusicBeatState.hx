@@ -1,11 +1,9 @@
 package funkin.states.base;
 
 import funkin.states.scripted.ScriptedState;
-import flixel.addons.ui.FlxUIState;
+import flixel.FlxState;
 import funkin.states.scripted.ScriptedState;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.FlxState;
-import flixel.FlxState;
 import sys.io.File;
 import haxe.io.Path;
 import funkin.scripting.LuaUtils;
@@ -17,7 +15,7 @@ import flixel.addons.display.FlxRuntimeShader;
 
 import funkin.game.shaders.CustomShader;
 
-class MusicBeatState extends FlxUIState
+class MusicBeatState extends FlxState
 {
 	#if (!flash && sys)
 	public var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();

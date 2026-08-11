@@ -82,8 +82,7 @@ enum abstract WaveformTarget(String)
 	var OPPONENT = 'opp';
 }
 
-class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
-{
+class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent {
 	public static var chartPath:String = null;
 
 	var _file:FileReference;
@@ -2081,8 +2080,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					var confirmFunc:Void->Void = function(){
 						pendingLaneRemoveIndex = fieldIndex;
 					}
-					FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
-					openSubState(new Prompt('Warning: Removing this lane\nwill delete all notes in it.', confirmFunc));
+
+					if(!ignoreProgressCheckBox.checked){
+						FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
+						openSubState(new Prompt('Warning: Removing this lane\nwill delete all notes in it.', confirmFunc));
+					} else confirmFunc();
 				}, Std.int(characterBoxes[fieldIndex].bg.width));
 				btn.normalStyle.bgColor = FlxColor.RED;
 				btn.normalStyle.textColor = FlxColor.WHITE;

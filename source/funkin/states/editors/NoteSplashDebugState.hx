@@ -3,8 +3,6 @@ package funkin.states.editors;
 import funkin.objects.notes.Note;
 import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.splashes.NoteSplash;
-import flixel.addons.ui.FlxInputText;
-import flixel.addons.ui.FlxUINumericStepper;
 
 class NoteSplashDebugState extends MusicBeatState
 {
@@ -17,10 +15,10 @@ class NoteSplashDebugState extends MusicBeatState
 	var notes:FlxTypedGroup<StrumNote>;
 	var splashes:FlxTypedGroup<FlxSprite>;
 	
-	var imageInputText:FlxInputText;
-	var nameInputText:FlxInputText;
-	var stepperMinFps:FlxUINumericStepper;
-	var stepperMaxFps:FlxUINumericStepper;
+	var imageInputText:PsychUIInputText;
+	var nameInputText:PsychUIInputText;
+	var stepperMinFps:PsychUINumericStepper;
+	var stepperMaxFps:PsychUINumericStepper;
 
 	var offsetsText:FlxText;
 	var curFrameText:FlxText;
@@ -71,69 +69,66 @@ class NoteSplashDebugState extends MusicBeatState
 		var imageName:FlxText = new FlxText(txtx, txty - 120, 'Image Name:', 16);
 		add(imageName);
 
-		imageInputText = new FlxInputText(txtx, txty - 100, 360, defaultTexture, 16);
-		imageInputText.callback = function(text:String, action:String)
+		imageInputText = new PsychUIInputText(txtx, txty - 100, 360, defaultTexture, 16);
+		imageInputText.onChange = function(old:String, cur:String)
 		{
-			switch(action)
-			{
-				case 'enter':
-					imageInputText.hasFocus = false;
-					textureName = text;
-					try {
-						loadFrames();
-					} catch(e:Dynamic) {
-						trace('ERROR! $e');
-						textureName = defaultTexture;
-						loadFrames();
+			trace('changed image to $cur');
+		}
+		imageInputText.unfocus = function()
+		{
+			textureName = imageInputText.text;
+			try {
+				loadFrames();
+			} catch(e:Dynamic) {
+				trace('ERROR! $e');
+				textureName = defaultTexture;
+				loadFrames();
 
-						missingText.text = 'ERROR WHILE LOADING IMAGE:\n$text';
-						missingText.screenCenter(Y);
-						missingText.visible = true;
-						missingTextBG.visible = true;
-						FlxG.sound.play(Paths.sound('cancelMenu'));
+				missingText.text = 'ERROR WHILE LOADING IMAGE:\n${imageInputText.text}';
+				missingText.screenCenter(Y);
+				missingText.visible = true;
+				missingTextBG.visible = true;
+				FlxG.sound.play(Paths.sound('cancelMenu'));
 
-						new FlxTimer().start(2.5, function(tmr:FlxTimer)
-						{
-							missingText.visible = false;
-							missingTextBG.visible = false;
-						});
-					}
-
-				default:
-					trace('changed image to $text');
+				new FlxTimer().start(2.5, function(tmr:FlxTimer)
+				{
+					missingText.visible = false;
+					missingTextBG.visible = false;
+				});
 			}
-
 		};
 		add(imageInputText);
 
 		var animName:FlxText = new FlxText(txtx, txty, 'Animation Name:', 16);
 		add(animName);
 
-		nameInputText = new FlxInputText(txtx, txty + 20, 360, '', 16);
-		nameInputText.callback = function(text:String, action:String)
+		nameInputText = new PsychUIInputText(txtx, txty + 20, 360, '', 16);
+		nameInputText.onChange = function(old:String, cur:String)
 		{
-			switch(action)
-			{
-				case 'enter':
-					nameInputText.hasFocus = false;
-				
-				default:
-					trace('changed anim name to $text');
-					config.anim = text;
-					curAnim = 1;
-					reloadAnims();
-			}
-
+			trace('changed anim name to $cur');
+			config.anim = cur;
+			curAnim = 1;
+			reloadAnims();
 		};
 		add(nameInputText);
 
 		add(new FlxText(txtx, txty - 50, 0, 'Min/Max Framerate:', 16));
-		stepperMinFps = new FlxUINumericStepper(txtx, txty - 30, 1, 22, 1, 60, 0);
-		stepperMinFps.name = 'min_fps';
+		stepperMinFps = new PsychUINumericStepper(txtx, txty - 30, 1, 22, 1, 60, 0);
+		stepperMinFps.onValueChange = function(){
+			if(stepperMinFps.value > stepperMaxFps.value)
+				stepperMaxFps.value = stepperMinFps.value;
+			config.minFps = Std.int(stepperMinFps.value);
+			config.maxFps = Std.int(stepperMaxFps.value);
+		}
 		add(stepperMinFps);
 
-		stepperMaxFps = new FlxUINumericStepper(txtx + 60, txty - 30, 1, 26, 1, 60, 0);
-		stepperMaxFps.name = 'max_fps';
+		stepperMaxFps = new PsychUINumericStepper(txtx + 60, txty - 30, 1, 26, 1, 60, 0);
+		stepperMaxFps.onValueChange = function(){
+			if(stepperMaxFps.value < stepperMinFps.value)
+				stepperMinFps.value = stepperMaxFps.value;
+			config.minFps = Std.int(stepperMinFps.value);
+			config.maxFps = Std.int(stepperMaxFps.value);
+		}
 		add(stepperMaxFps);
 
 		//
@@ -188,10 +183,7 @@ class NoteSplashDebugState extends MusicBeatState
 	var pressEnterToSave:Float = 0;
 	override function update(elapsed:Float)
 	{
-		@:privateAccess
-		cast(stepperMinFps.text_field, FlxInputText).hasFocus = cast(stepperMaxFps.text_field, FlxInputText).hasFocus = false;
-
-		var notTyping:Bool = !nameInputText.hasFocus && !imageInputText.hasFocus;
+		var notTyping:Bool = PsychUIInputText.focusOn == null;
 		if(controls.BACK && notTyping)
 		{
 			MusicBeatState.switchState(new funkin.states.MainMenuState());
@@ -358,26 +350,6 @@ class NoteSplashDebugState extends MusicBeatState
 		#end
 	}
 	
-	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>)
-	{
-		if (id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper))
-		{
-			var nums:FlxUINumericStepper = cast sender;
-			var wname = nums.name;
-			switch(wname)
-			{
-				case 'min_fps':
-					if(nums.value > stepperMaxFps.value)
-						stepperMaxFps.value = nums.value;
-				case 'max_fps':
-					if(nums.value < stepperMinFps.value)
-						stepperMinFps.value = nums.value;
-			}
-			config.minFps = Std.int(stepperMinFps.value);
-			config.maxFps = Std.int(stepperMaxFps.value);
-		}
-	}
-
 	var maxAnims:Int = 0;
 	function reloadAnims()
 	{
