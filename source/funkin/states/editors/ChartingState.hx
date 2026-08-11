@@ -1171,25 +1171,22 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					resetSelectedNotes();
 
 				var selectionBounds = selectionBox.getScreenBounds(null, camUI);
-				for (note in curRenderedNotes)
-				{
+				for(note in curRenderedNotes){
 					if(note == null) continue;
 
-					if(!selectedNotes.contains(note) || holdingAlt /*&& FlxG.overlap(selectionBox, note)*/) //overlap doesnt work here
-					{
+					if(!selectedNotes.contains(note) || holdingAlt){
 						var noteBounds = note.getScreenBounds(null, camUI);
 						noteBounds.top -= scrollY;
 						noteBounds.bottom -= scrollY;
+						noteBounds.left -= FlxG.camera.scroll.x;
+						noteBounds.right -= FlxG.camera.scroll.x;
 
-						if(selectionBounds.overlaps(noteBounds))
-						{
-							if(holdingAlt && selectedNotes.contains(note))
-							{
+						if(selectionBounds.overlaps(noteBounds)){
+							if(holdingAlt && selectedNotes.contains(note)){
 								selectedNotes.remove(note);
 								note.colorTransform.redMultiplier = note.colorTransform.greenMultiplier = note.colorTransform.blueMultiplier = 1;
 								if(note.animation.curAnim != null) note.animation.curAnim.curFrame = 0;
-							}
-							else selectedNotes.push(note);
+							} else selectedNotes.push(note);
 							onSelectNote();
 						}
 					}
@@ -3947,10 +3944,29 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		var stepperMania = new PsychUINumericStepper(objX + 180, objY, 1, PlayState.SONG.mania, ExtraKeysHandler.instance.data.minKeys, ExtraKeysHandler.instance.data.maxKeys, 1);
 		stepperMania.value = PlayState.SONG.mania;
-		stepperMania.onValueChange = function() 
-		{
-			PlayState.SONG.mania = Std.int(stepperMania.value);
-			GRID_COLUMNS_PER_PLAYER = PlayState.SONG.mania+1;
+		stepperMania.onValueChange = function(){
+			var oldColumns:Int = GRID_COLUMNS_PER_PLAYER;
+			var newMania:Int = Std.int(stepperMania.value);
+			var newColumns:Int = newMania + 1;
+
+			if(oldColumns == newColumns) return;
+
+			for (section in PlayState.SONG.notes){ // We need to remap the notes ig
+				for (note in section.sectionNotes){
+					if(note == null) continue;
+
+					var daID:Int = (note[4] == null) ? Std.int(note[1] / oldColumns) : Std.int(note[4]);
+					var daNoteData:Int = Std.int(note[1] % oldColumns);
+
+					if(daNoteData >= newColumns) daNoteData = newColumns - 1;
+
+					note[4] = daID;
+					note[1] = daNoteData + (daID * newColumns);
+				}
+			}
+
+			PlayState.SONG.mania = newMania;
+			GRID_COLUMNS_PER_PLAYER = newColumns;
 			createGrids();
 			reloadNotes();
 			loadSection();

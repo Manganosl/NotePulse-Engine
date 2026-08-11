@@ -164,6 +164,8 @@ class ModSelectorState extends MusicBeatState {
 
 		currentMod = (curSelected == 0) ? null : modArray[curSelected];
 		if (currentMod != null) Mods.currentModDirectory = currentMod;
+		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.tween(Main.fpsVar, {y: 10}, 1, {ease: FlxEase.circOut});
 		try MusicBeatState.switchState(Type.createInstance(goto, gotoArgs));
 	}
 
@@ -180,6 +182,8 @@ class ModSelectorState extends MusicBeatState {
 				var fmt = funkin.data.Highscore.formatSong(currentSong.songName.toLowerCase(), curDifficulty);
 				PlayState.SONG = funkin.data.Song.loadFromJson(fmt, currentSong.songName.toLowerCase());
 				var nextState = (goto == ModchartEditorState) ? new ModchartEditorState() : new ChartingState();
+				FlxTween.cancelTweensOf(Main.fpsVar);
+				FlxTween.tween(Main.fpsVar, {y: 10}, 1, {ease: FlxEase.circOut});
 				try LoadingState.loadAndSwitchState(nextState, false);
 			}
 		} else if (inSongSelect) {

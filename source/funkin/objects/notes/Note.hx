@@ -473,10 +473,8 @@ class Note extends FlxSkewedSprite {
 			if(skin == null || skin.length < 1)
 				skin = defaultNoteSkin + postfix;
 		}
-		var animName:String = null;
-		if(animation.curAnim != null) {
-			animName = animation.curAnim.name;
-		}
+
+		var wasPlaying:Bool = (animation.curAnim != null);
 		var skinPixel:String = skin;
 		var lastScaleY:Float = scale.y;
 		var skinPostfix:String = getNoteSkinPostfix();
@@ -487,6 +485,9 @@ class Note extends FlxSkewedSprite {
 			_lastValidChecked = customSkin;
 		}
 		else skinPostfix = '';
+
+		var newAnim:String = null;
+
 		if(PlayState.isPixelStage){
 			if(isSustainNote){
 				var graphic = Paths.image('pixelUI/' + skinPixel + 'ENDS' + skinPostfix);
@@ -498,7 +499,7 @@ class Note extends FlxSkewedSprite {
 			}
 			var mania = (playField != null ? playField.keyCount - 1 : (PlayState.SONG != null ? PlayState.SONG.mania : 3));
 			setGraphicSize((width * (ExtraKeysHandler.instance.data.pixelScales[mania] + 0.3)) * PlayState.daPixelZoom);
-			loadPixelNoteAnims();
+			newAnim = loadPixelNoteAnims();
 			antialiasing = false;
 			if(isSustainNote){
 				offsetX += _lastNoteOffX;
@@ -507,7 +508,7 @@ class Note extends FlxSkewedSprite {
 			}
 		} else {
 			frames = Paths.getSparrowAtlas(skin);
-			loadNoteAnims();
+			newAnim = loadNoteAnims();
 			if(!isSustainNote){
 				centerOffsets();
 				centerOrigin();
@@ -517,8 +518,9 @@ class Note extends FlxSkewedSprite {
 			scale.y = lastScaleY;
 		updateHitbox();
 		defScale.copyFrom(scale);
-		if(animName != null)
-			animation.play(animName, true);
+
+		if(wasPlaying && newAnim != null)
+			animation.play(newAnim, true);
 	}
 
 	public static function getNoteSkinPostfix()
@@ -529,34 +531,44 @@ class Note extends FlxSkewedSprite {
 		return skin;
 	}
 
-	function loadNoteAnims() {
+	function loadNoteAnims():String {
 		var mania = 3;
-		if (PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
+		if(PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
 		var noteAnim = getAnimSet(getIndex(mania, noteData)).note;
-		if (isSustainNote)
-		{
+
+		var resultAnim:String;
+		if(isSustainNote){
 			attemptToAddAnimationByPrefix('purpleholdend', 'pruple end hold', 24, true);
 			animation.addByPrefix(noteAnim + 'holdend', noteAnim + ' hold end', 24, true);
 			animation.addByPrefix(noteAnim + 'hold', noteAnim + ' hold piece', 24, true);
+			resultAnim = isSustainEnd ? (noteAnim + 'holdend') : (noteAnim + 'hold');
+		} else {
+			animation.addByPrefix(noteAnim + 'Scroll', noteAnim + '0');
+			resultAnim = noteAnim + 'Scroll';
 		}
-		else animation.addByPrefix(noteAnim + 'Scroll', noteAnim + '0');
+
 		setGraphicSize(width * ExtraKeysHandler.instance.data.scales[mania]);
 		updateHitbox();
+		return resultAnim;
 	}
 
-	function loadPixelNoteAnims() {
+	function loadPixelNoteAnims():String {
 		var mania = 3;
-		if (PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
+		if(PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
 		var noteAnimStr = getAnimSet(getIndex(mania, noteData)).note;
 		var noteAnimInt = getAnimSet(getIndex(mania, noteData)).pixel;
 		var cols = Note.getPixelColumns();
 
-		if (isSustainNote) {
+		var resultAnim:String;
+		if(isSustainNote){
 			animation.add(noteAnimStr + 'holdend', [noteAnimInt + cols], 24, true);
 			animation.add(noteAnimStr + 'hold', [noteAnimInt], 24, true);
+			resultAnim = isSustainEnd ? (noteAnimStr + 'holdend') : (noteAnimStr + 'hold');
 		} else {
 			animation.add(noteAnimStr + 'Scroll', [noteAnimInt + cols], 24, true);
+			resultAnim = noteAnimStr + 'Scroll';
 		}
+		return resultAnim;
 	}
 
 	function attemptToAddAnimationByPrefix(name:String, prefix:String, framerate:Float = 24, doLoop:Bool = true)

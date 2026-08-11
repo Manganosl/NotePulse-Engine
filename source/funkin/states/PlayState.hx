@@ -3730,6 +3730,13 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	public function fieldKeyJustPressed(field:PlayField, index:Int){
+		if (field == null || field.keysArray == null) return false;
+		if (index < 0 || index >= field.keysArray.length) return false;
+
+		return controls.justPressed(field.keysArray[index]);
+	}
+
 	//// Ratings | Score ////
 
 	public dynamic function updateScore(miss:Bool = false)
