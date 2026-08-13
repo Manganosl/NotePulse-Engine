@@ -371,7 +371,8 @@ class ModManager {
 		timeline.update(curStep);
 
 	public function getBaseX(direction:Int, player:Int):Float {
-		return PlayField.fields[player].members[direction].x;
+		var obj:StrumNote = PlayField.fields[player].members[direction];
+		return obj != null ? obj.x : 0;
 	}
 
 	public function updateObject(beat:Float, obj:FlxSprite, pos:Vector3, player:Int){

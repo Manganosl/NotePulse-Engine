@@ -465,6 +465,8 @@ class Note extends FlxSkewedSprite {
 	public var originalHeight:Float = 6;
 	static var _lastValidChecked:String;
 	public function reloadNote(texture:String = '', postfix:String = ''){
+		if(animation == null) return;
+
 		if(texture == null) texture = '';
 		if(postfix == null) postfix = '';
 		var skin:String = texture + postfix;
@@ -473,8 +475,7 @@ class Note extends FlxSkewedSprite {
 			if(skin == null || skin.length < 1)
 				skin = defaultNoteSkin + postfix;
 		}
-
-		var wasPlaying:Bool = (animation.curAnim != null);
+		var hadAnimPlaying:Bool = (animation.curAnim != null);
 		var skinPixel:String = skin;
 		var lastScaleY:Float = scale.y;
 		var skinPostfix:String = getNoteSkinPostfix();
@@ -485,9 +486,6 @@ class Note extends FlxSkewedSprite {
 			_lastValidChecked = customSkin;
 		}
 		else skinPostfix = '';
-
-		var newAnim:String = null;
-
 		if(PlayState.isPixelStage){
 			if(isSustainNote){
 				var graphic = Paths.image('pixelUI/' + skinPixel + 'ENDS' + skinPostfix);
@@ -499,7 +497,7 @@ class Note extends FlxSkewedSprite {
 			}
 			var mania = (playField != null ? playField.keyCount - 1 : (PlayState.SONG != null ? PlayState.SONG.mania : 3));
 			setGraphicSize((width * (ExtraKeysHandler.instance.data.pixelScales[mania] + 0.3)) * PlayState.daPixelZoom);
-			newAnim = loadPixelNoteAnims();
+			loadPixelNoteAnims();
 			antialiasing = false;
 			if(isSustainNote){
 				offsetX += _lastNoteOffX;
@@ -508,7 +506,7 @@ class Note extends FlxSkewedSprite {
 			}
 		} else {
 			frames = Paths.getSparrowAtlas(skin);
-			newAnim = loadNoteAnims();
+			loadNoteAnims();
 			if(!isSustainNote){
 				centerOffsets();
 				centerOrigin();
@@ -519,8 +517,15 @@ class Note extends FlxSkewedSprite {
 		updateHitbox();
 		defScale.copyFrom(scale);
 
-		if(wasPlaying && newAnim != null)
-			animation.play(newAnim, true);
+		if(hadAnimPlaying) {
+			var mania = 3;
+			if (PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
+			var noteAnim = getAnimSet(getIndex(mania, noteData)).note;
+			var newAnimName:String = isSustainNote ? (isSustainEnd ? (noteAnim + 'holdend') : (noteAnim + 'hold')) : (noteAnim + 'Scroll');
+
+			if(animation.getByName(newAnimName) != null)
+				animation.play(newAnimName, true);
+		}
 	}
 
 	public static function getNoteSkinPostfix()
@@ -531,44 +536,34 @@ class Note extends FlxSkewedSprite {
 		return skin;
 	}
 
-	function loadNoteAnims():String {
+	function loadNoteAnims() {
 		var mania = 3;
-		if(PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
+		if (PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
 		var noteAnim = getAnimSet(getIndex(mania, noteData)).note;
-
-		var resultAnim:String;
-		if(isSustainNote){
+		if (isSustainNote)
+		{
 			attemptToAddAnimationByPrefix('purpleholdend', 'pruple end hold', 24, true);
 			animation.addByPrefix(noteAnim + 'holdend', noteAnim + ' hold end', 24, true);
 			animation.addByPrefix(noteAnim + 'hold', noteAnim + ' hold piece', 24, true);
-			resultAnim = isSustainEnd ? (noteAnim + 'holdend') : (noteAnim + 'hold');
-		} else {
-			animation.addByPrefix(noteAnim + 'Scroll', noteAnim + '0');
-			resultAnim = noteAnim + 'Scroll';
 		}
-
+		else animation.addByPrefix(noteAnim + 'Scroll', noteAnim + '0');
 		setGraphicSize(width * ExtraKeysHandler.instance.data.scales[mania]);
 		updateHitbox();
-		return resultAnim;
 	}
 
-	function loadPixelNoteAnims():String {
+	function loadPixelNoteAnims() {
 		var mania = 3;
-		if(PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
+		if (PlayState.SONG != null) mania = (playField != null ? playField.keyCount - 1 : PlayState.SONG.mania);
 		var noteAnimStr = getAnimSet(getIndex(mania, noteData)).note;
 		var noteAnimInt = getAnimSet(getIndex(mania, noteData)).pixel;
 		var cols = Note.getPixelColumns();
 
-		var resultAnim:String;
-		if(isSustainNote){
+		if (isSustainNote) {
 			animation.add(noteAnimStr + 'holdend', [noteAnimInt + cols], 24, true);
 			animation.add(noteAnimStr + 'hold', [noteAnimInt], 24, true);
-			resultAnim = isSustainEnd ? (noteAnimStr + 'holdend') : (noteAnimStr + 'hold');
 		} else {
 			animation.add(noteAnimStr + 'Scroll', [noteAnimInt + cols], 24, true);
-			resultAnim = noteAnimStr + 'Scroll';
 		}
-		return resultAnim;
 	}
 
 	function attemptToAddAnimationByPrefix(name:String, prefix:String, framerate:Float = 24, doLoop:Bool = true)
@@ -587,35 +582,29 @@ class Note extends FlxSkewedSprite {
 		super.update(elapsed);
 
 		if(strum == null) return;
-		if(!strum.cpuControlled)
-		{
+		if(!strum.cpuControlled){
 			canBeHit = (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult) &&
 						strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult));
-		}
-		else
-		{
+		} else {
 			canBeHit = false;
 
-			if (!wasGoodHit && strumTime <= Conductor.songPosition)
-			{
+			if(!wasGoodHit && strumTime <= Conductor.songPosition){
 				if(!isSustainNote || ((prevNote != null && prevNote.wasGoodHit) && !ignoreNote))
 					wasGoodHit = true;
 			}
 		}
 
-		if (rgbShader != null)
-		{			
+		if(rgbShader != null)			
 			rgbShader.alphaMult = (alphaMod * alphaMod2);
-		}
 
-		if (tooLate && !inEditor)
-			if (alpha > 0.3)
+		if(tooLate && !inEditor)
+			if(alpha > 0.3)
 				alpha = 0.3;
 	}
 
 	var rectCache:Null<FlxRect> = null;
 	public function clip(strum:StrumNote){
-		if (strum.sustainReduce && wasGoodHit && Conductor.songPosition >= strumTime){
+		if(strum.sustainReduce && wasGoodHit && Conductor.songPosition >= strumTime){
 			final x:Float = (x - strum.modPos.x - (strum.width - width) * .5), y:Float = (y - strum.modPos.y - strum.height * .5);
 			final mag:Float = Math.sqrt(x * x + y * y);
 			

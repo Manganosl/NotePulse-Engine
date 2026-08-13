@@ -2,8 +2,6 @@ package funkin.objects.notes;
 
 import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.StrumNote.StrumBoundaries;
-import flixel.input.keyboard.FlxKey;
-import openfl.events.KeyboardEvent;
 import funkin.states.PlayState;
 
 class PlayField extends FlxTypedSpriteGroup<StrumNote> {
@@ -88,6 +86,8 @@ class PlayField extends FlxTypedSpriteGroup<StrumNote> {
 			remove(strum);
 		}
 
+		clear();
+
 		keyCount = value;
 		
 		this.keysArray = [];
@@ -103,10 +103,18 @@ class PlayField extends FlxTypedSpriteGroup<StrumNote> {
 			babyArrow.postAddedToGroup();
 		}
 
-		if (notes != null) {
-			for (note in notes){
+		if(notes != null){
+			var i:Int = notes.length - 1;
+			while (i >= 0){
+				var note = notes[i];
+				if(note == null || !note.exists){
+					notes.splice(i, 1);
+					i--;
+					continue;
+				}
 				note.defaultRGB();
 				note.reloadNote(note.texture);
+				i--;
 			}
 		}
 		adaptStrumline();

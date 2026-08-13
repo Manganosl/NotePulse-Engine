@@ -2688,10 +2688,11 @@ class PlayState extends MusicBeatState
 		{
 			for(field in PlayField.fields)
 				for (note in field.members)
-					if(!note.cpuControlled && note.animation.curAnim != null && note.animation.curAnim.name != 'static'){
-						note.playAnim('static');
-						note.resetAnim = 0;
-					}
+					if(note != null)
+						if(!note.cpuControlled && note.animation.curAnim != null && note.animation.curAnim.name != 'static'){
+							note.playAnim('static');
+							note.resetAnim = 0;
+						}
 		}
 		if(Mods.modPack != null && Mods.modPack.pauseSubState != null && Mods.modPack.pauseSubState.length > 0){
 			openSubState(new ScriptedSubstate(Mods.modPack.pauseSubState));
@@ -2997,6 +2998,7 @@ class PlayState extends MusicBeatState
 
 				daNote.kill();
 				unspawnNotes.remove(daNote);
+				if(daNote.playField != null) daNote.playField.notes.remove(daNote);
 				daNote.destroy();
 			}
 			--i;
@@ -3131,6 +3133,7 @@ class PlayState extends MusicBeatState
 	public function invalidateNote(note:Note):Void {
 		note.kill();
 		notes.remove(note, true);
+		if(note.playField != null) note.playField.notes.remove(note);
 		note.destroy();
 	}
 
@@ -3274,9 +3277,13 @@ class PlayState extends MusicBeatState
 			if(char != null && (note == null || !note.noMissAnimation) && char.hasMissAnimations && !char.noNoteAnim)
 			{
 				var suffix:String = '';
-				if(note != null) suffix = note.animSuffix;
+				var keyCount:Int = SONG.mania + 1;
+				if(note != null) {
+					suffix = note.animSuffix;
+					keyCount = note.playField.keyCount;
+				}
 
-				var animToPlay:String = singAnimation(direction) + 'miss' + suffix;
+				var animToPlay:String = singAnimation(direction, keyCount) + 'miss' + suffix;
 				char.playAnim(animToPlay, true);
 
 				if(char != gf && lastCombo > 5 && gf != null && gf.animOffsets.exists('sad'))
@@ -3294,8 +3301,8 @@ class PlayState extends MusicBeatState
 	// PlayState.instance.singAnimation = function (data:Int) {
 	// 	return 'sing' + ['LEFT', 'DOWN', 'UP', 'RIGHT', 'FRONT', 'LEFT2', 'DOWN2', 'UP2', 'RIGHT2'][data];
 	// }
-	public dynamic function singAnimation(noteData:Int):String {
-		return 'sing' + ExtraKeysHandler.instance.data.animations[ExtraKeysHandler.instance.data.keys[SONG.mania].notes[noteData]].sing;
+	public dynamic function singAnimation(noteData:Int, ?keyCount:Int):String {
+		return 'sing' + ExtraKeysHandler.instance.data.animations[ExtraKeysHandler.instance.data.keys[keyCount-1].notes[noteData]].sing;
 	}
 
 	function opponentNoteHit(note:Note):Void
@@ -3337,7 +3344,7 @@ class PlayState extends MusicBeatState
 					if (SONG.notes[curSection].altAnim && !SONG.notes[curSection].gfSection)
 						altAnim = '-alt';
 
-				var animToPlay:String = singAnimation(note.noteData) + altAnim;
+				var animToPlay:String = singAnimation(note.noteData, note.playField.keyCount) + altAnim;
 				if (char != null && !char.noNoteAnim)
 				{
 					char.holdTimer = 0;
@@ -3352,7 +3359,7 @@ class PlayState extends MusicBeatState
 					{
 						var chord = noteRows[(note.playField.player)][note.row];
 						var animNote = chord[0];
-						var realAnim:String = singAnimation(Std.int(Math.abs(animNote.noteData))) + (altAnim == null ? "" : altAnim);
+						var realAnim:String = singAnimation(Std.int(Math.abs(animNote.noteData)), note.playField.keyCount) + (altAnim == null ? "" : altAnim);
 
 						if (char.mostRecentRow != note.row) char.playAnim(realAnim, true);
 					
@@ -3455,7 +3462,7 @@ class PlayState extends MusicBeatState
 				}
 
 				if(!note.noAnimation && !char.noNoteAnim) {
-					var animToPlay:String = singAnimation(note.noteData);
+					var animToPlay:String = singAnimation(note.noteData, note.playField.keyCount);
 					var animCheck:String = 'hey';
 					if(note.gfNote || note.gfStrum)
 					{
@@ -3477,7 +3484,7 @@ class PlayState extends MusicBeatState
 						{
 							var chord = noteRows[(note.playField.player)][note.row];
 							var animNote = chord[0];
-							var realAnim:String = singAnimation(Std.int(Math.abs(animNote.noteData))) + note.animSuffix;
+							var realAnim:String = singAnimation(Std.int(Math.abs(animNote.noteData)), animNote.playField.keyCount) + note.animSuffix;
 
 							if (char.mostRecentRow != note.row) char.playAnim(realAnim, true);
 
