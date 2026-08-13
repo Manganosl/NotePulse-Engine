@@ -230,8 +230,8 @@ class StrumNote extends FlxSkewedSprite {
 			}
 		}
 		if(sustainSplash != null)
-			if(sustainSplash.animation.curAnim != null)
-				if (sustainSplash.animation.curAnim.name != "splash" && animation.curAnim.name == "static" && !cpuControlled)
+			if(sustainSplash.animation != null && sustainSplash.animation.curAnim != null)
+				if (sustainSplash.animation.curAnim.name != "splash" && animation != null && animation.curAnim != null && animation.curAnim.name == "static" && !cpuControlled)
 					sustainSplash.hide(true);  // You may ask, why 2 times? Well, BPM changes fucks with everything and I dont know why
 
 		super.update(elapsed);
