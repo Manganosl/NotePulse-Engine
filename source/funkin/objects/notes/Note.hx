@@ -119,6 +119,7 @@ class Note extends FlxSkewedSprite {
 	public var nextNote:Note;
 
 	public var spawned:Bool = false;
+	public var spawnedKeyCount:Int = -1;  // to reload note in case keyCount was modified
 
 	public var tail:Array<Note> = []; // for sustains
 	public var parent:Note;
@@ -226,6 +227,7 @@ class Note extends FlxSkewedSprite {
 		if(playField != null)
 			playField.notes.remove(this);
 		value.notes.push(this);
+		if(value != null) spawnedKeyCount = value.keyCount;
 		return playField = value;
 	}
 	
@@ -576,9 +578,7 @@ class Note extends FlxSkewedSprite {
 		animation.addByPrefix(name, prefix, framerate, doLoop);
 	}
 
-	private var currentStrumSpeed:Float = -99999999999999;  // Can't use null so fuck it
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float){
 		super.update(elapsed);
 
 		if(strum == null) return;

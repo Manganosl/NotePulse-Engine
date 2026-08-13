@@ -112,8 +112,11 @@ class PlayField extends FlxTypedSpriteGroup<StrumNote> {
 					i--;
 					continue;
 				}
-				note.defaultRGB();
-				note.reloadNote(note.texture);
+				if(note.spawned){
+					note.defaultRGB();
+					note.reloadNote(note.texture);
+					note.spawnedKeyCount = keyCount;
+				}
 				i--;
 			}
 		}

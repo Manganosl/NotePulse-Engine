@@ -1015,6 +1015,12 @@ class PlayState extends MusicBeatState
 				notes.insert(0, dunceNote);
 				dunceNote.spawned = true;
 
+				if(dunceNote.playField != null && dunceNote.spawnedKeyCount != dunceNote.playField.keyCount) {
+					dunceNote.defaultRGB();
+					dunceNote.reloadNote(dunceNote.texture);
+					dunceNote.spawnedKeyCount = dunceNote.playField.keyCount;
+				}
+
 				callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote, dunceNote.strumTime]);
 				callOnHScript('onSpawnNote', [dunceNote]);
 				notesLength = notes.length;
