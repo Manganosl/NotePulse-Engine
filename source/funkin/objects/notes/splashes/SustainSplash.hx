@@ -84,6 +84,7 @@ class SustainSplash extends FlxSkewedSprite {
 
 		if (animation.curAnim == null || animation.curAnim.name != "splash") {
 			animation.play("splash");
+			angle = offsetAngle;
 			centerSplash();
 		}
 	}

@@ -10,8 +10,9 @@ import funkin.objects.notes.PlayField;
 import funkin.objects.notes.StrumNote;
 
 import flixel.util.FlxSort;
+import flixel.util.FlxStringUtil;
+
 import openfl.geom.Rectangle;
-import openfl.events.KeyboardEvent;
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
@@ -27,6 +28,20 @@ import funkin.states.editors.content.*;
 import funkin.scripting.LuaUtils;
 
 import funkin.game.modchart.*;
+
+typedef ModchartUndoStruct = {
+	var action:ModchartUndoAction;
+	var data:Dynamic;
+}
+
+enum abstract ModchartUndoAction(String)
+{
+	var ADD_EVENT = 'Add Event';
+	var DELETE_EVENT = 'Delete Event';
+	var MOVE_EVENT = 'Move Event';
+	var SELECT_EVENT = 'Select Event';
+}
+
 class ModchartEditorState extends MusicBeatState
 {
 	var modManager:ModManager;
@@ -40,7 +55,8 @@ class ModchartEditorState extends MusicBeatState
 	var gridBg:ChartingGridSprite;
 	var nextGridBg:ChartingGridSprite;
 
-	var songPosSlider:PsychUIBar;
+	var songPosBar:PsychUIBar;
+	var infoText:FlxText;
 
 	var finishTimer:FlxTimer = null;
 	var noteKillOffset:Float = 350;
@@ -205,8 +221,6 @@ class ModchartEditorState extends MusicBeatState
 				for(i in 0...strums.length)
 					strums.members[i].x = gfStrums.members[i].x;
 		}
-
-		/***************/
 		
 		scoreTxt = new FlxText(10, FlxG.height - 50, FlxG.width - 20, "", 20);
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -257,6 +271,14 @@ class ModchartEditorState extends MusicBeatState
 		add(behindRenderedNotes);
 		add(curRenderedNotes);
 
+		selectionBox = new FlxSprite().makeGraphic(1, 1, FlxColor.CYAN);
+		selectionBox.alpha = 0.4;
+		selectionBox.blend = ADD;
+		selectionBox.scrollFactor.set();
+		selectionBox.cameras = [camUI];
+		selectionBox.visible = false;
+		add(selectionBox);
+
 		vortexIndicator = new FlxSprite(gridBg.x, FlxG.height/2).makeGraphic(ChartingState.GRID_SIZE, 2, FlxColor.RED);
 		vortexIndicator.scrollFactor.set();
 		vortexIndicator.cameras = [camUI];
@@ -269,24 +291,38 @@ class ModchartEditorState extends MusicBeatState
 		add(thatBG);
 
 		var songLen:Float = (inst != null ? inst.length : 0.0001);
-		songPosSlider = new PsychUIBar(0, thatBG.y, function(v:Float)
-		{
+		songPosBar = new PsychUIBar(0, thatBG.y, function(v:Float){
 			paused = true;
-			if(FlxG.sound.music != null)
-			{
+			if(FlxG.sound.music != null){
 				FlxG.sound.music.pause();
 				if(vocals != null) vocals.pause();
 				if(opponentVocals != null) opponentVocals.pause();
 				pendingSeekTime = v;
 			}
 		}, Conductor.songPosition, 0, songLen, FlxG.width, 0xFF4D4D4D, FlxColor.WHITE);
-		songPosSlider.y = thatBG.y;
-		songPosSlider.valueText.visible = false;
-		songPosSlider.minText.visible = false;
-		songPosSlider.maxText.visible = false;
-		songPosSlider.scrollFactor.set(0, 0);
-		songPosSlider.cameras = [camUI];
-		add(songPosSlider);
+		songPosBar.y = thatBG.y;
+		songPosBar.valueText.visible = false;
+		songPosBar.minText.visible = false;
+		songPosBar.maxText.visible = false;
+		songPosBar.scrollFactor.set(0, 0);
+		songPosBar.cameras = [camUI];
+		add(songPosBar);
+
+		infoText = new FlxText(25, songPosBar.y - 100, FlxG.width);
+		infoText.cameras = [camUI];
+		infoText.setFormat(null, 13, FlxColor.WHITE, LEFT);
+		infoText.borderColor = FlxColor.BLACK;
+		infoText.scrollFactor.set();
+		infoText.borderSize = 1;
+		infoText.active = false;
+		var curTime:String = FlxStringUtil.formatTime(Conductor.songPosition / 1000, true);
+		var songLength:String = (FlxG.sound.music != null) ? FlxStringUtil.formatTime(FlxG.sound.music.length / 1000, true) : '???';
+		infoText.text =  '$curTime / $songLength' +
+						  '\n\nSection: $curSec' +
+						  '\nBeat: $curBeat' +
+						  '\nStep: $curStep';
+		infoText.y += infoText.height;
+		add(infoText);
 
 		modchartBox = new PsychUIBox(0, 0, 300, 280, ['Modchart', 'Song']);
 		modchartBox.selectedName = 'Modchart';
@@ -305,7 +341,23 @@ class ModchartEditorState extends MusicBeatState
 		reloadNotes();
 	}
 
-	var selectedEvent:EventMetaNote;
+	var selectedNotes:Array<EventMetaNote> = [];
+	var selectedEvent(get, never):EventMetaNote;
+	inline function get_selectedEvent():EventMetaNote
+		return selectedNotes.length == 1 ? selectedNotes[0] : null;
+
+	var noteSelectionSine:Float = 0;
+	var ignoreClickForThisFrame:Bool = false;
+
+	var selectionBox:FlxSprite;
+	var selectionStart:FlxPoint = FlxPoint.get();
+
+	var isMovingNotes:Bool = false;
+	var movingNotesLastY:Float = 0;
+	var movingNotesOriginalTimes:Array<{event:EventMetaNote, from:Float}> = [];
+
+	var undoActions:Array<ModchartUndoStruct> = [];
+	var currentUndo:Int = 0;
 
 	var subdivisionsStepper:PsychUINumericStepper;
 	var modifierInput:PsychUIInputText;
@@ -582,7 +634,6 @@ class ModchartEditorState extends MusicBeatState
 		}
 		FlxG.sound.music.time = time;
 		Conductor.songPosition = time;
-		forceDataUpdate = true;
 		loadSection();
 	}
 
@@ -606,7 +657,6 @@ class ModchartEditorState extends MusicBeatState
 	var showPreviousSection:Bool = true;
 	var showNextSection:Bool = true;
 	var showNoteTypeLabels:Bool = true;
-	var forceDataUpdate:Bool = true;
 	var scrollY:Float = 0;
 	
 	var zoomList:Array<Float> = [
@@ -815,13 +865,6 @@ class ModchartEditorState extends MusicBeatState
 		note.chartY = noteY;
 	}
 
-	var curQuant(default, set):Int = 16;
-	function set_curQuant(v:Int)
-	{
-		curQuant = v;
-		return curQuant;
-	}
-
 	function goToPlayState()
 	{
 		StageData.loadDirectory(PlayState.SONG);
@@ -830,10 +873,8 @@ class ModchartEditorState extends MusicBeatState
 	}
 
 	private var wasInputting:Bool = false;
-	override function update(elapsed:Float)
-	{
-		if(pendingSeekTime != null)
-		{
+	override function update(elapsed:Float){
+		if(pendingSeekTime != null){
 			var oldTime:Float = Conductor.songPosition;
 			var newTime:Float = pendingSeekTime;
 			pendingSeekTime = null;
@@ -848,7 +889,7 @@ class ModchartEditorState extends MusicBeatState
 			if(newTime < oldTime) reloadManager();
 		}
 
-		if(FlxG.sound.music != null && FlxG.sound.music.playing) songPosSlider.value = Conductor.songPosition;
+		if(FlxG.sound.music != null && FlxG.sound.music.playing) songPosBar.value = Conductor.songPosition;
 
 		ClientPrefs.toggleVolumeKeys(PsychUIInputText.focusOn == null);
 		updateScrollY();
@@ -881,6 +922,9 @@ class ModchartEditorState extends MusicBeatState
 
 		if (FlxG.keys.justPressed.A && PsychUIInputText.focusOn == null)
 			seek(-Conductor.stepCrochet*4*4);
+
+		if (FlxG.keys.justReleased.W && PsychUIInputText.focusOn == null)
+			reloadManager();
 
 		if((controls.BACK || FlxG.keys.justPressed.ESCAPE) && PsychUIInputText.focusOn == null)
 		{
@@ -920,37 +964,122 @@ class ModchartEditorState extends MusicBeatState
 		}
 		notesFollow();
 
-		if(PsychUIInputText.focusOn == null && FlxG.keys.justPressed.Z != FlxG.keys.justPressed.X)
-		{
-			var zoomIndex:Int = zoomList.indexOf(curZoom);
-			if(zoomIndex < 0) zoomIndex = zoomList.indexOf(1);
+		var holdingAlt:Bool = FlxG.keys.pressed.ALT;
 
-			if(FlxG.keys.justPressed.Z)
-				curZoom = zoomList[Std.int(Math.max(zoomIndex - 1, 0))];
-			else
-				curZoom = zoomList[Std.int(Math.min(zoomIndex + 1, zoomList.length - 1))];
-
-			for (event in events)
-			{
-				var secNum:Int = 0;
-				for (time in cachedSectionTimes)
-				{
-					if(time > event.strumTime) break;
-					secNum++;
-				}
-				positionNoteYOnTime(event, secNum);
+		if(selectedNotes.length > 0){
+			noteSelectionSine += elapsed;
+			var sineValue:Float = 0.75 + Math.cos(Math.PI * noteSelectionSine * (isMovingNotes ? 8 : 2)) / 4;
+			for (note in selectedNotes){
+				if(note == null || !note.exists) continue;
+				note.colorTransform.redMultiplier = note.colorTransform.greenMultiplier = note.colorTransform.blueMultiplier = sineValue;
 			}
-			loadSection();
-			showOutput('Zoom: ${Math.round(curZoom * 100)}%');
-			updateScrollY();
+		} else noteSelectionSine = 0;
+
+		if(PsychUIInputText.focusOn == null){
+			var canContinue:Bool = true;
+
+			if(FlxG.keys.pressed.CONTROL && !isMovingNotes && (FlxG.keys.justPressed.Z || FlxG.keys.justPressed.Y)){
+				canContinue = false;
+				if(FlxG.keys.justPressed.Z)
+					undo();
+				else
+					redo();
+			}
+
+			if((FlxG.keys.justPressed.DELETE || FlxG.keys.justPressed.BACKSPACE) && selectedNotes.length > 0){
+				canContinue = false;
+				isMovingNotes = false;
+				var removedEvents:Array<EventMetaNote> = selectedNotes.copy();
+				selectedNotes = [];
+				actionRemoveEvents(removedEvents);
+				addUndoAction(DELETE_EVENT, {events: removedEvents});
+				FlxG.sound.play(Paths.sound('chartingSounds/noteErase'));
+				onSelectNote();
+			}
+
+			if(canContinue){
+				if(FlxG.keys.pressed.W != FlxG.keys.pressed.S){
+					var speedMult:Float = (FlxG.keys.pressed.SHIFT ? 4 : 1) / (holdingAlt ? 4 : 1);
+					var scrubDelta:Float = Conductor.crochet * speedMult * 1.5 * elapsed / curZoom;
+					if(FlxG.keys.pressed.W)
+						seek(-scrubDelta, false);
+					else if(!FlxG.keys.pressed.CONTROL)
+						seek(scrubDelta);
+				}
+
+				if(FlxG.keys.justPressed.Z != FlxG.keys.justPressed.X){
+					var zoomIndex:Int = zoomList.indexOf(curZoom);
+					if(zoomIndex < 0) zoomIndex = zoomList.indexOf(1);
+
+					if(FlxG.keys.justPressed.Z)
+						curZoom = zoomList[Std.int(Math.max(zoomIndex - 1, 0))];
+					else
+						curZoom = zoomList[Std.int(Math.min(zoomIndex + 1, zoomList.length - 1))];
+
+					for (event in events){
+						var secNum:Int = 0;
+						for (time in cachedSectionTimes){
+							if(time > event.strumTime) break;
+							secNum++;
+						}
+						positionNoteYOnTime(event, secNum);
+					}
+					loadSection();
+					showOutput('Zoom: ${Math.round(curZoom * 100)}%');
+					updateScrollY();
+				}
+			}
 		}
 
+		if(selectionBox.visible){
+			if(FlxG.mouse.releasedRight){
+				updateSelectionBox();
+				var sel = selectedNotes.copy();
+				if(!FlxG.keys.pressed.SHIFT && !holdingAlt)
+					resetSelectedNotes();
+
+				var selectionBounds = selectionBox.getScreenBounds(null, camUI);
+				for(note in curRenderedNotes){
+					if(note == null) continue;
+
+					var evNote:EventMetaNote = cast(note, EventMetaNote);
+					if(!selectedNotes.contains(evNote) || holdingAlt){
+						var noteBounds = note.getScreenBounds(null, camUI);
+
+						if(selectionBounds.overlaps(noteBounds)){
+							if(holdingAlt && selectedNotes.contains(evNote)){
+								selectedNotes.remove(evNote);
+								note.colorTransform.redMultiplier = note.colorTransform.greenMultiplier = note.colorTransform.blueMultiplier = 1;
+								if(note.animation.curAnim != null) note.animation.curAnim.curFrame = 0;
+							} else selectedNotes.push(evNote);
+						}
+					}
+				}
+				selectionBox.visible = false;
+				addUndoAction(SELECT_EVENT, {old: sel, current: selectedNotes.copy()});
+				onSelectNote();
+			} else if(FlxG.mouse.justMoved)
+				updateSelectionBox();
+		} else if(FlxG.mouse.pressedRight && (FlxG.mouse.deltaScreenX != 0 || FlxG.mouse.deltaScreenY != 0) && !isMovingNotes){
+			selectionBox.setPosition(FlxG.mouse.screenX, FlxG.mouse.screenY);
+			selectionStart.set(FlxG.mouse.screenX, FlxG.mouse.screenY);
+			selectionBox.visible = true;
+			updateSelectionBox();
+		}
+
+		var overlapsUI:Bool = modchartBox != null && FlxG.mouse.overlaps(modchartBox.bg, camUI);
+		if(FlxG.mouse.justPressed && overlapsUI)
+			ignoreClickForThisFrame = true;
+
+		if(isMovingNotes && (FlxG.mouse.justReleased || FlxG.mouse.justPressedRight))
+			stopMovingNotes();
+
 		var minX:Float = gridBg.x;
-		if(FlxG.mouse.x >= minX && FlxG.mouse.x < gridBg.x + gridBg.width){
+		if(FlxG.mouse.x >= minX && FlxG.mouse.x < gridBg.x + gridBg.width && !overlapsUI){
 			var diffX:Float = FlxG.mouse.x - gridBg.x;
 			var diffY:Float = (FlxG.mouse.y+camUI.scroll.y) - gridBg.y;
 			if(!FlxG.keys.pressed.SHIFT)
-				diffY -= diffY % (ChartingState.GRID_SIZE / (curQuant/16));
+				diffY -= diffY % ChartingState.GRID_SIZE;
 
 			if(nextGridBg.visible) diffY = Math.min(diffY, gridBg.height + nextGridBg.height);
 			else diffY = Math.min(diffY, gridBg.height);
@@ -960,29 +1089,49 @@ class ModchartEditorState extends MusicBeatState
 
 			var noteData:Int = Math.floor(diffX / ChartingState.GRID_SIZE);
 			dummyArrow.x = gridBg.x + noteData * ChartingState.GRID_SIZE;
-			dummyArrow.visible = true;
+			dummyArrow.visible = !selectionBox.visible;
 			noteData--;
 
 			if(FlxG.keys.pressed.SHIFT || (FlxG.mouse.y+camUI.scroll.y) >= gridBg.y || !prevGridBg.visible)
 				dummyArrow.y = gridBg.y + diffY;
-			else
-			{
-				var t:Float = (diffY - (ChartingState.GRID_SIZE / (curQuant/16)));
+			else {
+				var t:Float = (diffY - ChartingState.GRID_SIZE);
 				if((FlxG.mouse.y+camUI.scroll.y) >= gridBg.y) t *= curZoom;
 				dummyArrow.y = gridBg.y + t;
 			}
-			if(FlxG.mouse.justPressed)
-			{
-				if(FlxG.mouse.x >= gridBg.x && FlxG.mouse.x < gridBg.x + gridBg.width)
-				{
-					var closeNotes:Array<MetaNote> = curRenderedNotes.members.filter(function(note:MetaNote)
-					{
+
+			if(isMovingNotes){
+				if(dummyArrow.y != movingNotesLastY){
+					FlxG.sound.play(Paths.sound("chartingSounds/stretchSNAP_UI"));
+					var diff:Float = dummyArrow.y - movingNotesLastY;
+					for (note in selectedNotes){
+						if(note == null) continue;
+
+						note.chartY += diff;
+						var row:Float = (note.chartY / ChartingState.GRID_SIZE) / curZoom;
+						var noteSecRow:Int = 0;
+						while(noteSecRow + 1 < cachedSectionRow.length && cachedSectionRow[noteSecRow + 1] <= row)
+							noteSecRow++;
+
+						note.setStrumTime(Math.max(-5000, note.strumTime + (diff * cachedSectionCrochets[noteSecRow] / 4) / ChartingState.GRID_SIZE / curZoom));
+						positionNoteYOnTime(note, noteSecRow);
+						note.updateEventText();
+					}
+					movingNotesLastY = dummyArrow.y;
+				}
+			} else if(FlxG.mouse.justPressed && !ignoreClickForThisFrame){
+				if(FlxG.keys.pressed.CONTROL){
+					if(selectedNotes.length > 0)
+						moveSelectedNotes(dummyArrow.y);
+					else
+						showOutput('You must select events to move them!', true);
+				} else if(FlxG.mouse.x >= gridBg.x && FlxG.mouse.x < gridBg.x + gridBg.width){
+					var closeNotes:Array<MetaNote> = curRenderedNotes.members.filter(function(note:MetaNote){
 						var chartY:Float = (FlxG.mouse.y+camUI.scroll.y) - note.chartY;
 						return (note.isEvent && noteData < 0) && chartY >= 0 && chartY < ChartingState.GRID_SIZE;
 					});
 
-					closeNotes.sort(function(a:MetaNote, b:MetaNote)
-					{
+					closeNotes.sort(function(a:MetaNote, b:MetaNote){
 						var mouseY:Float = FlxG.mouse.y + camUI.scroll.y;
 						var distA:Float = Math.abs(a.chartY - mouseY);
 						var distB:Float = Math.abs(b.chartY - mouseY);
@@ -990,32 +1139,28 @@ class ModchartEditorState extends MusicBeatState
 					});
 
 					var closest = closeNotes[0];
-					if(closest != null)
-					{
-						if(!FlxG.keys.pressed.CONTROL)
-						{
-							for (i in 0...PlayState.SONG.events.length)
-							{
-								if (PlayState.SONG.events[i][0] == closest.strumTime)
-								{
-									PlayState.SONG.events.splice(i, 1);
-									break;
-								}
+					if(closest != null){
+						var evNote:EventMetaNote = cast(closest, EventMetaNote);
+						if(FlxG.keys.pressed.SHIFT || holdingAlt){ // Select Event
+							var sel = selectedNotes.copy();
+							if(!selectedNotes.contains(evNote)){
+								selectedNotes.push(evNote);
+								addUndoAction(SELECT_EVENT, {old: sel, current: selectedNotes.copy()});
+							} else if(!holdingAlt){
+								resetSelectedNotes();
+								selectedNotes.remove(evNote);
+								addUndoAction(SELECT_EVENT, {old: sel, current: selectedNotes.copy()});
 							}
-
-							var evNote:EventMetaNote = cast(closest, EventMetaNote);
-							events.remove(evNote);
-							if(selectedEvent == evNote) selectedEvent = null;
-							curRenderedNotes.remove(closest, true);
-							closest.destroy();
+							onSelectNote();
+						} else if(!FlxG.keys.pressed.CONTROL){ // Delete
+							selectedNotes.remove(evNote);
+							actionRemoveEvents([evNote]);
+							addUndoAction(DELETE_EVENT, {events: [evNote]});
 
 							FlxG.sound.play(Paths.sound('chartingSounds/noteErase'));
-							reloadManager();
-						} else {
-							selectedEvent = cast (closest, EventMetaNote);
-							reloadEventText();
+							onSelectNote();
 						}
-					} else if((FlxG.mouse.y+camUI.scroll.y) >= gridBg.y && (FlxG.mouse.y+camUI.scroll.y) < gridBg.y + gridBg.height){ // Add note
+					} else if(!holdingAlt && (FlxG.mouse.y+camUI.scroll.y) >= gridBg.y && (FlxG.mouse.y+camUI.scroll.y) < gridBg.y + gridBg.height){ // Add event
 						var strumTime:Float = (diffY / ChartingState.GRID_SIZE * Conductor.stepCrochet / curZoom) + cachedSectionTimes[curSec];
 
 						var didAdd:Bool = false;
@@ -1036,10 +1181,7 @@ class ModchartEditorState extends MusicBeatState
 							var event = events[num];       
 							if(event.strumTime >= strumTime){
 								events.insert(num, eventAdded);
-								selectedEvent = eventAdded;
-								reloadEventText();
 								PlayState.SONG.events.insert(num, evData);
-								reloadManager();
 								didAdd = true;
 								break;
 							}
@@ -1047,15 +1189,27 @@ class ModchartEditorState extends MusicBeatState
 						if(!didAdd){
 							events.push(eventAdded);
 							PlayState.SONG.events.push(evData);
-							reloadManager();
-							selectedEvent = eventAdded;
-							reloadEventText();
 						}
+						reloadManager();
+
+						if(!holdingAlt)
+							resetSelectedNotes();
+						selectedNotes.push(eventAdded);
+						addUndoAction(ADD_EVENT, {events: [eventAdded]});
+						onSelectNote();
 						softReloadNotes();
 					}
-				} else selectedEvent = null;
+				}
 			}
-		} else dummyArrow.visible = false;
+		} else {
+			if(!ignoreClickForThisFrame){
+				if(FlxG.mouse.justPressed)
+					resetSelectedNotes();
+
+				dummyArrow.visible = false;
+			}
+		}
+		ignoreClickForThisFrame = false;
 
 		if(modManager != null){
 			for(field in PlayField.fields){
@@ -1072,9 +1226,224 @@ class ModchartEditorState extends MusicBeatState
 		strumLineNotes.sort(PlayState.sortByOrderStrumNote);
 		
 		super.update(elapsed);
+
+		var curTime:String = FlxStringUtil.formatTime(Conductor.songPosition / 1000, true);
+		var songLength:String = (FlxG.sound.music != null) ? FlxStringUtil.formatTime(FlxG.sound.music.length / 1000, true) : '???';
+		var str:String =  '$curTime / $songLength' +
+						  '\n\nSection: $curSec' +
+						  '\nBeat: $curBeat' +
+						  '\nStep: $curStep';
+
+		if(str != infoText.text){
+			infoText.text = str;
+			if(infoText.autoSize) infoText.autoSize = false;
+		}
+	}
+
+	function onSelectNote()
+		reloadEventText();
+
+	function resetSelectedNotes(){
+		for (note in selectedNotes){
+			if(note == null || !note.exists) continue;
+
+			note.colorTransform.redMultiplier = note.colorTransform.greenMultiplier = note.colorTransform.blueMultiplier = 1;
+			if(note.animation.curAnim != null) note.animation.curAnim.curFrame = 0;
+		}
+		selectedNotes = [];
+		onSelectNote();
+	}
+
+	function updateSelectionBox(){
+		var diffX:Float = FlxG.mouse.screenX - selectionStart.x;
+		var diffY:Float = FlxG.mouse.screenY - selectionStart.y;
+		selectionBox.setPosition(selectionStart.x, selectionStart.y);
+
+		if(diffX < 0){
+			diffX = Math.abs(diffX);
+			selectionBox.x -= diffX;
+		}
+		if(diffY < 0){
+			diffY = Math.abs(diffY);
+			selectionBox.y -= diffY;
+		}
+		selectionBox.scale.set(diffX, diffY);
+		selectionBox.updateHitbox();
+	}
+
+	function moveSelectedNotes(lastY:Float){
+		isMovingNotes = true;
+		movingNotesLastY = lastY;
+		movingNotesOriginalTimes = [for (note in selectedNotes) {event: note, from: note.strumTime}];
+		selectedNotes.sort(CoolUtil.sortByTime);
+	}
+
+	function stopMovingNotes(){
+		isMovingNotes = false;
+		events.sort(CoolUtil.sortByTime);
+		if(PlayState.SONG.events != null) PlayState.SONG.events.sort(CoolUtil.sortByTime);
+		reloadManager();
+		softReloadNotes();
+
+		if(movingNotesOriginalTimes.length > 0){
+			var moves = [for (m in movingNotesOriginalTimes) {event: m.event, from: m.from, to: m.event.strumTime}];
+			moves = moves.filter(function(m) return m.from != m.to);
+			if(moves.length > 0)
+				addUndoAction(MOVE_EVENT, {moves: moves});
+		}
+		movingNotesOriginalTimes = [];
+	}
+
+	function applyEventTime(event:EventMetaNote, time:Float){
+		var secNum:Int = 0;
+		for (t in cachedSectionTimes){
+			if(t > time) break;
+			secNum++;
+		}
+		event.setStrumTime(time);
+		positionNoteYOnTime(event, secNum);
+		event.updateEventText();
+	}
+
+	function addUndoAction(action:ModchartUndoAction, data:Dynamic){
+		function destroyFromArr(arr:Array<EventMetaNote>){
+			if(arr == null || arr.length < 1) return;
+			for (note in arr)
+				if(note != null) note.destroy();
+		}
+
+		if(currentUndo > 0) undoActions = undoActions.slice(currentUndo);
+		currentUndo = 0;
+		undoActions.insert(0, {action: action, data: data});
+		while(undoActions.length > 15){
+			var lastAction:ModchartUndoStruct = undoActions.pop();
+			if(lastAction != null){
+				switch(lastAction.action){
+					case DELETE_EVENT:
+						destroyFromArr(lastAction.data.events);
+					default:
+				}
+			}
+		}
+	}
+
+	function undo(){
+		if(isMovingNotes || currentUndo >= undoActions.length){
+			FlxG.sound.play(Paths.sound('cancelMenu'), 0.4);
+			return;
+		}
+
+		var action:ModchartUndoStruct = undoActions[currentUndo];
+		switch(action.action){
+			case ADD_EVENT:
+				actionRemoveEvents(action.data.events);
+
+			case DELETE_EVENT:
+				actionPushEvents(action.data.events);
+
+			case MOVE_EVENT:
+				for (m in (action.data.moves:Array<{event:EventMetaNote, from:Float, to:Float}>))
+					applyEventTime(m.event, m.from);
+				events.sort(CoolUtil.sortByTime);
+				if(PlayState.SONG.events != null) PlayState.SONG.events.sort(CoolUtil.sortByTime);
+				reloadManager();
+				softReloadNotes();
+
+			case SELECT_EVENT:
+				resetSelectedNotes();
+				selectedNotes = action.data.old;
+				onSelectNote();
+		}
+		showOutput('Undo #${currentUndo+1}: ${action.action}');
+		FlxG.sound.play(Paths.sound('chartingSounds/undo'));
+		currentUndo++;
+	}
+
+	function redo(){
+		if(isMovingNotes || currentUndo < 1){
+			FlxG.sound.play(Paths.sound('cancelMenu'), 0.4);
+			return;
+		}
+
+		currentUndo--;
+		var action:ModchartUndoStruct = undoActions[currentUndo];
+		switch(action.action){
+			case ADD_EVENT:
+				actionPushEvents(action.data.events);
+
+			case DELETE_EVENT:
+				actionRemoveEvents(action.data.events);
+
+			case MOVE_EVENT:
+				for (m in (action.data.moves:Array<{event:EventMetaNote, from:Float, to:Float}>))
+					applyEventTime(m.event, m.to);
+				events.sort(CoolUtil.sortByTime);
+				if(PlayState.SONG.events != null) PlayState.SONG.events.sort(CoolUtil.sortByTime);
+				reloadManager();
+				softReloadNotes();
+
+			case SELECT_EVENT:
+				resetSelectedNotes();
+				selectedNotes = action.data.current;
+				onSelectNote();
+		}
+		showOutput('Redo #${currentUndo+1}: ${action.action}');
+		FlxG.sound.play(Paths.sound('chartingSounds/metronome2'), 0.4);
+	}
+
+	function actionPushEvents(dataEvents:Array<EventMetaNote>){
+		resetSelectedNotes();
+		if(dataEvents != null && dataEvents.length > 0){
+			for (event in dataEvents){
+				if(event == null) continue;
+
+				events.push(event);
+				selectedNotes.push(event);
+				event.songData[0] = event.strumTime;
+
+				if(PlayState.SONG.events != null && !PlayState.SONG.events.contains(event.songData))
+					PlayState.SONG.events.push(event.songData);
+			}
+			events.sort(CoolUtil.sortByTime);
+			if(PlayState.SONG.events != null) PlayState.SONG.events.sort(CoolUtil.sortByTime);
+		}
+		reloadManager();
+		softReloadNotes();
+		onSelectNote();
+	}
+
+	function actionRemoveEvents(dataEvents:Array<EventMetaNote>){
+		if(dataEvents != null && dataEvents.length > 0){
+			for (event in dataEvents){
+				if(event == null) continue;
+
+				var evIdx:Int = events.indexOf(event);
+				if(evIdx >= 0) events.splice(evIdx, 1);
+
+				selectedNotes.remove(event);
+
+				if(PlayState.SONG.events != null) PlayState.SONG.events.remove(event.songData);
+
+				if(event.exists){
+					event.colorTransform.redMultiplier = event.colorTransform.greenMultiplier = event.colorTransform.blueMultiplier = 1;
+					if(event.animation.curAnim != null) event.animation.curAnim.curFrame = 0;
+				}
+			}
+		}
+		reloadManager();
+		softReloadNotes();
 	}
 
 	function reloadEventText(){
+		if(selectedNotes.length > 1){
+			if (actionsDropdown != null) actionsDropdown.selectedIndex = 0;
+			if (modifierInput != null) modifierInput.text = "";
+			if (timeStepper != null) timeStepper.value = 0;
+			if (valueStepper != null) valueStepper.value = 0;
+			if (easeInput != null) easeInput.text = "";
+			if (playerStepper != null) playerStepper.value = -1;
+			return;
+		}
 		if(selectedEvent != null){
 			var myEvent:Array<String> = selectedEvent.events[0];
 			if(myEvent != null){
@@ -1219,7 +1588,6 @@ class ModchartEditorState extends MusicBeatState
 	override function beatHit()
 	{
 		if(lastBeatHit >= curBeat) {
-			//trace('BEAT HIT: ' + curBeat + ', LAST HIT: ' + lastBeatHit);
 			return;
 		}
 		notes.sort(FlxSort.byY, ClientPrefs.data.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
@@ -1675,7 +2043,7 @@ class ModchartEditorState extends MusicBeatState
 		unspawnNotes.sort(CoolUtil.sortByTime);
 	}
 
-	function seek(delta:Float){
+	function seek(delta:Float, ?doReloadManager:Bool = true){
 		var newTime = Math.max(0, FlxG.sound.music.time + delta);
 
 		FlxG.sound.music.time = newTime;
@@ -1686,7 +2054,7 @@ class ModchartEditorState extends MusicBeatState
 		applyNoteStates(newTime);
 
 		if(delta > 0) return;
-		reloadManager();
+		if(doReloadManager) reloadManager();
 	}
 
 	function reloadManager(){
