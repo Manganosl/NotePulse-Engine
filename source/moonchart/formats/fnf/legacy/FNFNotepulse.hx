@@ -10,17 +10,19 @@ typedef NotepulseJsonFormat = PsychJsonFormat &
 {
 	?format:String,
 	?mania:Int,
-	?lanes:Int
+	?lanes:Int,
+
+	?extraPlayers:Array<String>,
+
+	?laneKeyCounts:Array<Int>
 }
 
 private final KEYS_PER_PLAYER:Int = 4;
 
 @:private
 @:noCompletion
-class FNFNotepulseBasic<T:NotepulseJsonFormat> extends FNFPsychBasic<T>
-{
-	public static function __getFormat():FormatData
-	{
+class FNFNotepulseBasic<T:NotepulseJsonFormat> extends FNFPsychBasic<T> {
+	public static function __getFormat():FormatData {
 		return {
 			ID: FNF_LEGACY_NOTEPULSE,
 			name: "FNF (Notepulse)",
@@ -35,43 +37,65 @@ class FNFNotepulseBasic<T:NotepulseJsonFormat> extends FNFPsychBasic<T>
 	}
 
 	public function new(?data:T)
-	{
 		super(data);
-	}
 
-	override function resolvePsychEvent(event:BasicEvent):PsychEvent
-	{
+	override function resolvePsychEvent(event:BasicEvent):PsychEvent {
 		var values:Array<Dynamic> = Util.resolveEventValues(event);
 
 		var value1:String = Std.string(values[0] ?? "");
 
 		var extra:Array<String> = [];
 		for (i in 1...values.length)
-		{
 			extra.push(Std.string(values[i] ?? ""));
-		}
 		var value2:String = extra.join(",");
 
 		return [event.time, [[event.name, value1, value2]]];
 	}
 
-	override function fromBasicFormat(chart:BasicChart, ?diff:FormatDifficulty):FNFNotepulseBasic<T>
-	{
+	override function fromBasicFormat(chart:BasicChart, ?diff:FormatDifficulty):FNFNotepulseBasic<T> {
 		offsetMustHits = false;
 		chart.meta.extraData.set(LANES_LENGTH, 4);
+
+		var sourceKeyCounts:Array<Int> = chart.meta.extraData.get(LANE_KEY_COUNTS) ?? ([] : Array<Int>);
+		var usesSourceKeyCounts:Bool = sourceKeyCounts.length > 0;
+
+		var offsets:Array<Int> = [];
+		if(usesSourceKeyCounts){
+			var acc:Int = 0;
+			for (keyCount in sourceKeyCounts){
+				offsets.push(acc);
+				acc += keyCount;
+			}
+		}
 
 		var maxLane:Int = -1;
 		var playerQueue:Map<String, Array<Int>> = [];
 
-		for (notes in chart.data.diffs)
-		{
-			for (note in notes)
-			{
-				if (note.lane > maxLane)
+		for (notes in chart.data.diffs){
+			for (note in notes){
+				if(note.lane > maxLane)
 					maxLane = note.lane;
 
-				var player:Int = Std.int(note.lane / KEYS_PER_PLAYER);
-				var localLane:Int = note.lane % KEYS_PER_PLAYER;
+				var player:Int;
+				var localLane:Int;
+
+				if(usesSourceKeyCounts){
+					player = 0;
+					localLane = note.lane;
+
+					for (i in 0...offsets.length){
+						var start:Int = offsets[i];
+						var end:Int = start + sourceKeyCounts[i];
+						if(note.lane >= start && note.lane < end){
+							player = i;
+							localLane = note.lane - start;
+							break;
+						}
+					}
+				} else {
+					player = Std.int(note.lane / KEYS_PER_PLAYER);
+					localLane = note.lane % KEYS_PER_PLAYER;
+				}
 
 				var key:String = Std.string(note.time);
 				if (!playerQueue.exists(key))
@@ -82,11 +106,19 @@ class FNFNotepulseBasic<T:NotepulseJsonFormat> extends FNFPsychBasic<T>
 			}
 		}
 
+		var laneKeyCounts:Array<Int> = usesSourceKeyCounts ? sourceKeyCounts : [KEYS_PER_PLAYER];
+		var highestKeyCount:Int = KEYS_PER_PLAYER;
+		for (keyCount in laneKeyCounts){
+			if(keyCount > highestKeyCount)
+				highestKeyCount = keyCount;
+		}
+
 		var totalLanes:Int = maxLane + 1;
-		if (totalLanes <= 0)
+		if(totalLanes <= 0)
 			totalLanes = KEYS_PER_PLAYER;
-		var lanes:Int = Std.int(Math.max(1, Math.ceil(totalLanes / KEYS_PER_PLAYER)));
-		var mania:Int = KEYS_PER_PLAYER - 1;
+
+		var lanes:Int = usesSourceKeyCounts ? laneKeyCounts.length : Std.int(Math.max(1, Math.ceil(totalLanes / KEYS_PER_PLAYER)));
+		var mania:Int = highestKeyCount - 1;
 
 		var basic = super.fromBasicFormat(chart, diff);
 		var song = basic.data.song;
@@ -94,16 +126,16 @@ class FNFNotepulseBasic<T:NotepulseJsonFormat> extends FNFPsychBasic<T>
 		song.format = "notepulse";
 		song.mania = mania;
 		song.lanes = lanes;
+		song.extraPlayers = chart.meta.extraData.get(EXTRA_PLAYERS) ?? ([] : Array<String>);
+		song.laneKeyCounts = laneKeyCounts;
 
 		var offset:Float = chart.meta.offset;
 
-		for (section in song.notes)
-		{
+		for (section in song.notes){
 			var sectionNotes:Array<FNFLegacyNote> = section.sectionNotes;
 
-			for (note in sectionNotes)
-			{
-				if (note == null || note.lane <= -1)
+			for (note in sectionNotes){
+				if(note == null || note.lane <= -1)
 					continue;
 
 				var originalTime:Float = note.time + (bakedOffset ? offset : 0);
@@ -119,11 +151,12 @@ class FNFNotepulseBasic<T:NotepulseJsonFormat> extends FNFPsychBasic<T>
 		return cast basic;
 	}
 
-	override function getChartMeta():BasicMetaData
-	{
+	override function getChartMeta():BasicMetaData {
 		var meta = super.getChartMeta();
 		meta.extraData.set("mania", data.song.mania ?? (KEYS_PER_PLAYER - 1));
 		meta.extraData.set("lanes", data.song.lanes ?? 1);
+		meta.extraData.set(EXTRA_PLAYERS, data.song.extraPlayers ?? []);
+		meta.extraData.set(LANE_KEY_COUNTS, data.song.laneKeyCounts ?? []);
 		return meta;
 	}
 }

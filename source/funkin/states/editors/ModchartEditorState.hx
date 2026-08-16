@@ -193,7 +193,6 @@ class ModchartEditorState extends MusicBeatState
 		camHUD.y -= 125;
 		camHUD.zoom = 0.4;
 		
-		/**** NOTES ****/
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		strumLineNotes.cameras = [camHUD];
 		add(strumLineNotes);
@@ -308,7 +307,7 @@ class ModchartEditorState extends MusicBeatState
 		songPosBar.cameras = [camUI];
 		add(songPosBar);
 
-		infoText = new FlxText(25, songPosBar.y - 100, FlxG.width);
+		infoText = new FlxText(25, songPosBar.y - 65, FlxG.width);
 		infoText.cameras = [camUI];
 		infoText.setFormat(null, 13, FlxColor.WHITE, LEFT);
 		infoText.borderColor = FlxColor.BLACK;
