@@ -183,7 +183,7 @@ override function update(elapsed:Float)
         }
         else
         {
-            var offsetX:Float = (20 + (Math.abs(Math.cos((targetPosY + (135 / 2) - (FlxG.camera.scroll.y + (FlxG.height / 2))) / (FlxG.height * 1.25) * Math.PI)) * 150));
+            var offsetX:Float = (20 + (Math.abs(Math.cos((targetPosY + (135 / 2) - ((FlxG.camera.scroll.y * scrollFactor.y) + (FlxG.height / 2))) / (FlxG.height * 1.25) * Math.PI)) * 150));
             x = FlxMath.lerp(offsetX, x, lerpVal);
         }
     }
@@ -203,7 +203,7 @@ public function snapToPosition()
         }
         else
         {
-            x = (20 + (Math.abs(Math.cos((y + (135 / 2) - (FlxG.camera.scroll.y + (FlxG.height / 2))) / (FlxG.height * 1.25) * Math.PI)) * 150));
+            x = (20 + (Math.abs(Math.cos((y + (135 / 2) - ((FlxG.camera.scroll.y * scrollFactor.y) + (FlxG.height / 2))) / (FlxG.height * 1.25) * Math.PI)) * 150));
         }
     }
 }

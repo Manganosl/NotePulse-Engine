@@ -142,3 +142,69 @@ class Option
 		return type;
 	}
 }
+
+class ModOption extends Option {
+    public function new(name:String, description:String = '', variable:String, type:String = 'bool', ?options:Array<String> = null){
+        super(name, description, variable, type, options);
+
+        if(Mods.save != null && Mods.save.data != null){
+            if(!Reflect.hasField(Mods.save.data, variable)){
+                Reflect.setField(Mods.save.data, variable, defaultValue);
+                Mods.save.flush();
+            }
+        }
+
+        if(type == 'string' && options != null && options.length > 0){
+            var val:Dynamic = getValue();
+            var num:Int = options.indexOf(val);
+            if(num > -1){
+                curOption = num;
+            } else {
+                curOption = 0;
+                setValue(options[0]);
+            }
+        }
+    }
+
+    override public function getValue():Dynamic {
+        if(Mods.save == null || Mods.save.data == null)
+            return defaultValue;
+
+        if(!Reflect.hasField(Mods.save.data, variable)){
+            Reflect.setField(Mods.save.data, variable, defaultValue);
+            return defaultValue;
+        }
+
+        var value:Dynamic = Reflect.field(Mods.save.data, variable);
+
+        if(type == 'keybind'){
+            if(value == null) return 'NONE';
+            return !Controls.instance.controllerMode ? value.keyboard : value.gamepad;
+        }
+
+        return value;
+    }
+
+    override public function setValue(value:Dynamic){
+        if (Mods.save == null || Mods.save.data == null)
+            return value;
+
+        if (type == 'keybind'){
+            var keys:Keybind = Reflect.field(Mods.save.data, variable);
+            if (keys == null)
+                keys = {keyboard: 'NONE', gamepad: 'NONE'};
+
+            if (!Controls.instance.controllerMode)
+                keys.keyboard = value;
+            else
+                keys.gamepad = value;
+
+            Reflect.setField(Mods.save.data, variable, keys);
+        } else {
+            Reflect.setField(Mods.save.data, variable, value);
+        }
+
+        Mods.save.flush();
+        return value;
+    }
+}

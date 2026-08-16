@@ -76,7 +76,7 @@ class Init extends FlxState {
 	    } else {
 			FlxTransitionableState.skipNextTransOut = true;
 			if(Mods.currentLoadedMod != "" && Mods.modPack != null){
-				if(Mods.modPack.hasGlobalScript == true) GlobalHandler.loadGlobalHX();
+				GlobalHandler.loadGlobalHX();
 	    		if(Mods.modPack.forceStates && Mods.modPack.titleState != null && Mods.modPack.titleState != "") {
 					FlxG.switchState(new ScriptedState(Mods.modPack.titleState));
 				} else {

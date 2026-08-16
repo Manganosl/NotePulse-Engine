@@ -136,13 +136,6 @@ class VisualsUISubState extends BaseOptionsMenu
 		addOption(option);
 		option.onChange = onChangePauseMusic;
 
-		var option:Option = new Option('Main Menu Song:',
-			"What song do you prefer while in the Main Menu?",
-			'menuMusic',
-			'string',
-			['Vanilla', 'JS']);
-		addOption(option);
-
 		var option:Option = new Option('Combo Stacking',
 			"If unchecked, Ratings and Combo won't stack, saving on System Memory and making them easier to read",
 			'comboStacking',

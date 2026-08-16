@@ -134,7 +134,7 @@ class ModSelectorState extends MusicBeatState {
 				Mods.currentModDirectory = null;
 				Mods.currentLoadedMod = null;
 				Mods.modPack = null;
-				funkin.scripting.GlobalHandler.stopGlobalHX();
+				GlobalHandler.stopGlobalHX();
 				FlxG.sound.music.stop();
 				FlxTween.cancelTweensOf(Main.fpsVar);
 				Main.fpsVar.y = 10;
@@ -142,7 +142,7 @@ class ModSelectorState extends MusicBeatState {
 				return;
 			}
 			setMod(modArray[curSelected - 1], true);
-			if (Mods.modPack?.hasGlobalScript == true) GlobalHandler.loadGlobalHX();
+			GlobalHandler.loadGlobalHX();
 			FlxG.sound.music.stop();
 			FlxTween.cancelTweensOf(Main.fpsVar);
 			Main.fpsVar.y = 10;
@@ -503,24 +503,20 @@ class ModSelectorState extends MusicBeatState {
 			label(sx, sy+sp*8, "Default Transition:"); var transInput     = input(sx, sy+sp*8, cfg.defaultTransition);
 
 			var checkY = transInput.y + 35;
-			var globalCheck = new PsychUICheckBox(sx, checkY, "Has Global Script?", 100);
-			var globallyCheck = new PsychUICheckBox(sx + 180, checkY, "Runs Globally?", 100);
-			var forceCheck = new PsychUICheckBox(sx + 180 * 2, checkY, "Forces its states?", 100);
-			globalCheck.checked = cfg.hasGlobalScript;
+			var globallyCheck = new PsychUICheckBox(sx, checkY, "Runs Globally?", 100);
+			var forceCheck = new PsychUICheckBox(sx + 180, checkY, "Forces its states?", 100);
 			globallyCheck.checked = cfg.runsGlobally;
 			forceCheck.checked = cfg.forceStates;
-			state.add(globalCheck);
 			state.add(globallyCheck);
 			state.add(forceCheck);
 
-			var saveBtn = new PsychUIButton(sx, globalCheck.y + 45, "Save", function() {
+			var saveBtn = new PsychUIButton(sx, globallyCheck.y + 45, "Save", function() {
 				var newData = {
 					name: nameInput.text, description: descInput.text,
 					titleState: titleInput.text, mainMenuState: mainMenuInput.text,
 					storyMenuState: storyMenuInput.text, freeplayState: freeplayInput.text,
 					pauseSubState: pauseInput.text, discordRPC: discordInput.text,
 					defaultTransition: transInput.text,
-					hasGlobalScript: globalCheck.checked,
 					runsGlobally: globallyCheck.checked,
 					forceStates: forceCheck.checked
 				};
@@ -541,7 +537,7 @@ class ModSelectorState extends MusicBeatState {
 	function readModPackConfig() {
 		var d = { name:"", description:"", titleState:"", mainMenuState:"", storyMenuState:"",
 			freeplayState:"", pauseSubState:"", discordRPC:"", defaultTransition:"",
-			runsGlobally:false, hasGlobalScript:false, forceStates:false };
+			runsGlobally:false, forceStates:false };
 		if (Mods.modPack == null) return d;
 		try {
 			if (Mods.modPack.name            != null) d.name            = Mods.modPack.name;
@@ -554,7 +550,6 @@ class ModSelectorState extends MusicBeatState {
 			if (Mods.modPack.discordRPC      != null) d.discordRPC      = Mods.modPack.discordRPC;
 			if (Mods.modPack.defaultTransition != null) d.defaultTransition = Mods.modPack.defaultTransition;
 			if (Mods.modPack.runsGlobally    != null) d.runsGlobally    = Mods.modPack.runsGlobally;
-			if (Mods.modPack.hasGlobalScript != null) d.hasGlobalScript = Mods.modPack.hasGlobalScript;
 			if (Mods.modPack.forceStates     != null) d.forceStates     = Mods.modPack.forceStates;
 		} catch(_) {}
 		return d;

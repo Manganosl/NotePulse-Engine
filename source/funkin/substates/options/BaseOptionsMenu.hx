@@ -42,6 +42,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		bg.screenCenter();
 		bg.alpha = 0;
 		bg.antialiasing = ClientPrefs.data.antialiasing;
+		bg.scrollFactor.set();
 		add(bg);
 
 		// avoids lagspikes while scrolling through menus!
@@ -58,6 +59,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		topOverlay.antialiasing = ClientPrefs.data.antialiasing;
 		topOverlay.alpha = 0.5;
 		topOverlay.y = -210;
+		topOverlay.scrollFactor.set();
 		add(topOverlay);
 
 		var titleText:FlxText = new FlxText(0, 10, 1145, "Options > " + title, 32); //Alphabet(75, 45, title, true);
@@ -78,12 +80,14 @@ class BaseOptionsMenu extends MusicBeatSubstate
 			/*optionText.forceX = 300;
 			optionText.yMult = 90;*/
 			optionText.targetY = i;
+			optionText.scrollFactor.set();
 			grpOptions.add(optionText);
 
 			if(optionsArray[i].type == 'bool')
 			{
 				var checkbox:CheckboxThingie = new CheckboxThingie(optionText.x - 105, optionText.y, Std.string(optionsArray[i].getValue()) == 'true');
 				checkbox.sprTracker = optionText;
+				checkbox.scrollFactor.set();
 				checkbox.ID = i;
 				checkboxGroup.add(checkbox);
 			}
@@ -96,6 +100,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				valueText.sprTracker = optionText;
 				valueText.copyAlpha = true;
 				valueText.ID = i;
+				valueText.scrollFactor.set();
 				grpTexts.add(valueText);
 				optionsArray[i].child = valueText;
 			}

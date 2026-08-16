@@ -2,6 +2,7 @@ package funkin.states.options;
 
 import funkin.states.MainMenuState;
 import funkin.data.StageData;
+import tjson.TJSON as Json;
 
 class OptionsState extends MusicBeatState
 {
@@ -33,6 +34,10 @@ class OptionsState extends MusicBeatState
 
 	private var doControls:Bool = true;
 
+	private var modConfigName:String = "Mod Options";
+	private var modConfigDesc:String = "";
+	private var modParsedJson:Dynamic;
+
 	function openSelectedSubstate(label:String)
 	{
 		switch(label)
@@ -51,6 +56,8 @@ class OptionsState extends MusicBeatState
 				MusicBeatState.switchState(new funkin.states.options.NoteOffsetState());
 			case 'Misc':
 				openSubState(new funkin.substates.options.MiscSettingsSubState());
+			case modConfigName:
+				openSubState(new funkin.substates.options.ModOptionsSubState(modParsedJson));
 		}
 	}
 
@@ -72,6 +79,8 @@ class OptionsState extends MusicBeatState
 				descText.text = "Other miscellaneous settings.";
 			case 'Adjust Delay and Combo':
 				descText.text = "Calibrate note timing and combo offset.";
+			case modConfigName:
+				descText.text = modConfigDesc;
 		}
 	}
 
@@ -86,37 +95,27 @@ class OptionsState extends MusicBeatState
 		bg.color = 0xFFea71fd;
 		bg.updateHitbox();
 		bg.screenCenter();
+		bg.scrollFactor.set();
 		add(bg);
 
 		topOverlay = new FlxSprite().makeGraphic(FlxG.width, 300, 0xFF000000);
 		topOverlay.antialiasing = ClientPrefs.data.antialiasing;
 		topOverlay.alpha = 0.5;
+		topOverlay.scrollFactor.set();
 		topOverlay.y = -210;
 
 		titleText = new FlxText(0, 10, FlxG.width, "Options >", 32);
-		titleText.setFormat(
-			Paths.font("vcr.ttf"),
-			32,
-			FlxColor.WHITE,
-			LEFT,
-			FlxTextBorderStyle.OUTLINE,
-			FlxColor.BLACK
-		);
+		titleText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		titleText.scrollFactor.set();
 
 		descText = new FlxText(0, 50, FlxG.width, "", 15);
-		descText.setFormat(
-			Paths.font("vcr.ttf"),
-			15,
-			FlxColor.WHITE,
-			LEFT,
-			FlxTextBorderStyle.OUTLINE,
-			FlxColor.BLACK
-		);
+		descText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		descText.scrollFactor.set();
 
 		selectorLeft = new Alphabet(0, 0, '>', true);
+		selectorLeft.scrollFactor.set(0, 0.25);
 		selectorRight = new Alphabet(0, 0, '<', true);
+		selectorRight.scrollFactor.set(0, 0.25);
 
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
@@ -126,11 +125,39 @@ class OptionsState extends MusicBeatState
 		add(titleText);
 		add(descText);
 
+		if(Mods.currentLoadedMod != null && Mods.currentLoadedMod != ""){
+            var configPath:String = Paths.modsJson("config");
+            if(Paths.exists(configPath)){
+                try {
+                    #if sys
+                    var rawJson:String = File.getContent(configPath);
+                    #else
+                    var rawJson:String = openfl.utils.Assets.getText(configPath);
+                    #end
+
+                    modParsedJson = Json.parse(rawJson);
+                    if(modParsedJson != null) {
+						if(modParsedJson.options == null || modParsedJson.options.length < 1) return;
+                        if(modParsedJson.configName != null && modParsedJson.configName != "")
+                            modConfigName = modParsedJson.configName;
+
+                        if(modParsedJson.configDesc != null && modParsedJson.configDesc != "")
+                            modConfigDesc = modParsedJson.configDesc;
+                        else
+                            modConfigDesc = 'Options for ${Mods.modPack.name != null ? Mods.modPack.name : Mods.currentLoadedMod}';
+
+                        options.push(modConfigName);
+                    }
+                } catch(e:Dynamic) {}
+            }
+        }
+
 		for (num => option in options)
 		{
 			var optionText:Alphabet = new Alphabet(0, 0, option, true);
 			optionText.screenCenter();
 			optionText.y += (100 * (num - (options.length / 2))) + 50;
+			optionText.scrollFactor.set(0, 0.25);
 			grpOptions.add(optionText);
 		}
 
@@ -145,6 +172,7 @@ class OptionsState extends MusicBeatState
 		FlxTween.tween(Main.fpsVar, {y: 105}, 1, {ease: FlxEase.circOut});
 
 		ClientPrefs.saveSettings();
+
 		super.create();
 	}
 
@@ -171,6 +199,11 @@ class OptionsState extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+		if(doControls)
+			FlxG.camera.scroll.y = CoolUtil.fpsLerp(FlxG.camera.scroll.y, grpOptions.members[curSelected].y - 300, 0.25);
+		else
+			FlxG.camera.scroll.y = 0;
 
 		selectorLeft.x = CoolUtil.fpsLerp(selectorLeft.x, intendedSelLeftX, 0.25);
 		selectorRight.x = CoolUtil.fpsLerp(selectorRight.x, intendedSelRightX, 0.25);

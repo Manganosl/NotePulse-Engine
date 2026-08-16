@@ -21,7 +21,7 @@ class GlobalHandler {
 			initGlobalHX();
 			return;
 		} else {
-			Log.warn("Global.hx not found in mod directory!");
+			Log.warn("Mod does not have a global script");
 			globalHX = null;
 			globalHXActive = false;
 			return;
