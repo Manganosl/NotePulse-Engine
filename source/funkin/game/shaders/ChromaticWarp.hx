@@ -1,7 +1,5 @@
 package funkin.game.shaders;
 
-import flixel.system.FlxAssets.FlxShader;
-
 class ChromaticWarp {
     public var shader(default, null):ChromaWarpShader = new ChromaWarpShader();
     public var distortion(default, set):Float;
