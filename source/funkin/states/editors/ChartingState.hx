@@ -516,6 +516,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		PlayState.SONG.song + " - " + Difficulty.getString();
 
 		super.create();
+
+		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.tween(Main.fpsVar, {alpha: 0.5}, 1, {ease: FlxEase.circOut});
 	}
 
 	var littleBF:OurLittleFriend;
@@ -5658,8 +5661,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		updateAudioVolume();
 	}
 
-	override function destroy()
-	{
+	override function destroy(){
+		FlxTween.cancelTweensOf(Main.fpsVar, ["alpha"]);
+		FlxTween.tween(Main.fpsVar, {alpha: 1}, 1, {ease: FlxEase.circOut});
+
 		WindowUtil.preventClose = false;
 		WindowUtil.onEditorClosing = null;
 		Note.globalRgbShaders = [];

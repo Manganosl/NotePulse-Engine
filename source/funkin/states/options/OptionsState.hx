@@ -230,6 +230,8 @@ class OptionsState extends MusicBeatState
 			if (onPlayState)
 			{
 				StageData.loadDirectory(PlayState.SONG);
+				FlxTween.cancelTweensOf(Main.fpsVar);
+				FlxTween.tween(Main.fpsVar, {y: 10}, 1, {ease: FlxEase.circOut});
 				LoadingState.loadAndSwitchState(new PlayState());
 				FlxG.sound.music.volume = 0;
 			}

@@ -73,23 +73,27 @@ class NotesSubState extends MusicBeatSubstate
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.color = 0xFFEA71FD;
 		bg.screenCenter();
+		bg.scrollFactor.set();
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
 
 		var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
 		grid.velocity.set(40, 40);
 		grid.alpha = 0;
+		grid.scrollFactor.set();
 		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
 		add(grid);
 
 		modeBG = new FlxSprite(215, 85).makeGraphic(315, 115, FlxColor.BLACK);
 		modeBG.visible = false;
+		modeBG.scrollFactor.set();
 		modeBG.alpha = 0.4;
 		add(modeBG);
 
 		notesBG = new FlxSprite(140, 190).makeGraphic(480, 125, FlxColor.BLACK);
 		notesBG.visible = false;
 		notesBG.alpha = 0.4;
+		notesBG.scrollFactor.set();
 		add(notesBG);
 
 		modeNotes = new FlxTypedGroup<FlxSprite>();
@@ -100,46 +104,56 @@ class NotesSubState extends MusicBeatSubstate
 
 		var bg:FlxSprite = new FlxSprite(720).makeGraphic(FlxG.width - 720, FlxG.height, FlxColor.BLACK);
 		bg.alpha = 0.25;
+		bg.scrollFactor.set();
 		add(bg);
 		var bg:FlxSprite = new FlxSprite(750, 160).makeGraphic(FlxG.width - 780, 540, FlxColor.BLACK);
 		bg.alpha = 0.25;
+		bg.scrollFactor.set();
 		add(bg);
 		
 		var text:Alphabet = new Alphabet(50, 86, 'CTRL', false);
 		text.alignment = CENTERED;
 		text.setScale(0.4);
+		text.scrollFactor.set();
 		add(text);
 
 		copyButton = new FlxSprite(760, 50).loadGraphic(Paths.image('noteColorMenu/copy'));
 		copyButton.alpha = 0.6;
+		copyButton.scrollFactor.set();
 		add(copyButton);
 
 		pasteButton = new FlxSprite(1180, 50).loadGraphic(Paths.image('noteColorMenu/paste'));
 		pasteButton.alpha = 0.6;
+		pasteButton.scrollFactor.set();
 		add(pasteButton);
 
 		colorGradient = FlxGradient.createGradientFlxSprite(60, 360, [FlxColor.WHITE, FlxColor.BLACK]);
 		colorGradient.setPosition(780, 200);
+		colorGradient.scrollFactor.set();
 		add(colorGradient);
 
 		colorGradientSelector = new FlxSprite(770, 200).makeGraphic(80, 10, FlxColor.WHITE);
 		colorGradientSelector.offset.y = 5;
+		colorGradientSelector.scrollFactor.set();
 		add(colorGradientSelector);
 
 		colorPalette = new FlxSprite(820, 580).loadGraphic(Paths.image('noteColorMenu/palette', false));
 		colorPalette.scale.set(20, 20);
 		colorPalette.updateHitbox();
 		colorPalette.antialiasing = false;
+		colorPalette.scrollFactor.set();
 		add(colorPalette);
 		
 		colorWheel = new FlxSprite(860, 200).loadGraphic(Paths.image('noteColorMenu/colorWheel'));
 		colorWheel.setGraphicSize(360, 360);
 		colorWheel.updateHitbox();
+		colorWheel.scrollFactor.set();
 		add(colorWheel);
 
 		colorWheelSelector = new FlxShapeCircle(0, 0, 8, {thickness: 0}, FlxColor.WHITE);
 		colorWheelSelector.offset.set(8, 8);
 		colorWheelSelector.alpha = 0.6;
+		colorWheelSelector.scrollFactor.set();
 		add(colorWheelSelector);
 
 		var txtX = 980;
@@ -154,6 +168,7 @@ class NotesSubState extends MusicBeatSubstate
 		add(alphabetHex);
 		hexTypeLine = new FlxSprite(0, 20).makeGraphic(5, 62, FlxColor.WHITE);
 		hexTypeLine.visible = false;
+		hexTypeLine.scrollFactor.set();
 		add(hexTypeLine);
 
 		spawnNotes();
@@ -165,11 +180,13 @@ class NotesSubState extends MusicBeatSubstate
 		var tip:FlxText = new FlxText(tipX, tipY, 0, "Press RELOAD to Reset the selected Note Part.", 16);
 		tip.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		tip.borderSize = 2;
+		tip.scrollFactor.set();
 		add(tip);
 
 		tipTxt = new FlxText(tipX, tipY + 24, 0, '', 16);
 		tipTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		tipTxt.borderSize = 2;
+		tipTxt.scrollFactor.set();
 		add(tipTxt);
 		updateTip();
 
@@ -177,6 +194,7 @@ class NotesSubState extends MusicBeatSubstate
 		controllerPointer.offset.set(20, 20);
 		controllerPointer.screenCenter();
 		controllerPointer.alpha = 0.6;
+		controllerPointer.scrollFactor.set();
 		add(controllerPointer);
 		
 		FlxG.mouse.visible = !controls.controllerMode;
@@ -593,6 +611,7 @@ class NotesSubState extends MusicBeatSubstate
 	function makeColorAlphabet(x:Float = 0, y:Float = 0):Alphabet
 	{
 		var text:Alphabet = new Alphabet(x, y, '', true);
+		text.scrollFactor.set();
 		text.alignment = CENTERED;
 		text.setScale(0.6);
 		add(text);
@@ -641,6 +660,7 @@ class NotesSubState extends MusicBeatSubstate
 		skinNote.animation.add('anim', [0], 24, true);
 		skinNote.animation.play('anim', true);
 		if(!onPixel) skinNote.antialiasing = false;
+		skinNote.scrollFactor.set();
 		add(skinNote);
 
 		var res:Int = !onPixel ? 160 : 17;
@@ -650,6 +670,7 @@ class NotesSubState extends MusicBeatSubstate
 			newNote.antialiasing = ClientPrefs.data.antialiasing;
 			newNote.setGraphicSize(85);
 			newNote.updateHitbox();
+			newNote.scrollFactor.set();
 			newNote.animation.add('anim', [i], 24, true);
 			newNote.animation.play('anim', true);
 			newNote.ID = i;
@@ -666,6 +687,7 @@ class NotesSubState extends MusicBeatSubstate
 			newNote.modPos.y = 200;
 			newNote.useRGBShader = true;
 			newNote.setGraphicSize(102);
+			newNote.scrollFactor.set();
 			newNote.updateHitbox();
 			newNote.ID = i;
 			myNotes.add(newNote);
@@ -675,6 +697,7 @@ class NotesSubState extends MusicBeatSubstate
 		bigNote.setPosition(250, 325);
 		bigNote.setGraphicSize(250);
 		bigNote.updateHitbox();
+		bigNote.scrollFactor.set();
 		bigNote.rgbShader.parent = Note.globalRgbShaders[curSelectedNote];
 		bigNote.shader = Note.globalRgbShaders[curSelectedNote].shader;
 		for (i in 0...PlayState.SONG.mania+1)

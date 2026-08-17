@@ -51,11 +51,13 @@ class ControlsSubState extends MusicBeatSubstate {
 		bg.color = keyboardColor;
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.screenCenter();
+		bg.scrollFactor.set();
 		add(bg);
 
 		var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
 		grid.velocity.set(40, 40);
 		grid.alpha = 0;
+		grid.scrollFactor.set();
 		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
 		add(grid);
 
@@ -69,6 +71,7 @@ class ControlsSubState extends MusicBeatSubstate {
 		selectSpr.makeGraphic(250, 78, FlxColor.WHITE);
 		selectSpr.copyAlpha = false;
 		selectSpr.alpha = 0.75;
+		selectSpr.scrollFactor.set();
 		add(selectSpr);
 		grpBinds = new FlxTypedGroup<ControlsAlph>();
 		add(grpBinds);
@@ -77,16 +80,19 @@ class ControlsSubState extends MusicBeatSubstate {
 		controllerSpr.antialiasing = ClientPrefs.data.antialiasing;
 		controllerSpr.animation.add('keyboard', [0], 1, false);
 		controllerSpr.animation.add('gamepad', [1], 1, false);
+		controllerSpr.scrollFactor.set();
 		add(controllerSpr);
 
 		var text:ControlsAlph = new ControlsAlph(60, 90, 'CTRL', false);
 		text.alignment = CENTERED;
+		text.scrollFactor.set();
 		text.setScale(0.4);
 		add(text);
 
 		var topBar:FlxSprite = new FlxSprite().makeGraphic(5000, 300, 0xff000000);
 		topBar.antialiasing = ClientPrefs.data.antialiasing;
 		topBar.screenCenter();
+		topBar.scrollFactor.set();
 		topBar.alpha = 0.5;
 		topBar.y = -210;
 		add(topBar);
@@ -187,6 +193,7 @@ class ControlsSubState extends MusicBeatSubstate {
 					var isDisplayKey:Bool = (isCentered && !isDefaultKey);
 
 					var text:ControlsAlph = new ControlsAlph(200, 300, option[1], !isDisplayKey);
+					text.scrollFactor.set();
 					text.isMenuItem = true;
 					text.changeX = false;
 					text.distancePerItem.y = 60;
@@ -242,6 +249,7 @@ class ControlsSubState extends MusicBeatSubstate {
 			}
 
 			var attach:ControlsAlph = new ControlsAlph(textX + 210, 248, key, false);
+			attach.scrollFactor.set();
 			attach.isMenuItem = true;
 			attach.changeX = false;
 			attach.distancePerItem.y = 60;
@@ -261,6 +269,7 @@ class ControlsSubState extends MusicBeatSubstate {
 			black.alphaMult = 0.4;
 			black.sprTracker = text;
 			black.yAdd = -6;
+			black.scrollFactor.set();
 			black.xAdd = textX;
 			grpBlacks.add(black);
 		}
@@ -292,6 +301,7 @@ class ControlsSubState extends MusicBeatSubstate {
 		var bind:ControlsAlph = grpBinds.members[num];
 		var attach:ControlsAlph = new ControlsAlph(350 + (num % 2) * 300, 248, text, false);
 		attach.isMenuItem = true;
+		attach.scrollFactor.set();
 		attach.changeX = false;
 		attach.distancePerItem.y = 60;
 		attach.targetY = bind.targetY;

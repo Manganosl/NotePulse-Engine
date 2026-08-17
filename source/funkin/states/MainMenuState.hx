@@ -145,7 +145,7 @@ class MainMenuState extends MusicBeatState
 
 		super.create();
 
-		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.cancelTweensOf(Main.fpsVar, ["y"]);
 		FlxTween.tween(Main.fpsVar, {y: 125}, 1, {ease: FlxEase.circOut});
 
 		FlxG.camera.follow(camFollow, null, 0.15);
