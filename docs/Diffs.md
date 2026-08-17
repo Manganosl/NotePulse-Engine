@@ -45,7 +45,7 @@
 - Compatible with Psych 1.0 charts
 - Fifth rating
 - Play as opponent
-- Support for more PlayFields
+- PlayField system
 - CustomShader utility
 - NDLL support.
 - Camera movement on note hit.
@@ -53,5 +53,17 @@
 - Sustain splashes.
 - Psych 1.0 Stage editor.
 - Psych 1.0 Charting Editor
+  - Multiple players
+  - Character per lane
+  - Fixed bugs from Psych 1.0
+  - Modchart Events
+  - Import charts from:  (Moonchart)
+    - V-Slice
+    - Codename Engine
+    - Osu mania
+    - Clone Hero
+    - StepMania
+    - Quaver
+- Modchart Editor
 
 ###### Probably more things but I forgot

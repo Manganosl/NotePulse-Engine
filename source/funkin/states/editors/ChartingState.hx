@@ -725,6 +725,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			charBox.y = topY;
 		for(icon in icons)
 			icon.y = topY + 5;
+		lanesBox.y = topY;
 		eventIcon.y = topY + 50;
 		mustHitIndicator.y = topY + 30;
 
