@@ -17,7 +17,7 @@ class ConfusionModifier extends NoteModifier {
 
     override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int) {
         if(note.isSustainNote) {
-            note.angle = note.mAngle;
+            note.angle = note.mAngle + note.offsetAngle;
             return;
         }
         var data:Int = note.noteData;
@@ -41,7 +41,7 @@ class ConfusionModifier extends NoteModifier {
             note.rgbShader.angleY = angleY * (Math.PI / 180);
         }
         
-        note.angle = angleZ;
+        note.angle = angleZ + note.offsetAngle;
     }
 
     override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int) {
