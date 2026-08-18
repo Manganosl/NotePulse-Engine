@@ -1058,38 +1058,38 @@ class PlayState extends MusicBeatState
 						notes.sort(sortByOrderNote);
 						notes.forEachAlive(function(daNote:Note)
 						{
-							noteFollowStrum(daNote);
+							if(daNote.strum != null){
+								noteFollowStrum(daNote);
 
-							if(!daNote.strum.cpuControlled)
-							{
-								if(daNote.strum.noteHitCallback != null && cpuControlled && !daNote.blockHit && daNote.strum.inControl && daNote.canBeHit && (daNote.isSustainNote || daNote.strumTime <= Conductor.songPosition)){
+								if(!daNote.strum.cpuControlled){
+									if(daNote.strum.noteHitCallback != null && cpuControlled && !daNote.blockHit && daNote.strum.inControl && daNote.canBeHit && (daNote.isSustainNote || daNote.strumTime <= Conductor.songPosition)){
+										daNote.strum.noteHitCallback(daNote);
+										notesLength = notes.length;
+										unspawnNotesLength = unspawnNotes.length;
+									}
+								} else if (daNote.strum.noteHitCallback != null && daNote.wasGoodHit && !daNote.hitByOpponent && daNote.strum.inControl && !daNote.ignoreNote){
 									daNote.strum.noteHitCallback(daNote);
 									notesLength = notes.length;
 									unspawnNotesLength = unspawnNotes.length;
 								}
-							}
-							else if (daNote.strum.noteHitCallback != null && daNote.wasGoodHit && !daNote.hitByOpponent && daNote.strum.inControl && !daNote.ignoreNote){
-								daNote.strum.noteHitCallback(daNote);
-								notesLength = notes.length;
-								unspawnNotesLength = unspawnNotes.length;
-							}
 
-							if (daNote.isSustainNote && daNote.wasGoodHit && !daNote.strum.sustainSplash.updatedThisFrame) {
-								if (daNote.isSustainEnd) {
-									if(!cpuControlled && !daNote.strum.cpuControlled) daNote.strum.sustainSplash.hide(false);
-								} else {
-									daNote.strum.sustainSplash.show(daNote);
+								if (daNote.isSustainNote && daNote.wasGoodHit && !daNote.strum.sustainSplash.updatedThisFrame) {
+									if (daNote.isSustainEnd) {
+										if(!cpuControlled && !daNote.strum.cpuControlled) daNote.strum.sustainSplash.hide(false);
+									} else {
+										daNote.strum.sustainSplash.show(daNote);
+									}
 								}
-							}
 
-							// Kill extremely late notes and cause misses
-							if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
-							{
-								if (daNote.strum.noteMissCallback != null && !daNote.strum.cpuControlled && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
-									daNote.strum.noteMissCallback(daNote);
+								// Kill extremely late notes and cause misses
+								if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
+								{
+									if (daNote.strum.noteMissCallback != null && !daNote.strum.cpuControlled && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
+										daNote.strum.noteMissCallback(daNote);
 
-								daNote.active = daNote.visible = false;
-								invalidateNote(daNote);
+									daNote.active = daNote.visible = false;
+									invalidateNote(daNote);
+								}
 							}
 						});
 					}
@@ -3723,8 +3723,8 @@ class PlayState extends MusicBeatState
 						isHolding = controls.pressed(bindName);
 					}
 
-					var canHit:Bool = (n != null && n.strum.inControl && n.canBeHit
-						&& !n.strum.cpuControlled && !n.tooLate && !n.wasGoodHit && !n.blockHit);
+					var canHit:Bool = (n != null && n.strum != null && n.strum.inControl && !n.strum.cpuControlled 
+						&& n.canBeHit && !n.tooLate && !n.wasGoodHit && !n.blockHit);
 
 					if (guitarHeroSustains)
 						canHit = canHit && n.parent != null && n.parent.wasGoodHit;

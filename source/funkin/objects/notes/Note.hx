@@ -102,7 +102,7 @@ class Note extends FlxSkewedSprite {
 	public var characters:Array<Character> = [];
 
 	public var strumTime:Float = 0;
-	public var noteData:Int = 0;
+	public var noteData(default, set):Int = 0;
 
 	public var mustPress:Bool = false;
 	public var canBeHit:Bool = false;
@@ -317,6 +317,14 @@ class Note extends FlxSkewedSprite {
 		}
 	}
 
+	private function set_noteData(value:Int):Int {
+		if(this.noteData == value) return value;
+		this.noteData = value;
+		defaultRGB();
+		reloadNote(texture);
+		return value;
+	}
+
 	private function set_noteType(value:String):String {
 		if(noteData > -1 && noteType != value) {
 			noteSplashData.texture = PlayState.SONG != null ? PlayState.SONG.splashSkin : 'noteSplashes/noteSplashes';
@@ -387,7 +395,7 @@ class Note extends FlxSkewedSprite {
 		this.strumTime = strumTime;
 		if(!inEditor) this.strumTime += ClientPrefs.data.noteOffset;
 
-		this.noteData = noteData;
+		@:bypassAccessor this.noteData = noteData;
 
 		if(noteData > -1) {
 			texture = '';

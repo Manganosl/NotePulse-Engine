@@ -32,7 +32,6 @@ class TransformModifier extends NoteModifier { // this'll be transformX in ModMa
 	{
 		var subMods:Array<String> = ["transformY", "transformZ", "transformX-a", "transformY-a", "transformZ-a", "transformNoteX", "transformNoteY", "transformNoteZ"];
 		
-		var receptors = modMgr.receptors[0];
 		for (i in 0...PlayState.SONG.mania+1)
 		{
 			subMods.push('transform${i}X');

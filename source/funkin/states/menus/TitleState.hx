@@ -512,33 +512,22 @@ class TitleState extends MusicBeatState
 				gfDance.animation.play('danceLeft');
 		}
 
-		if(!closedState) {
+		if(!closedState){
 			sickBeats++;
-			switch (sickBeats)
-			{
+			switch (sickBeats){
 				case 1:
-					//FlxG.sound.music.stop();
 					FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
 				case 2:
-					#if PSYCH_WATERMARKS
-					createCoolText(['Psych Engine by'], 40);
-					#else
 					createCoolText(['ninjamuffin99', 'phantomArcade', 'kawaisprite', 'evilsk8er']);
-					#end
 				case 4:
-					#if PSYCH_WATERMARKS
-					addMoreText('Shadow Mario', 40);
-					addMoreText('Riveren', 40);
-					#else
 					addMoreText('present');
-					#end
 				case 5:
 					deleteCoolText();
 				case 6:
-					createCoolText(['NotePulse', 'by'], -40);
+					createCoolText(['In association', 'with'], -40);
 				case 8:
-					addMoreText('Manganos', -40);
+					addMoreText('newgrounds', -40);
 					ngSpr.visible = true;
 				case 9:
 					deleteCoolText();
@@ -554,8 +543,7 @@ class TitleState extends MusicBeatState
 				case 15:
 					addMoreText('Night');
 				case 16:
-					addMoreText('Funkin'); // credTextShit.text += '\nFunkin';
-
+					addMoreText('Funkin');
 				case 17:
 					skipIntro();
 			}
@@ -564,19 +552,15 @@ class TitleState extends MusicBeatState
 
 	var skippedIntro:Bool = false;
 	var increaseVolume:Bool = false;
-	function skipIntro():Void
-	{
-		if (!skippedIntro)
-		{
-			if (playJingle) //Ignore deez
-			{
+	function skipIntro():Void {
+		if(!skippedIntro){
+			if(playJingle){
 				var easteregg:String = FlxG.save.data.psychDevsEasterEgg;
 				if (easteregg == null) easteregg = '';
 				easteregg = easteregg.toUpperCase();
 
 				var sound:FlxSound = null;
-				switch(easteregg)
-				{
+				switch (easteregg){
 					case 'RIVER':
 						sound = FlxG.sound.play(Paths.sound('JingleRiver'));
 					case 'SHADOW':
