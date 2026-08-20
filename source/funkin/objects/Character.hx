@@ -685,6 +685,81 @@ class Character extends FlxAnimate
 		}
 	}
 
+	public function limitSize(maxWidth:Float, maxHeight:Float):Void {
+		if (maxWidth <= 0 || maxHeight <= 0)
+			return;
+
+		var maxFrameWidth:Float = 0;
+		var maxFrameHeight:Float = 0;
+
+		var prevAnimName:String = (animation.curAnim != null) ? animation.curAnim.name : null;
+		var prevFrame:Int = (animation.curAnim != null) ? animation.curAnim.curFrame : 0;
+
+		if (spriteType == TEXTURE_ATLAS)
+		{
+			var baseScaleX:Float = scale.x;
+			var baseScaleY:Float = scale.y;
+
+			for (animName in animOffsets.keys())
+			{
+				var anim = animation.getByName(animName);
+				if (anim == null) continue;
+
+				var totalFrames:Int = anim.numFrames;
+				if (totalFrames <= 0) continue;
+
+				for (frameIndex in 0...totalFrames)
+				{
+					playAnim(animName, true, false, frameIndex);
+
+					var rawW:Float = width / baseScaleX;
+					var rawH:Float = height / baseScaleY;
+
+					if (rawW > maxFrameWidth) maxFrameWidth = rawW;
+					if (rawH > maxFrameHeight) maxFrameHeight = rawH;
+				}
+			}
+		}
+		else
+		{
+			for (animName in animOffsets.keys())
+			{
+				var anim = animation.getByName(animName);
+				if (anim == null || anim.frames == null) continue;
+
+				for (frameIndex in anim.frames)
+				{
+					var frame = frames.frames[frameIndex];
+					if (frame == null) continue;
+
+					if (frame.frame.width > maxFrameWidth) maxFrameWidth = frame.frame.width;
+					if (frame.frame.height > maxFrameHeight) maxFrameHeight = frame.frame.height;
+				}
+			}
+		}
+
+		if (prevAnimName != null)
+			playAnim(prevAnimName, true, false, prevFrame);
+
+		if (maxFrameWidth <= 0 || maxFrameHeight <= 0)
+		{
+			if (width <= 0 || height <= 0 || scale.x <= 0 || scale.y <= 0)
+				return;
+			maxFrameWidth = width / scale.x;
+			maxFrameHeight = height / scale.y;
+		}
+
+		var maxScaledWidth:Float = maxFrameWidth * scale.x;
+		var maxScaledHeight:Float = maxFrameHeight * scale.y;
+
+		var shrink:Float = Math.min(maxWidth / maxScaledWidth, maxHeight / maxScaledHeight);
+		if (shrink < 1)
+		{
+			scale.set(scale.x * shrink, scale.y * shrink);
+			updateHitbox();
+		}
+	}
+
 	public override function destroy()
 	{
 		if(ghostTweenGrp != null){

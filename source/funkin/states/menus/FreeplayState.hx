@@ -205,8 +205,8 @@ class FreeplayState extends MusicBeatState
 		playerText.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		playerText.font = scoreText.font;
 		playerText.y -= playerText.height/2;
-		playerText.text = "[TAB] " + (PlayState.isPlayerOpponent ? "Opponent" : "Player");
 		add(playerText);
+		updatePlayerText();
 
 		add(scoreText);
 
@@ -263,11 +263,25 @@ class FreeplayState extends MusicBeatState
 		songs.push(new SongMetadata(songName, weekNum, songCharacter, color));
 	}
 
+	function updatePlayerText():Void {
+		var leWeek:WeekData = WeekData.weeksLoaded.get(WeekData.weeksList[songs[curSelected].week]);
+		canPlayAsOpponent = leWeek.allowPlayAsOpponent == true;
+
+		if(!canPlayAsOpponent) {
+			PlayState.isPlayerOpponent = false;
+			playerText.visible = false;
+		} else {
+			playerText.visible = true;
+		}
+		playerText.text = "[TAB] " + (PlayState.isPlayerOpponent ? "Opponent" : "Player");
+	}
+
 	function weekIsLocked(name:String):Bool {
 		var leWeek:WeekData = WeekData.weeksLoaded.get(name);
 		return (!leWeek.startUnlocked && leWeek.weekBefore.length > 0 && (!StoryMenuState.weekCompleted.exists(leWeek.weekBefore) || !StoryMenuState.weekCompleted.get(leWeek.weekBefore)));
 	}
 
+	var canPlayAsOpponent:Bool = true;
 	var instPlaying:Int = -1;
 	public static var vocals:FlxSound = null;
 	var holdTime:Float = 0;
@@ -385,7 +399,7 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
-		if(FlxG.keys.justPressed.TAB){
+		if(FlxG.keys.justPressed.TAB && canPlayAsOpponent){
 			PlayState.isPlayerOpponent = !PlayState.isPlayerOpponent;
 			playerText.text = "[TAB] " + (PlayState.isPlayerOpponent ? "Opponent" : "Player");
 		}
@@ -632,6 +646,7 @@ class FreeplayState extends MusicBeatState
 
 		changeDiff();
 		_updateSongLastDifficulty();
+		updatePlayerText();
 	}
 
 	private function getRank(song:String, diff:Int, rating:Float):String {

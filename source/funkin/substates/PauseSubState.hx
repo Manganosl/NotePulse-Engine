@@ -66,6 +66,8 @@ class PauseSubState extends MusicBeatSubstate
 	override function create()
 	{
 		if(Difficulty.list.length < 2) menuItemsOG.remove('Change Difficulty'); //No need to change difficulty if there is only one!
+		var curWeek:WeekData = WeekData.getCurrentWeek();
+		if(curWeek != null && curWeek.allowPlayAsOpponent == false) menuItemsOG.remove('Change Player');
 
 		if(PlayState.chartingMode)
 		{
