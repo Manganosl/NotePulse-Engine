@@ -358,7 +358,6 @@ class ModchartEditorState extends MusicBeatState
 	var undoActions:Array<ModchartUndoStruct> = [];
 	var currentUndo:Int = 0;
 
-	var subdivisionsStepper:PsychUINumericStepper;
 	var modifierInput:PsychUIInputText;
 	var actionsDropdown:PsychUIDropDownMenu;
 	var timeStepper:PsychUINumericStepper;
@@ -398,13 +397,6 @@ class ModchartEditorState extends MusicBeatState
 		var tabGroupModchart = modchartBox.getTab('Modchart').menu;
 		var posX = 10;
 		var posY = 25;
-
-		subdivisionsStepper = new PsychUINumericStepper(posX, posY-7.5, 1, 0, 1, 16, 1);
-		subdivisionsStepper.value = PlayState.SONG.holdSubdivisions;	
-		subdivisionsStepper.onValueChange = () -> {
-			PlayState.SONG.holdSubdivisions = Std.int(subdivisionsStepper.value);
-			regenerateNotes();
-		};
 
 		posY += 40;
 
@@ -450,10 +442,7 @@ class ModchartEditorState extends MusicBeatState
 		var valueLabelText = new FlxText(valueStepper.x, valueStepper.y - 15, 80, 'Value:');
 		var easeLabelText = new FlxText(easeInput.x, easeInput.y - 15, 80, 'Ease (if ease):');
 		var playerLabelText = new FlxText(playerStepper.x, playerStepper.y - 15, 80, 'Player:');
-		var subdivisionsLabelText = new FlxText(subdivisionsStepper.x, subdivisionsStepper.y - 15, 80, 'Subdivisions:');
 
-		tabGroupModchart.add(subdivisionsStepper);
-		tabGroupModchart.add(subdivisionsLabelText);
 		tabGroupModchart.add(modifierInput);
 		tabGroupModchart.add(modifierLabelText);
 		tabGroupModchart.add(actionsLabelText);
@@ -1511,11 +1500,11 @@ class ModchartEditorState extends MusicBeatState
 
 	public function noteFollowStrum(daNote:Note){
 		if(modManager == null) return;
-		var pN:Int = daNote.playField.player;
-		var pos = modManager.getPos(daNote.strumTime, modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed),
-			daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
 
-    	daNote.distance = modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed);
+		daNote.distance = modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed);
+		var pN:Int = daNote.playField.player;
+		var pos = modManager.getPos(daNote.strumTime, daNote.distance, daNote.strumTime - Conductor.songPosition, 
+			curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
 
 		modManager.updateObject(curDecBeat, daNote, pos, pN);
 
@@ -1527,7 +1516,7 @@ class ModchartEditorState extends MusicBeatState
 		daNote.y = pos.y;
 		daNote.z = pos.z;
 		if (daNote.isSustainNote){
-			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / PlayState.SONG.holdSubdivisions, 10);
+			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4), 10);
 			var futureSongPos = Conductor.songPosition + holdCrochet;
 			var diff = daNote.strumTime - futureSongPos;
 			var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
@@ -1729,7 +1718,7 @@ class ModchartEditorState extends MusicBeatState
 		var noteData:Array<SwagSection> = songData.notes;
 
 		initialCrochet = Conductor.crochet;
-		var holdCrochet:Float = Math.max(Conductor.stepCrochet / PlayState.SONG.holdSubdivisions, 10);
+		var holdCrochet:Float = Math.max(Conductor.stepCrochet, 10);
 
 		for (section in noteData)
 		{

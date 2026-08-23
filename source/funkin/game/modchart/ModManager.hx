@@ -18,6 +18,8 @@ class ModManager {
 	public var doTraces:Bool = true;
 	public var swapPlayers:Bool = false;
 
+	public var curveSegments:Int = 4;
+
 	static inline function normalizeModName(modName:String):String
 		return modName == null ? modName : modName.toLowerCase();
 
@@ -435,6 +437,9 @@ class ModManager {
 		pos.x = PlayField.fields[player].members[data].x;
 		pos.y = PlayField.fields[player].members[data].y + diff;
 		pos.z = 0;
+
+		pos.alpha = 1;
+		pos.glow = 0;
 
 		if (activeMods[player] != null){
 			flushActiveMods(player);

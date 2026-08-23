@@ -15,6 +15,11 @@ import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.PlayField;
 
 import funkin.game.modchart.math.Vector3;
+import funkin.game.modchart.math.MathUtil;
+
+import flixel.FlxCamera;
+import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
+import openfl.geom.ColorTransform;
 
 using StringTools;
 
@@ -43,6 +48,7 @@ class Note extends FlxSkewedSprite {
 
 	override function destroy() {
 		defScale.put();
+		_curvePoint.put();
 		super.destroy();
 	}	
 	public var zIndex:Float = 0;
@@ -55,6 +61,18 @@ class Note extends FlxSkewedSprite {
 	public var mAngle:Float = 0;
 	public var bAngle:Float = 0;
 	public var visualLength:Float = 0;
+
+	var _curveVertices:DrawData<Float>;
+	var _curveIndices:DrawData<Int>;
+	var _curveUVT:DrawData<Float>;
+	var _curveSamplesX:Array<Float> = [];
+	var _curveSamplesY:Array<Float> = [];
+	var _curveTopX:Array<Float> = [];
+	var _curveTopY:Array<Float> = [];
+	var _curveBotX:Array<Float> = [];
+	var _curveBotY:Array<Float> = [];
+	var _curvePoint:FlxPoint = FlxPoint.get();
+	var _curveTransform:ColorTransform;
 
 	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
 	public var typeOffsetY:Float = 0;
@@ -610,11 +628,159 @@ class Note extends FlxSkewedSprite {
 				alpha = 0.3;
 	}
 
+	override function draw(){
+		if (isSustainNote && !isSustainEnd && alpha > 0 && visible && strum != null 
+			&& createdFrom != null && createdFrom.modManager != null && createdFrom.modManager.curveSegments > 1){
+			drawSegments();
+			return;
+		}
+		super.draw();
+	}
+
+	function drawSegments() {
+		if (frames == null || frame == null) {
+			super.draw();
+			return;
+		}
+
+		final pf:Dynamic = createdFrom;
+		final modManager = pf.modManager;
+		final pN:Int = playField != null ? playField.player : 0;
+		final songSpeed:Float = pf.songSpeed;
+
+		@:privateAccess
+		var segLength:Float = Math.max(((pf.initialCrochet + 8) / 4), 10);
+		if (nextNote != null && nextNote.isSustainNote)
+			segLength = Math.max(nextNote.strumTime - strumTime, 1);
+
+		final segs:Int = modManager.curveSegments;
+		final halfW:Float = frameWidth * 0.5 * Math.abs(scale.x);
+
+		var tStart:Float = 0;
+		if (clipRect != null && frameHeight > 0)
+			tStart = Math.max(0, Math.min(1, clipRect.y / frameHeight));
+
+		if (tStart >= 1) return;
+
+		_curveSamplesX.resize(0);
+		_curveSamplesY.resize(0);
+		
+		var sampleAlphas:Array<Float> = [];
+		var sampleGlows:Array<Float> = [];
+		var sampleVDiffs:Array<Float> = [];
+
+		for (i in 0...segs + 1) {
+			final t:Float = tStart + (1 - tStart) * (i / segs);
+			final sampleStrumTime:Float = strumTime + segLength * t;
+			final diff:Float = sampleStrumTime - Conductor.songPosition;
+			final vDiff:Float = modManager.getVisPos(Conductor.songPosition, sampleStrumTime, songSpeed);
+
+			sampleVDiffs.push(vDiff);
+
+			final sampBeat:Float = Conductor.getStep(sampleStrumTime) / 4;
+
+			var samplePos = modManager.getPos(strumTime, vDiff, diff, sampBeat, noteData, pN, this, [], vec3Cache);
+			var sx:Float = samplePos.x + offsetX;
+			var sy:Float = samplePos.y + offsetY;
+			if (parent != null) {
+				sx += parent.width / 2 - width / 2;
+				sy += parent.height / 2;
+			}
+			sy += strum.y - 50;
+
+			sx += origin.x - offset.x;
+			sy += origin.y - offset.y;
+
+			_curveSamplesX.push(sx);
+			_curveSamplesY.push(sy);
+
+			sampleAlphas.push(samplePos.alpha);
+			sampleGlows.push(samplePos.glow);
+		}
+
+		if (_curveVertices == null) {
+			_curveVertices = new DrawData<Float>();
+			_curveIndices = DrawData.ofArray([0, 1, 2, 1, 3, 2]);
+			_curveUVT = new DrawData<Float>();
+			_curveTransform = new ColorTransform();
+		}
+
+		final texW:Float = frames.parent.width;
+		final texH:Float = frames.parent.height;
+		final uStart:Float = frame.frame.x / texW, uEnd:Float = (frame.frame.x + frame.frame.width) / texW;
+		final vStart:Float = frame.frame.y / texH, vEnd:Float = (frame.frame.y + frame.frame.height) / texH;
+		final sampleCount:Int = _curveSamplesX.length;
+
+		_curveTopX.resize(0); _curveTopY.resize(0);
+		_curveBotX.resize(0); _curveBotY.resize(0);
+
+		for (i in 0...sampleCount) {
+			final px:Float = _curveSamplesX[i], py:Float = _curveSamplesY[i];
+			final prevI:Int = (i > 0) ? i - 1 : i;
+			final nextI:Int = (i < sampleCount - 1) ? i + 1 : i;
+
+			var dx:Float = _curveSamplesX[nextI] - _curveSamplesX[prevI];
+			var dy:Float = _curveSamplesY[nextI] - _curveSamplesY[prevI];
+			final len:Float = Math.sqrt(dx * dx + dy * dy);
+			if (len > 0.0001) { dx /= len; dy /= len; } else { dx = 0; dy = 1; }
+
+			final nx:Float = -dy * halfW;
+			final ny:Float = dx * halfW;
+
+			_curveTopX.push(px + nx); _curveTopY.push(py + ny);
+			_curveBotX.push(px - nx); _curveBotY.push(py - ny);
+		}
+
+		_curvePoint.set(0, 0);
+
+		for (i in 1...sampleCount) {
+			if (sampleVDiffs[i - 1] <= 0 && sampleVDiffs[i] <= 0) continue;  // Skip the vertices that should be clipped
+
+			_curveVertices.length = 0;
+			_curveUVT.length = 0;
+
+			_curveVertices.push(_curveTopX[i - 1]); _curveVertices.push(_curveTopY[i - 1]);
+			_curveVertices.push(_curveBotX[i - 1]); _curveVertices.push(_curveBotY[i - 1]);
+			_curveVertices.push(_curveTopX[i]);     _curveVertices.push(_curveTopY[i]);
+			_curveVertices.push(_curveBotX[i]);     _curveVertices.push(_curveBotY[i]);
+
+			final tPrev:Float = tStart + (1 - tStart) * ((i - 1) / segs);
+			final tCur:Float  = tStart + (1 - tStart) * (i / segs);
+			final vPrev:Float = vStart + (vEnd - vStart) * tPrev;
+			final vCur:Float  = vStart + (vEnd - vStart) * tCur;
+
+			_curveUVT.push(uStart); _curveUVT.push(vPrev);
+			_curveUVT.push(uEnd);   _curveUVT.push(vPrev);
+			_curveUVT.push(uStart); _curveUVT.push(vCur);
+			_curveUVT.push(uEnd);   _curveUVT.push(vCur);
+
+			final segAlpha:Float = MathUtil.clamp((sampleAlphas[i - 1] + sampleAlphas[i]) * 0.5, 0, 1);
+			final segGlow:Float = MathUtil.clamp((sampleGlows[i - 1] + sampleGlows[i]) * 0.5, 0, 1);
+
+			_curveTransform.redMultiplier = 1 - segGlow;
+			_curveTransform.greenMultiplier = 1 - segGlow;
+			_curveTransform.blueMultiplier = 1 - segGlow;
+			_curveTransform.redOffset = 255 * segGlow;
+			_curveTransform.greenOffset = 255 * segGlow;
+			_curveTransform.blueOffset = 255 * segGlow;
+			_curveTransform.alphaMultiplier = MathUtil.clamp(segAlpha, 0, 1);
+			_curveTransform.alphaOffset = 0;
+
+			for (camera in cameras) {
+				if (camera == null || !camera.visible || !camera.exists) continue;
+				camera.drawTriangles(frames.parent, _curveVertices, _curveIndices, _curveUVT, null,
+					_curvePoint, blend, true, antialiasing, _curveTransform, shader);
+			}
+		}
+	}
+
 	var rectCache:Null<FlxRect> = null;
 	public function clip(strum:StrumNote){
 		if(strum.sustainReduce && wasGoodHit && Conductor.songPosition >= strumTime){
-			final x:Float = (x - strum.modPos.x - (strum.width - width) * .5), y:Float = (y - strum.modPos.y - strum.height * .5);
-			final mag:Float = Math.sqrt(x * x + y * y);
+			final x:Float = (x - strum.modPos.x - (strum.width - width) * .5);
+			final y:Float = (y - strum.modPos.y - strum.height * .5);
+			final z:Float = (z - strum.z);
+			final mag:Float = Math.sqrt(x * x + y * y + z * z);
 			
 			var swagRect:FlxRect = (clipRect ?? rectCache ?? (rectCache = FlxRect.get()));
 

@@ -4,6 +4,9 @@ class AlphaModifier extends NoteModifier
 {
 	override function getName() return 'stealth';
 
+	override function getModType()
+		return NOTE_MOD;
+
 	public static var fadeDistY = 120;
 
 	public function getHiddenSudden(player:Int = -1, column:Int = -1)
@@ -44,7 +47,7 @@ class AlphaModifier extends NoteModifier
 		return getSubmodValue(mod, player) + getSubmodValue('$mod$column', player);
 	}
 
-	function getVisibility(yPos:Float, player:Int, column:Int, note:Note):Float
+	function getVisibility(yPos:Float, player:Int, column:Int):Float
 	{
 		var distFromCenter = yPos;
 		var alpha:Float = 0;
@@ -102,6 +105,7 @@ class AlphaModifier extends NoteModifier
 
 	override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int)
 	{
+		if(note.isSustainNote && !note.isSustainEnd) return;
 		var player = note.playField.player;
 		var column = note.noteData;
 		var speed = modMgr.state.songSpeed * (note.multSpeed * note.modSpeed);
@@ -110,7 +114,7 @@ class AlphaModifier extends NoteModifier
 		note.rgbShader.flash = 0;
 		var alphaMod = (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha$column', player))
 			* (1 - getSubmodValue("noteAlpha", player)) * (1 - getSubmodValue('noteAlpha$column', player));
-		var alpha = getVisibility(yPos, player, column, note);
+		var alpha = getVisibility(yPos, player, column);
 
 		if (getSubmodValue("dontUseStealthGlow", player) == 0)
 		{
@@ -120,6 +124,31 @@ class AlphaModifier extends NoteModifier
 		else note.alphaMod = alpha;
 
 		note.alphaMod *= alphaMod;
+	}
+
+	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite):Vector3
+	{
+		var column = data;
+		var yPos:Float = visualDiff + 50;
+
+		var alphaMod = (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha$column', player))
+			* (1 - getSubmodValue("noteAlpha", player)) * (1 - getSubmodValue('noteAlpha$column', player));
+		var visibility = getVisibility(yPos, player, column);
+
+		var finalAlpha:Float;
+		var glow:Float = 0;
+
+		if (getSubmodValue("dontUseStealthGlow", player) == 0)
+		{
+			finalAlpha = getAlpha(visibility);
+			glow = getGlow(visibility);
+		}
+		else finalAlpha = visibility;
+
+		pos.alpha = finalAlpha * alphaMod;
+		pos.glow = glow;
+
+		return pos;
 	}
 
 	override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int)
@@ -146,7 +175,8 @@ class AlphaModifier extends NoteModifier
 			"randomVanish",
 			"dark",
 			"useStealthGlow",
-			"stealthPastReceptors"
+			"stealthPastReceptors",
+			"dontUseStealthGlow"
 		];
 		for (i in 0...PlayState.SONG.mania+1)
 		{

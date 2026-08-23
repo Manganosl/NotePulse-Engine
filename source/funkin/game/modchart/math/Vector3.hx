@@ -17,17 +17,17 @@ class Vector3 implements IFlxPooled
 	
 	public static function get(x:Float = 0, y:Float = 0, z:Float = 0):Vector3
 	{
-		return _pool.get().setTo(x, y, z);
+		return _pool.get().setTo(x, y, z, 1, 0);
 	}
 	
 	public static inline function recycle(x:Float = 0, y:Float = 0, z:Float = 0):Vector3
 	{
-		return _pool.get().setTo(x, y, z);
+		return _pool.get().setTo(x, y, z, 1, 0);
 	}
 	
 	public inline function put():Void
 	{
-		setTo(0, 0, 0);
+		setTo(0, 0, 0, 1, 0);
 		_pool.put(this);
 	}
 	
@@ -79,6 +79,16 @@ class Vector3 implements IFlxPooled
 		The z component value
 	**/
 	public var z:Float;
+
+	/**
+	 * Alpha value
+	**/
+	public var alpha:Float;
+
+	/**
+	 * Glow value
+	**/
+	public var glow:Float;
 	
 	/**
 		Creates a new `Vector3` instance
@@ -86,9 +96,9 @@ class Vector3 implements IFlxPooled
 		@param	y	(Optional) An initial y value (default is 0)
 		@param	z	(Optional) An initial z value (default is 0)
 	**/
-	public function new(x:Float = 0.0, y:Float = 0.0, z:Float = 0.0)
+	public function new(x:Float = 0.0, y:Float = 0.0, z:Float = 0.0, ?alpha:Float = 1.0, ?glow:Float = 0.0)
 	{
-		setTo(x, y, z);
+		setTo(x, y, z, alpha, glow);
 	}
 	
 	/**
@@ -99,8 +109,12 @@ class Vector3 implements IFlxPooled
 	**/
 	public inline function add(a:Vector3, result:Vector3 = null):Vector3
 	{
-	    result ??= Vector3.get();
-		result.setTo(this.x + a.x, this.y + a.y, this.z + a.z);
+		var isNew = (result == null);
+		result ??= Vector3.get();
+		if (isNew)
+			result.setTo(this.x + a.x, this.y + a.y, this.z + a.z, this.alpha, this.glow);
+		else
+			result.setTo(this.x + a.x, this.y + a.y, this.z + a.z);
 		return result;
 	}
 	
@@ -126,19 +140,24 @@ class Vector3 implements IFlxPooled
 	**/
 	public inline function clone():Vector3
 	{
-		return Vector3.get(x, y, z);
+		return Vector3.get(x, y, z).setTo(x, y, z, alpha, glow);
 	}
 	
 	/**
-		Creates a new `Vector3` instance linearly interpolated between this Vector3 and the given goal by the given alpha
+		Creates a new `Vector3` instance linearly interpolated between this Vector3 and the given goal by the given lerpAlpha
 		@param goal A `Vector3` instance to interpolate towards
-		@param alpha How far the interpolation is
+		@param lerpAlpha How far the interpolation is
 		@return A `Vector3 instance linearly interpolated`
 	**/
 	// https://gamedev.stackexchange.com/questions/18615/how-do-i-linearly-interpolate-between-two-vectors
-	public function lerp(goal:Vector3, alpha:Float):Vector3
+	public function lerp(goal:Vector3, lerpAlpha:Float):Vector3
 	{
-		return Vector3.get(alpha * goal.x + x * (1 - alpha), alpha * goal.y + y * (1 - alpha), alpha * goal.z + z * (1 - alpha));
+		var rx = lerpAlpha * goal.x + x * (1 - lerpAlpha);
+		var ry = lerpAlpha * goal.y + y * (1 - lerpAlpha);
+		var rz = lerpAlpha * goal.z + z * (1 - lerpAlpha);
+		var ra = lerpAlpha * goal.alpha + alpha * (1 - lerpAlpha);
+		var rg = lerpAlpha * goal.glow + glow * (1 - lerpAlpha);
+		return Vector3.get(rx, ry, rz).setTo(rx, ry, rz, ra, rg);
 	}
 	
 	/**
@@ -150,6 +169,8 @@ class Vector3 implements IFlxPooled
 		x = sourceVector3.x;
 		y = sourceVector3.y;
 		z = sourceVector3.z;
+		alpha = sourceVector3.alpha;
+		glow = sourceVector3.glow;
 	}
 	
 	/**
@@ -161,8 +182,12 @@ class Vector3 implements IFlxPooled
 	**/
 	public inline function crossProduct(a:Vector3, result:Vector3 = null):Vector3
 	{
+	    var isNew = (result == null);
 	    result ??= Vector3.get();
-		result.setTo(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x);
+		if (isNew)
+			result.setTo(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x, this.alpha, this.glow);
+		else
+			result.setTo(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x);
 		return result;
 	}
 	
@@ -292,9 +317,13 @@ class Vector3 implements IFlxPooled
 	**/
 	public inline function project(onto:Vector3, result:Vector3 = null):Vector3
 	{
+	    var isNew = (result == null);
 	    result ??= Vector3.get();
 	    var scalar = dotProduct(onto) / onto.lengthSquared;
-	    result.setTo(onto.x * scalar, onto.y * scalar, onto.z * scalar);
+	    if (isNew)
+	    	result.setTo(onto.x * scalar, onto.y * scalar, onto.z * scalar, this.alpha, this.glow);
+	    else
+	    	result.setTo(onto.x * scalar, onto.y * scalar, onto.z * scalar);
 	    return result;
 	}	
 
@@ -307,9 +336,13 @@ class Vector3 implements IFlxPooled
 	**/
 	public inline function projectOntoPlane(normal:Vector3, result:Vector3 = null):Vector3
 	{
+	    var isNew = (result == null);
 	    result ??= Vector3.get();
 	    var projected = project(normal, Vector3.get());
-	    result.setTo(x - projected.x, y - projected.y, z - projected.z);
+	    if (isNew)
+	    	result.setTo(x - projected.x, y - projected.y, z - projected.z, this.alpha, this.glow);
+	    else
+	    	result.setTo(x - projected.x, y - projected.y, z - projected.z);
 	    projected.put();
 	    return result;
 	}
@@ -320,8 +353,12 @@ class Vector3 implements IFlxPooled
 	**/
 	public inline function abs(result:Vector3 = null):Vector3
 	{
+		var isNew = (result == null);
 		result ??= Vector3.get();
-		result.setTo(Math.abs(x), Math.abs(y), Math.abs(z));
+		if (isNew)
+			result.setTo(Math.abs(x), Math.abs(y), Math.abs(z), this.alpha, this.glow);
+		else
+			result.setTo(Math.abs(x), Math.abs(y), Math.abs(z));
 		return result;
 	}
 	/**
@@ -343,11 +380,13 @@ class Vector3 implements IFlxPooled
 
 		@return returns `this` vector3
 	**/
-	public inline function setTo(xa:Float, ya:Float, za:Float):Vector3
+	public inline function setTo(xa:Float, ya:Float, za:Float, ?alphaa:Null<Float>, ?glowa:Null<Float>):Vector3
 	{
 		x = xa;
 		y = ya;
 		z = za;
+		if (alphaa != null) alpha = alphaa;
+		if (glowa != null) glow = glowa;
 		
 		return this;
 	}
@@ -360,8 +399,12 @@ class Vector3 implements IFlxPooled
 	**/
 	public inline function subtract(a:Vector3, result:Vector3 = null):Vector3
 	{
+	    var isNew = (result == null);
 	    result ??= Vector3.get();
-		result.setTo(x - a.x, y - a.y, z - a.z);
+		if (isNew)
+			result.setTo(x - a.x, y - a.y, z - a.z, this.alpha, this.glow);
+		else
+			result.setTo(x - a.x, y - a.y, z - a.z);
 		return result;
 	}
 	
@@ -387,8 +430,12 @@ class Vector3 implements IFlxPooled
 	**/
 	public static inline function min(a:Vector3, b:Vector3, result:Vector3 = null):Vector3
 	{
+	    var isNew = (result == null);
 	    result ??= Vector3.get();
-	    result.setTo(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.min(a.z, b.z));
+	    if (isNew)
+	    	result.setTo(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.min(a.z, b.z), a.alpha, a.glow);
+	    else
+	    	result.setTo(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.min(a.z, b.z));
 	    return result;
 	}
 	
@@ -401,8 +448,12 @@ class Vector3 implements IFlxPooled
 	**/
 	public static inline function max(a:Vector3, b:Vector3, result:Vector3 = null):Vector3
 	{
+	    var isNew = (result == null);
 	    result ??= Vector3.get();
-	    result.setTo(Math.max(a.x, b.x), Math.max(a.y, b.y), Math.max(a.z, b.z));
+	    if (isNew)
+	    	result.setTo(Math.max(a.x, b.x), Math.max(a.y, b.y), Math.max(a.z, b.z), a.alpha, a.glow);
+	    else
+	    	result.setTo(Math.max(a.x, b.x), Math.max(a.y, b.y), Math.max(a.z, b.z));
 	    return result;
 	}
 

@@ -1317,7 +1317,7 @@ class PlayState extends MusicBeatState
 			noteRows.push([]);
 
 		initialCrochet = Conductor.crochet;
-		var holdCrochet:Float = Math.max(Conductor.stepCrochet / PlayState.SONG.holdSubdivisions, 10);
+		var holdCrochet:Float = Math.max(Conductor.stepCrochet, 10);
 
 		for (section in noteData)
 		{
@@ -2938,10 +2938,10 @@ class PlayState extends MusicBeatState
 
 	public function noteFollowStrum(daNote:Note){
 		var pN:Int = daNote.playField.player;
-		var pos = modManager.getPos(daNote.strumTime, modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed),
-			daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
+		
+		daNote.distance = modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed);
 
-    	daNote.distance = modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed);
+		var pos = modManager.getPos(daNote.strumTime, daNote.distance, daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
 
 		if(daNote.copyAlpha) daNote.alpha = daNote.strum.alpha;
 
@@ -2956,8 +2956,9 @@ class PlayState extends MusicBeatState
 		daNote.x = pos.x;
 		daNote.y = pos.y + daNote.strum.y - 50;
 		daNote.z = pos.z;
-		if (daNote.isSustainNote){
-			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4) / PlayState.SONG.holdSubdivisions, 10);
+
+		if(daNote.isSustainNote){
+			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4), 10);
 			var futureSongPos = Conductor.songPosition + holdCrochet;
 			var diff = daNote.strumTime - futureSongPos;
 			var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
@@ -3191,7 +3192,6 @@ class PlayState extends MusicBeatState
 	function noteMissCommon(direction:Int, note:Note = null)
 	{
 		// score and data
-		final susMult:Float = (note.isSustainNote ? 1 / PlayState.SONG.holdSubdivisions : 1);
 		var subtract:Float = 0.05;
 		if(note != null) subtract = note.missHealth;
 
@@ -3248,7 +3248,7 @@ class PlayState extends MusicBeatState
 		var lastCombo:Int = combo;
 		combo = 0;
 
-		if(!isPlayerOpponent) health -= subtract * healthLoss * susMult; else health += subtract * healthLoss * susMult;
+		if(!isPlayerOpponent) health -= subtract * healthLoss; else health += subtract * healthLoss;
 		if(!practiceMode) songScore -= 10;
 		if(!endingSong) songMisses++;
 		totalPlayed++;
@@ -3560,11 +3560,10 @@ class PlayState extends MusicBeatState
 			noteMs.push((noteDiff));
 			noteTime.push(note.strumTime);
 		}
-		final susMult:Float = (note.isSustainNote ? 1 / PlayState.SONG.holdSubdivisions : 1);
 		var gainHealth:Bool = true; // prevent health gain, *if* sustains are treated as a singular note
 		if (guitarHeroSustains && note.isSustainNote) gainHealth = false;
-		if (gainHealth && !isPlayerOpponent) health += note.hitHealth * healthGain * susMult;
-		if (gainHealth && isPlayerOpponent) health -= note.hitHealth * healthGain * susMult;
+		if (gainHealth && !isPlayerOpponent) health += note.hitHealth * healthGain;
+		if (gainHealth && isPlayerOpponent) health -= note.hitHealth * healthGain;
 
 		stagesFunc(function(stage:BaseStage) stage.goodNoteHit(note));
 		var result:Dynamic = (!isPlayerOpponent && !note.gfStrum) ? callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]) : callOnLuas('opponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
