@@ -62,6 +62,8 @@ class Note extends FlxSkewedSprite {
 	public var bAngle:Float = 0;
 	public var visualLength:Float = 0;
 
+	public var extraSusLength:Int = 0;
+
 	var _curveVertices:DrawData<Float>;
 	var _curveIndices:DrawData<Int>;
 	var _curveUVT:DrawData<Float>;
@@ -629,15 +631,15 @@ class Note extends FlxSkewedSprite {
 	}
 
 	override function draw(){
-		if (isSustainNote && !isSustainEnd && alpha > 0 && visible && strum != null 
-			&& createdFrom != null && createdFrom.modManager != null && createdFrom.modManager.curveSegments > 1){
-			drawSegments();
+		if (isSustainNote && alpha > 0 && visible && strum != null 
+			&& createdFrom != null && createdFrom.modManager != null && !createdFrom.modManager.useNormalSustains && createdFrom.modManager.sustainSegments > 1){
+			drawSustain();
 			return;
 		}
 		super.draw();
 	}
 
-	function drawSegments() {
+	function drawSustain() {
 		if (frames == null || frame == null) {
 			super.draw();
 			return;
@@ -650,10 +652,10 @@ class Note extends FlxSkewedSprite {
 
 		@:privateAccess
 		var segLength:Float = Math.max(((pf.initialCrochet + 8) / 4), 10);
-		if (nextNote != null && nextNote.isSustainNote)
-			segLength = Math.max(nextNote.strumTime - strumTime, 1);
+		if (!isSustainEnd && nextNote != null && nextNote.isSustainNote)
+			segLength = Math.max(nextNote.strumTime - strumTime + extraSusLength, 1);
 
-		final segs:Int = modManager.curveSegments;
+		final segs:Int = isSustainEnd ? 2 : modManager.sustainSegments;
 		final halfW:Float = frameWidth * 0.5 * Math.abs(scale.x);
 
 		var tStart:Float = 0;
@@ -664,7 +666,7 @@ class Note extends FlxSkewedSprite {
 
 		_curveSamplesX.resize(0);
 		_curveSamplesY.resize(0);
-		
+
 		var sampleAlphas:Array<Float> = [];
 		var sampleGlows:Array<Float> = [];
 		var sampleVDiffs:Array<Float> = [];
@@ -698,7 +700,7 @@ class Note extends FlxSkewedSprite {
 			sampleGlows.push(samplePos.glow);
 		}
 
-		if (_curveVertices == null) {
+		if(_curveVertices == null){
 			_curveVertices = new DrawData<Float>();
 			_curveIndices = DrawData.ofArray([0, 1, 2, 1, 3, 2]);
 			_curveUVT = new DrawData<Float>();
@@ -711,10 +713,12 @@ class Note extends FlxSkewedSprite {
 		final vStart:Float = frame.frame.y / texH, vEnd:Float = (frame.frame.y + frame.frame.height) / texH;
 		final sampleCount:Int = _curveSamplesX.length;
 
-		_curveTopX.resize(0); _curveTopY.resize(0);
-		_curveBotX.resize(0); _curveBotY.resize(0);
+		_curveTopX.resize(0);
+		_curveTopY.resize(0);
+		_curveBotX.resize(0);
+		_curveBotY.resize(0);
 
-		for (i in 0...sampleCount) {
+		for (i in 0...sampleCount){
 			final px:Float = _curveSamplesX[i], py:Float = _curveSamplesY[i];
 			final prevI:Int = (i > 0) ? i - 1 : i;
 			final nextI:Int = (i < sampleCount - 1) ? i + 1 : i;
@@ -722,52 +726,98 @@ class Note extends FlxSkewedSprite {
 			var dx:Float = _curveSamplesX[nextI] - _curveSamplesX[prevI];
 			var dy:Float = _curveSamplesY[nextI] - _curveSamplesY[prevI];
 			final len:Float = Math.sqrt(dx * dx + dy * dy);
-			if (len > 0.0001) { dx /= len; dy /= len; } else { dx = 0; dy = 1; }
+			if(len > 0.0001){
+				dx /= len;
+				dy /= len;
+			} else { 
+				dx = 0;
+				dy = 1;
+			}
 
 			final nx:Float = -dy * halfW;
 			final ny:Float = dx * halfW;
 
-			_curveTopX.push(px + nx); _curveTopY.push(py + ny);
-			_curveBotX.push(px - nx); _curveBotY.push(py - ny);
+			_curveTopX.push(px + nx);
+			_curveTopY.push(py + ny);
+			_curveBotX.push(px - nx);
+			_curveBotY.push(py - ny);
 		}
 
-		_curvePoint.set(0, 0);
-
+		final tPrevs:Array<Float> = [];
+		final tCurs:Array<Float> = [];
 		for (i in 1...sampleCount) {
-			if (sampleVDiffs[i - 1] <= 0 && sampleVDiffs[i] <= 0) continue;  // Skip the vertices that should be clipped
+			tPrevs.push(tStart + (1 - tStart) * ((i - 1) / segs));
+			tCurs.push(tStart + (1 - tStart) * (i / segs));
+		}
 
-			_curveVertices.length = 0;
-			_curveUVT.length = 0;
+		for (camera in cameras){
+			if (camera == null || !camera.visible || !camera.exists) continue;
 
-			_curveVertices.push(_curveTopX[i - 1]); _curveVertices.push(_curveTopY[i - 1]);
-			_curveVertices.push(_curveBotX[i - 1]); _curveVertices.push(_curveBotY[i - 1]);
-			_curveVertices.push(_curveTopX[i]);     _curveVertices.push(_curveTopY[i]);
-			_curveVertices.push(_curveBotX[i]);     _curveVertices.push(_curveBotY[i]);
+			final scrollX:Float = camera.scroll.x * scrollFactor.x;
+			final scrollY:Float = camera.scroll.y * scrollFactor.y;
 
-			final tPrev:Float = tStart + (1 - tStart) * ((i - 1) / segs);
-			final tCur:Float  = tStart + (1 - tStart) * (i / segs);
-			final vPrev:Float = vStart + (vEnd - vStart) * tPrev;
-			final vCur:Float  = vStart + (vEnd - vStart) * tCur;
+			final angleRad:Float = camera.angle * (Math.PI / 180);
+			final cosA:Float = Math.cos(angleRad);
+			final sinA:Float = Math.sin(angleRad);
+			final camCenterX:Float = camera.width * 0.5;
+			final camCenterY:Float = camera.height * 0.5;
 
-			_curveUVT.push(uStart); _curveUVT.push(vPrev);
-			_curveUVT.push(uEnd);   _curveUVT.push(vPrev);
-			_curveUVT.push(uStart); _curveUVT.push(vCur);
-			_curveUVT.push(uEnd);   _curveUVT.push(vCur);
+			inline function transform(x:Float, y:Float):{x:Float, y:Float} {
+				final sx:Float = x - scrollX;
+				final sy:Float = y - scrollY;
+				final relX:Float = sx - camCenterX;
+				final relY:Float = sy - camCenterY;
+				final rx:Float = relX * cosA - relY * sinA;
+				final ry:Float = relX * sinA + relY * cosA;
+				return {x: rx + camCenterX, y: ry + camCenterY};
+			}
 
-			final segAlpha:Float = MathUtil.clamp((sampleAlphas[i - 1] + sampleAlphas[i]) * 0.5, 0, 1);
-			final segGlow:Float = MathUtil.clamp((sampleGlows[i - 1] + sampleGlows[i]) * 0.5, 0, 1);
+			final topT:Array<{x:Float, y:Float}> = [for (i in 0...sampleCount) transform(_curveTopX[i], _curveTopY[i])];
+			final botT:Array<{x:Float, y:Float}> = [for (i in 0...sampleCount) transform(_curveBotX[i], _curveBotY[i])];
 
-			_curveTransform.redMultiplier = 1 - segGlow;
-			_curveTransform.greenMultiplier = 1 - segGlow;
-			_curveTransform.blueMultiplier = 1 - segGlow;
-			_curveTransform.redOffset = 255 * segGlow;
-			_curveTransform.greenOffset = 255 * segGlow;
-			_curveTransform.blueOffset = 255 * segGlow;
-			_curveTransform.alphaMultiplier = MathUtil.clamp(segAlpha, 0, 1);
-			_curveTransform.alphaOffset = 0;
+			final camAlphaMult:Float = MathUtil.clamp(alpha * camera.alpha, 0, 1);
 
-			for (camera in cameras) {
-				if (camera == null || !camera.visible || !camera.exists) continue;
+			_curvePoint.set(0, 0);
+
+			for (i in 1...sampleCount){
+				if (sampleVDiffs[i - 1] <= 0 && sampleVDiffs[i] <= 0) continue;
+
+				_curveVertices.length = 0;
+				_curveUVT.length = 0;
+
+				_curveVertices.push(topT[i - 1].x);
+				_curveVertices.push(topT[i - 1].y);
+				_curveVertices.push(botT[i - 1].x);
+				_curveVertices.push(botT[i - 1].y);
+				_curveVertices.push(topT[i].x);
+				_curveVertices.push(topT[i].y);
+				_curveVertices.push(botT[i].x);
+				_curveVertices.push(botT[i].y);
+
+				final vPrev:Float = vStart + (vEnd - vStart) * tPrevs[i - 1];
+				final vCur:Float  = vStart + (vEnd - vStart) * tCurs[i - 1];
+
+				_curveUVT.push(uStart);
+				_curveUVT.push(vPrev);
+				_curveUVT.push(uEnd);
+				_curveUVT.push(vPrev);
+				_curveUVT.push(uStart);
+				_curveUVT.push(vCur);
+				_curveUVT.push(uEnd);
+				_curveUVT.push(vCur);
+
+				final segAlpha:Float = (sampleAlphas[i - 1] + sampleAlphas[i]) * 0.5;
+				final segGlow:Float = (sampleGlows[i - 1] + sampleGlows[i]) * 0.5;
+
+				_curveTransform.redMultiplier = 1 - segGlow;
+				_curveTransform.greenMultiplier = 1 - segGlow;
+				_curveTransform.blueMultiplier = 1 - segGlow;
+				_curveTransform.redOffset = 255 * segGlow;
+				_curveTransform.greenOffset = 255 * segGlow;
+				_curveTransform.blueOffset = 255 * segGlow;
+				_curveTransform.alphaMultiplier = segAlpha * camAlphaMult;
+				_curveTransform.alphaOffset = 0;
+
 				camera.drawTriangles(frames.parent, _curveVertices, _curveIndices, _curveUVT, null,
 					_curvePoint, blend, true, antialiasing, _curveTransform, shader);
 			}

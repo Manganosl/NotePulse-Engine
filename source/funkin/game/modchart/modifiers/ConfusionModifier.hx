@@ -36,10 +36,10 @@ class ConfusionModifier extends NoteModifier {
         angleZ += (beat * getSubmodValue("dizzy", player) % 360) * (180 / Math.PI);
         angleZ += getSubmodValue("noteAngle", player) + getSubmodValue('note${data}Angle', player);
 
-        if (note.rgbShader != null) {
-            note.rgbShader.angleX = angleX * (Math.PI / 180);
-            note.rgbShader.angleY = angleY * (Math.PI / 180);
-        }
+        //if (note.rgbShader != null) {
+        //    note.rgbShader.angleX = angleX * (Math.PI / 180);
+        //    note.rgbShader.angleY = angleY * (Math.PI / 180);
+        //}
         
         note.angle = angleZ + note.offsetAngle;
     }
@@ -55,10 +55,10 @@ class ConfusionModifier extends NoteModifier {
         angleY += getSubmodValue("receptorAngleY", player) + getSubmodValue('receptor${data}AngleY', player);
         angleZ += getSubmodValue("receptorAngle", player) + getSubmodValue('receptor${data}Angle', player);
 
-        if (receptor.rgbShader != null) {
-            receptor.rgbShader.angleX = angleX * (Math.PI / 180);
-            receptor.rgbShader.angleY = angleY * (Math.PI / 180);
-        }
+        //if (receptor.rgbShader != null) {
+        //    receptor.rgbShader.angleX = angleX * (Math.PI / 180);
+        //    receptor.rgbShader.angleY = angleY * (Math.PI / 180);
+        //}
         
         receptor.angle = angleZ;
     }

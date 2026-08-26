@@ -18,7 +18,8 @@ class ModManager {
 	public var doTraces:Bool = true;
 	public var swapPlayers:Bool = false;
 
-	public var curveSegments:Int = 4;
+	public var useNormalSustains:Bool = false;  // Some textures have problems with segmented sustains
+	public var sustainSegments:Int = 4;
 
 	static inline function normalizeModName(modName:String):String
 		return modName == null ? modName : modName.toLowerCase();
