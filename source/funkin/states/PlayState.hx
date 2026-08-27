@@ -2958,7 +2958,6 @@ class PlayState extends MusicBeatState
 		daNote.z = pos.z;
 
 		if(daNote.isSustainNote){
-			daNote.clip(daNote.playField.members[daNote.noteData]);
 			if(modManager.useNormalSustains){
 				var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4), 10);
 				var futureSongPos = Conductor.songPosition + holdCrochet;
@@ -2990,6 +2989,7 @@ class PlayState extends MusicBeatState
 					}
 				}
 			}
+			daNote.clip(daNote.playField.members[daNote.noteData]);
 		}
 	}
 

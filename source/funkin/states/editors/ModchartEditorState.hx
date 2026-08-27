@@ -341,6 +341,7 @@ class ModchartEditorState extends MusicBeatState
 	}
 
 	var selectedNotes:Array<EventMetaNote> = [];
+	var copiedEvents:Array<Dynamic> = [];
 	var selectedEvent(get, never):EventMetaNote;
 	inline function get_selectedEvent():EventMetaNote
 		return selectedNotes.length == 1 ? selectedNotes[0] : null;
@@ -492,6 +493,37 @@ class ModchartEditorState extends MusicBeatState
 		}
 		positionNoteYOnTime(swagEvent, secNum);
 		return swagEvent;
+	}
+
+	function makeEventDataCopy(originalData:Array<Dynamic>){
+		var dataCopy:Array<Dynamic> = originalData.copy();
+		var eventGrp:Array<Array<Dynamic>> = cast dataCopy[1].copy();
+		for (num => subEvent in eventGrp)
+			eventGrp[num] = subEvent.copy();
+
+		dataCopy[1] = eventGrp;
+		return dataCopy;
+	}
+
+	function pasteCopiedEvents():Array<EventMetaNote> {
+		var pastedEvents:Array<EventMetaNote> = [];
+		if(copiedEvents.length == 0) return pastedEvents;
+
+		var baseTime:Float = Conductor.songPosition;
+		for (event in copiedEvents){
+			var dataCopy:Array<Dynamic> = makeEventDataCopy(event);
+			dataCopy[0] += baseTime;
+
+			var createdEvent:EventMetaNote = createEvent(dataCopy);
+			if(createdEvent != null) pastedEvents.push(createdEvent);
+		}
+
+		if(pastedEvents.length > 0){
+			actionPushEvents(pastedEvents);
+			FlxG.sound.play(Paths.sound('chartingSounds/noteLay'));
+			showOutput('Events Pasted: ${pastedEvents.length}');
+		}
+		return pastedEvents;
 	}
 
 	function _cacheSections()
@@ -965,16 +997,39 @@ class ModchartEditorState extends MusicBeatState
 
 		if(PsychUIInputText.focusOn == null){
 			var canContinue:Bool = true;
+			var doCut:Bool = false;
 
-			if(FlxG.keys.pressed.CONTROL && !isMovingNotes && (FlxG.keys.justPressed.Z || FlxG.keys.justPressed.Y)){
+			if(FlxG.keys.pressed.CONTROL && !isMovingNotes && (FlxG.keys.justPressed.Z || FlxG.keys.justPressed.Y ||
+				FlxG.keys.justPressed.X || FlxG.keys.justPressed.C || FlxG.keys.justPressed.V)){
 				canContinue = false;
 				if(FlxG.keys.justPressed.Z)
 					undo();
-				else
+				else if(FlxG.keys.justPressed.Y)
 					redo();
+				else if((doCut = FlxG.keys.justPressed.X) || FlxG.keys.justPressed.C){
+					if(selectedNotes.length > 0){
+						copiedEvents = [for (note in selectedNotes) if(note != null) makeEventDataCopy(note.songData)];
+						if(copiedEvents.length > 0){
+							copiedEvents.sort((a:Array<Dynamic>, b:Array<Dynamic>) -> FlxSort.byValues(FlxSort.ASCENDING, a[0], b[0]));
+
+							var minTime:Float = copiedEvents[0][0];
+							for (event in copiedEvents)
+								event[0] -= minTime;
+
+							showOutput('Events Copied: ${copiedEvents.length}');
+						}
+					}
+				}
+				else if(FlxG.keys.justPressed.V){
+					if(copiedEvents.length > 0){
+						var pastedEvents:Array<EventMetaNote> = pasteCopiedEvents();
+						if(pastedEvents.length > 0)
+							addUndoAction(ADD_EVENT, {events: pastedEvents});
+					}
+				}
 			}
 
-			if((FlxG.keys.justPressed.DELETE || FlxG.keys.justPressed.BACKSPACE) && selectedNotes.length > 0){
+			if((doCut || FlxG.keys.justPressed.DELETE || FlxG.keys.justPressed.BACKSPACE) && selectedNotes.length > 0){
 				canContinue = false;
 				isMovingNotes = false;
 				var removedEvents:Array<EventMetaNote> = selectedNotes.copy();

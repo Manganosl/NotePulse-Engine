@@ -35,6 +35,7 @@ class ModManager {
 			BeatModifier,
 			AlphaModifier,
 			ReceptorScrollModifier, 
+			RadionicModifier,
 			ScaleModifier, 
 			SkewModifier, 
 			ConfusionModifier, 
