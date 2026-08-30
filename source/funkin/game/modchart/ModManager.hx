@@ -21,9 +21,6 @@ class ModManager {
 	public var useNormalSustains:Bool = false;  // Some textures have problems with segmented sustains
 	public var sustainSegments:Int = 4;
 
-	static inline function normalizeModName(modName:String):String
-		return modName == null ? modName : modName.toLowerCase();
-
 	public function registerDefaultModifiers()
 	{
 		var quickRegs:Array<Any> = [
@@ -95,6 +92,7 @@ class ModManager {
     public var activeMods:Array<Array<String>> = [[], []]; // by player
 
 	private var activeModsDirty:Array<Bool> = [false, false];
+	private var activeNoteModObjs:Array<Array<Modifier>> = [[], []];
 
 	var aliases:Map<String, String> = [];
 
@@ -106,7 +104,8 @@ class ModManager {
         registerMod(mod.getName(), mod);
 
     public function registerMod(modName:String, mod:Modifier, ?registerSubmods = true){
-        modName = normalizeModName(modName);
+        modName = modName.toLowerCase();
+        mod.lowerCaseName = modName;
         register.set(modName, mod);
 		switch (mod.getModType()){
 			case NOTE_MOD:
@@ -137,10 +136,10 @@ class ModManager {
 		quickRegister(new SubModifier(name, this));
 
 	public function registerAlias(alias:String, mod:String)
-		aliases.set(normalizeModName(alias), normalizeModName(mod));
+		aliases.set(alias.toLowerCase(), mod.toLowerCase());
 
 	function getActualModName(m:String):String {
-		var norm = normalizeModName(m);
+		var norm = m.toLowerCase();
 		return aliases.exists(norm) ? aliases.get(norm) : norm;
 	}
 
@@ -277,6 +276,15 @@ class ModManager {
 	private function flushActiveMods(player:Int){
 		if (activeModsDirty[player]){
 			activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
+
+			var objs = activeNoteModObjs[player];
+			if (objs == null) { objs = []; activeNoteModObjs[player] = objs; }
+			while (objs.length > 0) objs.pop();
+			for (name in activeMods[player]){
+				var mod = notemodRegister.get(name);
+				if (mod != null) objs.push(mod);
+			}
+
 			activeModsDirty[player] = false;
 		}
 	}
@@ -306,7 +314,7 @@ class ModManager {
 				return;
 			}
 			var mod = daMod.parent == null ? daMod : daMod.parent;
-			var name = normalizeModName(mod.getName());
+			var name = mod.getName().toLowerCase();
             // optimization shit!! :)
             // thanks 4mbr0s3 for giving an alternative way to do all of this cus andromeda has smth similar in Flexy but like
             // this is a better way to do it
@@ -324,8 +332,8 @@ class ModManager {
 			daMod.setValue(val, player);
 
 			if (!activeMods[player].contains(name) && mod.shouldExecute(player, val)){
-				if (normalizeModName(daMod.getName()) != name)
-					activeMods[player].push(normalizeModName(daMod.getName()));
+				if (daMod.getName().toLowerCase() != name)
+					activeMods[player].push(daMod.getName().toLowerCase());
 				activeMods[player].push(name);
 			} else if (!mod.shouldExecute(player, val)){
 
@@ -340,13 +348,13 @@ class ModManager {
 					}
 				}
 				if (daMod != modParent)
-					activeMods[player].remove(normalizeModName(daMod.getName()));
+					activeMods[player].remove(daMod.getName().toLowerCase());
 				if (modParent != null){
 					if (!shouldKeepParentActive(modParent, player)){
-						activeMods[player].remove(normalizeModName(modParent.getName()));
+						activeMods[player].remove(modParent.getName().toLowerCase());
 					}
 				} else
-					activeMods[player].remove(normalizeModName(daMod.getName()));
+					activeMods[player].remove(daMod.getName().toLowerCase());
 			}
 
 			activeModsDirty[player] = true;
@@ -404,13 +412,15 @@ class ModManager {
 		if (activeMods[player] != null)
 		{
 			flushActiveMods(player);
-			for (name in activeMods[player])
-			{
-				var mod:Modifier = notemodRegister.get(name);
-				if (mod == null || !obj.active) continue;
-				
-				if (obj is Note) mod.updateNote(beat, cast obj, pos, player);
-				else if (obj is StrumNote) mod.updateReceptor(beat, cast obj, pos, player);
+			if(obj.active){
+				var isNote = obj is Note;
+				var isStrum = !isNote && (obj is StrumNote);
+				if(isNote || isStrum){
+					for (mod in activeNoteModObjs[player]){
+						if(isNote) mod.updateNote(beat, cast obj, pos, player);
+						else mod.updateReceptor(beat, cast obj, pos, player);
+					}
+				}
 			}
 		}
 		
@@ -443,13 +453,11 @@ class ModManager {
 		pos.alpha = 1;
 		pos.glow = 0;
 
-		if (activeMods[player] != null){
+		if (activeMods[player] != null && obj.active){
 			flushActiveMods(player);
-			for (name in activeMods[player]){
-				if (exclusions != null && exclusions.contains(name)) continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
-				var mod:Modifier = notemodRegister.get(name);
-				if (mod == null) continue;
-				if (!obj.active) continue;
+			var hasExclusions = exclusions != null && exclusions.length > 0;
+			for (mod in activeNoteModObjs[player]){
+				if (hasExclusions && exclusions.contains(mod.lowerCaseName)) continue;
 				pos = mod.getPos(time, diff, tDiff, beat, pos, data, player, obj);
 			}
 		}
@@ -473,7 +481,7 @@ class ModManager {
 				if (doTraces)
 					Log.warn('Unknown ease style: $style');
 			}
-			timeline.addEvent(new ModEaseEvent(step, endStep, normalizeModName(modName), target, easeFunc, player, this));
+			timeline.addEvent(new ModEaseEvent(step, endStep, modName.toLowerCase(), target, easeFunc, player, this));
 		}
 	}
 
@@ -483,7 +491,7 @@ class ModManager {
 				queueSet(step, modName, target, field.player);
 		}
 		else
-			timeline.addEvent(new SetEvent(step, normalizeModName(modName), target, player, this));
+			timeline.addEvent(new SetEvent(step, modName.toLowerCase(), target, player, this));
 	}
 
 	public function queueEaseL(step:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
@@ -550,7 +558,7 @@ class ModManager {
 			for (field in PlayField.fields)
 				ease(modName, beat, len, val, easeFunc, field.player);
 		} else {
-			timeline.addEvent(new ModEaseEvent(beat * 4, (beat + len) * 4, normalizeModName(modName), val, easeFunc, player, this));
+			timeline.addEvent(new ModEaseEvent(beat * 4, (beat + len) * 4, modName.toLowerCase(), val, easeFunc, player, this));
 		}
 	}
 
@@ -559,7 +567,7 @@ class ModManager {
 			for (field in PlayField.fields)
 				set(modName, beat, val, field.player);
 		} else {
-			timeline.addEvent(new SetEvent(beat * 4, normalizeModName(modName), val, player, this));
+			timeline.addEvent(new SetEvent(beat * 4, modName.toLowerCase(), val, player, this));
 		}
 	}
 }

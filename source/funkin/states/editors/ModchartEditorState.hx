@@ -397,11 +397,12 @@ class ModchartEditorState extends MusicBeatState
 	function addModchartTab():Void {
 		var tabGroupModchart = modchartBox.getTab('Modchart').menu;
 		var posX = 10;
-		var posY = 25;
-
-		posY += 40;
+		var posY = 30;
 
 		modifierInput = new PsychUIInputText(posX+150, posY, 120, '', 8);
+    	modifierInput.onChange = function(old:String, cur:String){
+			updateModEvV1();
+		}
 
 		var modifierLabelText = new FlxText(modifierInput.x, modifierInput.y - 15, 80, 'Modifier:');
 
@@ -411,7 +412,7 @@ class ModchartEditorState extends MusicBeatState
 
 		var actionsLabelText = new FlxText(actionsDropdown.x, actionsDropdown.y - 15, 80, 'Action:');
 
-		posY += 40;
+		posY += 60;
 
 		timeStepper = new PsychUINumericStepper(posX, posY, 0.01, 0, 0, 9999, 2);
 		timeStepper.onValueChange = function() {
@@ -423,21 +424,17 @@ class ModchartEditorState extends MusicBeatState
 			updateModEvV1();
 		};
 
-		posY += 40;
+		posY += 60;
 
 		easeInput = new PsychUIInputText(posX, posY, 120, '', 8);
 		easeInput.onChange = function(old:String, cur:String){
 			updateModEvV1();
 		}
 
-		posY += 40;
-
-		playerStepper = new PsychUINumericStepper(posX, posY, 1, -1, -1, (PlayState.SONG.lanes - 1), 0);
+		playerStepper = new PsychUINumericStepper(posX + 150, posY, 1, -1, -1, (PlayState.SONG.lanes - 1), 0);
 		playerStepper.onValueChange = function() {
 			updateModEvV1();
 		};
-
-
 
 		var timeLabelText = new FlxText(timeStepper.x, timeStepper.y - 15, 80, 'Time (beats):');
 		var valueLabelText = new FlxText(valueStepper.x, valueStepper.y - 15, 80, 'Value:');

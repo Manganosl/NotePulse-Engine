@@ -655,7 +655,6 @@ class Note extends FlxSkewedSprite {
 		if (!isSustainEnd && nextNote != null && nextNote.isSustainNote)
 			segLength = Math.max(nextNote.strumTime - strumTime + extraSusLength, 1);
 
-		final segs:Int = isSustainEnd ? 2 : modManager.sustainSegments;
 		final halfW:Float = frameWidth * 0.5 * Math.abs(scale.x);
 
 		var tStart:Float = 0;
@@ -671,8 +670,8 @@ class Note extends FlxSkewedSprite {
 		var sampleGlows:Array<Float> = [];
 		var sampleVDiffs:Array<Float> = [];
 
-		for (i in 0...segs + 1) {
-			final t:Float = tStart + (1 - tStart) * (i / segs);
+		for (i in 0...modManager.sustainSegments + 1) {
+			final t:Float = tStart + (1 - tStart) * (i / modManager.sustainSegments);
 			final sampleStrumTime:Float = strumTime + segLength * t;
 			final diff:Float = sampleStrumTime - Conductor.songPosition;
 			final vDiff:Float = modManager.getVisPos(Conductor.songPosition, sampleStrumTime, songSpeed);
@@ -746,8 +745,8 @@ class Note extends FlxSkewedSprite {
 		final tPrevs:Array<Float> = [];
 		final tCurs:Array<Float> = [];
 		for (i in 1...sampleCount) {
-			tPrevs.push(tStart + (1 - tStart) * ((i - 1) / segs));
-			tCurs.push(tStart + (1 - tStart) * (i / segs));
+			tPrevs.push(tStart + (1 - tStart) * ((i - 1) / modManager.sustainSegments));
+			tCurs.push(tStart + (1 - tStart) * (i / modManager.sustainSegments));
 		}
 
 		for (camera in cameras){

@@ -10,19 +10,19 @@ class TransformModifier extends NoteModifier { // this'll be transformX in ModMa
 		pos.x += getValue(player) + getSubmodValue("transformX-a", player);
 		pos.y += getSubmodValue("transformY", player) + getSubmodValue("transformY-a", player);
 		pos.z += (getSubmodValue('transformZ', player) + getSubmodValue("transformZ-a", player)) / 1280;
-		
-		pos.x += getSubmodValue('transform${data}X', player) + getSubmodValue('transform${data}X-a', player);
-		pos.y += getSubmodValue('transform${data}Y', player) + getSubmodValue('transform${data}Y-a', player);
-		pos.z += (getSubmodValue('transform${data}Z', player) + getSubmodValue('transform${data}Z-a', player)) / 1280;
+
+		pos.x += getColumnSubmodValue('transform', data, player, 'X') + getColumnSubmodValue('transform', data, player, 'X-a');
+		pos.y += getColumnSubmodValue('transform', data, player, 'Y') + getColumnSubmodValue('transform', data, player, 'Y-a');
+		pos.z += (getColumnSubmodValue('transform', data, player, 'Z') + getColumnSubmodValue('transform', data, player, 'Z-a')) / 1280;
 
 		if(obj is Note){
 			pos.x += getSubmodValue('transformNoteX', player);
 			pos.y += getSubmodValue('transformNoteY', player);
 			pos.z += getSubmodValue('transformNoteZ', player) / 1280;
 
-			pos.x += getSubmodValue('transformNote${data}X', player);
-			pos.y += getSubmodValue('transformNote${data}Y', player);
-			pos.z += getSubmodValue('transformNote${data}Z', player) / 1280;
+			pos.x += getColumnSubmodValue('transformNote', data, player, 'X');
+			pos.y += getColumnSubmodValue('transformNote', data, player, 'Y');
+			pos.z += getColumnSubmodValue('transformNote', data, player, 'Z') / 1280;
 		}
 		
 		return pos;

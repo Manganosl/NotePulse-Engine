@@ -8,10 +8,10 @@ class ConfusionModifier extends NoteModifier {
         var mainAngle:Float = 0;
         if (!onlyOffset) {
             var main = (suffix.length == 0) ? getValue(player) : getSubmodValue('confusion$suffix', player);
-            main += getSubmodValue('confusion${suffix}${column}', player);
+            main += getColumnSubmodValue('confusion$suffix', column, player);
             mainAngle = -((beat * main) % 360);
         }
-        var constAngle:Float = getSubmodValue('confusion${suffix}Offset', player) + getSubmodValue('confusion${suffix}Offset${column}', player);
+        var constAngle:Float = getSubmodValue('confusion${suffix}Offset', player) + getColumnSubmodValue('confusion${suffix}Offset', column, player);
         return mainAngle + constAngle;
     }
 
@@ -30,11 +30,11 @@ class ConfusionModifier extends NoteModifier {
         
         angleX += getSubmodValue("roll", player) * yPos * 0.5;
         angleY += getSubmodValue("twirl", player) * yPos * 0.5;
-        angleX += getSubmodValue("noteAngleX", player) + getSubmodValue('note${data}AngleX', player);
-        angleY += getSubmodValue("noteAngleY", player) + getSubmodValue('note${data}AngleY', player);
+        angleX += getSubmodValue("noteAngleX", player) + getColumnSubmodValue('note', data, player, 'AngleX');
+        angleY += getSubmodValue("noteAngleY", player) + getColumnSubmodValue('note', data, player, 'AngleY');
 
         angleZ += (beat * getSubmodValue("dizzy", player) % 360) * (180 / Math.PI);
-        angleZ += getSubmodValue("noteAngle", player) + getSubmodValue('note${data}Angle', player);
+        angleZ += getSubmodValue("noteAngle", player) + getColumnSubmodValue('note', data, player, 'Angle');
 
         //if (note.rgbShader != null) {
         //    note.rgbShader.angleX = angleX * (Math.PI / 180);
@@ -51,9 +51,9 @@ class ConfusionModifier extends NoteModifier {
         var angleY:Float = getConfusion("Y", beat, data, player);
         var angleZ:Float = getConfusion("", beat, data, player);
 
-        angleX += getSubmodValue("receptorAngleX", player) + getSubmodValue('receptor${data}AngleX', player);
-        angleY += getSubmodValue("receptorAngleY", player) + getSubmodValue('receptor${data}AngleY', player);
-        angleZ += getSubmodValue("receptorAngle", player) + getSubmodValue('receptor${data}Angle', player);
+        angleX += getSubmodValue("receptorAngleX", player) + getColumnSubmodValue('receptor', data, player, 'AngleX');
+        angleY += getSubmodValue("receptorAngleY", player) + getColumnSubmodValue('receptor', data, player, 'AngleY');
+        angleZ += getSubmodValue("receptorAngle", player) + getColumnSubmodValue('receptor', data, player, 'Angle');
 
         //if (receptor.rgbShader != null) {
         //    receptor.rgbShader.angleX = angleX * (Math.PI / 180);

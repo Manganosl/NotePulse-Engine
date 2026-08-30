@@ -26,7 +26,8 @@ class Modifier {
 	public var submods:Map<String, Modifier> = [];
 	public var parent:Modifier; // for submods
     public var active:Bool = false; // used for performance reasons
-    // modifiers are only called if active is true
+
+	public var lowerCaseName:String;
 
     public function getModType()
 		return MISC_MOD; // if this is NOTE_MOD then this will be called on notes & receptors
@@ -109,21 +110,43 @@ class Modifier {
 	inline function lerp(a:Float, b:Float, c:Float)
 		return a + (b - a) * c;
 
-	public function getSubmodPercent(modName:String, player:Int)
-	{
-		if (submods.exists(modName))
-			return submods.get(modName).getPercent(player);
-		else
-			return 0;
-		
+	public function getSubmodPercent(modName:String, player:Int){
+		var m = submods.get(modName);
+		return m == null ? 0 : m.getPercent(player);
 	}
 
-	public function getSubmodValue(modName:String, player:Int)
-	{
-		if (submods.exists(modName))
-			return submods.get(modName).getValue(player);
-		else
-			return 0;
+	public function getSubmodValue(modName:String, player:Int){
+		var m = submods.get(modName);
+		return m == null ? 0 : m.getValue(player);
+	}
+
+	var submodColumnCache:Map<String, Array<Modifier>> = [];
+	function getColumnSubmodEntry(baseName:String, data:Int, suffix:String = ''):Modifier {
+		if (data < 0) return null;
+		var cacheKey = suffix == '' ? baseName : '$baseName\000$suffix';
+		var arr = submodColumnCache.get(cacheKey);
+		if (arr == null){
+			arr = [];
+			submodColumnCache.set(cacheKey, arr);
+		}
+		var cached = (data < arr.length) ? arr[data] : null;
+		if (cached == null){
+			cached = submods.get('$baseName$data$suffix');
+			while (arr.length <= data)
+				arr.push(null);
+			arr[data] = cached;
+		}
+		return cached;
+	}
+
+	public function getColumnSubmodValue(baseName:String, data:Int, player:Int, suffix:String = ''):Float {
+		var m = getColumnSubmodEntry(baseName, data, suffix);
+		return m == null ? 0 : m.getValue(player);
+	}
+
+	public function getColumnSubmodPercent(baseName:String, data:Int, player:Int, suffix:String = ''):Float {
+		var m = getColumnSubmodEntry(baseName, data, suffix);
+		return m == null ? 0 : m.getPercent(player);
 	}
 
 	public function setSubmodPercent(modName:String, endPercent:Float, player:Int)
