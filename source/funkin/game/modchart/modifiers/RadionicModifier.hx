@@ -22,8 +22,8 @@ class RadionicModifier extends NoteModifier {
     var sinAng = Math.sin(angle);
     var cosAng = Math.cos(angle);
 
-    var targetX = FlxG.width * 0.5 + ((sinAng * offsetY + cosAng * (circf + offsetX)) * 0.7) * 1.125;
-    var targetY = FlxG.height * 0.5 + ((cosAng * offsetY + sinAng * (circf + offsetX)) * 0.7) * 0.875;
+    var targetX = FlxG.width * 0.5 + ((sinAng * offsetY + cosAng * (circf + offsetX)) * 0.7) * 1.125 - (Note.swagWidth / 2);
+    var targetY = FlxG.height * 0.5 + ((cosAng * offsetY + sinAng * (circf + offsetX)) * 0.7) * 0.875 - (Note.swagWidth / 2);
 
     pos.x = lerp(pos.x, targetX, perc);
     pos.y = lerp(pos.y, targetY, perc);
