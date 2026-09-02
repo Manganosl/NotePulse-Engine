@@ -10,6 +10,7 @@ import funkin.states.init.OutdatedState;
 import funkin.backend.utils.helpers.FunkinRatioScaleMode;
 import flixel.addons.transition.FlxTransitionableState;
 import funkin.scripting.GlobalHandler;
+import lime.app.Application;
 
 class Init extends FlxState {
 	var mustUpdate:Bool = false;
@@ -77,6 +78,7 @@ class Init extends FlxState {
 			FlxTransitionableState.skipNextTransOut = true;
 			if(Mods.currentLoadedMod != "" && Mods.modPack != null){
 				GlobalHandler.loadGlobalHX();
+				Application.current.window.title = (((Mods.currentLoadedMod != null && Mods.currentLoadedMod != "" && Mods.modPack.name != null && Mods.modPack.name != "") ? Mods.modPack.name : "NotePulse Engine"));
 	    		if(Mods.modPack.forceStates && Mods.modPack.titleState != null && Mods.modPack.titleState != "") {
 					FlxG.switchState(new ScriptedState(Mods.modPack.titleState));
 				} else {

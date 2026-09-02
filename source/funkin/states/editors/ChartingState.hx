@@ -599,12 +599,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		loadChart(song);
 	}
 
-	function prepareReload()
-	{
+	function prepareReload(){
 		updateJsonData();
 		loadMusic();
 		reloadNotes();
 		onChartLoaded();
+		createGrids();
 		updateHeads(true);
 		
 		autoSaveTime = 0;

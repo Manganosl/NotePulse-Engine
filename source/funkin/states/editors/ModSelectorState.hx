@@ -6,6 +6,7 @@ import funkin.states.menus.FreeplayState.SongMetadata;
 import funkin.objects.HealthIcon;
 import funkin.objects.AttachedSprite;
 import openfl.net.FileReference;
+import lime.app.Application;
 import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxSort;
 import haxe.Json;
@@ -146,6 +147,7 @@ class ModSelectorState extends MusicBeatState {
 			FlxG.sound.music.stop();
 			FlxTween.cancelTweensOf(Main.fpsVar);
 			Main.fpsVar.y = 10;
+			Application.current.window.title = (((Mods.currentLoadedMod != null && Mods.currentLoadedMod != "" && Mods.modPack.name != null && Mods.modPack.name != "") ? Mods.modPack.name : "NotePulse Engine"));
 			MusicBeatState.switchState(new funkin.states.menus.TitleState());
 			return;
 		}

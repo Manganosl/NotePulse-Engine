@@ -93,14 +93,15 @@ class FunkinScript implements HscriptInterface {
 		"PlayField"					=> funkin.objects.notes.PlayField,
 		"StrumNote"					=> funkin.objects.notes.StrumNote,
 		"ClientPrefs" 				=> funkin.data.ClientPrefs,
+		"Mods" 						=> funkin.backend.Mods,
 		"Conductor" 				=> funkin.backend.Conductor,
 		"Paths" 					=> funkin.backend.Paths,
 		#if PRETTY_TRACE "Log" 		=> funkin.backend.Log, #end
 		"CoolUtil"					=> funkin.backend.utils.CoolUtil,
 		"WindowUtil" 				=> funkin.backend.utils.WindowUtil,
 		"CameraUtil"				=> funkin.backend.utils.CameraUtil,
-		"CustomShader" 				=> funkin.game.shaders.CustomShader,
 		"NdllUtil" 					=> funkin.backend.utils.NdllUtil,
+		"CustomShader" 				=> funkin.game.shaders.CustomShader,
 		"LuaUtils" 					=> funkin.scripting.LuaUtils,
 
 		// Modcharting Classes

@@ -56,7 +56,7 @@ class MainMenuState extends MusicBeatState
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 
-		Application.current.window.title = "NotePulse Engine" + " | " + "Main Menu";
+		Application.current.window.title = (((Mods.currentLoadedMod != null && Mods.currentLoadedMod != "" && Mods.modPack.name != null && Mods.modPack.name != "") ? Mods.modPack.name : "NotePulse Engine")) + " | " + "Main Menu";
 
 		persistentUpdate = persistentDraw = true;
 
