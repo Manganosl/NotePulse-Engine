@@ -36,7 +36,7 @@ class Main extends Sprite
 {
 	public static var GIT_COMMIT:String = Compiler.getDefine("GIT_COMMIT") != null ?
 	Compiler.getDefine("GIT_COMMIT").split("=")[0] : null;
-	public static var npeVersion:String = "0.9.0";
+	public static var npeVersion:String = "1.0.0-prerelease";
 	public static var psychEngineVersion:String = '0.7.3';
 
 	var game = {

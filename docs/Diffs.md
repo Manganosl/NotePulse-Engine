@@ -29,7 +29,7 @@
 - RGBShader now has a perspective shader.
 - Functions that add compatibility for FunkinModchart.
 - StrumNotes render using modPos.x and modPos.y, (x and y still work)
-- Sustains can use more subdivisions, the count can be changed on the charting editor (2 is the default value)
+- Sustains can be segmented.
 
 ### Others
 
@@ -65,5 +65,6 @@
     - StepMania
     - Quaver
 - Modchart Editor
+- FunkinSprite with 3D angles
 
 ###### Probably more things but I forgot
