@@ -36,12 +36,9 @@ class ConfusionModifier extends NoteModifier {
         angleZ += (beat * getSubmodValue("dizzy", player) % 360) * (180 / Math.PI);
         angleZ += getSubmodValue("noteAngle", player) + getColumnSubmodValue('note', data, player, 'Angle');
 
-        //if (note.rgbShader != null) {
-        //    note.rgbShader.angleX = angleX * (Math.PI / 180);
-        //    note.rgbShader.angleY = angleY * (Math.PI / 180);
-        //}
-        
-        note.angle = angleZ + note.offsetAngle;
+        note.angle3D.x = angleX;
+        note.angle3D.y = angleY;
+        note.angle3D.z = angleZ + note.offsetAngle;
     }
 
     override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int) {
@@ -54,13 +51,10 @@ class ConfusionModifier extends NoteModifier {
         angleX += getSubmodValue("receptorAngleX", player) + getColumnSubmodValue('receptor', data, player, 'AngleX');
         angleY += getSubmodValue("receptorAngleY", player) + getColumnSubmodValue('receptor', data, player, 'AngleY');
         angleZ += getSubmodValue("receptorAngle", player) + getColumnSubmodValue('receptor', data, player, 'Angle');
-
-        //if (receptor.rgbShader != null) {
-        //    receptor.rgbShader.angleX = angleX * (Math.PI / 180);
-        //    receptor.rgbShader.angleY = angleY * (Math.PI / 180);
-        //}
         
-        receptor.angle = angleZ;
+        receptor.angle3D.x = angleX;
+        receptor.angle3D.y = angleY;
+        receptor.angle3D.z = angleZ;
     }
 
     override function getSubmods() {

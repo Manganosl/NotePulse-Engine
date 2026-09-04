@@ -85,6 +85,7 @@ class FunkinScript implements HscriptInterface {
 		"ScriptedState" 			=> funkin.states.scripted.ScriptedState,
 		"ScriptedSubstate" 			=> funkin.states.scripted.ScriptedSubstate,
 		"GameOverSubstate" 			=> funkin.substates.GameOverSubstate,
+		"FunkinSprite"              => funkin.objects.FunkinSprite,
 		"Character" 				=> funkin.objects.Character,
 		"FunkinVideoSprite"			=> funkin.objects.FunkinVideoSprite,
 		"HealthIcon"				=> funkin.objects.HealthIcon,
@@ -147,6 +148,8 @@ class FunkinScript implements HscriptInterface {
 		"FlxRuntimeShader" 			=> flixel.addons.display.FlxRuntimeShader, 
 		#end
 		"ShaderFilter"				=> openfl.filters.ShaderFilter,
+
+		"FlxAnimate"                => animate.FlxAnimate,
 
 		//Abstracts
 		"FlxPoint" 					=> LuaUtils.getMacroAbstractClass("flixel.math.FlxPoint"),

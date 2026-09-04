@@ -8,6 +8,8 @@ import funkin.game.shaders.RGBPalette;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.frames.FlxFrame;
 
+import funkin.objects.FunkinSprite;
+
 typedef NoteSplashConfig = {
 	anim:String,
 	minFps:Int,
@@ -15,7 +17,7 @@ typedef NoteSplashConfig = {
 	offsets:Array<Array<Float>>
 }
 
-class NoteSplash extends FlxSkewedSprite {
+class NoteSplash extends FunkinSprite {
 	public var rgbShader:PixelSplashShaderRef;
 	private var idleAnim:String;
 	private var _textureLoaded:String = null;

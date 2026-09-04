@@ -1,13 +1,6 @@
 package funkin.states.scripted;
 
-import flixel.util.FlxColor;
 import funkin.scripting.FunkinScript;
-import flixel.addons.display.FlxRuntimeShader;
-import flixel.text.FlxText;
-import flixel.FlxG;
-import funkin.backend.CustomFadeTransition;
-import sys.io.File;
-import flixel.FlxBasic;
 
 class ScriptedState extends MusicBeatState
 {
@@ -18,29 +11,24 @@ class ScriptedState extends MusicBeatState
 
 	private var softlocked:Bool = false;
 
-	public function new(?scriptPath:String = null, ?isCode:Bool = false)
-	{
-		if(scriptPath != null) lastScriptPath = scriptPath;
+	public function new(?scriptPath:String = null){
 		instance = this;
 		super();
-		this.initialScriptPath = Paths.modState(scriptPath != null ? scriptPath : lastScriptPath);
+		this.initialScriptPath = scriptPath != null ? Paths.modState(scriptPath) : lastScriptPath;
+		if(scriptPath != null) lastScriptPath = this.initialScriptPath;
 	}
 
 	override public function create():Void {
 		super.create();
+		if(initialScriptPath != null) startHScript(initialScriptPath);
 
-		if (initialScriptPath != null) startHScript(initialScriptPath);
-
-		stagesFunc(function(stage:BaseStage) stage.createPost());
-		if (hscript != null) callOnHScript('onCreatePost');
+		if(hscript != null) callOnHScript('onCreatePost');
 	}
 
-	public function startHScript(scriptToLoad:String):Bool
-	{
-		if (FileSystem.exists(scriptToLoad))
-		{
+	public function startHScript(scriptToLoad:String):Bool {
+		if(FileSystem.exists(scriptToLoad)){
 			hscript = initHScript(scriptToLoad);
-			if (hscript == null){
+			if(hscript == null){
 				softlocked = true;
 				var errorText = new FlxText(0, FlxG.height / 2 - 10, FlxG.width, "Error while loading Script:\n" + scriptToLoad + "\n\nPress SPACE to go back to Main Menu");
 				errorText.setFormat(null, 16, FlxColor.RED, "center");
@@ -58,13 +46,12 @@ class ScriptedState extends MusicBeatState
 
 	override public function update(elapsed:Float):Void
 	{
-		if (hscript != null) callOnHScript("onUpdate", [elapsed]);
+		if(hscript != null) callOnHScript("onUpdate", [elapsed]);
 
 		super.update(elapsed);
 
-		if (softlocked)
-		{
-			if (FlxG.keys.justPressed.SPACE){
+		if(softlocked){
+			if(FlxG.keys.justPressed.SPACE){
 				Mods.modPack = null;
 				funkin.scripting.GlobalHandler.stopGlobalHX();
 				MusicBeatState.switchState(new funkin.states.menus.TitleState());
@@ -72,21 +59,11 @@ class ScriptedState extends MusicBeatState
 			return;
 		}
 
-		if (hscript != null) callOnHScript("onUpdatePost", [elapsed]);
+		if(hscript != null) callOnHScript("onUpdatePost", [elapsed]);
 	}
 
-	override public function destroy():Void
-	{
-		if (hscript != null) callOnHScript('onDestroy');
-
-		if (hscriptArray != null)
-		{
-			for (s in hscriptArray)
-			{
-				if (s != null) s.stop();
-			}
-			hscriptArray = [];
-		}
+	override public function destroy():Void {
+		if(hscript != null) callOnHScript('onDestroy');
 		hscript = null;
 
 		super.destroy();

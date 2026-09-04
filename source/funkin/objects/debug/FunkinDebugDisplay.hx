@@ -346,8 +346,16 @@ class FunkinDebugDisplay extends Sprite
     final stateName:String = FlxG.state != null ? Type.getClassName(Type.getClass(FlxG.state)) : 'null';
     final subStateName:String = FlxG.state != null && FlxG.state.subState != null ? Type.getClassName(Type.getClass(FlxG.state.subState)) : 'none';
 
-    info.push('State: $stateName');
-    info.push('Substate: $subStateName');
+    @:privateAccess
+    if(stateName != 'funkin.states.scripted.ScriptedState')
+      info.push('State: $stateName');
+    else
+      info.push('State: ${funkin.states.scripted.ScriptedState.lastScriptPath}');
+    @:privateAccess
+    if(stateName != 'funkin.states.scripted.ScriptedSubstate')
+      info.push('Substate: $subStateName');
+    else
+      info.push('Substate: ${funkin.states.scripted.ScriptedSubstate.lastScriptPath}');
     info.push('Members: ${FlxG.state != null ? FlxG.state.members.length : 0}');
     info.push('Cameras: ${FlxG.cameras.list.length}');
     info.push('Sounds: ${FlxG.sound.list.length}');

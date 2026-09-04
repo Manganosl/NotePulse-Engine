@@ -10,17 +10,16 @@ import flixel.FlxBasic;
 
 class ScriptedSubstate extends MusicBeatSubstate
 {
+	static var lastScriptPath:String = "";
 	public var hscript:FunkinScript = null;
 	private var initialScriptPath:String;
-	public static var instance:ScriptedSubstate;
 
 	private var softlocked:Bool = false;
 
-	public function new(?scriptPath:String = null, ?isCode:Bool = false)
-	{
-		instance = this;
+	public function new(?scriptPath:String = null){
 		super();
-		this.initialScriptPath = Paths.modState(scriptPath);
+		this.initialScriptPath = scriptPath != null ? Paths.modState(scriptPath) : lastScriptPath;
+		if(scriptPath != null) lastScriptPath = this.initialScriptPath;
 	}
 
 	override public function create():Void
@@ -28,18 +27,14 @@ class ScriptedSubstate extends MusicBeatSubstate
 		super.create();
 
 		if (initialScriptPath != null)
-		{
 			startHScript(initialScriptPath);
-		}
 
 		if (hscript != null)
 			callOnHScript('onCreatePost');
 	}
 
-	public function startHScript(scriptToLoad:String):Bool
-	{
-		if (FileSystem.exists(scriptToLoad))
-		{
+	public function startHScript(scriptToLoad:String):Bool {
+		if (FileSystem.exists(scriptToLoad)){
 			hscript = initHScript(scriptToLoad);
 			if (hscript == null){
 				softlocked = true;
@@ -63,9 +58,8 @@ class ScriptedSubstate extends MusicBeatSubstate
 
 		super.update(elapsed);
 
-		if (softlocked)
-		{
-			if (FlxG.keys.justPressed.SPACE)
+		if(softlocked){
+			if(FlxG.keys.justPressed.SPACE)
 				MusicBeatState.switchState(new funkin.states.MainMenuState());
 			return;
 		}
@@ -73,18 +67,8 @@ class ScriptedSubstate extends MusicBeatSubstate
 		callOnHScript("onUpdatePost", [elapsed]);
 	}
 
-	override public function destroy():Void
-	{
+	override public function destroy():Void {
 		callOnHScript('onDestroy');
-
-		if (hscriptArray != null)
-		{
-			for (s in hscriptArray)
-			{
-				if (s != null) s.stop();
-			}
-			hscriptArray = [];
-		}
 		hscript = null;
 
 		super.destroy();

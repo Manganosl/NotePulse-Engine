@@ -14,6 +14,7 @@ import funkin.objects.notes.splashes.NoteSplash;
 import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.PlayField;
 
+import funkin.objects.FunkinSprite;
 import funkin.game.modchart.math.Vector3;
 import funkin.game.modchart.math.MathUtil;
 
@@ -42,7 +43,7 @@ typedef NoteSplashData = {
 	a:Float
 }
 
-class Note extends FlxSkewedSprite {
+class Note extends FunkinSprite {
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
 
@@ -779,7 +780,7 @@ class Note extends FlxSkewedSprite {
 			_curvePoint.set(0, 0);
 
 			for (i in 1...sampleCount){
-				if (sampleVDiffs[i - 1] <= 0 && sampleVDiffs[i] <= 0) continue;
+				if(strum.sustainReduce && wasGoodHit && sampleVDiffs[i - 1] <= 0 && sampleVDiffs[i] <= 0) continue;
 
 				_curveVertices.length = 0;
 				_curveUVT.length = 0;
