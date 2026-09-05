@@ -67,6 +67,10 @@ class SustainSplash extends FunkinSprite {
 
 		angle = note.angle + offsetAngle;
 
+		var ct = note.colorTransform;
+
+		setColorTransform(ct.redMultiplier, ct.greenMultiplier, ct.blueMultiplier, ct.alphaMultiplier, ct.redOffset, ct.greenOffset, ct.blueOffset, ct.alphaOffset);
+
 		if (animation.curAnim == null || animation.curAnim.name != "loop") {
 			animation.play("loop");
 			centerSplash();
@@ -110,7 +114,7 @@ class SustainSplash extends FunkinSprite {
 		centerOffsets();
 		scale.x = strum.scale.x * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleX;
 		scale.y = strum.scale.y * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleY;
-		alpha = strum.alpha + offsetAlpha - (1 - strum.rgbShader.alphaMult);
+		alpha = strum.alpha + offsetAlpha;
 		x = strum.modPos.x + (strum.width / 2) - (width / 2) + offsetX;
 		y = strum.modPos.y + (strum.height / 2) - (height / 2) + offsetY;
 	}

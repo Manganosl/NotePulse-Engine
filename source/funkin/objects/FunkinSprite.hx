@@ -2,6 +2,7 @@ package funkin.objects;
 
 import flixel.graphics.frames.FlxFrame.FlxFrameType;
 import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
+import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
 import flixel.util.FlxDestroyUtil;
@@ -17,9 +18,12 @@ class FunkinSprite extends FlxSkewedSprite {
 
 	@:noCompletion private static var __rotationMatrix:Matrix3D = new Matrix3D();
 
+	@:noCompletion private var _clippedFrame:FlxFrame;
+
 	override public function destroy():Void {
 		skew = FlxDestroyUtil.put(skew);
 		skewOffset = FlxDestroyUtil.put(skewOffset);
+		_clippedFrame = FlxDestroyUtil.destroy(_clippedFrame);
 
 		super.destroy();
 	}
@@ -85,14 +89,20 @@ class FunkinSprite extends FlxSkewedSprite {
 	}
 
 	private function __drawSprite3D(camera:FlxCamera):Void {
+		var renderFrame = frame;
+		if (clipRect != null) {
+			_clippedFrame = frame.clipTo(clipRect, _clippedFrame);
+			renderFrame = _clippedFrame;
+		}
+
 		var halfFrameW = frameWidth * 0.5;
 		var halfFrameH = frameHeight * 0.5;
 
-		var trimCenterX = frame.offset.x + frame.frame.width * 0.5;
-		var trimCenterY = frame.offset.y + frame.frame.height * 0.5;
+		var trimCenterX = renderFrame.offset.x + renderFrame.frame.width * 0.5;
+		var trimCenterY = renderFrame.offset.y + renderFrame.frame.height * 0.5;
 
-		var planeWidth = frame.frame.width * scale.x * .5;
-		var planeHeight = frame.frame.height * scale.y * .5;
+		var planeWidth = renderFrame.frame.width * scale.x * .5;
+		var planeHeight = renderFrame.frame.height * scale.y * .5;
 
 		var planeVertices = getGraphicVertices(planeWidth, planeHeight);
 		getScreenPosition(_point, camera);
@@ -147,7 +157,7 @@ class FunkinSprite extends FlxSkewedSprite {
 			planeVertices[6], planeVertices[7]
 		]);
 
-		final uvRectangle = this.frame.uv;
+		final uvRectangle = renderFrame.uv;
 		var uvData = new DrawData<Float>(12, true, [
 			uvRectangle.x, uvRectangle.y,
 			uvRectangle.width, uvRectangle.y,
@@ -159,7 +169,7 @@ class FunkinSprite extends FlxSkewedSprite {
 
 		@:privateAccess
 		camera.drawTriangles(graphic, vertices, new DrawData<Int>(vertices.length, true, [for (i in 0...vertices.length) i]),
-			uvData, new DrawData<Int>(), camera._point, blend, false,antialiasing, colorTransform, shader
+			uvData, new DrawData<Int>(), camera._point, blend, false, antialiasing, colorTransform, shader
 		);
 	}
 }

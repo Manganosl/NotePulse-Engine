@@ -456,6 +456,7 @@ class ModchartEditorState extends MusicBeatState
 	}
 
 	var useNormalSustainsCheckBox:PsychUICheckBox;
+	var sustainSegmentsStepper:PsychUINumericStepper;
 	function addSongTab():Void {
 		var tabGroup = modchartBox.getTab('Song').menu;
 		var posX = 10;
@@ -470,12 +471,12 @@ class ModchartEditorState extends MusicBeatState
 
 		posY += 40;
 		useNormalSustainsCheckBox = new PsychUICheckBox(posX, posY, 'Use Normal Sustains', 150, function() modManager.useNormalSustains = useNormalSustainsCheckBox.checked);
-		useNormalSustainsCheckBox.checked = modManager.useNormalSustains;
+		useNormalSustainsCheckBox.checked = false;
 		tabGroup.add(useNormalSustainsCheckBox);
 
 		posY += 40;
 		var sustainSegmentsLabelText = new FlxText(posX, posY - 15, 150, 'Sustain Segments:');
-		var sustainSegmentsStepper:PsychUINumericStepper = new PsychUINumericStepper(posX, posY, 1, modManager.sustainSegments, 1, 999, 0);
+		sustainSegmentsStepper = new PsychUINumericStepper(posX, posY, 1, 4, 1, 999, 0);
 		sustainSegmentsStepper.onValueChange = function() {
 			modManager.sustainSegments = Std.int(sustainSegmentsStepper.value);
 		};
@@ -2129,6 +2130,8 @@ class ModchartEditorState extends MusicBeatState
 		modManager.receptors = [for(i in PlayField.fields) i.members];
 		modManager.registerDefaultModifiers();
 		modManager.registerScriptedModifiers();
+		if(useNormalSustainsCheckBox != null) modManager.useNormalSustains = useNormalSustainsCheckBox.checked;
+		if(sustainSegmentsStepper != null) modManager.sustainSegments = Std.int(sustainSegmentsStepper.value);
 		
 		for (songEvent in PlayState.SONG.events){
 			for (i in 0...songEvent[1].length){

@@ -10,8 +10,10 @@ class MathUtil {
 		return n;
 	}
 
-	inline public static function square(angle:Float)
-		return angle % (Math.PI * 2) >= Math.PI ? -1.0 : 1.0;
+	inline public static function square(angle:Float){
+		var fAngle = angle % (Math.PI * 2);
+		return fAngle >= Math.PI ? -1.0 : 1.0;
+	}
 
 	inline public static function triangle(angle:Float){
 		var fAngle:Float = angle % (Math.PI * 2.0);

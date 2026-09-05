@@ -57,8 +57,11 @@ class NoteSplash extends FunkinSprite {
 
 	var maxAnims:Int = 1;
 	public function setupNoteSplash(x:Float, y:Float, direction:Int = 0, ?note:Note = null) {
-		this.babyArrow = note.strum;
-
+		if(note != null){
+			this.babyArrow = note.strum;
+			var ct = note.colorTransform;
+			setColorTransform(ct.redMultiplier, ct.greenMultiplier, ct.blueMultiplier, ct.alphaMultiplier, ct.redOffset, ct.greenOffset, ct.blueOffset, ct.alphaOffset);
+		}
 		setPosition(x - Note.swagWidth * 0.95, y - Note.swagWidth);
 		aliveTime = 0;
 
@@ -216,10 +219,8 @@ class NoteSplash extends FunkinSprite {
 
 class PixelSplashShaderRef {
 	public var shader:PixelSplashShader = new PixelSplashShader();
-	public var alphaMult:Float = 1; // DO THIS LATER
 
-	public function copyValues(tempShader:RGBPalette)
-	{
+	public function copyValues(tempShader:RGBPalette){
 		var enabled:Bool = false;
 		if(tempShader != null)
 			enabled = true;
