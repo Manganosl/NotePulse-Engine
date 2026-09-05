@@ -455,18 +455,33 @@ class ModchartEditorState extends MusicBeatState
 		tabGroupModchart.add(actionsDropdown);
 	}
 
+	var useNormalSustainsCheckBox:PsychUICheckBox;
 	function addSongTab():Void {
 		var tabGroup = modchartBox.getTab('Song').menu;
 		var posX = 10;
 		var posY = 25;
 
-		var saveButton:PsychUIButton = new PsychUIButton(posX, posY, 'Save Modchart', function()
-		{
+		var saveButton:PsychUIButton = new PsychUIButton(posX, posY, 'Save Modchart', function(){
 			saveChart();
 		}, 100);
 		saveButton.normalStyle.bgColor = FlxColor.GREEN;
 		saveButton.normalStyle.textColor = FlxColor.WHITE;
 		tabGroup.add(saveButton);
+
+		posY += 40;
+		useNormalSustainsCheckBox = new PsychUICheckBox(posX, posY, 'Use Normal Sustains', 150, function() modManager.useNormalSustains = useNormalSustainsCheckBox.checked);
+		useNormalSustainsCheckBox.checked = modManager.useNormalSustains;
+		tabGroup.add(useNormalSustainsCheckBox);
+
+		posY += 40;
+		var sustainSegmentsLabelText = new FlxText(posX, posY - 15, 150, 'Sustain Segments:');
+		var sustainSegmentsStepper:PsychUINumericStepper = new PsychUINumericStepper(posX, posY, 1, modManager.sustainSegments, 1, 999, 0);
+		sustainSegmentsStepper.onValueChange = function() {
+			modManager.sustainSegments = Std.int(sustainSegmentsStepper.value);
+		};
+
+		tabGroup.add(sustainSegmentsLabelText);
+		tabGroup.add(sustainSegmentsStepper);
 	}
 
 	var vortexIndicator:FlxSprite;
@@ -1253,17 +1268,18 @@ class ModchartEditorState extends MusicBeatState
 
 		if(modManager != null){
 			for(field in PlayField.fields){
-				field.forEachAlive(function(strum:StrumNote)
-				{
+				field.forEachAlive(function(strum:StrumNote){
+					if(strum.alpha == 0 || strum.visible == false) return;
+
 					var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
 					modManager.updateObject(curDecBeat, strum, pos, field.player);
 					strum.modPos.x = pos.x;
-					strum.modPos.y = pos.y;
+					strum.modPos.y = pos.y + strum.y - 50;
 					strum.z = pos.z;
+					strum.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
 				});
 			}
 		}
-		strumLineNotes.sort(PlayState.sortByOrderStrumNote);
 		
 		super.update(elapsed);
 
@@ -1570,6 +1586,9 @@ class ModchartEditorState extends MusicBeatState
 		daNote.x = pos.x;
 		daNote.y = pos.y + daNote.strum.y - 50;
 		daNote.z = pos.z;
+
+		if(modManager.useNormalSustains || !daNote.isSustainNote)
+    		daNote.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
 
 		if(daNote.isSustainNote){
 			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4), 10);

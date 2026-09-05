@@ -103,63 +103,35 @@ class AlphaModifier extends NoteModifier
 
 	override function shouldExecute(player:Int, val:Float) return true;
 
-	override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int)
-	{
-		if(note.isSustainNote && !note.isSustainEnd) return;
-		var player = note.playField.player;
-		var column = note.noteData;
-		var speed = modMgr.state.songSpeed * (note.multSpeed * note.modSpeed);
-		var yPos:Float = modMgr.getVisPos(Conductor.songPosition, note.strumTime, speed) + 50;
-
-		note.rgbShader.flash = 0;
-		var alphaMod = (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha$column', player))
-			* (1 - getSubmodValue("noteAlpha", player)) * (1 - getSubmodValue('noteAlpha$column', player));
-		var alpha = getVisibility(yPos, player, column);
-
-		if (getSubmodValue("dontUseStealthGlow", player) == 0)
-		{
-			note.alphaMod = getAlpha(alpha);
-			note.rgbShader.flash = getGlow(alpha);
-		}
-		else note.alphaMod = alpha;
-
-		note.alphaMod *= alphaMod;
-	}
-
 	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite):Vector3
 	{
-		var column = data;
-		var yPos:Float = visualDiff + 50;
+		if(obj is Note){
+			var column = data;
+			var yPos:Float = visualDiff + 50;
 
-		var alphaMod = (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha$column', player))
-			* (1 - getSubmodValue("noteAlpha", player)) * (1 - getSubmodValue('noteAlpha$column', player));
-		var visibility = getVisibility(yPos, player, column);
+			var alphaMod = (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha$column', player))
+				* (1 - getSubmodValue("noteAlpha", player)) * (1 - getSubmodValue('noteAlpha$column', player));
+			var visibility = getVisibility(yPos, player, column);
 
-		var finalAlpha:Float;
-		var glow:Float = 0;
+			var finalAlpha:Float;
+			var glow:Float = 0;
 
-		if (getSubmodValue("dontUseStealthGlow", player) == 0)
-		{
-			finalAlpha = getAlpha(visibility);
-			glow = getGlow(visibility);
+			if (getSubmodValue("dontUseStealthGlow", player) == 0)
+			{
+				finalAlpha = getAlpha(visibility);
+				glow = getGlow(visibility);
+			}
+			else finalAlpha = visibility;
+
+			pos.alpha = finalAlpha * alphaMod;
+			pos.glow = glow;
+		} else {
+			var alphaMod = (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha$data', player));
+			if (getSubmodValue("dark", player) != 0 || getSubmodValue('dark$data', player) != 0)
+				alphaMod = alphaMod * (1 - getSubmodValue("dark", player)) * (1 - getSubmodValue('dark$data', player));
+			pos.alpha = alphaMod;
 		}
-		else finalAlpha = visibility;
-
-		pos.alpha = finalAlpha * alphaMod;
-		pos.glow = glow;
-
 		return pos;
-	}
-
-	override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int)
-	{
-		var column = receptor.noteData;
-		var alpha = (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha$column', player));
-		if (getSubmodValue("dark", player) != 0 || getSubmodValue('dark$column', player) != 0)
-		{
-			alpha = alpha * (1 - getSubmodValue("dark", player)) * (1 - getSubmodValue('dark$column', player));
-		}
-		receptor.rgbShader.alphaMult = alpha;
 	}
 
 	override function getSubmods()

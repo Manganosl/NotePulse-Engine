@@ -52,12 +52,8 @@ class Note extends FunkinSprite {
 		_curvePoint.put();
 		super.destroy();
 	}	
-	public var zIndex:Float = 0;
-	public var desiredZIndex:Float = 0;
 	public var z:Float = 0;
 	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
-	public var alphaMod:Float = 1;
-	public var alphaMod2:Float = 1; // TODO: unhardcode this shit lmao
 
 	public var mAngle:Float = 0;
 	public var bAngle:Float = 0;
@@ -622,9 +618,6 @@ class Note extends FunkinSprite {
 					wasGoodHit = true;
 			}
 		}
-
-		if(rgbShader != null)			
-			rgbShader.alphaMult = (alphaMod * alphaMod2);
 
 		if(tooLate && !inEditor)
 			if(alpha > 0.3)

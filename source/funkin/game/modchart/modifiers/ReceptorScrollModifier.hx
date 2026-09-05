@@ -32,7 +32,7 @@ class ReceptorScrollModifier extends NoteModifier {
   }
 
 	override function updateNote(beat:Float, daNote:Note, pos:Vector3, player:Int){
-    if(getValue(player)==0) return;
+    if(getValue(player) == 0) return;
     if(daNote.isSustainNote && !daNote.isSustainEnd) return;
 		var timeDiff = (daNote.strumTime - Conductor.songPosition);
 
@@ -42,11 +42,7 @@ class ReceptorScrollModifier extends NoteModifier {
     var songPos = sPos / moveSpeed;
 		var notePos = -(-diff - sPos) / moveSpeed;
 
-    if(Math.floor(songPos)!=Math.floor(notePos)){
-			daNote.alphaMod *= .5;
-			daNote.zIndex++;
-    }
-		if (daNote.wasGoodHit)daNote.garbage=true;
+		if(daNote.wasGoodHit) daNote.garbage=true;
 
   }
 }

@@ -1040,24 +1040,18 @@ class PlayState extends MusicBeatState
 				strum.modPos.x = pos.x;
 				strum.modPos.y = pos.y + strum.y - 50;
 				strum.z = pos.z;
+				strum.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
 			});
 		}
-		strumLineNotes.sort(sortByOrderStrumNote);
 
-		if (generatedMusic)
-		{
-			if(!inCutscene)
-			{
+		if(generatedMusic){
+			if(!inCutscene){
 				if(!cpuControlled)
 					keysCheck();
 
-				if(notes.length > 0)
-				{
-					if(startedCountdown)
-					{
-						notes.sort(sortByOrderNote);
-						notes.forEachAlive(function(daNote:Note)
-						{
+				if(notes.length > 0){
+					if(startedCountdown){
+						notes.forEachAlive(function(daNote:Note){
 							if(daNote.strum != null){
 								noteFollowStrum(daNote);
 
@@ -1129,16 +1123,6 @@ class PlayState extends MusicBeatState
 		setOnScripts('botPlay', cpuControlled);
 
 		callOnScripts('onUpdatePost', [elapsed]);
-	}
-
-	public static function sortByOrderNote(wat:Int, Obj1:Note, Obj2:Note):Int
-	{
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
-	}
-
-	public static function sortByOrderStrumNote(wat:Int, Obj1:StrumNote, Obj2:StrumNote):Int
-	{
-		return FlxSort.byValues(FlxSort.DESCENDING, Obj1.zIndex, Obj2.zIndex);
 	}
 
 	override function destroy() {
@@ -2956,6 +2940,9 @@ class PlayState extends MusicBeatState
 		daNote.x = pos.x;
 		daNote.y = pos.y + daNote.strum.y - 50;
 		daNote.z = pos.z;
+
+		if(modManager.useNormalSustains || !daNote.isSustainNote)
+    		daNote.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
 
 		if(daNote.isSustainNote){
 			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4), 10);

@@ -21,8 +21,7 @@ class ModManager {
 	public var useNormalSustains:Bool = false;  // Some textures have problems with segmented sustains
 	public var sustainSegments:Int = 4;
 
-	public function registerDefaultModifiers()
-	{
+	public function registerDefaultModifiers(){
 		var quickRegs:Array<Any> = [
 			XModifier,
 			FlipModifier,

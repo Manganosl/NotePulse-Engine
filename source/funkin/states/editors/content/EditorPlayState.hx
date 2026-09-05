@@ -286,16 +286,17 @@ class EditorPlayState extends MusicBeatSubstate
 		}
 
 		for(field in PlayField.fields){
-			field.forEachAlive(function(strum:StrumNote)
-			{
+			field.forEachAlive(function(strum:StrumNote){
+				if(strum.alpha == 0 || strum.visible == false) return;
+
 				var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
 				modManager.updateObject(curDecBeat, strum, pos, field.player);
 				strum.modPos.x = pos.x;
-				strum.modPos.y = pos.y;
+				strum.modPos.y = pos.y + strum.y - 50;
 				strum.z = pos.z;
+				strum.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
 			});
 		}
-		strumLineNotes.sort(PlayState.sortByOrderStrumNote);
 		
 		var time:Float = CoolUtil.floorDecimal((Conductor.songPosition - ClientPrefs.data.noteOffset) / 1000, 1);
 		dataTxt.text = 'Time: $time / ${songLength/1000}
@@ -325,6 +326,9 @@ class EditorPlayState extends MusicBeatSubstate
 		daNote.x = pos.x;
 		daNote.y = pos.y + daNote.strum.y - 50;
 		daNote.z = pos.z;
+
+		if(modManager.useNormalSustains || !daNote.isSustainNote)
+    		daNote.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
 
 		if(daNote.isSustainNote){
 			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4), 10);
