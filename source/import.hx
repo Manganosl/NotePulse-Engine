@@ -4,6 +4,8 @@
 import funkin.backend.Discord;
 #end
 
+import haxe.ui.*;
+
 //Psych
 #if LUA_ALLOWED
 import llua.*;

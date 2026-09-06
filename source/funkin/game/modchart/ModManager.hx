@@ -387,8 +387,6 @@ class ModManager {
 	}
 
 	public function updateObject(beat:Float, obj:FlxSprite, pos:Vector3, player:Int){
-		if(obj.alpha == 0 || obj.visible == false) return;
-
 		final note:Note = (obj is Note ? cast obj : null);
 		final strum:StrumNote = (obj is StrumNote ? cast obj : null);
 		
@@ -398,18 +396,14 @@ class ModManager {
 			obj.x += note.parent.width/2 - note.width + note.offsetX;
 		
 		if (note != null && note.isSustainNote)
-		{
 			note.y = pos.y + note.offsetY + (note.strum.y - 50);
-		}
-		else
-		{
+		else {
 			if(strum != null) strum.modPos.y = (pos.y - obj.height * .5 + strum.y - 50);
 			else if (note != null) note.y = (note.offsetY + pos.y - obj.height * .5);
 			else obj.y = (pos.y - obj.height * .5);
 		}
 		
-		if (activeMods[player] != null)
-		{
+		if (activeMods[player] != null){
 			flushActiveMods(player);
 			if(obj.active){
 				var isNote = obj is Note;

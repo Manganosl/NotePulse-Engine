@@ -90,6 +90,8 @@
 
 	<haxelib name="flixel" />
 	<haxelib name="flixel-addons" />
+	<haxelib name="haxeui-core" />
+	<haxelib name="haxeui-flixel" />
 	<haxelib name="tjson" />
 	<haxelib name="nape-haxe4" />
 	<haxelib name="json2object" />
@@ -102,6 +104,8 @@
 	<haxedef name="PRETTY_TRACE" />
 	<haxedef name="CUSTOM_CLASSES"/>
 	<haxedef name="HSCRIPT_ABSTRACT_SUPPORT"/>
+    <haxedef name="haxeui_dont_impose_base_class"/>
+    <haxedef name="haxeui_focus_out_on_click"/>
 
 	<!--Psych stuff needed-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>

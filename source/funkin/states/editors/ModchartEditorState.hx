@@ -29,6 +29,23 @@ import funkin.scripting.LuaUtils;
 
 import funkin.game.modchart.*;
 
+import haxe.ui.core.Screen;
+import haxe.ui.containers.windows.Window;
+import haxe.ui.containers.windows.WindowManager;
+import haxe.ui.components.Button;
+import haxe.ui.components.CheckBox;
+import haxe.ui.components.DropDown;
+import haxe.ui.components.Label;
+import haxe.ui.components.NumberStepper;
+import haxe.ui.components.HorizontalSlider;
+import haxe.ui.components.TextField;
+import haxe.ui.containers.Box;
+import haxe.ui.containers.HBox;
+import haxe.ui.containers.TabView;
+import haxe.ui.containers.VBox;
+
+import funkin.states.editors.ui.ToolKitUtils;
+
 typedef ModchartUndoStruct = {
 	var action:ModchartUndoAction;
 	var data:Dynamic;
@@ -42,8 +59,7 @@ enum abstract ModchartUndoAction(String)
 	var SELECT_EVENT = 'Select Event';
 }
 
-class ModchartEditorState extends MusicBeatState
-{
+class ModchartEditorState extends haxe.ui.backend.flixel.UIStateBase {
 	var modManager:ModManager;
 	var initialCrochet:Float = 0;
 	// Borrowed from original PlayState
@@ -55,7 +71,6 @@ class ModchartEditorState extends MusicBeatState
 	var gridBg:ChartingGridSprite;
 	var nextGridBg:ChartingGridSprite;
 
-	var songPosBar:PsychUIBar;
 	var infoText:FlxText;
 
 	var finishTimer:FlxTimer = null;
@@ -144,7 +159,20 @@ class ModchartEditorState extends MusicBeatState
 		this.startPos = Conductor.songPosition;
 	}
 
-	var modchartBox:PsychUIBox;
+	var settingSongPosProgrammatically:Bool = false;
+	var songPosBar:HorizontalSlider;
+
+	var modchartBox:Window;
+	var modchartTabs:TabView;
+	var modifierInput:TextField;
+	var actionsDropdown:DropDown;
+	var timeStepper:NumberStepper;
+	var valueStepper:NumberStepper;
+	var easeInput:TextField;
+	var playerStepper:NumberStepper;
+
+	var useNormalSustainsCheckBox:CheckBox;
+	var sustainSegmentsStepper:NumberStepper;
 	override public function create(){
 		initPsychCamera();
 
@@ -159,6 +187,12 @@ class ModchartEditorState extends MusicBeatState
 		camUI = new FlxCamera();
 		camUI.bgColor = 0x00000000;
 		FlxG.cameras.add(camUI, false);
+
+		var camAnchor = new haxe.ui.core.Component();
+		camAnchor.cameras = [camUI];
+		camAnchor.width = 0;
+		camAnchor.height = 0;
+		Screen.instance.addComponent(camAnchor);
 
 		Conductor.safeZoneOffset = (ClientPrefs.data.safeFrames / 60) * 1000 * playbackRate;
 		Conductor.songPosition -= startOffset;
@@ -290,24 +324,31 @@ class ModchartEditorState extends MusicBeatState
 		add(thatBG);
 
 		var songLen:Float = (inst != null ? inst.length : 0.0001);
-		songPosBar = new PsychUIBar(0, thatBG.y, function(v:Float){
-			paused = true;
-			if(FlxG.sound.music != null){
-				FlxG.sound.music.pause();
-				if(vocals != null) vocals.pause();
-				if(opponentVocals != null) opponentVocals.pause();
-				pendingSeekTime = v;
-			}
-		}, Conductor.songPosition, 0, songLen, FlxG.width, 0xFF4D4D4D, FlxColor.WHITE);
+		songPosBar = new HorizontalSlider();
+		songPosBar.x = 0;
 		songPosBar.y = thatBG.y;
-		songPosBar.valueText.visible = false;
-		songPosBar.minText.visible = false;
-		songPosBar.maxText.visible = false;
+		songPosBar.width = FlxG.width;
+		songPosBar.min = 0;
+		songPosBar.max = songLen;
+		songPosBar.pos = Conductor.songPosition;
 		songPosBar.scrollFactor.set(0, 0);
 		songPosBar.cameras = [camUI];
+
+		songPosBar.onChange = function(e) {
+			if (settingSongPosProgrammatically) return;
+			if (FlxG.mouse.pressed && songPosBar.hitTest(FlxG.mouse.screenX, FlxG.mouse.screenY)) {
+				paused = true;
+				if (FlxG.sound.music != null) {
+					FlxG.sound.music.pause();
+					if (vocals != null) vocals.pause();
+					if (opponentVocals != null) opponentVocals.pause();
+					pendingSeekTime = songPosBar.pos;
+				}
+			}
+		};
 		add(songPosBar);
 
-		infoText = new FlxText(25, songPosBar.y - 65, FlxG.width);
+		infoText = new FlxText(25, thatBG.y - 65, FlxG.width);
 		infoText.cameras = [camUI];
 		infoText.setFormat(null, 13, FlxColor.WHITE, LEFT);
 		infoText.borderColor = FlxColor.BLACK;
@@ -323,11 +364,16 @@ class ModchartEditorState extends MusicBeatState
 		infoText.y += infoText.height;
 		add(infoText);
 
-		modchartBox = new PsychUIBox(0, 0, 300, 280, ['Modchart', 'Song']);
-		modchartBox.selectedName = 'Modchart';
-		modchartBox.scrollFactor.set();
-		modchartBox.cameras = [camUI];
-		add(modchartBox);
+		modchartBox = new Window();
+		modchartBox.title = "Modchart Editor";
+		modchartBox.width = 360;
+		modchartBox.height = 420;
+		modchartBox.x = 20;
+		modchartBox.y = 20;
+		modchartBox.minimizable = modchartBox.maximizable = 
+		modchartBox.closable = modchartBox.collapsable = false;
+
+		WindowManager.instance.addWindow(modchartBox);
 
 		addModchartTab();
 		addSongTab();
@@ -359,12 +405,6 @@ class ModchartEditorState extends MusicBeatState
 	var undoActions:Array<ModchartUndoStruct> = [];
 	var currentUndo:Int = 0;
 
-	var modifierInput:PsychUIInputText;
-	var actionsDropdown:PsychUIDropDownMenu;
-	var timeStepper:PsychUINumericStepper;
-	var valueStepper:PsychUINumericStepper;
-	var easeInput:PsychUIInputText;
-	var playerStepper:PsychUINumericStepper;
 	function updateModEvV1():Void {
 		if (selectedEvent == null) return;
 
@@ -378,7 +418,7 @@ class ModchartEditorState extends MusicBeatState
 		var eventName:String = (myEvent[0] != null) ? myEvent[0] : '';
 		if (eventName != "Modchart Event") return;
 
-		var action:String = (actionsDropdown != null) ? actionsDropdown.selectedLabel : '';
+		var action:String = (actionsDropdown != null) ? actionsDropdown.selectedItem.text : '';
 		var modifier:String = (modifierInput != null) ? modifierInput.text : '';
 		var timeStr:String = (timeStepper != null) ? Std.string(timeStepper.value) : '';
 		var valueStr:String = (valueStepper != null) ? Std.string(valueStepper.value) : '';
@@ -395,94 +435,144 @@ class ModchartEditorState extends MusicBeatState
 	}
 
 	function addModchartTab():Void {
-		var tabGroupModchart = modchartBox.getTab('Modchart').menu;
-		var posX = 10;
-		var posY = 30;
+		modchartTabs = new TabView();
+		modchartTabs.percentWidth = 100;
+		modchartTabs.percentHeight = 100;
+		
+		modchartBox.addComponent(modchartTabs);
+		modchartBox.scrollFactor.set();
+		modchartBox.cameras = [camUI];
+		Screen.instance.addComponent(modchartBox);
+		add(modchartBox);
 
-		modifierInput = new PsychUIInputText(posX+150, posY, 120, '', 8);
-    	modifierInput.onChange = function(old:String, cur:String){
-			updateModEvV1();
-		}
+		var tabModchart = new VBox();
+		tabModchart.text = "Modchart";
+		tabModchart.padding = 10;
+		tabModchart.verticalSpacing = 35;
 
-		var modifierLabelText = new FlxText(modifierInput.x, modifierInput.y - 15, 80, 'Modifier:');
+		var row1 = new HBox();
+		row1.horizontalSpacing = 80;
+		var actionsBox = new VBox();
+		var actionsLabel = new Label();
+		actionsLabel.text = 'Action:';
+		actionsDropdown = new DropDown();
+		actionsDropdown.dataSource.add({text: "Set"});
+		actionsDropdown.dataSource.add({text: "Ease"});
+		actionsDropdown.selectedIndex = 0;
+		actionsDropdown.onChange = function(e) updateModEvV1();
+		actionsBox.addComponent(actionsLabel);
+		actionsBox.addComponent(actionsDropdown);
 
-		actionsDropdown = new PsychUIDropDownMenu(posX, posY, ["Set", "Ease"], function(index:Int, name:String){
-			updateModEvV1();
-		});
+		var modifierBox = new VBox();
+		var modifierLabel = new Label();
+		modifierLabel.text = 'Modifier:';
+		modifierInput = new TextField();
+		modifierInput.placeholder = '';
+		modifierInput.onChange = function(e) updateModEvV1();
+		modifierBox.addComponent(modifierLabel);
+		modifierBox.addComponent(modifierInput);
 
-		var actionsLabelText = new FlxText(actionsDropdown.x, actionsDropdown.y - 15, 80, 'Action:');
+		row1.addComponent(actionsBox);
+		row1.addComponent(modifierBox);
+		tabModchart.addComponent(row1);
 
-		posY += 60;
+		var row2 = new HBox();
+		row2.horizontalSpacing = 120;
+		var timeBox = new VBox();
+		var timeLabel = new Label();
+		timeLabel.text = 'Time (beats):';
+		timeStepper = new NumberStepper();
+		timeStepper.step = 0.01;
+		timeStepper.min = 0;
+		timeStepper.max = 9999;
+		timeStepper.precision = 2;
+		timeStepper.onChange = function(e) updateModEvV1();
+		timeBox.addComponent(timeLabel);
+		timeBox.addComponent(timeStepper);
 
-		timeStepper = new PsychUINumericStepper(posX, posY, 0.01, 0, 0, 9999, 2);
-		timeStepper.onValueChange = function() {
-			updateModEvV1();
-		};
+		var valueBox = new VBox();
+		var valueLabel = new Label();
+		valueLabel.text = 'Value:';
+		valueStepper = new NumberStepper();
+		valueStepper.step = 0.01;
+		valueStepper.min = -999999;
+		valueStepper.max = 999999;
+		valueStepper.precision = 2;
+		valueStepper.onChange = function(e) updateModEvV1();
+		valueBox.addComponent(valueLabel);
+		valueBox.addComponent(valueStepper);
 
-		valueStepper = new PsychUINumericStepper(posX + 150, posY, 0.01, 0, -999999, 999999, 2);
-		valueStepper.onValueChange = function() {
-			updateModEvV1();
-		};
+		row2.addComponent(timeBox);
+		row2.addComponent(valueBox);
+		tabModchart.addComponent(row2);
 
-		posY += 60;
+		var row3 = new HBox();
+		row3.horizontalSpacing = 50;
+		var easeBox = new VBox();
+		var easeLabel = new Label();
+		easeLabel.text = 'Ease (if ease):';
+		easeInput = new TextField();
+		easeInput.onChange = function(e) updateModEvV1();
+		easeBox.addComponent(easeLabel);
+		easeBox.addComponent(easeInput);
 
-		easeInput = new PsychUIInputText(posX, posY, 120, '', 8);
-		easeInput.onChange = function(old:String, cur:String){
-			updateModEvV1();
-		}
+		var playerBox = new VBox();
+		var playerLabel = new Label();
+		playerLabel.text = 'Player:';
+		playerStepper = new NumberStepper();
+		playerStepper.step = 1;
+		playerStepper.min = -1;
+		playerStepper.max = (PlayState.SONG.lanes - 1);
+		playerStepper.precision = 0;
+		playerStepper.value = -1;
+		playerStepper.onChange = function(e) updateModEvV1();
+		playerBox.addComponent(playerLabel);
+		playerBox.addComponent(playerStepper);
 
-		playerStepper = new PsychUINumericStepper(posX + 150, posY, 1, -1, -1, (PlayState.SONG.lanes - 1), 0);
-		playerStepper.onValueChange = function() {
-			updateModEvV1();
-		};
+		row3.addComponent(easeBox);
+		row3.addComponent(playerBox);
+		tabModchart.addComponent(row3);
 
-		var timeLabelText = new FlxText(timeStepper.x, timeStepper.y - 15, 80, 'Time (beats):');
-		var valueLabelText = new FlxText(valueStepper.x, valueStepper.y - 15, 80, 'Value:');
-		var easeLabelText = new FlxText(easeInput.x, easeInput.y - 15, 80, 'Ease (if ease):');
-		var playerLabelText = new FlxText(playerStepper.x, playerStepper.y - 15, 80, 'Player:');
-
-		tabGroupModchart.add(modifierInput);
-		tabGroupModchart.add(modifierLabelText);
-		tabGroupModchart.add(actionsLabelText);
-		tabGroupModchart.add(timeStepper);
-		tabGroupModchart.add(valueStepper);
-		tabGroupModchart.add(easeInput);
-		tabGroupModchart.add(playerStepper);
-		tabGroupModchart.add(timeLabelText);
-		tabGroupModchart.add(valueLabelText);
-		tabGroupModchart.add(easeLabelText);
-		tabGroupModchart.add(playerLabelText);
-		tabGroupModchart.add(actionsDropdown);
+		modchartTabs.addComponent(tabModchart);
 	}
 
-	var useNormalSustainsCheckBox:PsychUICheckBox;
-	var sustainSegmentsStepper:PsychUINumericStepper;
 	function addSongTab():Void {
-		var tabGroup = modchartBox.getTab('Song').menu;
-		var posX = 10;
-		var posY = 25;
+		var tabSong = new VBox();
+		tabSong.text = "Song";
+		tabSong.padding = 10;
 
-		var saveButton:PsychUIButton = new PsychUIButton(posX, posY, 'Save Modchart', function(){
-			saveChart();
-		}, 100);
-		saveButton.normalStyle.bgColor = FlxColor.GREEN;
-		saveButton.normalStyle.textColor = FlxColor.WHITE;
-		tabGroup.add(saveButton);
+		var saveButton = new Button();
+		saveButton.text = 'Save Modchart';
+		saveButton.width = 120;
+		saveButton.onClick = function(e) saveChart();
+		tabSong.addComponent(saveButton);
 
-		posY += 40;
-		useNormalSustainsCheckBox = new PsychUICheckBox(posX, posY, 'Use Normal Sustains', 150, function() modManager.useNormalSustains = useNormalSustainsCheckBox.checked);
-		useNormalSustainsCheckBox.checked = false;
-		tabGroup.add(useNormalSustainsCheckBox);
+		useNormalSustainsCheckBox = new CheckBox();
+		useNormalSustainsCheckBox.text = 'Use Normal Sustains';
+		useNormalSustainsCheckBox.selected = false;
+		useNormalSustainsCheckBox.onChange = function(e) {
+			modManager.useNormalSustains = useNormalSustainsCheckBox.selected;
+		};
+		tabSong.addComponent(useNormalSustainsCheckBox);
 
-		posY += 40;
-		var sustainSegmentsLabelText = new FlxText(posX, posY - 15, 150, 'Sustain Segments:');
-		sustainSegmentsStepper = new PsychUINumericStepper(posX, posY, 1, 4, 1, 999, 0);
-		sustainSegmentsStepper.onValueChange = function() {
+		var sustainBox = new VBox();
+		var sustainSegmentsLabel = new Label();
+		sustainSegmentsLabel.text = 'Sustain Segments:';
+		sustainSegmentsStepper = new NumberStepper();
+		sustainSegmentsStepper.step = 1;
+		sustainSegmentsStepper.value = 4;
+		sustainSegmentsStepper.min = 1;
+		sustainSegmentsStepper.max = 999;
+		sustainSegmentsStepper.precision = 0;
+		sustainSegmentsStepper.onChange = function(e) {
 			modManager.sustainSegments = Std.int(sustainSegmentsStepper.value);
 		};
+		sustainBox.addComponent(sustainSegmentsLabel);
+		sustainBox.addComponent(sustainSegmentsStepper);
 
-		tabGroup.add(sustainSegmentsLabelText);
-		tabGroup.add(sustainSegmentsStepper);
+		tabSong.addComponent(sustainBox);
+
+		modchartTabs.addComponent(tabSong);
 	}
 
 	var vortexIndicator:FlxSprite;
@@ -907,6 +997,8 @@ class ModchartEditorState extends MusicBeatState
 
 	private var wasInputting:Bool = false;
 	override function update(elapsed:Float){
+		ToolKitUtils.update();
+
 		if(pendingSeekTime != null){
 			var oldTime:Float = Conductor.songPosition;
 			var newTime:Float = pendingSeekTime;
@@ -922,13 +1014,20 @@ class ModchartEditorState extends MusicBeatState
 			if(newTime < oldTime) reloadManager();
 		}
 
-		if(FlxG.sound.music != null && FlxG.sound.music.playing) songPosBar.value = Conductor.songPosition;
+		final inputFocused:Bool = ToolKitUtils.currentFocus != null;
 
-		ClientPrefs.toggleVolumeKeys(PsychUIInputText.focusOn == null);
+		if (songPosBar != null && FlxG.sound.music != null && FlxG.sound.music.playing) {
+			settingSongPosProgrammatically = true;
+			songPosBar.pos = Conductor.songPosition;
+			songPosBar.invalidateComponentLayout();
+			songPosBar.syncComponentValidation();
+			settingSongPosProgrammatically = false;
+		}
+
+		ClientPrefs.toggleVolumeKeys(!inputFocused);
 		updateScrollY();
 		camUI.scroll.y = scrollY;
 
-		var inputFocused:Bool = (PsychUIInputText.focusOn != null);
 		if(wasInputting && !inputFocused)
 			updateModEvV1();
 		wasInputting = inputFocused;
@@ -941,25 +1040,25 @@ class ModchartEditorState extends MusicBeatState
 				loadSection(curSec + 1);
 		}
 
-		if (FlxG.keys.justPressed.SPACE && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.SPACE && !inputFocused)
 			togglePause();
 
-		if (FlxG.keys.justPressed.RIGHT && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.RIGHT && !inputFocused)
 			seek(Conductor.stepCrochet);
 
-		if (FlxG.keys.justPressed.LEFT && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.LEFT && !inputFocused)
 			seek(-Conductor.stepCrochet);
 
-		if (FlxG.keys.justPressed.D && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.D && !inputFocused)
 			seek(Conductor.stepCrochet*4*4);
 
-		if (FlxG.keys.justPressed.A && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.A && !inputFocused)
 			seek(-Conductor.stepCrochet*4*4);
 
-		if (FlxG.keys.justReleased.W && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justReleased.W && !inputFocused)
 			reloadManager();
 
-		if((controls.BACK || FlxG.keys.justPressed.ESCAPE) && PsychUIInputText.focusOn == null)
+		if((controls.BACK || FlxG.keys.justPressed.ESCAPE) && !inputFocused)
 		{
 			goToPlayState();
 			super.update(elapsed);
@@ -1008,7 +1107,7 @@ class ModchartEditorState extends MusicBeatState
 			}
 		} else noteSelectionSine = 0;
 
-		if(PsychUIInputText.focusOn == null){
+		if(!inputFocused){
 			var canContinue:Bool = true;
 			var doCut:Bool = false;
 
@@ -1123,7 +1222,7 @@ class ModchartEditorState extends MusicBeatState
 			updateSelectionBox();
 		}
 
-		var overlapsUI:Bool = modchartBox != null && FlxG.mouse.overlaps(modchartBox.bg, camUI);
+		var overlapsUI:Bool = ToolKitUtils.isHaxeUIHovered(camUI);
 		if(FlxG.mouse.justPressed && overlapsUI)
 			ignoreClickForThisFrame = true;
 
@@ -1223,7 +1322,7 @@ class ModchartEditorState extends MusicBeatState
 						var eventAdded:EventMetaNote;
 						FlxG.sound.play(Paths.sound('chartingSounds/noteLay'));
 
-						var action:String = (actionsDropdown != null && actionsDropdown.selectedLabel != null) ? actionsDropdown.selectedLabel : "";
+						var action:String = (actionsDropdown != null && actionsDropdown.selectedItem.text != null) ? actionsDropdown.selectedItem.text : "";
 						var modifier:String = (modifierInput != null) ? modifierInput.text : "";
 						var timeStr:String = (timeStepper != null) ? Std.string(timeStepper.value) : "";
 						var valueStr:String = (valueStepper != null) ? Std.string(valueStepper.value) : "";
@@ -1270,7 +1369,7 @@ class ModchartEditorState extends MusicBeatState
 		if(modManager != null){
 			for(field in PlayField.fields){
 				field.forEachAlive(function(strum:StrumNote){
-					if(strum.alpha == 0 || strum.visible == false) return;
+					if(strum.visible == false) return;
 
 					var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
 					modManager.updateObject(curDecBeat, strum, pos, field.player);
@@ -1511,7 +1610,7 @@ class ModchartEditorState extends MusicBeatState
 						var parts:Array<String> = combined.split(",");
 						while (parts.length < 7) parts.push("");
 						if (actionsDropdown != null) {
-							actionsDropdown.selectedLabel = parts[0];
+							actionsDropdown.text = parts[0];
 						}
 						if (modifierInput != null) modifierInput.text = parts[1];
 						if (timeStepper != null) {
@@ -1576,7 +1675,7 @@ class ModchartEditorState extends MusicBeatState
 
 		if(daNote.copyAlpha) daNote.alpha = daNote.strum.alpha;
 
-		if(daNote.alpha == 0 || daNote.visible == false) return;
+		if(daNote.visible == false) return;
 
 		modManager.updateObject(curDecBeat, daNote, pos, pN);
 
@@ -2130,7 +2229,7 @@ class ModchartEditorState extends MusicBeatState
 		modManager.receptors = [for(i in PlayField.fields) i.members];
 		modManager.registerDefaultModifiers();
 		modManager.registerScriptedModifiers();
-		if(useNormalSustainsCheckBox != null) modManager.useNormalSustains = useNormalSustainsCheckBox.checked;
+		if(useNormalSustainsCheckBox != null) modManager.useNormalSustains = useNormalSustainsCheckBox.selected;
 		if(sustainSegmentsStepper != null) modManager.sustainSegments = Std.int(sustainSegmentsStepper.value);
 		
 		for (songEvent in PlayState.SONG.events){
