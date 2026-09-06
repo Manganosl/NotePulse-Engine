@@ -1270,7 +1270,7 @@ class ModchartEditorState extends MusicBeatState
 		if(modManager != null){
 			for(field in PlayField.fields){
 				field.forEachAlive(function(strum:StrumNote){
-					if(strum.alpha == 0 || strum.visible == false) return;
+					if(strum.visible == false) return;
 
 					var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
 					modManager.updateObject(curDecBeat, strum, pos, field.player);
@@ -1576,7 +1576,7 @@ class ModchartEditorState extends MusicBeatState
 
 		if(daNote.copyAlpha) daNote.alpha = daNote.strum.alpha;
 
-		if(daNote.alpha == 0 || daNote.visible == false) return;
+		if(daNote.visible == false) return;
 
 		modManager.updateObject(curDecBeat, daNote, pos, pN);
 
