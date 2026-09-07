@@ -1033,14 +1033,13 @@ class PlayState extends MusicBeatState
 
 		for(field in PlayField.fields){
 			field.forEachAlive(function(strum:StrumNote){
-				if(strum.alpha == 0 || strum.visible == false) return;
+				if(strum.visible == false) return;
 
 				var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
 				modManager.updateObject(curDecBeat, strum, pos, field.player);
 				strum.modPos.x = pos.x;
 				strum.modPos.y = pos.y + strum.y - 50;
 				strum.z = pos.z;
-				strum.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
 			});
 		}
 
@@ -2929,7 +2928,7 @@ class PlayState extends MusicBeatState
 
 		if(daNote.copyAlpha) daNote.alpha = daNote.strum.alpha;
 
-		if(daNote.alpha == 0 || daNote.visible == false) return;
+		if(daNote.visible == false) return;
 
 		modManager.updateObject(curDecBeat, daNote, pos, pN);
 

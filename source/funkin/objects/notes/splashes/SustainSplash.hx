@@ -63,6 +63,9 @@ class SustainSplash extends FunkinSprite {
 
 		rgbShader.copyValues(tempShader);
 
+		var ct = note.colorTransform;
+		setColorTransform(ct.redMultiplier, ct.greenMultiplier, ct.blueMultiplier, ct.alphaMultiplier, ct.redOffset, ct.greenOffset, ct.blueOffset, ct.alphaOffset);
+
 		visible = true;
 
 		angle = note.angle + offsetAngle;

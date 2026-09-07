@@ -387,8 +387,6 @@ class ModManager {
 	}
 
 	public function updateObject(beat:Float, obj:FlxSprite, pos:Vector3, player:Int){
-		if(obj.alpha == 0 || obj.visible == false) return;
-
 		final note:Note = (obj is Note ? cast obj : null);
 		final strum:StrumNote = (obj is StrumNote ? cast obj : null);
 		

@@ -455,6 +455,7 @@ class ModchartEditorState extends MusicBeatState
 		tabGroupModchart.add(actionsDropdown);
 	}
 
+	var sustainSegmentsStepper:PsychUINumericStepper;
 	var useNormalSustainsCheckBox:PsychUICheckBox;
 	function addSongTab():Void {
 		var tabGroup = modchartBox.getTab('Song').menu;
@@ -470,12 +471,12 @@ class ModchartEditorState extends MusicBeatState
 
 		posY += 40;
 		useNormalSustainsCheckBox = new PsychUICheckBox(posX, posY, 'Use Normal Sustains', 150, function() modManager.useNormalSustains = useNormalSustainsCheckBox.checked);
-		useNormalSustainsCheckBox.checked = modManager.useNormalSustains;
+		useNormalSustainsCheckBox.checked = false;
 		tabGroup.add(useNormalSustainsCheckBox);
 
 		posY += 40;
 		var sustainSegmentsLabelText = new FlxText(posX, posY - 15, 150, 'Sustain Segments:');
-		var sustainSegmentsStepper:PsychUINumericStepper = new PsychUINumericStepper(posX, posY, 1, modManager.sustainSegments, 1, 999, 0);
+		sustainSegmentsStepper = new PsychUINumericStepper(posX, posY, 1, 4, 1, 999, 0);
 		sustainSegmentsStepper.onValueChange = function() {
 			modManager.sustainSegments = Std.int(sustainSegmentsStepper.value);
 		};
@@ -1269,14 +1270,13 @@ class ModchartEditorState extends MusicBeatState
 		if(modManager != null){
 			for(field in PlayField.fields){
 				field.forEachAlive(function(strum:StrumNote){
-					if(strum.alpha == 0 || strum.visible == false) return;
-
 					var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, field.player, strum, [], strum.vec3Cache);
 					modManager.updateObject(curDecBeat, strum, pos, field.player);
 					strum.modPos.x = pos.x;
 					strum.modPos.y = pos.y + strum.y - 50;
 					strum.z = pos.z;
-					strum.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
+					strum.rgbShader.alphaMult = pos.alpha;
+					strum.rgbShader.flash = pos.glow;
 				});
 			}
 		}
@@ -1574,8 +1574,6 @@ class ModchartEditorState extends MusicBeatState
 		var pos = modManager.getPos(daNote.strumTime, daNote.distance, daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
 
 		if(daNote.copyAlpha) daNote.alpha = daNote.strum.alpha;
-
-		if(daNote.alpha == 0 || daNote.visible == false) return;
 
 		modManager.updateObject(curDecBeat, daNote, pos, pN);
 
@@ -2129,6 +2127,8 @@ class ModchartEditorState extends MusicBeatState
 		modManager.receptors = [for(i in PlayField.fields) i.members];
 		modManager.registerDefaultModifiers();
 		modManager.registerScriptedModifiers();
+		if(useNormalSustainsCheckBox != null) modManager.useNormalSustains = useNormalSustainsCheckBox.checked;
+		if(sustainSegmentsStepper != null) modManager.sustainSegments = Std.int(sustainSegmentsStepper.value);
 		
 		for (songEvent in PlayState.SONG.events){
 			for (i in 0...songEvent[1].length){
