@@ -1,5 +1,7 @@
 package funkin.states.editors;
 
+import flixel.util.FlxGradient;
+
 import funkin.data.Section;
 import funkin.game.Rating;
 import funkin.data.Song;
@@ -109,9 +111,6 @@ class ModchartEditorState extends MusicBeatState
 	var startPos:Float = 0;
 	var timerToStart:Float = 0;
 
-	var scoreTxt:FlxText;
-	var guitarHeroSustains:Bool = false;
-
 	public static var instance:ModchartEditorState;
 
 	private var player:Int;
@@ -145,6 +144,7 @@ class ModchartEditorState extends MusicBeatState
 	}
 
 	var modchartBox:PsychUIBox;
+	var boxHUD:FlxSprite;
 	override public function create(){
 		initPsychCamera();
 
@@ -169,28 +169,33 @@ class ModchartEditorState extends MusicBeatState
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
-		guitarHeroSustains = ClientPrefs.data.guitarHeroSustains;
-		if(ClientPrefs.data.hitsoundVolume > 0) Paths.sound('hitsound');
-
 		/* setting up Editor PlayState stuff */
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.scrollFactor.set();
 		bg.cameras = [bgCam];
-		bg.color = 0xFF101010;
+		bg.color = 0xFF222222;
 		bg.alpha = 0.9;
 		add(bg);
 
-        var box:FlxSprite = new FlxSprite();
-        box.makeGraphic(camHUD.width, camHUD.height, FlxColor.TRANSPARENT);
-        box.pixels.fillRect(new Rectangle(0, 0, camHUD.width, 5), FlxColor.RED);
-        box.pixels.fillRect(new Rectangle(0, camHUD.height - 5, camHUD.width, 5), FlxColor.RED);
-        box.pixels.fillRect(new Rectangle(0, 0, 5, camHUD.height), FlxColor.RED);
-        box.pixels.fillRect(new Rectangle(camHUD.width - 5, 0, 5, camHUD.height), FlxColor.RED);
-        box.dirty = true;
+		var gradient:FlxSprite = new FlxSprite();
+		gradient.loadGraphic(FlxGradient.createGradientBitmapData(FlxG.width, FlxG.height, [0xFF53154D, 0xFF153F53, 0xFF53154D,]));
+		gradient.screenCenter(X);
+		gradient.scrollFactor.set();
+		gradient.blend = ADD;
+		gradient.cameras = [bgCam];
+		add(gradient);
 
-        add(box);
-		camHUD.y -= 125;
+        boxHUD = new FlxSprite();
+        boxHUD.makeGraphic(camHUD.width, camHUD.height, FlxColor.TRANSPARENT);
+        boxHUD.pixels.fillRect(new Rectangle(0, 0, camHUD.width, 5), FlxColor.RED);
+        boxHUD.pixels.fillRect(new Rectangle(0, camHUD.height - 5, camHUD.width, 5), FlxColor.RED);
+        boxHUD.pixels.fillRect(new Rectangle(0, 0, 5, camHUD.height), FlxColor.RED);
+        boxHUD.pixels.fillRect(new Rectangle(camHUD.width - 5, 0, 5, camHUD.height), FlxColor.RED);
+        boxHUD.dirty = true;
+        add(boxHUD);
+
+		camHUD.y = -125;
 		camHUD.zoom = 0.4;
 		
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
@@ -220,13 +225,6 @@ class ModchartEditorState extends MusicBeatState
 				for(i in 0...strums.length)
 					strums.members[i].x = gfStrums.members[i].x;
 		}
-		
-		scoreTxt = new FlxText(10, FlxG.height - 50, FlxG.width - 20, "", 20);
-		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1.25;
-		scoreTxt.visible = !ClientPrefs.data.hideHud;
-		add(scoreTxt);
 
 		FlxG.mouse.visible = true;
 		
@@ -255,7 +253,7 @@ class ModchartEditorState extends MusicBeatState
 		whiteRect1.cameras = [camUI];
 		add(whiteRect1);
 
-		var whiteRect2:FlxSprite = new FlxSprite(gridBg.x + gridBg.width, 0).makeGraphic(2, FlxG.height, FlxColor.WHITE);
+		var whiteRect2:FlxSprite = new FlxSprite(gridBg.x + gridBg.width - 2, 0).makeGraphic(2, FlxG.height, FlxColor.WHITE);
 		whiteRect2.scrollFactor.set();
 		whiteRect2.cameras = [camUI];
 		add(whiteRect2);
@@ -283,47 +281,9 @@ class ModchartEditorState extends MusicBeatState
 		vortexIndicator.cameras = [camUI];
 		add(vortexIndicator);
 
-		var thatBG:FlxSprite = new FlxSprite(0, FlxG.height-125).makeGraphic(FlxG.width, 125, FlxColor.BLACK);
-		thatBG.alpha = 0.6;
-		thatBG.cameras = [camUI];
-		thatBG.scrollFactor.set();
-		add(thatBG);
+		createPlaybar();
 
-		var songLen:Float = (inst != null ? inst.length : 0.0001);
-		songPosBar = new PsychUIBar(0, thatBG.y, function(v:Float){
-			paused = true;
-			if(FlxG.sound.music != null){
-				FlxG.sound.music.pause();
-				if(vocals != null) vocals.pause();
-				if(opponentVocals != null) opponentVocals.pause();
-				pendingSeekTime = v;
-			}
-		}, Conductor.songPosition, 0, songLen, FlxG.width, 0xFF4D4D4D, FlxColor.WHITE);
-		songPosBar.y = thatBG.y;
-		songPosBar.valueText.visible = false;
-		songPosBar.minText.visible = false;
-		songPosBar.maxText.visible = false;
-		songPosBar.scrollFactor.set(0, 0);
-		songPosBar.cameras = [camUI];
-		add(songPosBar);
-
-		infoText = new FlxText(25, songPosBar.y - 65, FlxG.width);
-		infoText.cameras = [camUI];
-		infoText.setFormat(null, 13, FlxColor.WHITE, LEFT);
-		infoText.borderColor = FlxColor.BLACK;
-		infoText.scrollFactor.set();
-		infoText.borderSize = 1;
-		infoText.active = false;
-		var curTime:String = FlxStringUtil.formatTime(Conductor.songPosition / 1000, true);
-		var songLength:String = (FlxG.sound.music != null) ? FlxStringUtil.formatTime(FlxG.sound.music.length / 1000, true) : '???';
-		infoText.text =  '$curTime / $songLength' +
-						  '\n\nSection: $curSec' +
-						  '\nBeat: $curBeat' +
-						  '\nStep: $curStep';
-		infoText.y += infoText.height;
-		add(infoText);
-
-		modchartBox = new PsychUIBox(0, 0, 300, 280, ['Modchart', 'Song']);
+		modchartBox = new PsychUIBox(10, 40, 300, 280, ['Modchart', 'Song']);
 		modchartBox.selectedName = 'Modchart';
 		modchartBox.scrollFactor.set();
 		modchartBox.cameras = [camUI];
@@ -338,6 +298,84 @@ class ModchartEditorState extends MusicBeatState
 
 		loadSection(0);
 		reloadNotes();
+
+		FlxTween.cancelTweensOf(Main.fpsVar);
+		FlxTween.tween(Main.fpsVar, {alpha: 0.5}, 1, {ease: FlxEase.circOut});
+	}
+
+	var isFullScreen:Bool = false;
+	function createPlaybar(){
+		var playbar:FlxSpriteGroup = new FlxSpriteGroup();
+		playbar.cameras = [camUI];
+		playbar.scrollFactor.set();
+
+		var playbarBG:FlxSprite = new FlxSprite(0, FlxG.height-125).makeGraphic(FlxG.width, 125, FlxColor.BLACK);
+		playbarBG.alpha = 0.6;
+		playbarBG.blend = OVERLAY;
+		playbar.add(playbarBG);
+
+		var songLen:Float = (inst != null ? inst.length : 0.0001);
+		songPosBar = new PsychUIBar(0, playbarBG.y, function(v:Float){
+			paused = true;
+			if(FlxG.sound.music != null){
+				FlxG.sound.music.pause();
+				if(vocals != null) vocals.pause();
+				if(opponentVocals != null) opponentVocals.pause();
+				pendingSeekTime = v;
+			}
+		}, Conductor.songPosition, 0, songLen, FlxG.width, 0xFF4D4D4D, FlxColor.WHITE);
+		songPosBar.y = playbarBG.y;
+		songPosBar.valueText.visible = false;
+		songPosBar.minText.visible = false;
+		songPosBar.maxText.visible = false;
+		playbar.add(songPosBar);
+
+		infoText = new FlxText(25, songPosBar.y - 65, FlxG.width);
+		infoText.setFormat(null, 13, FlxColor.WHITE, LEFT);
+		infoText.borderColor = FlxColor.BLACK;
+		infoText.borderSize = 1;
+		infoText.active = false;
+		var curTime:String = FlxStringUtil.formatTime(Conductor.songPosition / 1000, true);
+		var songLength:String = (FlxG.sound.music != null) ? FlxStringUtil.formatTime(FlxG.sound.music.length / 1000, true) : '???';
+		infoText.text =  '$curTime / $songLength' +
+						  '\n\nSection: $curSec' +
+						  '\nBeat: $curBeat' +
+						  '\nStep: $curStep';
+		infoText.y += infoText.height;
+		playbar.add(infoText);
+
+		var fullScreenBtn:PsychUIButton;
+		fullScreenBtn = new PsychUIButton(0, 0, '>', function(){
+			fullScreenBtn.text.angle += 180;
+			if(!isFullScreen){
+				FlxTween.cancelTweensOf(playbar, ["y"]);
+				FlxTween.tween(playbar, {y: 100}, 1, {ease: FlxEase.circOut});
+
+				FlxTween.cancelTweensOf(camHUD);
+				FlxTween.tween(camHUD, {zoom: 1, y: 0}, 1, {ease: FlxEase.circOut});
+
+				FlxTween.cancelTweensOf(boxHUD);
+				FlxTween.tween(boxHUD, {alpha: 0}, 1, {ease: FlxEase.circOut});
+			} else {
+				FlxTween.cancelTweensOf(playbar, ["y"]);
+				FlxTween.tween(playbar, {y: 0}, 1, {ease: FlxEase.circOut});
+
+				FlxTween.cancelTweensOf(camHUD);
+				FlxTween.tween(camHUD, {zoom: 0.4, y:-125}, 1, {ease: FlxEase.circOut});
+
+				FlxTween.cancelTweensOf(boxHUD);
+				FlxTween.tween(boxHUD, {alpha: 1}, 1, {ease: FlxEase.circOut});
+			}
+			isFullScreen = !isFullScreen;
+		}, 100);
+		fullScreenBtn.screenCenter();
+		fullScreenBtn.text.angle -= 90;
+		fullScreenBtn.scrollFactor.set(0, 0);
+		fullScreenBtn.cameras = [camUI];
+		fullScreenBtn.y = FlxG.height - fullScreenBtn.height;
+		add(fullScreenBtn);  // We dont want this to move with the playbar
+
+		add(playbar);
 	}
 
 	var selectedNotes:Array<EventMetaNote> = [];
@@ -456,7 +494,6 @@ class ModchartEditorState extends MusicBeatState
 	}
 
 	var sustainSegmentsStepper:PsychUINumericStepper;
-	var useNormalSustainsCheckBox:PsychUICheckBox;
 	function addSongTab():Void {
 		var tabGroup = modchartBox.getTab('Song').menu;
 		var posX = 10;
@@ -470,15 +507,10 @@ class ModchartEditorState extends MusicBeatState
 		tabGroup.add(saveButton);
 
 		posY += 40;
-		useNormalSustainsCheckBox = new PsychUICheckBox(posX, posY, 'Use Normal Sustains', 150, function() modManager.useNormalSustains = useNormalSustainsCheckBox.checked);
-		useNormalSustainsCheckBox.checked = false;
-		tabGroup.add(useNormalSustainsCheckBox);
-
-		posY += 40;
 		var sustainSegmentsLabelText = new FlxText(posX, posY - 15, 150, 'Sustain Segments:');
 		sustainSegmentsStepper = new PsychUINumericStepper(posX, posY, 1, 4, 1, 999, 0);
 		sustainSegmentsStepper.onValueChange = function() {
-			modManager.sustainSegments = Std.int(sustainSegmentsStepper.value);
+			for (field in PlayField.fields) field.sustainSegments = Std.int(sustainSegmentsStepper.value);
 		};
 
 		tabGroup.add(sustainSegmentsLabelText);
@@ -1585,7 +1617,7 @@ class ModchartEditorState extends MusicBeatState
 		daNote.y = pos.y + daNote.strum.y - 50;
 		daNote.z = pos.z;
 
-		if(modManager.useNormalSustains || !daNote.isSustainNote)
+		if((daNote.playField != null && daNote.playField.sustainSegments == 1) || !daNote.isSustainNote)
     		daNote.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
 
 		if(daNote.isSustainNote){
@@ -1605,7 +1637,7 @@ class ModchartEditorState extends MusicBeatState
 			var diffY = (nextPos.y - pos.y);
 			var diffZ = (nextPos.z - pos.z);
 
-			if(modManager.useNormalSustains){
+			if((daNote.playField != null && daNote.playField.sustainSegments == 1)){
 				var rad = Math.atan2(diffY, diffX);
 				var deg = rad * (180 / Math.PI);
 				daNote.mAngle = (deg != 0) ? (deg + 90) : 0;
@@ -1614,7 +1646,7 @@ class ModchartEditorState extends MusicBeatState
 			var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
 
 			if(daNote.frameHeight != 0) {
-				if(modManager.useNormalSustains){
+				if((daNote.playField != null && daNote.playField.sustainSegments == 1)){
 					if(!daNote.isSustainEnd){
 						daNote.scale.y = (visualDist / daNote.frameHeight);
 					} else {
@@ -1686,6 +1718,10 @@ class ModchartEditorState extends MusicBeatState
 		}
 		flixel.util.FlxDestroyUtil.destroy(inst);
 		camHUD = null;
+
+		FlxTween.cancelTweensOf(Main.fpsVar, ["alpha"]);
+		FlxTween.tween(Main.fpsVar, {alpha: 1}, 1, {ease: FlxEase.circOut});
+
 		super.destroy();
 	}
 	
@@ -2127,8 +2163,8 @@ class ModchartEditorState extends MusicBeatState
 		modManager.receptors = [for(i in PlayField.fields) i.members];
 		modManager.registerDefaultModifiers();
 		modManager.registerScriptedModifiers();
-		if(useNormalSustainsCheckBox != null) modManager.useNormalSustains = useNormalSustainsCheckBox.checked;
-		if(sustainSegmentsStepper != null) modManager.sustainSegments = Std.int(sustainSegmentsStepper.value);
+		if(sustainSegmentsStepper != null) 
+			for(field in PlayField.fields) field.sustainSegments = Std.int(sustainSegmentsStepper.value);
 		
 		for (songEvent in PlayState.SONG.events){
 			for (i in 0...songEvent[1].length){

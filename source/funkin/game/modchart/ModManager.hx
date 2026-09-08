@@ -18,9 +18,6 @@ class ModManager {
 	public var doTraces:Bool = true;
 	public var swapPlayers:Bool = false;
 
-	public var useNormalSustains:Bool = false;  // Some textures have problems with segmented sustains
-	public var sustainSegments:Int = 4;
-
 	public function registerDefaultModifiers(){
 		var quickRegs:Array<Any> = [
 			XModifier,

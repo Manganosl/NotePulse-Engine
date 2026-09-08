@@ -625,8 +625,8 @@ class Note extends FunkinSprite {
 	}
 
 	override function draw(){
-		if (isSustainNote && alpha > 0 && visible && strum != null 
-			&& createdFrom != null && createdFrom.modManager != null && !createdFrom.modManager.useNormalSustains && createdFrom.modManager.sustainSegments > 1){
+		if (isSustainNote && alpha > 0 && visible && strum != null && playField != null
+			&& createdFrom != null && createdFrom.modManager != null && playField.sustainSegments > 1){
 			drawSustain();
 			return;
 		}
@@ -664,8 +664,8 @@ class Note extends FunkinSprite {
 		var sampleGlows:Array<Float> = [];
 		var sampleVDiffs:Array<Float> = [];
 
-		for (i in 0...modManager.sustainSegments + 1) {
-			final t:Float = tStart + (1 - tStart) * (i / modManager.sustainSegments);
+		for (i in 0...playField.sustainSegments + 1) {
+			final t:Float = tStart + (1 - tStart) * (i / playField.sustainSegments);
 			final sampleStrumTime:Float = strumTime + segLength * t;
 			final diff:Float = sampleStrumTime - Conductor.songPosition;
 			final vDiff:Float = modManager.getVisPos(Conductor.songPosition, sampleStrumTime, songSpeed);
@@ -739,8 +739,8 @@ class Note extends FunkinSprite {
 		final tPrevs:Array<Float> = [];
 		final tCurs:Array<Float> = [];
 		for (i in 1...sampleCount) {
-			tPrevs.push(tStart + (1 - tStart) * ((i - 1) / modManager.sustainSegments));
-			tCurs.push(tStart + (1 - tStart) * (i / modManager.sustainSegments));
+			tPrevs.push(tStart + (1 - tStart) * ((i - 1) / playField.sustainSegments));
+			tCurs.push(tStart + (1 - tStart) * (i / playField.sustainSegments));
 		}
 
 		for (camera in cameras){

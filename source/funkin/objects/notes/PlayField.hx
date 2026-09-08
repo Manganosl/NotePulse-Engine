@@ -8,6 +8,8 @@ class PlayField extends FlxTypedSpriteGroup<StrumNote> {
 	public static var fields:Array<PlayField> = [];
 	private var stateGeneration:(Int, Bool)->Void = null;
 
+	public var sustainSegments:Int = 4;
+
 	public var keysArray:Array<String>;
 
 	public var keyCount(default, set):Int;
