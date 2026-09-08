@@ -93,8 +93,6 @@ class PlayState extends MusicBeatState
 		['PFC', 1] //The value on this one isn't used actually, since Perfect is always "1"
 	];
 
-	public var judgementCounter:FlxText;
-
 	//event variables
 	private var isCameraOnForcedPos:Bool = false;
 
@@ -1040,6 +1038,8 @@ class PlayState extends MusicBeatState
 				strum.modPos.x = pos.x;
 				strum.modPos.y = pos.y + strum.y - 50;
 				strum.z = pos.z;
+				strum.rgbShader.alphaMult = pos.alpha;
+				strum.rgbShader.flash = pos.glow;
 			});
 		}
 
@@ -2925,11 +2925,6 @@ class PlayState extends MusicBeatState
 		daNote.distance = modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed);
 
 		var pos = modManager.getPos(daNote.strumTime, daNote.distance, daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
-
-		if(daNote.copyAlpha) daNote.alpha = daNote.strum.alpha;
-
-		if(daNote.visible == false) return;
-
 		modManager.updateObject(curDecBeat, daNote, pos, pN);
 
 		pos.x += daNote.offsetX;
@@ -2939,9 +2934,7 @@ class PlayState extends MusicBeatState
 		daNote.x = pos.x;
 		daNote.y = pos.y + daNote.strum.y - 50;
 		daNote.z = pos.z;
-
-		if((daNote.playField != null && daNote.playField.sustainSegments == 1) || !daNote.isSustainNote)
-    		daNote.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
+    	daNote.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
 
 		if(daNote.isSustainNote){
 			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4), 10);
@@ -2960,16 +2953,15 @@ class PlayState extends MusicBeatState
 			var diffY = (nextPos.y - pos.y);
 			var diffZ = (nextPos.z - pos.z);
 
-			if(daNote.playField != null && daNote.playField.sustainSegments == 1){
+			if((daNote.playField != null && daNote.playField.sustainSegments == 1)){
 				var rad = Math.atan2(diffY, diffX);
 				var deg = rad * (180 / Math.PI);
 				daNote.mAngle = (deg != 0) ? (deg + 90) : 0;
 			}
 
 			var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
-
 			if(daNote.frameHeight != 0) {
-				if(daNote.playField != null && daNote.playField.sustainSegments == 1){
+				if((daNote.playField != null && daNote.playField.sustainSegments == 1)){
 					if(!daNote.isSustainEnd){
 						daNote.scale.y = (visualDist / daNote.frameHeight);
 					} else {

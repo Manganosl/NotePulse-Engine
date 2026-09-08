@@ -54,7 +54,6 @@
 - Change both note hit and note miss callbacks (Can also be per strum).
 
 ## Editors and Utilities
-
 - Psych 1.0 Stage editor.
 - Psych 1.0 Charting Editor
   - Multiple players

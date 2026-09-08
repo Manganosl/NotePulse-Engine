@@ -392,19 +392,15 @@ class ModManager {
 		if(obj is Note && note.isSustainNote)
 			obj.x += note.parent.width/2 - note.width + note.offsetX;
 		
-		if (note != null && note.isSustainNote)
-		{
+		if(note != null && note.isSustainNote){
 			note.y = pos.y + note.offsetY + (note.strum.y - 50);
-		}
-		else
-		{
+		} else {
 			if(strum != null) strum.modPos.y = (pos.y - obj.height * .5 + strum.y - 50);
 			else if (note != null) note.y = (note.offsetY + pos.y - obj.height * .5);
 			else obj.y = (pos.y - obj.height * .5);
 		}
 		
-		if (activeMods[player] != null)
-		{
+		if(activeMods[player] != null){
 			flushActiveMods(player);
 			if(obj.active){
 				var isNote = obj is Note;
@@ -443,7 +439,6 @@ class ModManager {
 		pos.x = PlayField.fields[player].members[data].x;
 		pos.y = PlayField.fields[player].members[data].y + diff;
 		pos.z = 0;
-
 		pos.alpha = 1;
 		pos.glow = 0;
 

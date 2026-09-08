@@ -294,6 +294,8 @@ class EditorPlayState extends MusicBeatSubstate
 				strum.modPos.x = pos.x;
 				strum.modPos.y = pos.y + strum.y - 50;
 				strum.z = pos.z;
+				strum.rgbShader.alphaMult = pos.alpha;
+				strum.rgbShader.flash = pos.glow;
 			});
 		}
 		
@@ -311,11 +313,6 @@ class EditorPlayState extends MusicBeatSubstate
 		daNote.distance = modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed);
 
 		var pos = modManager.getPos(daNote.strumTime, daNote.distance, daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
-
-		if(daNote.copyAlpha) daNote.alpha = daNote.strum.alpha;
-
-		if(daNote.visible == false) return;
-
 		modManager.updateObject(curDecBeat, daNote, pos, pN);
 
 		pos.x += daNote.offsetX;
@@ -353,7 +350,6 @@ class EditorPlayState extends MusicBeatSubstate
 			}
 
 			var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
-
 			if(daNote.frameHeight != 0) {
 				if((daNote.playField != null && daNote.playField.sustainSegments == 1)){
 					if(!daNote.isSustainEnd){

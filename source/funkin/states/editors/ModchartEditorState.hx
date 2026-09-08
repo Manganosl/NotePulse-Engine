@@ -57,7 +57,7 @@ class ModchartEditorState extends MusicBeatState
 	var gridBg:ChartingGridSprite;
 	var nextGridBg:ChartingGridSprite;
 
-	var songPosBar:PsychUIBar;
+	var playbarHead:PsychUIBar;
 	var infoText:FlxText;
 
 	var finishTimer:FlxTimer = null;
@@ -121,8 +121,6 @@ class ModchartEditorState extends MusicBeatState
 	var dummyArrow:FlxSprite;
 
 	var _file:FileReference;
-
-	var pendingSeekTime:Null<Float> = null;
 
 	public function new()
 	{
@@ -304,6 +302,8 @@ class ModchartEditorState extends MusicBeatState
 	}
 
 	var isFullScreen:Bool = false;
+	var pHeadIsDragging:Bool = false;
+	var pHeadWasPlaying:Bool = false;
 	function createPlaybar(){
 		var playbar:FlxSpriteGroup = new FlxSpriteGroup();
 		playbar.cameras = [camUI];
@@ -315,22 +315,50 @@ class ModchartEditorState extends MusicBeatState
 		playbar.add(playbarBG);
 
 		var songLen:Float = (inst != null ? inst.length : 0.0001);
-		songPosBar = new PsychUIBar(0, playbarBG.y, function(v:Float){
+		playbarHead = new PsychUIBar(0, playbarBG.y, null, Conductor.songPosition, 0, songLen, FlxG.width, 0xFF4D4D4D, FlxColor.WHITE);
+		playbarHead.y = playbarBG.y;
+		playbarHead.valueText.visible = false;
+		playbarHead.minText.visible = false;
+		playbarHead.maxText.visible = false;
+
+		playbarHead.onDragStart = (v:Float) -> {
+			pHeadIsDragging = true;
+			if(!paused) pHeadWasPlaying = true;
 			paused = true;
 			if(FlxG.sound.music != null){
 				FlxG.sound.music.pause();
 				if(vocals != null) vocals.pause();
 				if(opponentVocals != null) opponentVocals.pause();
-				pendingSeekTime = v;
 			}
-		}, Conductor.songPosition, 0, songLen, FlxG.width, 0xFF4D4D4D, FlxColor.WHITE);
-		songPosBar.y = playbarBG.y;
-		songPosBar.valueText.visible = false;
-		songPosBar.minText.visible = false;
-		songPosBar.maxText.visible = false;
-		playbar.add(songPosBar);
+		}
+		
+		playbarHead.onDrag = (v:Float) -> {
+			if(pHeadIsDragging){
+				if(FlxG.sound.music != null) FlxG.sound.music.time = v;
+				if(vocals != null) vocals.time = v;
+				if(opponentVocals != null) opponentVocals.time = v;
+				Conductor.songPosition = v;
 
-		infoText = new FlxText(25, songPosBar.y - 65, FlxG.width);
+				applyNoteStates(v);
+			}
+		}
+
+		playbarHead.onDragEnd = (v:Float) -> {
+			pHeadIsDragging = false;
+			if(pHeadWasPlaying){
+				paused = false;
+				pHeadWasPlaying = false;
+				if(FlxG.sound.music != null){
+					FlxG.sound.music.play();
+					if(vocals != null) vocals.play();
+					if(opponentVocals != null) opponentVocals.play();
+				}
+			}
+			reloadManager();
+		}
+		playbar.add(playbarHead);
+
+		infoText = new FlxText(25, playbarHead.y - 65, FlxG.width);
 		infoText.setFormat(null, 13, FlxColor.WHITE, LEFT);
 		infoText.borderColor = FlxColor.BLACK;
 		infoText.borderSize = 1;
@@ -939,80 +967,66 @@ class ModchartEditorState extends MusicBeatState
 
 	private var wasInputting:Bool = false;
 	override function update(elapsed:Float){
-		if(pendingSeekTime != null){
-			var oldTime:Float = Conductor.songPosition;
-			var newTime:Float = pendingSeekTime;
-			pendingSeekTime = null;
+		var inputFocused:Bool = (PsychUIInputText.focusOn != null);
 
-			if(FlxG.sound.music != null) FlxG.sound.music.time = newTime;
-			if(vocals != null) vocals.time = newTime;
-			if(opponentVocals != null) opponentVocals.time = newTime;
-			Conductor.songPosition = newTime;
+		if(FlxG.mouse.justPressed || FlxG.mouse.justPressedRight || FlxG.mouse.justPressedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickDown'));
+		if(FlxG.mouse.justReleased || FlxG.mouse.justReleasedRight || FlxG.mouse.justReleasedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickUp'));
+		if(FlxG.keys.justPressed.ANY) FlxG.sound.play(Paths.sound('chartingSounds/keyboard${FlxG.random.int(1,3)}'));
 
-			applyNoteStates(newTime);
+		if(!pHeadIsDragging && FlxG.sound.music != null && FlxG.sound.music.playing) 
+			playbarHead.value = Conductor.songPosition;
 
-			if(newTime < oldTime) reloadManager();
-		}
-
-		if(FlxG.sound.music != null && FlxG.sound.music.playing) songPosBar.value = Conductor.songPosition;
-
-		ClientPrefs.toggleVolumeKeys(PsychUIInputText.focusOn == null);
+		ClientPrefs.toggleVolumeKeys(!inputFocused);
 		updateScrollY();
 		camUI.scroll.y = scrollY;
 
-		var inputFocused:Bool = (PsychUIInputText.focusOn != null);
 		if(wasInputting && !inputFocused)
 			updateModEvV1();
 		wasInputting = inputFocused;
 
-		if(FlxG.sound.music != null)
-		{
+		if(FlxG.sound.music != null){
 			while(curSec > 0 && Conductor.songPosition < cachedSectionTimes[curSec])
 				loadSection(curSec - 1);
 			while(curSec < cachedSectionTimes.length - 1 && Conductor.songPosition >= cachedSectionTimes[curSec + 1])
 				loadSection(curSec + 1);
 		}
 
-		if (FlxG.keys.justPressed.SPACE && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.SPACE && !inputFocused)
 			togglePause();
 
-		if (FlxG.keys.justPressed.RIGHT && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.RIGHT && !inputFocused)
 			seek(Conductor.stepCrochet);
 
-		if (FlxG.keys.justPressed.LEFT && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.LEFT && !inputFocused)
 			seek(-Conductor.stepCrochet);
 
-		if (FlxG.keys.justPressed.D && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.D && !inputFocused)
 			seek(Conductor.stepCrochet*4*4);
 
-		if (FlxG.keys.justPressed.A && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justPressed.A && !inputFocused)
 			seek(-Conductor.stepCrochet*4*4);
 
-		if (FlxG.keys.justReleased.W && PsychUIInputText.focusOn == null)
+		if (FlxG.keys.justReleased.W && !inputFocused)
 			reloadManager();
 
-		if((controls.BACK || FlxG.keys.justPressed.ESCAPE) && PsychUIInputText.focusOn == null)
-		{
+		if((controls.BACK || FlxG.keys.justPressed.ESCAPE) && !inputFocused){
 			goToPlayState();
 			super.update(elapsed);
 			return;
 		}
 		
-		if (startingSong)
-		{
+		if(startingSong){
 			timerToStart -= elapsed * 1000;
 			Conductor.songPosition = startPos - timerToStart;
 			if(timerToStart < 0) startSong();
 		}
 		else if(!paused) Conductor.songPosition += elapsed * 1000 * playbackRate;
 
-		if (unspawnNotes[0] != null)
-		{
+		if(unspawnNotes[0] != null){
 			var time:Float = spawnTime * playbackRate;
 			if(songSpeed < 1) time /= songSpeed;
 
-			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
-			{
+			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time){
 				var dunceNote:Note = unspawnNotes[0];
 				dunceNote.cameras = [camHUD];
 				notes.insert(0, dunceNote);
@@ -1040,7 +1054,7 @@ class ModchartEditorState extends MusicBeatState
 			}
 		} else noteSelectionSine = 0;
 
-		if(PsychUIInputText.focusOn == null){
+		if(!inputFocused){
 			var canContinue:Bool = true;
 			var doCut:Bool = false;
 
@@ -1092,8 +1106,11 @@ class ModchartEditorState extends MusicBeatState
 					if(FlxG.keys.pressed.W)
 						seek(-scrubDelta, false);
 					else if(!FlxG.keys.pressed.CONTROL)
-						seek(scrubDelta);
+						seek(scrubDelta, false);
 				}
+
+				if(FlxG.keys.justReleased.W)
+					reloadManager();
 
 				if(FlxG.keys.justPressed.Z != FlxG.keys.justPressed.X){
 					var zoomIndex:Int = zoomList.indexOf(curZoom);
@@ -1600,13 +1617,8 @@ class ModchartEditorState extends MusicBeatState
 
 	public function noteFollowStrum(daNote:Note){
 		var pN:Int = daNote.playField.player;
-		
 		daNote.distance = modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed);
-
 		var pos = modManager.getPos(daNote.strumTime, daNote.distance, daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
-
-		if(daNote.copyAlpha) daNote.alpha = daNote.strum.alpha;
-
 		modManager.updateObject(curDecBeat, daNote, pos, pN);
 
 		pos.x += daNote.offsetX;
@@ -1644,7 +1656,6 @@ class ModchartEditorState extends MusicBeatState
 			}
 
 			var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
-
 			if(daNote.frameHeight != 0) {
 				if((daNote.playField != null && daNote.playField.sustainSegments == 1)){
 					if(!daNote.isSustainEnd){
@@ -2093,57 +2104,76 @@ class ModchartEditorState extends MusicBeatState
 
 	function togglePause()
 	{
+		if(pHeadIsDragging) return;
 		paused = !paused;
 
-		if (paused)
-		{
+		if (paused){
 			FlxG.sound.music.pause();
 			vocals.pause();
 			opponentVocals.pause();
-		}
-		else
-		{
+		} else {
 			FlxG.sound.music.play();
 			vocals.play();
 			opponentVocals.play();
 		}
 	}
 
-	function applyNoteStates(time:Float)
-	{
-		for (note in notes)
-			note.kill();
+	function applyNoteStates(time:Float){
+		unspawnNotes = [];
 		notes.clear();
 
-		unspawnNotes = [];
+		var spawnThreshold:Float = spawnTime * playbackRate;
+		if(songSpeed < 1) spawnThreshold /= songSpeed;
 
 		for (note in allNotes){
 			note.revive();
-			note.spawned = false;
 			note.wasGoodHit = false;
 			note.hitByOpponent = false;
 			note.tooLate = false;
 			note.visible = true;
 			note.active = true;
 
-			if(note.isSustainNote)
-				if(note.clipRect != null)
-					note.clipRect = null;
+			if(note.isSustainNote && note.clipRect != null)
+				note.clipRect = null;
 
-			if (note.strumTime >= time)
-				unspawnNotes.push(note);
+			var shouldBeSpawned:Bool = false;
+			var shouldKill:Bool = false;
+
+			if (note.strumTime >= time){
+				if (note.strumTime - time < spawnThreshold)
+					shouldBeSpawned = true;
+				else
+					unspawnNotes.push(note);
+			}
 			else if(note.isSustainNote){
-				if(note.parent != null && note.parent.strumTime + note.parent.sustainLength >= time){
-					notes.add(note);
-					note.spawned = true;
-				} else note.kill();
-			} else note.kill();
+				if(note.parent != null && note.parent.strumTime + note.parent.sustainLength >= time)
+					shouldBeSpawned = true;
+				else
+					shouldKill = true;
+			} else shouldKill = true;
+
+			note.spawned = shouldBeSpawned;
+
+			if(shouldBeSpawned){
+				note.cameras = [camHUD];
+				notes.add(note);
+			}
+
+			if(shouldKill) note.kill();
 		}
 
 		unspawnNotes.sort(CoolUtil.sortByTime);
 	}
 
 	function seek(delta:Float, ?doReloadManager:Bool = true){
+		if(pHeadIsDragging) return;
+		paused = true;
+		if(FlxG.sound.music != null){
+			FlxG.sound.music.pause();
+			if(vocals != null) vocals.pause();
+			if(opponentVocals != null) opponentVocals.pause();
+		}
+
 		var newTime = Math.max(0, FlxG.sound.music.time + delta);
 
 		FlxG.sound.music.time = newTime;
@@ -2151,9 +2181,9 @@ class ModchartEditorState extends MusicBeatState
 		opponentVocals.time = newTime;
 		Conductor.songPosition = newTime;
 
-		applyNoteStates(newTime);
-
 		if(delta > 0) return;
+
+		applyNoteStates(newTime);
 		if(doReloadManager) reloadManager();
 	}
 
