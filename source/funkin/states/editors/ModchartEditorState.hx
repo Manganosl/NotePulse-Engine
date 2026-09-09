@@ -63,7 +63,7 @@ class ModchartEditorState extends MusicBeatState
 	var finishTimer:FlxTimer = null;
 	var noteKillOffset:Float = 350;
 	var spawnTime:Float = 2000;
-	var startingSong:Bool = true;
+	var startingSong:Bool = false;
 
 	var playbackRate:Float = 1;
 	var vocals:FlxSound;
@@ -350,8 +350,8 @@ class ModchartEditorState extends MusicBeatState
 				pHeadWasPlaying = false;
 				if(FlxG.sound.music != null){
 					FlxG.sound.music.play();
-					if(vocals != null) vocals.play();
-					if(opponentVocals != null) opponentVocals.play();
+					if(vocals != null && FlxG.sound.music.time < vocals.length) vocals.play(true, FlxG.sound.music.time);
+					if(opponentVocals != null && FlxG.sound.music.time < opponentVocals.length) opponentVocals.play(true, FlxG.sound.music.time);
 				}
 			}
 			reloadManager();
@@ -973,8 +973,7 @@ class ModchartEditorState extends MusicBeatState
 		if(FlxG.mouse.justReleased || FlxG.mouse.justReleasedRight || FlxG.mouse.justReleasedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickUp'));
 		if(FlxG.keys.justPressed.ANY) FlxG.sound.play(Paths.sound('chartingSounds/keyboard${FlxG.random.int(1,3)}'));
 
-		if(!pHeadIsDragging && FlxG.sound.music != null && FlxG.sound.music.playing) 
-			playbarHead.value = Conductor.songPosition;
+		if(!pHeadIsDragging) playbarHead.value = Conductor.songPosition;
 
 		ClientPrefs.toggleVolumeKeys(!inputFocused);
 		updateScrollY();
@@ -1824,9 +1823,16 @@ class ModchartEditorState extends MusicBeatState
 		FlxG.sound.list.add(vocals);
 		FlxG.sound.list.add(opponentVocals);
 
-		inst = new FlxSound().loadEmbedded(Paths.inst(songData.song));
-		FlxG.sound.list.add(inst);
-		FlxG.sound.music.volume = 0;
+		FlxG.sound.playMusic(Paths.inst(songData.song), 1, false);
+		inst = FlxG.sound.music;
+		FlxG.sound.music.pause();
+		FlxG.sound.music.time = 0;
+		FlxG.sound.music.onComplete = finishSong;
+
+		songLength = FlxG.sound.music.length;
+
+		Conductor.songPosition = 0;
+		paused = true;
 
 		notes = new FlxTypedGroup<Note>();
 		notes.cameras = [camHUD];
@@ -2020,8 +2026,15 @@ class ModchartEditorState extends MusicBeatState
 		}
 	}
 
-	public function endSong()
-	{
+	public function endSong(){
+		paused = true;
+
+		if(FlxG.sound.music != null)
+		{
+			FlxG.sound.music.pause();
+			Conductor.songPosition = FlxG.sound.music.time = Math.max(0, FlxG.sound.music.length - 1);
+		}
+
 		vocals.pause();
 		vocals.time = 0;
 		opponentVocals.pause();
@@ -2030,6 +2043,7 @@ class ModchartEditorState extends MusicBeatState
 		{
 			finishTimer.cancel();
 			finishTimer.destroy();
+			finishTimer = null;
 		}
 		//close();
 	}
@@ -2062,17 +2076,15 @@ class ModchartEditorState extends MusicBeatState
 		Conductor.songPosition = FlxG.sound.music.time;
 		if (Conductor.songPosition <= vocals.length)
 		{
-			vocals.time = Conductor.songPosition;
+			vocals.play(true, Conductor.songPosition);
 			#if FLX_PITCH vocals.pitch = playbackRate; #end
 		}
 
 		if (Conductor.songPosition <= opponentVocals.length)
 		{
-			opponentVocals.time = Conductor.songPosition;
+			opponentVocals.play(true, Conductor.songPosition);
 			#if FLX_PITCH opponentVocals.pitch = playbackRate; #end
 		}
-		vocals.play();
-		opponentVocals.play();
 	}
 	
 	function loadCharacterFile(char:String):CharacterFile {
@@ -2112,9 +2124,10 @@ class ModchartEditorState extends MusicBeatState
 			vocals.pause();
 			opponentVocals.pause();
 		} else {
+			vocals.time = opponentVocals.time = FlxG.sound.music.time;
 			FlxG.sound.music.play();
-			vocals.play();
-			opponentVocals.play();
+			if(FlxG.sound.music.time < vocals.length) vocals.play(true, FlxG.sound.music.time);
+			if(FlxG.sound.music.time < opponentVocals.length) opponentVocals.play(true, FlxG.sound.music.time);
 		}
 	}
 

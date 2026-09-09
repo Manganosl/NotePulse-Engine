@@ -38,6 +38,11 @@ class MacroUtil
 		//Openfl library
 		"openfl",
 
+        // Foxlite
+        #if(foxlite && FOXLITE_ALLOWED)
+        "foxlite",
+        #end
+
         //Flixel library
         "flixel.animation", "flixel.effects", "flixel.math",
         "flixel.graphics", "flixel.group", "flixel.input",

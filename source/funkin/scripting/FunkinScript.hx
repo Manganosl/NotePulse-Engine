@@ -119,11 +119,25 @@ class FunkinScript implements HscriptInterface {
 		"SetEvent" 					=> funkin.game.modchart.events.SetEvent,
 
 		// Away3D
-		#if(away3d && AWAY3D_ALLOWED)
-		"Flx3DCamera" 				=> flixel.flx3d.Flx3DCamera,
-		"Flx3DView" 				=> flixel.flx3d.Flx3DView,
-		"FlxView3D" 				=> flixel.flx3d.FlxView3D,
-		"Flx3DUtil" 				=> flixel.flx3d.Flx3DUtil,
+		#if(foxlite && FOXLITE_ALLOWED)
+		"FoxScene"					=> foxlite.FoxScene,
+		"FoxCamera"					=> foxlite.FoxCamera,
+		"FoxModel"					=> foxlite.FoxModel,
+		"FoxShader"					=> foxlite.FoxShader,
+		"FoxCache"					=> foxlite.FoxCache,
+		"FoxDirectionalLight"		=> foxlite.lights.FoxDirectionalLight,
+		"FoxDirectionalSound"		=> foxlite.flixel.FoxDirectionalSound,
+		"FoxRenderMetrics"			=> foxlite.flixel.FoxRenderMetrics,
+		"FoxStencilAction"			=> foxlite.stencil.FoxStencilAction,
+		"FoxMesh"					=> foxlite.mesh.FoxMesh,
+		"FoxQuadMesh"				=> foxlite.mesh.FoxQuadMesh,
+		"FoxPanoramaSky"			=> foxlite.sky.FoxPanoramaSky,
+		"FoxFlxSprite"				=> foxlite.flixel.FoxFlxSprite,
+		"FoxFPSCamera"				=> foxlite.extras.FoxFPSCamera,
+		"FoxRenderer"				=> foxlite.renderer.FoxRenderer,
+		"FoxLoaderUtil"				=> foxlite.loaders.FoxLoaderUtil,
+		"FoxMaterial"				=> foxlite.material.FoxMaterial,
+		"FoxTexture"				=> foxlite.texture.FoxTexture,
 		#end
 
 		//Extras

@@ -1,7 +1,7 @@
 ## Libraries
 - Replaced SScript, now using HScript Improved.
 - Added Nape
-- Added Away3D
+- Added FoxLite
 - Using cne-hxcpp
 - Replaced hxCodec, using hxvlc to avoid crashes.
 - Using cne-hxdiscord.
