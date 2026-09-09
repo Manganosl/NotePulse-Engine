@@ -15,7 +15,7 @@ import openfl.events.KeyboardEvent;
 import haxe.Json;
 import funkin.objects.Character;
 
-import funkin.states.editors.ChartingState;
+import funkin.states.editors.ChartEditorState;
 
 import funkin.scripting.LuaUtils;
 
@@ -194,7 +194,7 @@ class EditorPlayState extends MusicBeatSubstate
 		modManager.registerDefaultModifiers();
 		modManager.registerScriptedModifiers();
 
-		if(ChartingState.doModchartOnEditor){
+		if(ChartEditorState.doModchartOnEditor){
 			for (songEvent in PlayState.SONG.events){
 				for (i in 0...songEvent[1].length){
 					var evName:String = songEvent[1][i][0];
@@ -524,7 +524,7 @@ class EditorPlayState extends MusicBeatSubstate
 				swagNote.sustainLength = songNotes[2];
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<(PlayState.SONG.mania + 1)));
 				swagNote.noteType = songNotes[3];
-				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartEditorState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 				final fieldID:Int = songNotes[4];
 				swagNote.mustPress = (fieldID == 0 ? false : (fieldID == 1 ? true : false));
 				swagNote.playField = PlayField.fields[fieldID];

@@ -22,7 +22,7 @@ import openfl.events.IOErrorEvent;
 import haxe.Json;
 import funkin.objects.Character;
 
-import funkin.states.editors.ChartingState;
+import funkin.states.editors.ChartEditorState;
 
 import funkin.states.editors.content.MetaNote.EventMetaNote;
 import funkin.states.editors.content.*;
@@ -257,7 +257,7 @@ class ModchartEditorState extends MusicBeatState
 		add(whiteRect2);
 
 		dummyArrow = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
-		dummyArrow.setGraphicSize(ChartingState.GRID_SIZE, ChartingState.GRID_SIZE);
+		dummyArrow.setGraphicSize(ChartEditorState.GRID_SIZE, ChartEditorState.GRID_SIZE);
 		dummyArrow.updateHitbox();
 		dummyArrow.cameras = [camUI];
 		dummyArrow.scrollFactor.x = 0;
@@ -274,7 +274,7 @@ class ModchartEditorState extends MusicBeatState
 		selectionBox.visible = false;
 		add(selectionBox);
 
-		vortexIndicator = new FlxSprite(gridBg.x, FlxG.height/2).makeGraphic(ChartingState.GRID_SIZE, 2, FlxColor.RED);
+		vortexIndicator = new FlxSprite(gridBg.x, FlxG.height/2).makeGraphic(ChartEditorState.GRID_SIZE, 2, FlxColor.RED);
 		vortexIndicator.scrollFactor.set();
 		vortexIndicator.cameras = [camUI];
 		add(vortexIndicator);
@@ -737,7 +737,7 @@ class ModchartEditorState extends MusicBeatState
 		var secRows:Null<Float> = cast cachedSectionRow[curSec];
 		if(secStartTime == null || secCrochet == null || secRows == null) return;
 
-		scrollY = (((Conductor.songPosition - secStartTime) / secCrochet * ChartingState.GRID_SIZE * 4) + (secRows * ChartingState.GRID_SIZE)) * curZoom - FlxG.height/2;
+		scrollY = (((Conductor.songPosition - secStartTime) / secCrochet * ChartEditorState.GRID_SIZE * 4) + (secRows * ChartEditorState.GRID_SIZE)) * curZoom - FlxG.height/2;
 	}
 
 	var sectionFirstNoteID:Int = 0;
@@ -775,7 +775,7 @@ class ModchartEditorState extends MusicBeatState
 		var hei:Float = 0;
 		if(curSec > 0)
 		{
-			prevGridBg.y = cachedSectionRow[curSec-1] * ChartingState.GRID_SIZE * curZoom;
+			prevGridBg.y = cachedSectionRow[curSec-1] * ChartEditorState.GRID_SIZE * curZoom;
 			prevGridBg.rows = 4 * PlayState.SONG.notes[curSec-1].sectionBeats * curZoom;
 			prevGridBg.visible = showPreviousSection;
 			hei += prevGridBg.height;
@@ -784,21 +784,21 @@ class ModchartEditorState extends MusicBeatState
 
 		if(curSec < PlayState.SONG.notes.length - 1)
 		{
-			nextGridBg.y = cachedSectionRow[curSec+1] * ChartingState.GRID_SIZE * curZoom;
+			nextGridBg.y = cachedSectionRow[curSec+1] * ChartEditorState.GRID_SIZE * curZoom;
 			nextGridBg.rows = 4 * PlayState.SONG.notes[curSec+1].sectionBeats * curZoom;
 			nextGridBg.visible = showNextSection;
 			hei += nextGridBg.height;
 		}
 		else nextGridBg.visible = false;
 
-		gridBg.y = cachedSectionRow[curSec] * ChartingState.GRID_SIZE * curZoom;
+		gridBg.y = cachedSectionRow[curSec] * ChartEditorState.GRID_SIZE * curZoom;
 		gridBg.rows = 4 * PlayState.SONG.notes[curSec].sectionBeats * curZoom;
 		hei += gridBg.height;
 
 		softReloadNotes();
 
 		prevGridBg.vortexLineEnabled = gridBg.vortexLineEnabled = nextGridBg.vortexLineEnabled = true;
-		prevGridBg.vortexLineSpace = gridBg.vortexLineSpace = nextGridBg.vortexLineSpace = ChartingState.GRID_SIZE * 4 * curZoom;
+		prevGridBg.vortexLineSpace = gridBg.vortexLineSpace = nextGridBg.vortexLineSpace = ChartEditorState.GRID_SIZE * 4 * curZoom;
 	}
 
 	inline function getCurChartSection()
@@ -898,10 +898,10 @@ class ModchartEditorState extends MusicBeatState
 		if (data == null)
 			data = note.songData[1];
 
-		var noteX:Float = gridBg.x + (ChartingState.GRID_SIZE - note.width) / 2;
-		noteX += ChartingState.GRID_SIZE;
+		var noteX:Float = gridBg.x + (ChartEditorState.GRID_SIZE - note.width) / 2;
+		noteX += ChartEditorState.GRID_SIZE;
 
-		var lane:Int = Std.int(data % ChartingState.GRID_COLUMNS_PER_PLAYER);
+		var lane:Int = Std.int(data % ChartEditorState.GRID_COLUMNS_PER_PLAYER);
 		var groupIndex:Int = 0;
 
 		if (note.gfStrum)
@@ -938,12 +938,12 @@ class ModchartEditorState extends MusicBeatState
 		if (groupIndex == 2)
 			note.gfStrum = true;
 
-		if (groupIndex >= ChartingState.GRID_PLAYERS) groupIndex = ChartingState.GRID_PLAYERS - 1;
+		if (groupIndex >= ChartEditorState.GRID_PLAYERS) groupIndex = ChartEditorState.GRID_PLAYERS - 1;
 		if (groupIndex < 0) groupIndex = 0;
 		if (note.gfStrum)
 			groupIndex = 2;
 
-		noteX += ChartingState.GRID_SIZE * (groupIndex * ChartingState.GRID_COLUMNS_PER_PLAYER + lane);
+		noteX += ChartEditorState.GRID_SIZE * (groupIndex * ChartEditorState.GRID_COLUMNS_PER_PLAYER + lane);
 
 		note.x = noteX;
 	}
@@ -951,10 +951,10 @@ class ModchartEditorState extends MusicBeatState
 	function positionNoteYOnTime(note:MetaNote, section:Int)
 	{
 		var time:Float = note.strumTime - cachedSectionTimes[section];
-		var noteY:Float = (time / cachedSectionCrochets[section]) * ChartingState.GRID_SIZE * 4 * curZoom;
-		noteY += cachedSectionRow[section] * ChartingState.GRID_SIZE * curZoom;
+		var noteY:Float = (time / cachedSectionCrochets[section]) * ChartEditorState.GRID_SIZE * 4 * curZoom;
+		noteY += cachedSectionRow[section] * ChartEditorState.GRID_SIZE * curZoom;
 		noteY = Math.max(noteY, -150);
-		note.y = noteY + (ChartingState.GRID_SIZE/2 - note.height/2);
+		note.y = noteY + (ChartEditorState.GRID_SIZE/2 - note.height/2);
 		note.chartY = noteY;
 	}
 
@@ -1183,7 +1183,7 @@ class ModchartEditorState extends MusicBeatState
 			var diffX:Float = FlxG.mouse.x - gridBg.x;
 			var diffY:Float = (FlxG.mouse.y+camUI.scroll.y) - gridBg.y;
 			if(!FlxG.keys.pressed.SHIFT)
-				diffY -= diffY % ChartingState.GRID_SIZE;
+				diffY -= diffY % ChartEditorState.GRID_SIZE;
 
 			if(nextGridBg.visible) diffY = Math.min(diffY, gridBg.height + nextGridBg.height);
 			else diffY = Math.min(diffY, gridBg.height);
@@ -1191,15 +1191,15 @@ class ModchartEditorState extends MusicBeatState
 			if(prevGridBg.visible) diffY = Math.max(diffY, -prevGridBg.height);
 			else diffY = Math.max(diffY, 0);
 
-			var noteData:Int = Math.floor(diffX / ChartingState.GRID_SIZE);
-			dummyArrow.x = gridBg.x + noteData * ChartingState.GRID_SIZE;
+			var noteData:Int = Math.floor(diffX / ChartEditorState.GRID_SIZE);
+			dummyArrow.x = gridBg.x + noteData * ChartEditorState.GRID_SIZE;
 			dummyArrow.visible = !selectionBox.visible;
 			noteData--;
 
 			if(FlxG.keys.pressed.SHIFT || (FlxG.mouse.y+camUI.scroll.y) >= gridBg.y || !prevGridBg.visible)
 				dummyArrow.y = gridBg.y + diffY;
 			else {
-				var t:Float = (diffY - ChartingState.GRID_SIZE);
+				var t:Float = (diffY - ChartEditorState.GRID_SIZE);
 				if((FlxG.mouse.y+camUI.scroll.y) >= gridBg.y) t *= curZoom;
 				dummyArrow.y = gridBg.y + t;
 			}
@@ -1212,12 +1212,12 @@ class ModchartEditorState extends MusicBeatState
 						if(note == null) continue;
 
 						note.chartY += diff;
-						var row:Float = (note.chartY / ChartingState.GRID_SIZE) / curZoom;
+						var row:Float = (note.chartY / ChartEditorState.GRID_SIZE) / curZoom;
 						var noteSecRow:Int = 0;
 						while(noteSecRow + 1 < cachedSectionRow.length && cachedSectionRow[noteSecRow + 1] <= row)
 							noteSecRow++;
 
-						note.setStrumTime(Math.max(-5000, note.strumTime + (diff * cachedSectionCrochets[noteSecRow] / 4) / ChartingState.GRID_SIZE / curZoom));
+						note.setStrumTime(Math.max(-5000, note.strumTime + (diff * cachedSectionCrochets[noteSecRow] / 4) / ChartEditorState.GRID_SIZE / curZoom));
 						positionNoteYOnTime(note, noteSecRow);
 						note.updateEventText();
 					}
@@ -1232,7 +1232,7 @@ class ModchartEditorState extends MusicBeatState
 				} else if(FlxG.mouse.x >= gridBg.x && FlxG.mouse.x < gridBg.x + gridBg.width){
 					var closeNotes:Array<MetaNote> = curRenderedNotes.members.filter(function(note:MetaNote){
 						var chartY:Float = (FlxG.mouse.y+camUI.scroll.y) - note.chartY;
-						return (note.isEvent && noteData < 0) && chartY >= 0 && chartY < ChartingState.GRID_SIZE;
+						return (note.isEvent && noteData < 0) && chartY >= 0 && chartY < ChartEditorState.GRID_SIZE;
 					});
 
 					closeNotes.sort(function(a:MetaNote, b:MetaNote){
@@ -1265,7 +1265,7 @@ class ModchartEditorState extends MusicBeatState
 							onSelectNote();
 						}
 					} else if(!holdingAlt && (FlxG.mouse.y+camUI.scroll.y) >= gridBg.y && (FlxG.mouse.y+camUI.scroll.y) < gridBg.y + gridBg.height){ // Add event
-						var strumTime:Float = (diffY / ChartingState.GRID_SIZE * Conductor.stepCrochet / curZoom) + cachedSectionTimes[curSec];
+						var strumTime:Float = (diffY / ChartEditorState.GRID_SIZE * Conductor.stepCrochet / curZoom) + cachedSectionTimes[curSec];
 
 						var didAdd:Bool = false;
 						var eventAdded:EventMetaNote;
@@ -1868,7 +1868,7 @@ class ModchartEditorState extends MusicBeatState
 				swagNote.sustainLength = songNotes[2];
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<(PlayState.SONG.mania + 1)));
 				swagNote.noteType = songNotes[3];
-				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartEditorState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 				final fieldID:Int = songNotes[4];
 				swagNote.mustPress = (fieldID == 0 ? false : (fieldID == 1 ? true : false));
 				swagNote.playField = PlayField.fields[fieldID];
@@ -2300,7 +2300,7 @@ class ModchartEditorState extends MusicBeatState
 			var chartDir = haxe.io.Path.directory(chartPath);
 			if (!sys.FileSystem.exists(chartDir))
 			{
-				ChartingState.ensureDirectory(chartDir);
+				ChartEditorState.ensureDirectory(chartDir);
 			}
 
 			try

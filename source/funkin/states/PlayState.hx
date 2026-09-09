@@ -24,7 +24,7 @@ import openfl.events.KeyboardEvent;
 import funkin.game.cutscenes.DialogueBoxPsych;
 
 import funkin.states.menus.StoryMenuState;
-import funkin.states.editors.ChartingState;
+import funkin.states.editors.ChartEditorState;
 import funkin.states.editors.CharacterEditorState;
 import funkin.states.editors.ModchartEditorState;
 import funkin.states.scripted.ScriptedSubstate;
@@ -1320,7 +1320,7 @@ class PlayState extends MusicBeatState
 				swagNote.sustainLength = songNotes[2];
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<(SONG.mania + 1)));
 				swagNote.noteType = songNotes[3];
-				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartEditorState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 				final fieldID:Int = songNotes[4];
 				swagNote.mustPress = (fieldID == 0 ? false : (fieldID == 1 ? true : false));
 				if(PlayField.fields[fieldID] != null) swagNote.playField = PlayField.fields[fieldID];
@@ -2706,7 +2706,7 @@ class PlayState extends MusicBeatState
 		DiscordClient.resetClientID();
 		#end
 
-		MusicBeatState.switchState(new ChartingState());
+		MusicBeatState.switchState(new ChartEditorState());
 	}
 
 	function openCharacterEditor(){

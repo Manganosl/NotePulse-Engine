@@ -169,7 +169,7 @@ class EditorSelectorSubstate extends MusicBeatSubstate {
 	function onAccept() {
 		switch (curSelected) {
 			case 0:
-				MusicBeatState.switchState(new ModSelectorState(funkin.states.editors.ChartingState, []));
+				MusicBeatState.switchState(new ModSelectorState(funkin.states.editors.ChartEditorState, []));
 			case 1:
 				MusicBeatState.switchState(new ModSelectorState(funkin.states.editors.CharacterEditorState, [null, false]));
 			case 2:

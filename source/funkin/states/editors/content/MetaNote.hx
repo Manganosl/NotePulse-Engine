@@ -155,7 +155,7 @@ class MetaNote extends Note {
 
     public function new(time:Float, data:Int, songData:Array<Dynamic>) {
         super(time, data, null, false, true);
-        this.fieldID = Std.int(songData[1] / ChartingState.GRID_COLUMNS_PER_PLAYER);
+        this.fieldID = Std.int(songData[1] / ChartEditorState.GRID_COLUMNS_PER_PLAYER);
         this.songData = songData;
         this.strumTime = time;
         this.chartNoteData = data;
@@ -164,9 +164,9 @@ class MetaNote extends Note {
     public function changeNoteData(v:Int) {
         this.chartNoteData = v;
         this.songData[1] = v;
-        this.noteData = v % ChartingState.GRID_COLUMNS_PER_PLAYER;
-        this.fieldID = Std.int(v / ChartingState.GRID_COLUMNS_PER_PLAYER);
-        this.mustPress = (v < ChartingState.GRID_COLUMNS_PER_PLAYER);
+        this.noteData = v % ChartEditorState.GRID_COLUMNS_PER_PLAYER;
+        this.fieldID = Std.int(v / ChartEditorState.GRID_COLUMNS_PER_PLAYER);
+        this.mustPress = (v < ChartEditorState.GRID_COLUMNS_PER_PLAYER);
 
         if (!PlayState.isPixelStage)
             loadNoteAnims();
@@ -182,9 +182,9 @@ class MetaNote extends Note {
         updateHitbox();
 
         if (width > height)
-            setGraphicSize(ChartingState.GRID_SIZE);
+            setGraphicSize(ChartEditorState.GRID_SIZE);
         else
-            setGraphicSize(0, ChartingState.GRID_SIZE);
+            setGraphicSize(0, ChartEditorState.GRID_SIZE);
 
         updateHitbox();
 
@@ -199,9 +199,9 @@ class MetaNote extends Note {
         super.reloadNote(tex, postfix);
 
         if (width > height)
-            setGraphicSize(ChartingState.GRID_SIZE);
+            setGraphicSize(ChartEditorState.GRID_SIZE);
         else
-            setGraphicSize(0, ChartingState.GRID_SIZE);
+            setGraphicSize(0, ChartEditorState.GRID_SIZE);
 
         updateHitbox();
     }
@@ -225,14 +225,14 @@ class MetaNote extends Note {
                 sustain.downScroll = false;
             }
 
-            var pixelBlocks:Int = Math.round((v * ChartingState.GRID_SIZE + ChartingState.GRID_SIZE) / stepCrochet);
-            var pixelHeight:Float = Math.max(ChartingState.GRID_SIZE / 4, pixelBlocks * zoom - ChartingState.GRID_SIZE / 2);
+            var pixelBlocks:Int = Math.round((v * ChartEditorState.GRID_SIZE + ChartEditorState.GRID_SIZE) / stepCrochet);
+            var pixelHeight:Float = Math.max(ChartEditorState.GRID_SIZE / 4, pixelBlocks * zoom - ChartEditorState.GRID_SIZE / 2);
 
             pixelHeight = Math.max(pixelHeight, 1);
 
             sustain.sustainHeight = pixelHeight;
 
-            sustain.setGraphicSize(16, ChartingState.GRID_SIZE);
+            sustain.setGraphicSize(16, ChartEditorState.GRID_SIZE);
             sustain.updateHitbox();
 
             sustain.changeNoteData(this.noteData);
@@ -260,7 +260,7 @@ class MetaNote extends Note {
         var txt:FlxText = null;
         if (num != 0) {
             if (!noteTypeTexts.exists(num)) {
-                txt = new FlxText(0, 0, ChartingState.GRID_SIZE, (num > 0) ? Std.string(num) : "?", 16);
+                txt = new FlxText(0, 0, ChartEditorState.GRID_SIZE, (num > 0) ? Std.string(num) : "?", 16);
                 txt.autoSize = false;
                 txt.alignment = CENTER;
                 txt.borderStyle = SHADOW;
@@ -332,7 +332,7 @@ class EventMetaNote extends MetaNote
                 loadGraphic(Paths.image('editors/eventArrow'));
             }
         }
-		setGraphicSize(ChartingState.GRID_SIZE);
+		setGraphicSize(ChartEditorState.GRID_SIZE);
 		updateHitbox();
 	}
 	

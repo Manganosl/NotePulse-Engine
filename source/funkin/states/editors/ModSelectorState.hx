@@ -72,7 +72,7 @@ class ModSelectorState extends MusicBeatState {
 		add(iconGroup);
 
 		reloadMods();
-		if (goto == ChartingState || goto == ModchartEditorState) reloadSongs();
+		if (goto == ChartEditorState || goto == ModchartEditorState) reloadSongs();
 
 		var bar = new FlxSprite().makeGraphic(FlxG.width, 300, 0xff000000);
 		bar.antialiasing = ClientPrefs.data.antialiasing;
@@ -159,7 +159,7 @@ class ModSelectorState extends MusicBeatState {
 			return;
 		}
 
-		if (goto == ChartingState || goto == ModchartEditorState) {
+		if (goto == ChartEditorState || goto == ModchartEditorState) {
 			onAcceptCharter();
 			return;
 		}
@@ -183,7 +183,7 @@ class ModSelectorState extends MusicBeatState {
 				WeekData.setDirectoryFromWeek(WeekData.weeksLoaded.get(WeekData.weeksList[currentSong.week]));
 				var fmt = funkin.data.Highscore.formatSong(currentSong.songName.toLowerCase(), curDifficulty);
 				PlayState.SONG = funkin.data.Song.loadFromJson(fmt, currentSong.songName.toLowerCase());
-				var nextState = (goto == ModchartEditorState) ? new ModchartEditorState() : new ChartingState();
+				var nextState = (goto == ModchartEditorState) ? new ModchartEditorState() : new ChartEditorState();
 				FlxTween.cancelTweensOf(Main.fpsVar);
 				FlxTween.tween(Main.fpsVar, {y: 10}, 1, {ease: FlxEase.circOut});
 				try LoadingState.loadAndSwitchState(nextState, false);

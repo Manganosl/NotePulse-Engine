@@ -52,6 +52,8 @@
 - Set if the player/cpu is in control of the field (Can also be per strum).
 - Set if the playfield is controlled by the player or cpu (Can also be per strum). Multiple fields can be played by the player, even with different keyCount each.
 - Change both note hit and note miss callbacks (Can also be per strum).
+- Change a note's field and strum
+- Unlimited amount of Fields
 
 ## Editors and Utilities
 - Psych 1.0 Stage editor.

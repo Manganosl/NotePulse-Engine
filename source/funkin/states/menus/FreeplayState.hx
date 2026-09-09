@@ -30,7 +30,7 @@ import funkin.game.shaders.ColorSwap;
 
 import funkin.states.menus.StoryMenuState;
 import funkin.states.MainMenuState;
-import funkin.states.editors.ChartingState;
+import funkin.states.editors.ChartEditorState;
 
 class FreeplayState extends MusicBeatState
 {
@@ -515,7 +515,7 @@ class FreeplayState extends MusicBeatState
 				FlxTween.tween(Main.fpsVar, {y: 10}, 1, {ease: FlxEase.circOut});
 				if (FlxG.keys.pressed.SHIFT && ClientPrefs.data.devMode) {
 					PlayState.chartingMode = true;
-					MusicBeatState.switchState(new LoadingState(new ChartingState(), true));
+					MusicBeatState.switchState(new LoadingState(new ChartEditorState(), true));
 					LoadingState.prepareToSong();
 				} else {
 					MusicBeatState.switchState(new LoadingState(new PlayState(), true));
