@@ -607,7 +607,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 				mania: 3,
 				needsVoices: true,
 				lanes: 2,
-				holdSubdivisions: 1,
 				player1: 'bf',
 				player2: 'dad',
 				gfVersion: 'gf',
@@ -709,7 +708,8 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 			if(char != null && note.noteType != "No Animation"){
 				char.holdTimer = 0;
-				char.playAnim("sing" + ExtraKeysHandler.instance.data.animations[ExtraKeysHandler.instance.data.keys[PlayState.SONG.mania].notes[note.noteData]].sing, true);
+				char.playAnim("sing" + ExtraKeysHandler.instance.data.animations[ExtraKeysHandler.instance.data.keys[PlayState.SONG.mania].notes[note.noteData]].sing
+				+ (note.noteType == "Alt Animation" ? "-alt" : ""), true);
 			}
 		}
 	}
@@ -1540,7 +1540,8 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 					}
 					if (char != null && note.noteType != "No Animation"){
 						char.holdTimer = 0;
-						char.playAnim("sing" + ExtraKeysHandler.instance.data.animations[ExtraKeysHandler.instance.data.keys[PlayState.SONG.mania].notes[note.noteData]].sing, true);
+						char.playAnim("sing" + ExtraKeysHandler.instance.data.animations[ExtraKeysHandler.instance.data.keys[PlayState.SONG.mania].notes[note.noteData]].sing
+						+ (note.noteType == "Alt Animation" ? "-alt" : ""), true);
 					}
 					if(vortexPlaying)
 					{

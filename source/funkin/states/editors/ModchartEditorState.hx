@@ -7,12 +7,20 @@ import funkin.game.Rating;
 import funkin.data.Song;
 import funkin.data.StageData;
 
+import flash.media.Sound;
+
+import funkin.backend.parsers.CodenameParser;
+
+import haxe.Exception;
+
 import funkin.objects.notes.Note;
 import funkin.objects.notes.PlayField;
 import funkin.objects.notes.StrumNote;
 
 import flixel.util.FlxSort;
 import flixel.util.FlxStringUtil;
+
+import lime.utils.Assets;
 
 import openfl.geom.Rectangle;
 import openfl.net.FileReference;
@@ -59,6 +67,8 @@ class ModchartEditorState extends MusicBeatState
 
 	var playbarHead:PsychUIBar;
 	var infoText:FlxText;
+
+	var songFinished:Bool = false;
 
 	var finishTimer:FlxTimer = null;
 	var noteKillOffset:Float = 350;
@@ -225,7 +235,12 @@ class ModchartEditorState extends MusicBeatState
 		}
 
 		FlxG.mouse.visible = true;
-		
+
+		vocals = new FlxSound();
+		opponentVocals = new FlxSound();
+		FlxG.sound.list.add(vocals);
+		FlxG.sound.list.add(opponentVocals);
+
 		generateSong(PlayState.SONG.song);
 
 		reloadManager();
@@ -299,6 +314,10 @@ class ModchartEditorState extends MusicBeatState
 
 		FlxTween.cancelTweensOf(Main.fpsVar);
 		FlxTween.tween(Main.fpsVar, {alpha: 0.5}, 1, {ease: FlxEase.circOut});
+
+		updateScrollY();
+		easedScrollY = scrollY;
+		camUI.scroll.y = easedScrollY;
 	}
 
 	var isFullScreen:Bool = false;
@@ -324,12 +343,7 @@ class ModchartEditorState extends MusicBeatState
 		playbarHead.onDragStart = (v:Float) -> {
 			pHeadIsDragging = true;
 			if(!paused) pHeadWasPlaying = true;
-			paused = true;
-			if(FlxG.sound.music != null){
-				FlxG.sound.music.pause();
-				if(vocals != null) vocals.pause();
-				if(opponentVocals != null) opponentVocals.pause();
-			}
+			setSongPlaying(false);
 		}
 		
 		playbarHead.onDrag = (v:Float) -> {
@@ -346,13 +360,8 @@ class ModchartEditorState extends MusicBeatState
 		playbarHead.onDragEnd = (v:Float) -> {
 			pHeadIsDragging = false;
 			if(pHeadWasPlaying){
-				paused = false;
 				pHeadWasPlaying = false;
-				if(FlxG.sound.music != null){
-					FlxG.sound.music.play();
-					if(vocals != null && FlxG.sound.music.time < vocals.length) vocals.play(true, FlxG.sound.music.time);
-					if(opponentVocals != null && FlxG.sound.music.time < opponentVocals.length) opponentVocals.play(true, FlxG.sound.music.time);
-				}
+				setSongPlaying(true);
 			}
 			reloadManager();
 		}
@@ -373,7 +382,8 @@ class ModchartEditorState extends MusicBeatState
 		playbar.add(infoText);
 
 		var fullScreenBtn:PsychUIButton;
-		fullScreenBtn = new PsychUIButton(0, 0, '>', function(){
+		fullScreenBtn = new PsychUIButton(0, 0, '>', null, 100);
+		fullScreenBtn.onClick = () -> {  // To remove that annoying warning
 			fullScreenBtn.text.angle += 180;
 			if(!isFullScreen){
 				FlxTween.cancelTweensOf(playbar, ["y"]);
@@ -395,7 +405,7 @@ class ModchartEditorState extends MusicBeatState
 				FlxTween.tween(boxHUD, {alpha: 1}, 1, {ease: FlxEase.circOut});
 			}
 			isFullScreen = !isFullScreen;
-		}, 100);
+		}
 		fullScreenBtn.screenCenter();
 		fullScreenBtn.text.angle -= 90;
 		fullScreenBtn.scrollFactor.set(0, 0);
@@ -751,6 +761,8 @@ class ModchartEditorState extends MusicBeatState
 	var showNextSection:Bool = true;
 	var showNoteTypeLabels:Bool = true;
 	var scrollY:Float = 0;
+	var easedScrollY:Float = 0;
+	public static final SCROLL_EASE_DURATION:Float = 0.2;
 	
 	var zoomList:Array<Float> = [
 		0.25,
@@ -977,7 +989,9 @@ class ModchartEditorState extends MusicBeatState
 
 		ClientPrefs.toggleVolumeKeys(!inputFocused);
 		updateScrollY();
-		camUI.scroll.y = scrollY;
+		easedScrollY = CoolUtil.smoothLerpPrecision(easedScrollY, scrollY, elapsed, SCROLL_EASE_DURATION);
+		easedScrollY = CoolUtil.snap(easedScrollY, scrollY, 1 / 1000);
+		camUI.scroll.y = easedScrollY;
 
 		if(wasInputting && !inputFocused)
 			updateModEvV1();
@@ -1738,17 +1752,17 @@ class ModchartEditorState extends MusicBeatState
 	function startSong():Void
 	{
 		startingSong = false;
-		@:privateAccess
-		FlxG.sound.playMusic(inst._sound, 1, false);
+		FlxG.sound.music.play();
 		FlxG.sound.music.time = startPos;
 		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
 		FlxG.sound.music.onComplete = finishSong;
-		//vocals.volume = 1;
+		vocals.volume = 1;
 		vocals.time = startPos;
 		vocals.play();
-		//opponentVocals.volume = 1;
+		opponentVocals.volume = 1;
 		opponentVocals.time = startPos;
 		opponentVocals.play();
+		updateAudioVolume();
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
@@ -1772,63 +1786,14 @@ class ModchartEditorState extends MusicBeatState
 		var songData = PlayState.SONG;
 		Conductor.bpm = songData.bpm;
 
-		var boyfriendVocals:String = loadCharacterFile(PlayState.SONG.player1).vocals_file;
-		var dadVocals:String = loadCharacterFile(PlayState.SONG.player2).vocals_file;
+		updateJsonData();
 
-		vocals = new FlxSound();
-		opponentVocals = new FlxSound();
-
-		try
-		{
-			if (songData.needsVoices || Paths.voices(songData.song) != null)
-			{
-				var playerVocals = Paths.voices(songData.song, boyfriendVocals);
-				if (playerVocals == null)
-					playerVocals = Paths.voices(songData.song);
-				if (playerVocals != null)
-				{
-					vocals.loadEmbedded(playerVocals);
-					FlxG.sound.list.add(vocals);
-					vocals.persist = true;
-					vocals.looped = true;
-					vocals.volume = 0;
-					vocals.play();
-					vocals.pause();
-				}
-
-				var oppVocals = Paths.voices(songData.song, dadVocals);
-				if (oppVocals == null)
-					oppVocals = Paths.voices(songData.song);
-				if (oppVocals != null)
-				{
-					opponentVocals.loadEmbedded(oppVocals);
-					FlxG.sound.list.add(opponentVocals);
-					opponentVocals.persist = true;
-					opponentVocals.looped = true;
-					opponentVocals.volume = 0;
-					opponentVocals.play();
-					opponentVocals.pause();
-				}
-			}
-		}
-		catch (e:Dynamic) {}
-
-		vocals.volume = 1;
-		opponentVocals.volume = 1;
-
-		#if FLX_PITCH
-		vocals.pitch = playbackRate;
-		opponentVocals.pitch = playbackRate;
-		#end
-		FlxG.sound.list.add(vocals);
-		FlxG.sound.list.add(opponentVocals);
-
-		FlxG.sound.playMusic(Paths.inst(songData.song), 1, false);
-		inst = FlxG.sound.music;
-		FlxG.sound.music.pause();
-		FlxG.sound.music.time = 0;
-		FlxG.sound.music.onComplete = finishSong;
-
+		loadMusic();
+		vocals.time = opponentVocals.time = FlxG.sound.music.time = Conductor.songPosition - Conductor.offset;
+		if(FlxG.sound.music.time >= vocals.length)
+			vocals.pause();
+		if(FlxG.sound.music.time >= opponentVocals.length)
+			opponentVocals.pause();
 		songLength = FlxG.sound.music.length;
 
 		Conductor.songPosition = 0;
@@ -1839,6 +1804,116 @@ class ModchartEditorState extends MusicBeatState
 		add(notes);
 
 		buildNotes();
+	}
+
+	var characterData:Dynamic = {};
+	function updateJsonData():Void
+	{
+		for (i in 1...PlayState.SONG.mania+2)
+		{
+			var charName:String = null;
+			switch(i){
+				case 1: charName = PlayState.SONG.player1;
+				case 2: charName = PlayState.SONG.player2;
+				case 3: charName = PlayState.SONG.gfVersion;
+				default:
+					var extraChars:Array<String> = Reflect.hasField(PlayState.SONG, 'extraPlayers') ? Reflect.field(PlayState.SONG, 'extraPlayers') : null;
+					if(extraChars != null && extraChars.length > i - 4)
+						charName = extraChars[i - 4];
+			}
+			var data:CharacterFile = loadCharacterFile(charName);
+			Reflect.setField(characterData, 'iconP$i', !characterFailed ? data.healthicon : 'face');
+			Reflect.setField(characterData, 'vocalsP$i', data.vocals_file != null ? data.vocals_file : '');
+		}
+	}
+
+	var characterFailed:Bool = false;
+	function loadCharacterFile(char:String):CharacterFile {
+		characterFailed = false;
+		var usingXML:Bool = false;
+		var path:String = '';
+
+		var jsonRelPath:String = 'characters/' + char + '.json';
+		var xmlRelPath:String = 'characters/' + char + '.xml';
+
+		#if MODS_ALLOWED
+		if(FileSystem.exists(Paths.modFolders(jsonRelPath))){
+			path = Paths.modFolders(jsonRelPath);
+		} else if(FileSystem.exists(Paths.modFolders(xmlRelPath))){
+			path = Paths.modFolders(xmlRelPath);
+			usingXML = true;
+		} else if(FileSystem.exists(Paths.getSharedPath(jsonRelPath))){
+			path = Paths.getSharedPath(jsonRelPath);
+		} else if(FileSystem.exists(Paths.getSharedPath(xmlRelPath))){
+			path = Paths.getSharedPath(xmlRelPath);
+			usingXML = true;
+		}
+		#else
+		if(OpenFlAssets.exists(Paths.getSharedPath(jsonRelPath))){
+			path = Paths.getSharedPath(jsonRelPath);
+		} else if(OpenFlAssets.exists(Paths.getSharedPath(xmlRelPath))){
+			path = Paths.getSharedPath(xmlRelPath);
+			usingXML = true;
+		}
+		#end
+
+		if (path == '') {
+			path = Paths.getSharedPath('characters/' + Character.DEFAULT_CHARACTER + '.json');
+			usingXML = false;
+			characterFailed = true;
+		}
+
+		#if MODS_ALLOWED
+		var rawFile:String = File.getContent(path);
+		#else
+		var rawFile:String = OpenFlAssets.getText(path);
+		#end
+
+		return cast Json.parse(!usingXML ? rawFile : CodenameParser.characterParse(rawFile));
+	}
+
+	function loadMusic(?killAudio:Bool = false){
+		var time:Float = Conductor.songPosition;
+
+		try {
+			FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 0);
+			FlxG.sound.music.pause();
+			FlxG.sound.music.time = time;
+			FlxG.sound.music.onComplete = (function() songFinished = true);
+		} catch(e:Exception){
+			FlxG.log.error('Error loading song: $e');
+			return;
+		}
+
+		if(PlayState.SONG.needsVoices){
+			try {
+				var playerVocals:Sound = Paths.voices(PlayState.SONG.song, (characterData.vocalsP1 == null || characterData.vocalsP1.length < 1) ? 'Player' : characterData.vocalsP1);
+				vocals.loadEmbedded(playerVocals != null ? playerVocals : Paths.voices(PlayState.SONG.song));
+				vocals.volume = 0;
+				vocals.play();
+				vocals.pause();
+				vocals.time = time;
+				
+				var oppVocals:Sound = Paths.voices(PlayState.SONG.song, (characterData.vocalsP2 == null || characterData.vocalsP2.length < 1) ? 'Opponent' : characterData.vocalsP2);
+				if(oppVocals != null && oppVocals.length > 0){
+					opponentVocals.loadEmbedded(oppVocals);
+					opponentVocals.volume = 0;
+					opponentVocals.play();
+					opponentVocals.pause();
+					opponentVocals.time = time;
+				}
+			} catch(e:Dynamic){}
+		}
+
+		updateAudioVolume();
+		_cacheSections();
+	}
+
+	function updateAudioVolume():Void
+	{
+		FlxG.sound.music.volume = 1;
+		vocals.volume = 1;
+		opponentVocals.volume = 1;
 	}
 
 	function buildNotes()
@@ -2027,18 +2102,12 @@ class ModchartEditorState extends MusicBeatState
 	}
 
 	public function endSong(){
-		paused = true;
+		setSongPlaying(false);
 
 		if(FlxG.sound.music != null)
-		{
-			FlxG.sound.music.pause();
 			Conductor.songPosition = FlxG.sound.music.time = Math.max(0, FlxG.sound.music.length - 1);
-		}
 
-		vocals.pause();
-		vocals.time = 0;
-		opponentVocals.pause();
-		opponentVocals.time = 0;
+		vocals.time = opponentVocals.time = Conductor.songPosition;
 		if(finishTimer != null)
 		{
 			finishTimer.cancel();
@@ -2086,48 +2155,34 @@ class ModchartEditorState extends MusicBeatState
 			#if FLX_PITCH opponentVocals.pitch = playbackRate; #end
 		}
 	}
-	
-	function loadCharacterFile(char:String):CharacterFile {
-		var characterPath:String = 'characters/' + char + '.json';
-		var isJSON:Bool = true;
-		#if MODS_ALLOWED
-		var path:String = Paths.modFolders(characterPath);
-		if (!FileSystem.exists(path)) {
-			path = Paths.getSharedPath(characterPath);
-		}
-
-		if (!FileSystem.exists(path))
-		#else
-		var path:String = Paths.getSharedPath(characterPath);
-		if (!OpenFlAssets.exists(path))
-		#end
-		{
-			isJSON = true;
-			path = Paths.getSharedPath('characters/' + Character.DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
-		}
-
-		#if MODS_ALLOWED
-		var rawJson = File.getContent(path);
-		#else
-		var rawJson = OpenFlAssets.getText(path);
-		#end
-		return cast Json.parse(rawJson);
-	}
 
 	function togglePause()
 	{
 		if(pHeadIsDragging) return;
-		paused = !paused;
+		setSongPlaying(paused);
+	}
 
-		if (paused){
-			FlxG.sound.music.pause();
-			vocals.pause();
-			opponentVocals.pause();
-		} else {
-			vocals.time = opponentVocals.time = FlxG.sound.music.time;
+	function setSongPlaying(doPlay:Bool)
+	{
+		if(FlxG.sound.music == null) return;
+
+		paused = !doPlay;
+
+		vocals.time = FlxG.sound.music.time;
+		opponentVocals.time = FlxG.sound.music.time;
+
+		if(doPlay)
+		{
 			FlxG.sound.music.play();
 			if(FlxG.sound.music.time < vocals.length) vocals.play(true, FlxG.sound.music.time);
 			if(FlxG.sound.music.time < opponentVocals.length) opponentVocals.play(true, FlxG.sound.music.time);
+			updateAudioVolume();
+		}
+		else
+		{
+			FlxG.sound.music.pause();
+			vocals.pause();
+			opponentVocals.pause();
 		}
 	}
 
@@ -2180,12 +2235,7 @@ class ModchartEditorState extends MusicBeatState
 
 	function seek(delta:Float, ?doReloadManager:Bool = true){
 		if(pHeadIsDragging) return;
-		paused = true;
-		if(FlxG.sound.music != null){
-			FlxG.sound.music.pause();
-			if(vocals != null) vocals.pause();
-			if(opponentVocals != null) opponentVocals.pause();
-		}
+		setSongPlaying(false);
 
 		var newTime = Math.max(0, FlxG.sound.music.time + delta);
 

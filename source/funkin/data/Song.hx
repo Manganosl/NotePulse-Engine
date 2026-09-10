@@ -28,8 +28,6 @@ typedef SwagSong =
 
 	@:optional var lanes:Int;
 
-	@:optional var holdSubdivisions:Int;
-
 	@:optional var gameOverChar:String;
 	@:optional var gameOverSound:String;
 	@:optional var gameOverLoop:String;
@@ -144,10 +142,6 @@ class Song
         if (songJson.pixel4kTexture == null){
             if(songJson.mania == 3) songJson.pixel4kTexture = false;
             else songJson.pixel4kTexture = true;
-        }
-
-        if (songJson.holdSubdivisions == null){
-            songJson.holdSubdivisions = 2;
         }
 
 		if (songJson.extraPlayers == null){

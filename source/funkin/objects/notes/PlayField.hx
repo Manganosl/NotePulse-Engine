@@ -1,10 +1,11 @@
 package funkin.objects.notes;
 
+import flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer;
 import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.StrumNote.StrumBoundaries;
 import funkin.states.PlayState;
 
-class PlayField extends FlxTypedSpriteGroup<StrumNote> {
+class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 	public static var fields:Array<PlayField> = [];
 	private var stateGeneration:(Int, Bool)->Void = null;
 

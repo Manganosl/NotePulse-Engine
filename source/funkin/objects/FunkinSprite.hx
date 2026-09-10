@@ -1,11 +1,8 @@
 package funkin.objects;
 
-import flixel.graphics.frames.FlxFrame.FlxFrameType;
-import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
-import flixel.graphics.frames.FlxFrame;
+import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.math.FlxAngle;
-import flixel.math.FlxPoint;
-import flixel.util.FlxDestroyUtil;
+import openfl.geom.Matrix;
 import openfl.geom.Matrix3D;
 import openfl.geom.Vector3D;
 
@@ -13,163 +10,93 @@ import openfl.geom.Vector3D;
 class FunkinSprite extends FlxSkewedSprite {
 	public var angle3D:Vector3D = new Vector3D();
 
-	@:noCompletion private var __position3D:Vector3D = new Vector3D();
 	@:noCompletion private var __angle3D:Vector3D = new Vector3D();
 
 	@:noCompletion private static var __rotationMatrix:Matrix3D = new Matrix3D();
+	@:noCompletion private static var __basisX:Vector3D = new Vector3D();
+	@:noCompletion private static var __basisY:Vector3D = new Vector3D();
 
-	@:noCompletion private var _clippedFrame:FlxFrame;
+	override function drawComplex(camera:FlxCamera):Void
+	{
+		_frame.prepareMatrix(_matrix, FlxFrameAngle.ANGLE_0, checkFlipX(), checkFlipY());
+		_matrix.translate(-origin.x, -origin.y);
+		_matrix.scale(scale.x, scale.y);
 
-	override public function destroy():Void {
-		skew = FlxDestroyUtil.put(skew);
-		skewOffset = FlxDestroyUtil.put(skewOffset);
-		_clippedFrame = FlxDestroyUtil.destroy(_clippedFrame);
-
-		super.destroy();
-	}
-
-	override function draw(){
-		checkEmptyFrame();
-
-		if(alpha == 0 || _frame.type == FlxFrameType.EMPTY)
-			return;
-
-		if(dirty)
-			calcFrame(useFramePixels);
-
-		if(colorTransform == null)
-			updateColorTransform();
-
-		for(camera in cameras){
-			if(!camera.visible || !camera.exists || !isOnScreen(camera))
-				continue;
-
-			__drawSprite3D(camera);
+		if (matrixExposed)
+		{
+			_matrix.concat(transformMatrix);
 		}
-	}
-
-	private function getGraphicVertices(planeWidth:Float, planeHeight:Float){
-		var x1 = flipX ? planeWidth : -planeWidth;
-		var x2 = flipX ? -planeWidth : planeWidth;
-		var y1 = flipY ? planeHeight : -planeHeight;
-		var y2 = flipY ? -planeHeight : planeHeight;
-
-		return [
-			x1, y1,
-			x2, y1,
-			x1, y2,
-			x2, y2
-		];
-	}
-
-	inline private function applySkew(point:FlxPoint):Void {
-		if(skew.x == 0 && skew.y == 0 && skewOffset.x == 0 && skewOffset.y == 0)
-			return;
-
-		final originalX = point.x;
-		final originalY = point.y;
-
-		final skewX = Math.tan((skew.x + skewOffset.x) * FlxAngle.TO_RAD);
-		final skewY = Math.tan((skew.y + skewOffset.y) * FlxAngle.TO_RAD);
-
-		point.x = originalX + skewX * originalY;
-		point.y = originalY + skewY * originalX;
-	}
-
-	private static inline function rotation3D(input:Vector3D, angle:Vector3D):Vector3D {
-		if(angle.x == 0 && angle.y == 0 && angle.z == 0)
-			return input;
-
-		__rotationMatrix.identity();
-		__rotationMatrix.appendRotation(angle.z, Vector3D.Z_AXIS);
-		__rotationMatrix.appendRotation(angle.y, Vector3D.Y_AXIS);
-		__rotationMatrix.appendRotation(angle.x, Vector3D.X_AXIS);
-
-		return __rotationMatrix.transformVector(input);
-	}
-
-	private function __drawSprite3D(camera:FlxCamera):Void {
-		var renderFrame = frame;
-		if (clipRect != null) {
-			_clippedFrame = frame.clipTo(clipRect, _clippedFrame);
-			renderFrame = _clippedFrame;
+		else
+		{
+			_matrix.concat(update3DSkewMatrix());
 		}
 
-		var halfFrameW = frameWidth * 0.5;
-		var halfFrameH = frameHeight * 0.5;
+		getScreenPosition(_point, camera).subtractPoint(offset);
+		_point.addPoint(origin);
+		if (isPixelPerfectRender(camera))
+			_point.floor();
 
-		var trimCenterX = renderFrame.offset.x + renderFrame.frame.width * 0.5;
-		var trimCenterY = renderFrame.offset.y + renderFrame.frame.height * 0.5;
+		if (__shouldDoZoomFactor())
+		{
+			_matrix.translate(-camera.width / 2, -camera.height / 2);
 
-		var planeWidth = renderFrame.frame.width * scale.x * .5;
-		var planeHeight = renderFrame.frame.height * scale.y * .5;
-
-		var planeVertices = getGraphicVertices(planeWidth, planeHeight);
-		getScreenPosition(_point, camera);
-		_point.x += origin.x - offset.x;
-		_point.y += origin.y - offset.y;
-
-		var centerOffsetX = (trimCenterX - origin.x) * scale.x;
-		var centerOffsetY = (trimCenterY - origin.y) * scale.y;
-
-		var zoomDiff = 1.0;
-		if(__shouldDoZoomFactor()){
 			var requestedZoom = (camera.zoom >= 0 ? Math.max : Math.min)(FlxMath.lerp(1, camera.zoom, zoomFactor), 0);
-			zoomDiff = requestedZoom / camera.zoom;
+			var diff = requestedZoom / camera.zoom;
+			_matrix.scale(diff, diff);
+			_matrix.translate(camera.width / 2, camera.height / 2);
 		}
 
-		var vertPointer:Int = 0;
-		do {
-			__position3D.setTo(
-				planeVertices[vertPointer] + centerOffsetX,
-				planeVertices[vertPointer + 1] + centerOffsetY,
-				0
+		_matrix.translate(_point.x, _point.y);
+		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
+	}
+
+
+	private function update3DSkewMatrix():Matrix
+	{
+		__angle3D.setTo(angle3D.x, angle3D.y, angle + angle3D.z);
+
+		var a = 1.0, b = 0.0, c = 0.0, d = 1.0;
+
+		if (__angle3D.x != 0 || __angle3D.y != 0 || __angle3D.z != 0)
+		{
+			__rotationMatrix.identity();
+			__rotationMatrix.appendRotation(__angle3D.z, Vector3D.Z_AXIS);
+			__rotationMatrix.appendRotation(__angle3D.y, Vector3D.Y_AXIS);
+			__rotationMatrix.appendRotation(__angle3D.x, Vector3D.X_AXIS);
+
+			__basisX.setTo(1, 0, 0);
+			__basisY.setTo(0, 1, 0);
+
+			var rotX = __rotationMatrix.transformVector(__basisX);
+			var rotY = __rotationMatrix.transformVector(__basisY);
+
+			a = rotX.x;
+			b = rotX.y;
+			c = rotY.x;
+			d = rotY.y;
+		}
+
+		if (skew.x != 0 || skew.y != 0 || skewOffset.x != 0 || skewOffset.y != 0)
+		{
+			var skewX = Math.tan((skew.x + skewOffset.x) * FlxAngle.TO_RAD);
+			var skewY = Math.tan((skew.y + skewOffset.y) * FlxAngle.TO_RAD);
+
+			_skewMatrix.setTo(
+				a + skewX * b, b + skewY * a,
+				c + skewX * d, d + skewY * c,
+				0, 0
 			);
-			__angle3D.setTo(angle3D.x, angle3D.y, angle + angle3D.z);
+		}
+		else
+		{
+			_skewMatrix.setTo(a, b, c, d, 0, 0);
+		}
 
-			var rotation = rotation3D(__position3D, __angle3D);
+		return _skewMatrix;
+	}
 
-			var skewPoint = FlxPoint.get(rotation.x, rotation.y);
-			applySkew(skewPoint);
-
-			var vx = _point.x + skewPoint.x;
-			var vy = _point.y + skewPoint.y;
-
-			if(__shouldDoZoomFactor()){
-				vx = (vx - camera.width * 0.5) * zoomDiff + camera.width * 0.5;
-				vy = (vy - camera.height * 0.5) * zoomDiff + camera.height * 0.5;
-			}
-
-			planeVertices[vertPointer] = vx;
-			planeVertices[vertPointer + 1] = vy;
-
-			skewPoint.put();
-
-			vertPointer += 2;
-		} while (vertPointer < planeVertices.length);
-
-		var vertices = new DrawData<Float>(12, true, [
-			planeVertices[0], planeVertices[1],
-			planeVertices[2], planeVertices[3],
-			planeVertices[6], planeVertices[7],
-			planeVertices[0], planeVertices[1],
-			planeVertices[4], planeVertices[5],
-			planeVertices[6], planeVertices[7]
-		]);
-
-		final uvRectangle = renderFrame.uv;
-		var uvData = new DrawData<Float>(12, true, [
-			uvRectangle.x, uvRectangle.y,
-			uvRectangle.width, uvRectangle.y,
-			uvRectangle.width, uvRectangle.height,
-			uvRectangle.x, uvRectangle.y,
-			uvRectangle.x, uvRectangle.height,
-			uvRectangle.width, uvRectangle.height
-		]);
-
-		@:privateAccess
-		camera.drawTriangles(graphic, vertices, new DrawData<Int>(vertices.length, true, [for (i in 0...vertices.length) i]),
-			uvData, new DrawData<Int>(), camera._point, blend, false, antialiasing, colorTransform, shader
-		);
+	override public function isSimpleRender(?camera:FlxCamera):Bool
+	{
+		return super.isSimpleRender(camera) && angle3D.x == 0 && angle3D.y == 0 && angle3D.z == 0;
 	}
 }
