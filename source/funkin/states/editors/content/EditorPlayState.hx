@@ -413,6 +413,7 @@ class EditorPlayState extends MusicBeatSubstate
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		PlayField.fields = [];
+		modManager.destroy();
 		FlxG.mouse.visible = true;
 		FlxG.cameras.remove(camHUD);
 		camHUD.destroy();

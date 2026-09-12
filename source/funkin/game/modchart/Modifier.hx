@@ -20,7 +20,7 @@ abstract ModifierOrder(Int) to Int{
 	
 }
 
-class Modifier {
+class Modifier implements flixel.util.FlxDestroyUtil.IFlxDestroyable{
 	public var modMgr:ModManager;
 	public var percents:Array<Float> = [0, 0];
 	public var submods:Map<String, Modifier> = [];
@@ -177,4 +177,6 @@ class Modifier {
 	public function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)return pos;
 
     public function update(elapsed:Float){}
+
+	public function destroy():Void {}
 }

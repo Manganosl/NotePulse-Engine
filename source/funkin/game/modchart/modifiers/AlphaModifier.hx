@@ -105,7 +105,7 @@ class AlphaModifier extends NoteModifier
 
 	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite):Vector3
 	{
-		if(obj is Note){
+		if(!Std.isOfType(obj, StrumNote)){
 			var column = data;
 			var yPos:Float = visualDiff + 50;
 

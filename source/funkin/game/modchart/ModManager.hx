@@ -14,7 +14,7 @@ typedef Node = {
 	var nodeFunc:(values:Array<Float>, player:Int) -> Array<Float>;
 }
 
-class ModManager {
+class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 	public var doTraces:Bool = true;
 	public var swapPlayers:Bool = false;
 
@@ -69,6 +69,7 @@ class ModManager {
 	}
 
 	public var state:Dynamic;
+	public static var instance:ModManager;
 	public var receptors:Array<Array<StrumNote>> = []; // for modifiers to be able to access receptors directly if they need to
 	public var timeline:EventTimeline = new EventTimeline();
 
@@ -359,6 +360,7 @@ class ModManager {
 
     public function new(daState:Dynamic){
 		this.state = daState;
+		instance = this;
 	}
 
 	public function update(elapsed:Float){
@@ -558,5 +560,10 @@ class ModManager {
 		} else {
 			timeline.addEvent(new SetEvent(beat * 4, modName.toLowerCase(), val, player, this));
 		}
+	}
+
+	public function destroy():Void {
+		modArray = flixel.util.FlxDestroyUtil.destroyArray(modArray);
+		instance = null;
 	}
 }

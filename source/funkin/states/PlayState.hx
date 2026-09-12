@@ -1126,8 +1126,7 @@ class PlayState extends MusicBeatState
 
 	override function destroy() {
 		#if LUA_ALLOWED
-		for (lua in luaArray)
-		{
+		for (lua in luaArray){
 			lua.call('onDestroy', []);
 			lua.stop();
 		}
@@ -1149,6 +1148,7 @@ class PlayState extends MusicBeatState
 		#end
 
 		stagesFunc(function(stage:BaseStage) stage.destroy());
+		modManager.destroy();
 
 		if(vocals != null) vocals.stop();
 		if(opponentVocals != null) opponentVocals.stop();
