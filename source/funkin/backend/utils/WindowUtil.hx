@@ -189,7 +189,6 @@ class WindowUtil {
 	public static function getWallpaper():String
 		return CppBackend.getWallpaper();
 
-
 	public static function setDesktopIconsVisibility(visible:Bool)
 		CppBackend.hideDesktopIcons(visible);
 	#end

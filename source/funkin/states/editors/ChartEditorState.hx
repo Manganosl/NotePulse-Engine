@@ -313,7 +313,6 @@ class ChartEditorState extends MusicBeatState {
 		UI = new ChartEditorUI(this);
 		UI.cameras = [camUI];
 		UI.scrollFactor.set();
-		add(UI);
 
 		createGrids();
 		
@@ -321,6 +320,7 @@ class ChartEditorState extends MusicBeatState {
 		selectionBox.alpha = 0.4;
 		selectionBox.blend = ADD;
 		selectionBox.scrollFactor.set();
+		selectionBox.cameras = [camUI];
 		selectionBox.visible = false;
 		add(selectionBox);
 
@@ -1118,8 +1118,8 @@ class ChartEditorState extends MusicBeatState {
 		}
 		else if(FlxG.mouse.pressedRight && (FlxG.mouse.deltaScreenX != 0 || FlxG.mouse.deltaScreenY != 0))
 		{
-			selectionBox.setPosition(FlxG.mouse.screenX, FlxG.mouse.screenY);
-			selectionStart.set(FlxG.mouse.screenX, FlxG.mouse.screenY);
+			selectionBox.setPosition(FlxG.mouse.viewX, FlxG.mouse.viewY);
+			selectionStart.set(FlxG.mouse.viewX, FlxG.mouse.viewY);
 			selectionBox.visible = true;
 			updateSelectionBox();
 		}
@@ -1606,8 +1606,8 @@ class ChartEditorState extends MusicBeatState {
 
 	function updateSelectionBox()
 	{
-		var diffX:Float = FlxG.mouse.screenX - selectionStart.x;
-		var diffY:Float = FlxG.mouse.screenY - selectionStart.y;
+		var diffX:Float = FlxG.mouse.viewX - selectionStart.x;
+		var diffY:Float = FlxG.mouse.viewY - selectionStart.y;
 		selectionBox.setPosition(selectionStart.x, selectionStart.y);
 
 		if(diffX < 0) //Fixes negative X scale
@@ -1952,6 +1952,18 @@ class ChartEditorState extends MusicBeatState {
 		UI.createCharacterBoxes();
 		UI.createPlayerBoxes();
 
+		remove(UI);
+		add(UI);
+
+		remove(selectionBox);
+		add(selectionBox);
+		for (box in UI.playerBoxes){
+			box.cameras = [FlxG.camera];
+			box.scrollFactor.set(1, 0);
+		}
+		UI.lanesBox.cameras = [FlxG.camera];
+		UI.lanesBox.scrollFactor.set(1, 0);
+
 		strumLineNotes.clear();
 		for (i in 0...Std.int(GRID_PLAYERS * GRID_COLUMNS_PER_PLAYER))
 		{
@@ -1999,9 +2011,11 @@ class ChartEditorState extends MusicBeatState {
 			mustHitIndicator = FlxSpriteUtil.drawTriangle(new FlxSprite(0, iconY - 20).makeGraphic(16, 16, FlxColor.TRANSPARENT), 0, 0, 16);
 			mustHitIndicator.scrollFactor.set(1, 0);
 			mustHitIndicator.flipY = true;
+			mustHitIndicator.cameras = [FlxG.camera];
 			mustHitIndicator.offset.x += mustHitIndicator.width/2;
-			add(mustHitIndicator);
 		}
+		remove(mustHitIndicator);
+		add(mustHitIndicator);
 
 		for (i in 0...GRID_PLAYERS){
             if(columns > 0) gridStripes.push(columns);

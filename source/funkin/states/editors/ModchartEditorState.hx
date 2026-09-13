@@ -832,6 +832,7 @@ class ModchartEditorState extends MusicBeatState
 
 		if (FlxG.keys.justReleased.P && !inputFocused){
 			for(field in PlayField.fields) field.showNotePaths = !field.showNotePaths;
+			ui.showPathsCheckbox.checked = !ui.showPathsCheckbox.checked;
 		}
 
 		if((controls.BACK || FlxG.keys.justPressed.ESCAPE) && !inputFocused){

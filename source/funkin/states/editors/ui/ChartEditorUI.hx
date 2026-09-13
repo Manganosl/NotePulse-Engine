@@ -183,7 +183,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 	public function isOverlapping():Bool {
 		var overlapsUI:Bool = false;
 
-		if(FlxG.mouse.overlaps(mainBox.bg, charter.camUI) || FlxG.mouse.overlaps(infoBox.bg, charter.camUI) || FlxG.mouse.overlaps(lanesBox.bg, charter.camUI)) overlapsUI = true;
+		if(FlxG.mouse.overlaps(mainBox.bg, charter.camUI) || FlxG.mouse.overlaps(infoBox.bg, charter.camUI) || FlxG.mouse.overlaps(lanesBox.bg, FlxG.camera)) overlapsUI = true;
 		for(box in playerBoxes) if(FlxG.mouse.overlaps(box.bg, FlxG.camera)) overlapsUI = true;
 		for(box in characterBoxes) if(FlxG.mouse.overlaps(box.bg, charter.camUI)) overlapsUI = true;
 		for(dropdown in characterDropdowns) if(FlxG.mouse.overlaps(dropdown.bg, FlxG.camera)) overlapsUI = true;

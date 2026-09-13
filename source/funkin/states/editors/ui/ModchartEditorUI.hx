@@ -25,6 +25,7 @@ class ModchartEditorUI extends FlxSpriteContainer {
 	public var playerStepper:PsychUINumericStepper;
     
 	public var sustainSegmentsStepper:PsychUINumericStepper;
+	public var showPathsCheckbox:PsychUICheckBox;
 
     public function new(modcharter:ModchartEditorState){
         super();
@@ -125,8 +126,14 @@ class ModchartEditorUI extends FlxSpriteContainer {
 			for (field in PlayField.fields) field.sustainSegments = Std.int(sustainSegmentsStepper.value);
 		};
 
+		posY += 40;
+		showPathsCheckbox = new PsychUICheckBox(posX, posY + 20, 'Show Note Paths', 80, function(){
+			for (field in PlayField.fields) field.showNotePaths = !field.showNotePaths;
+		});
+
 		tabGroup.add(sustainSegmentsLabelText);
 		tabGroup.add(sustainSegmentsStepper);
+		tabGroup.add(showPathsCheckbox);
 	}
 
 	function createPlaybar(){
