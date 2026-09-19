@@ -1,8 +1,10 @@
 package funkin.objects.ui;
 
-class NPUICountdown extends FlxSpriteGroup
+class UICountdown extends FlxSpriteGroup
 {
+    public var border:FlxSprite;
     public var bg:FlxSprite;
+    public var progressTrack:FlxSprite;
     public var label:FlxText;
     public var countdownText:FlxText;
     public var progressBar:FlxSprite;
@@ -17,16 +19,6 @@ class NPUICountdown extends FlxSpriteGroup
     var finished:Bool = false;
     var cancelled:Bool = false;
 
-    /**
-     * Creates a countdown UI box.
-     * @param x X position
-     * @param y Y position
-     * @param width Width of the box
-     * @param height Height of the box
-     * @param text The message to display
-     * @param seconds Countdown time in seconds
-     * @param callback Function to call when finished
-     */
     public function new(x:Float, y:Float, width:Int, height:Int, text:String, seconds:Float, callback:Void->Void, cancelledCallback:Void->Void = null)
     {
         super(x, y);
@@ -38,19 +30,33 @@ class NPUICountdown extends FlxSpriteGroup
         onFinish = callback;
         onCancel = cancelledCallback;
 
-        bg = new FlxSprite().makeGraphic(width, height, FlxColor.BLACK);
-        bg.alpha = 0.6;
+        border = new FlxSprite(-1, -1).makeGraphic(1, 1, FlxColor.WHITE);
+        border.color = 0xFF3A3F52;
+        border.alpha = 0.55;
+        border.scale.set(width + 2, height + 2);
+        border.updateHitbox();
+        add(border);
+
+        bg = new FlxSprite().makeGraphic(width, height, FlxColor.WHITE);
+        bg.color = 0xFF1C1F27;
+        bg.alpha = 0.78;
         add(bg);
 
-        progressBar = new FlxSprite(0 - (bg.width/2), 0).makeGraphic(width, 4, FlxColor.WHITE);
+        progressTrack = new FlxSprite(0, 6).makeGraphic(width, 4, FlxColor.WHITE);
+        progressTrack.color = 0xFF262A34;
+        progressTrack.alpha = 0.7;
+        add(progressTrack);
+
+        progressBar = new FlxSprite(0, 6).makeGraphic(width, 4, FlxColor.WHITE);
+        progressBar.color = 0xFFA855F7;
         add(progressBar);
 
         label = new FlxText(0, height / 2 - 20, width, text);
-        label.setFormat(null, 16, FlxColor.WHITE, "center");
+        label.setFormat(null, 16, 0xFFF1F1F5, "center");
         add(label);
 
         countdownText = new FlxText(0, height / 2 + 5, width, Std.string(Std.int(seconds)));
-        countdownText.setFormat(null, 14, FlxColor.WHITE, "center");
+        countdownText.setFormat(null, 14, 0xFFF1F1F5, "center");
         add(countdownText);
 
         FlxG.sound.play(Paths.sound('chartingSounds/openWindow'));

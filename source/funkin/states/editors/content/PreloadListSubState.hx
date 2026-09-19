@@ -3,13 +3,13 @@ package funkin.states.editors.content;
 import haxe.io.Path;
 import flixel.util.FlxDestroyUtil;
 import flash.net.FileFilter;
-import funkin.objects.ui.PsychUIEventHandler.PsychUIEvent;
-import funkin.objects.ui.PsychUIRadioGroup.PsychUIRadioItem;
+import funkin.objects.ui.UIEventHandler.UIEvent;
+import funkin.objects.ui.UIRadioGroup.UIRadioItem;
 
 import funkin.data.StageData;
 import funkin.states.editors.content.FileDialogHandler;
 
-class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
+class PreloadListSubState extends MusicBeatSubstate implements UIEvent
 {
 	var lockedList:Array<String>;
 	var preloadList:Map<String, LoadFilters>;
@@ -29,12 +29,12 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 
 	var outputTxt:FlxText;
 	var fileDialog:FileDialogHandler = new FileDialogHandler();
-	var radioGrp:PsychUIRadioGroup;
+	var radioGrp:UIRadioGroup;
 	
-	var removeButton:PsychUIButton;
-	var lqCheckBox:PsychUICheckBox;
-	var hqCheckBox:PsychUICheckBox;
-	var smCheckBox:PsychUICheckBox;
+	var removeButton:UIButton;
+	var lqCheckBox:UICheckBox;
+	var hqCheckBox:UICheckBox;
+	var smCheckBox:UICheckBox;
 	override function create()
 	{
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
@@ -52,7 +52,7 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 		titleText.cameras = cameras;
 		add(titleText);
 
-		var btn:PsychUIButton = new PsychUIButton(bg.x + bg.width - 40, bg.y, 'X', close, 40);
+		var btn:UIButton = new UIButton(bg.x + bg.width - 40, bg.y, 'X', close, 40);
 		btn.cameras = cameras;
 		add(btn);
 		
@@ -63,7 +63,7 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 		outputTxt.alpha = 0;
 		add(outputTxt);
 
-		removeButton = new PsychUIButton(0, 0, 'X', function()
+		removeButton = new UIButton(0, 0, 'X', function()
 		{
 			if(radioGrp.checked < 0) return;
 
@@ -91,9 +91,9 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 			if(smCheckBox.checked) filters |= STORY_MODE;
 			preloadList.set(name, filters);
 		}
-		lqCheckBox = new PsychUICheckBox(bg.x + bg.width - 100, bg.y + bg.height - 130, 'Low Qual.', 0, updateFilters);
-		hqCheckBox = new PsychUICheckBox(lqCheckBox.x, lqCheckBox.y + 22, 'High Qual.', 0, updateFilters);
-		smCheckBox = new PsychUICheckBox(hqCheckBox.x, hqCheckBox.y + 22, 'Story Mode', 0, updateFilters);
+		lqCheckBox = new UICheckBox(bg.x + bg.width - 100, bg.y + bg.height - 130, 'Low Qual.', 0, updateFilters);
+		hqCheckBox = new UICheckBox(lqCheckBox.x, lqCheckBox.y + 22, 'High Qual.', 0, updateFilters);
+		smCheckBox = new UICheckBox(hqCheckBox.x, hqCheckBox.y + 22, 'Story Mode', 0, updateFilters);
 		lqCheckBox.cameras = cameras;
 		hqCheckBox.cameras = cameras;
 		smCheckBox.cameras = cameras;
@@ -101,7 +101,7 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 		add(hqCheckBox);
 		add(smCheckBox);
 
-		radioGrp = new PsychUIRadioGroup(bg.x + 60, bg.y + 80, preloadListKeys, 25, 15, false, 280);
+		radioGrp = new UIRadioGroup(bg.x + 60, bg.y + 80, preloadListKeys, 25, 15, false, 280);
 		radioGrp.cameras = cameras;
 		add(radioGrp);
 
@@ -147,7 +147,7 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 			else showOutput('File is not inside Psych Engine\'s folder!', true);
 		}
 
-		var loadFileBtn:PsychUIButton = new PsychUIButton(0, bg.y + bg.height - 40, 'Load File', function()
+		var loadFileBtn:UIButton = new UIButton(0, bg.y + bg.height - 40, 'Load File', function()
 		{
 			if(!fileDialog.completed) return;
 			
@@ -172,7 +172,7 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 		loadFileBtn.x -= 120;
 		add(loadFileBtn);
 
-		var loadFolderBtn:PsychUIButton = new PsychUIButton(0, bg.y + bg.height - 40, 'Load Folder', function()
+		var loadFolderBtn:UIButton = new UIButton(0, bg.y + bg.height - 40, 'Load Folder', function()
 		{
 			if(!fileDialog.completed) return;
 
@@ -185,7 +185,7 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 		loadFolderBtn.cameras = cameras;
 		add(loadFolderBtn);
 
-		var saveBtn:PsychUIButton = new PsychUIButton(0, bg.y + bg.height - 40, 'Save', function()
+		var saveBtn:UIButton = new UIButton(0, bg.y + bg.height - 40, 'Save', function()
 		{
 			if(!fileDialog.completed) return;
 
@@ -216,7 +216,7 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 			close();
 		}
 		
-		var checked:PsychUIRadioItem = radioGrp.checkedRadio;
+		var checked:UIRadioItem = radioGrp.checkedRadio;
 		if(checked != null)
 			removeButton.y = checked.y - 1;
 	}
@@ -226,14 +226,14 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 		//trace(id, sender);
 		switch(id)
 		{
-			case PsychUIRadioGroup.CLICK_EVENT:
+			case UIRadioGroup.CLICK_EVENT:
 				updateButtons();
 		}
 	}
 
 	function updateButtons()
 	{
-		var checked:PsychUIRadioItem = radioGrp.checkedRadio;
+		var checked:UIRadioItem = radioGrp.checkedRadio;
 		if(checked != null)
 		{
 			var filters:LoadFilters = getCurLoadFilters();

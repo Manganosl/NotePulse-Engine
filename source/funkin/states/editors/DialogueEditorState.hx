@@ -12,7 +12,9 @@ import funkin.game.cutscenes.DialogueBoxPsych;
 import funkin.game.cutscenes.DialogueCharacter;
 import funkin.states.editors.content.Prompt;
 
-class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
+import funkin.states.editors.ui.DialogueEditorUI;
+
+class DialogueEditorState extends MusicBeatState
 {
 	var character:DialogueCharacter;
 	var box:FlxSprite;
@@ -24,6 +26,8 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 	var defaultLine:DialogueLine;
 	var dialogueFile:DialogueFile = null;
 	var unsavedProgress:Bool = false;
+
+	var UI:DialogueEditorUI;
 
 	override function create() {
 		persistentUpdate = persistentDraw = true;
@@ -61,7 +65,10 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 		box.updateHitbox();
 		add(box);
 
-		addEditorBox();
+		UI = new DialogueEditorUI(this);
+		UI.createUI();
+		add(UI);
+
 		FlxG.mouse.visible = true;
 
 		var addLineText:FlxText = new FlxText(10, 10, FlxG.width - 20, 'Press O to remove the current dialogue line, Press P to add another line after the current one.', 8);
@@ -86,65 +93,6 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 		super.create();
 	}
 
-	var UI_box:PsychUIBox;
-	function addEditorBox()
-	{
-		UI_box = new PsychUIBox(FlxG.width - 260, 10, 250, 210, ['Dialogue Line']);
-		UI_box.scrollFactor.set();
-		addDialogueLineUI();
-		add(UI_box);
-	}
-
-	var characterInputText:PsychUIInputText;
-	var lineInputText:PsychUIInputText;
-	var angryCheckbox:PsychUICheckBox;
-	var speedStepper:PsychUINumericStepper;
-	var soundInputText:PsychUIInputText;
-	function addDialogueLineUI() {
-		var tab_group = UI_box.getTab('Dialogue Line').menu;
-
-		characterInputText = new PsychUIInputText(10, 20, 80, DialogueCharacter.DEFAULT_CHARACTER, 8);
-		speedStepper = new PsychUINumericStepper(10, characterInputText.y + 40, 0.005, 0.05, 0, 0.5, 3);
-
-		angryCheckbox = new PsychUICheckBox(speedStepper.x + 120, speedStepper.y, "Angry Textbox", 200);
-		angryCheckbox.onClick = function()
-		{
-			updateTextBox();
-			dialogueFile.dialogue[curSelected].boxState = (angryCheckbox.checked ? 'angry' : 'normal');
-		};
-
-		soundInputText = new PsychUIInputText(10, speedStepper.y + 40, 150, '', 8);
-		lineInputText = new PsychUIInputText(10, soundInputText.y + 35, 200, DEFAULT_TEXT, 8);
-		lineInputText.onPressEnter = function(e)
-		{
-			if(e.shiftKey)
-			{
-				lineInputText.text += '\n';
-				lineInputText.caretIndex++;
-			}
-			else PsychUIInputText.focusOn = null;
-		};
-
-		var loadButton:PsychUIButton = new PsychUIButton(20, lineInputText.y + 25, "Load Dialogue", function() {
-			loadDialogue();
-		});
-		var saveButton:PsychUIButton = new PsychUIButton(loadButton.x + 120, loadButton.y, "Save Dialogue", function() {
-			saveDialogue();
-		});
-
-		tab_group.add(new FlxText(10, speedStepper.y - 18, 0, 'Interval/Speed (ms):'));
-		tab_group.add(new FlxText(10, characterInputText.y - 18, 0, 'Character:'));
-		tab_group.add(new FlxText(10, soundInputText.y - 18, 0, 'Sound file name:'));
-		tab_group.add(new FlxText(10, lineInputText.y - 18, 0, 'Text:'));
-		tab_group.add(characterInputText);
-		tab_group.add(angryCheckbox);
-		tab_group.add(speedStepper);
-		tab_group.add(soundInputText);
-		tab_group.add(lineInputText);
-		tab_group.add(loadButton);
-		tab_group.add(saveButton);
-	}
-
 	function copyDefaultLine():DialogueLine {
 		var copyLine:DialogueLine = {
 			portrait: defaultLine.portrait,
@@ -159,7 +107,7 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 
 	function updateTextBox() {
 		box.flipX = false;
-		var isAngry:Bool = angryCheckbox.checked;
+		var isAngry:Bool = UI.angryCheckbox.checked;
 		var anim:String = isAngry ? 'angry' : 'normal';
 
 		switch(character.jsonFile.dialogue_pos) {
@@ -209,7 +157,7 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 	private static var DEFAULT_SPEED:Float = 0.05;
 	private static var DEFAULT_BUBBLETYPE:String = "normal";
 	function reloadText(skipDialogue:Bool) {
-		var textToType:String = lineInputText.text;
+		var textToType:String = UI.lineInputText.text;
 		if(textToType == null || textToType.length < 1) textToType = ' ';
 
 		daText.text = textToType;
@@ -229,61 +177,11 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
-		var rpcText:String = lineInputText.text;
+		var rpcText:String = UI.lineInputText.text;
 		if(rpcText == null || rpcText.length < 1) rpcText = '(Empty)';
 		if(rpcText.length < 3) rpcText += '   '; //Fixes a bug on RPC that triggers an error when the text is too short
 		DiscordClient.changePresence("Dialogue Editor", rpcText);
 		#end
-	}
-
-	public function UIEvent(id:String, sender:Dynamic) {
-		if(id == PsychUICheckBox.CLICK_EVENT)
-			unsavedProgress = true;
-
-		if(id == PsychUIInputText.CHANGE_EVENT && (sender is PsychUIInputText)) {
-			if (sender == characterInputText)
-			{
-				character.reloadCharacterJson(characterInputText.text);
-				reloadCharacter();
-				if(character.jsonFile.animations.length > 0) {
-					curAnim = 0;
-					if(character.jsonFile.animations.length > curAnim && character.jsonFile.animations[curAnim] != null) {
-						character.playAnim(character.jsonFile.animations[curAnim].anim, daText.finishedText);
-						animText.text = 'Animation: ' + character.jsonFile.animations[curAnim].anim + ' (' + (curAnim + 1) +' / ' + character.jsonFile.animations.length + ') - Press W or S to scroll';
-					} else {
-						animText.text = 'ERROR! NO ANIMATIONS FOUND';
-					}
-					characterAnimSpeed();
-				}
-				dialogueFile.dialogue[curSelected].portrait = characterInputText.text;
-				reloadText(false);
-				updateTextBox();
-			}
-			else if(sender == lineInputText)
-			{
-				dialogueFile.dialogue[curSelected].text = lineInputText.text;
-
-				daText.text = lineInputText.text;
-				if(daText.text == null) daText.text = '';
-				reloadText(true);
-			}
-			else if(sender == soundInputText)
-			{
-				daText.finishText();
-				dialogueFile.dialogue[curSelected].sound = soundInputText.text;
-				daText.sound = soundInputText.text;
-				if(daText.sound == null) daText.sound = '';
-			}
-			unsavedProgress = true;
-		} else if(id == PsychUINumericStepper.CHANGE_EVENT && (sender == speedStepper)) {
-			dialogueFile.dialogue[curSelected].speed = speedStepper.value;
-			if(Math.isNaN(dialogueFile.dialogue[curSelected].speed) || dialogueFile.dialogue[curSelected].speed == null || dialogueFile.dialogue[curSelected].speed < 0.001) {
-				dialogueFile.dialogue[curSelected].speed = 0.0;
-			}
-			daText.delay = dialogueFile.dialogue[curSelected].speed;
-			reloadText(false);
-			unsavedProgress = true;
-		}
 	}
 
 	var curSelected:Int = 0;
@@ -305,7 +203,7 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 			}
 		}
 
-		if(PsychUIInputText.focusOn == null)
+		if(UIInputText.focusOn == null)
 		{
 			ClientPrefs.toggleVolumeKeys(true);
 			if(FlxG.keys.justPressed.SPACE) {
@@ -364,20 +262,20 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 		curSelected = FlxMath.wrap(curSelected + add, 0, dialogueFile.dialogue.length - 1);
 
 		var curDialogue:DialogueLine = dialogueFile.dialogue[curSelected];
-		characterInputText.text = curDialogue.portrait;
-		lineInputText.text = curDialogue.text;
-		angryCheckbox.checked = (curDialogue.boxState == 'angry');
-		speedStepper.value = curDialogue.speed;
+		UI.characterInputText.text = curDialogue.portrait;
+		UI.lineInputText.text = curDialogue.text;
+		UI.angryCheckbox.checked = (curDialogue.boxState == 'angry');
+		UI.speedStepper.value = curDialogue.speed;
 
 		if (curDialogue.sound == null) curDialogue.sound = '';
-		soundInputText.text = curDialogue.sound;
+		UI.soundInputText.text = curDialogue.sound;
 
-		daText.delay = speedStepper.value;
-		daText.sound = soundInputText.text;
+		daText.delay = UI.speedStepper.value;
+		daText.sound = UI.soundInputText.text;
 		if(daText.sound != null && daText.sound.trim() == '') daText.sound = 'dialogue';
 
 		curAnim = 0;
-		character.reloadCharacterJson(characterInputText.text);
+		character.reloadCharacterJson(UI.characterInputText.text);
 		reloadCharacter();
 		reloadText(false);
 		updateTextBox();
@@ -405,7 +303,7 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 
 	function characterAnimSpeed() {
 		if(character.animation.curAnim != null) {
-			var speed:Float = speedStepper.value;
+			var speed:Float = UI.speedStepper.value;
 			var rate:Float = 24 - (((speed - 0.05) / 5) * 480);
 			if(rate < 12) rate = 12;
 			else if(rate > 48) rate = 48;

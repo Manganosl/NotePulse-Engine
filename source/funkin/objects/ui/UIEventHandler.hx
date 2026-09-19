@@ -1,6 +1,6 @@
 package funkin.objects.ui;
 
-class PsychUIEventHandler
+class UIEventHandler
 {
 	public static function event(id:String, sender:Dynamic)
 	{
@@ -15,6 +15,6 @@ class PsychUIEventHandler
 	}
 }
 
-interface PsychUIEvent {
+interface UIEvent {
 	public function UIEvent(id:String, sender:Dynamic):Void;
 }

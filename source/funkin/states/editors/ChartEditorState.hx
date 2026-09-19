@@ -316,7 +316,7 @@ class ChartEditorState extends MusicBeatState {
 
 		createGrids();
 		
-		selectionBox = new FlxSprite().makeGraphic(1, 1, FlxColor.CYAN);
+		selectionBox = new FlxSprite().makeGraphic(1, 1, 0xFF8000FF);
 		selectionBox.alpha = 0.4;
 		selectionBox.blend = ADD;
 		selectionBox.scrollFactor.set();
@@ -545,7 +545,7 @@ class ChartEditorState extends MusicBeatState {
 		if(UI.lanesGfDropDown != null) UI.lanesGfDropDown.selectedLabel = PlayState.SONG.gfVersion;
 		for (i in 3...UI.characterDropdowns.length)
 		{
-			var dropDown:PsychUIDropDownMenu = UI.characterDropdowns[i];
+			var dropDown:UIDropDownMenu = UI.characterDropdowns[i];
 			if(dropDown == null) continue;
 
 			var extraChars:Array<String> = Reflect.hasField(PlayState.SONG, 'extraPlayers') ? Reflect.field(PlayState.SONG, 'extraPlayers') : null;
@@ -613,7 +613,7 @@ class ChartEditorState extends MusicBeatState {
 	var songFinished:Bool = false;
 
 	var fileDialog:FileDialogHandler = new FileDialogHandler();
-	var lastFocus:PsychUIInputText;
+	var lastFocus:UIInputText;
 
 	var autoSaveTime:Float = 0;
 	var autoSaveCap:Int = 2; //in minutes
@@ -662,7 +662,7 @@ class ChartEditorState extends MusicBeatState {
 		}
 		if(!fileDialog.completed)
 		{
-			lastFocus = PsychUIInputText.focusOn;
+			lastFocus = UIInputText.focusOn;
 			return;
 		}
 
@@ -674,26 +674,26 @@ class ChartEditorState extends MusicBeatState {
 			autoSaveTime += elapsed / 60.0;
 			if(autoSaveTime >= autoSaveCap #if debug || FlxG.keys.justPressed.NUMPADMULTIPLY #end)
 			{
-			var box:NPUICountdown = new NPUICountdown(100, 100, 200, 80, "AutoSaving in...", 5, function() {saveChart();}, function() {UI.showOutput("Autosave cancelled!", true);});
+			var box:UICountdown = new UICountdown(100, 100, 200, 80, "AutoSaving in...", 5, function() {saveChart();}, function() {UI.showOutput("Autosave cancelled!", true);});
 			box.cameras = [camUI];
 			add(box);
 			autoSaveTime = 0;
 			}
 		}
 
-		ClientPrefs.toggleVolumeKeys((PsychUIInputText.focusOn == null && !FlxG.keys.pressed.CONTROL));
+		ClientPrefs.toggleVolumeKeys((UIInputText.focusOn == null && !FlxG.keys.pressed.CONTROL));
 
 		var lastTime:Float = Conductor.songPosition;
 		var holdingAlt:Bool = FlxG.keys.pressed.ALT;
 		if(FlxG.sound.music != null)
 		{
-			if(PsychUIInputText.focusOn == null) //If not typing anything
+			if(UIInputText.focusOn == null) //If not typing anything
 			{
 				if(FlxG.keys.justPressed.F12)
 				{
 					super.update(elapsed);
 					editorPlayStatePrompt();
-					lastFocus = PsychUIInputText.focusOn;
+					lastFocus = UIInputText.focusOn;
 					return;
 				}
 				else if(FlxG.keys.justPressed.F1)
@@ -901,7 +901,7 @@ class ChartEditorState extends MusicBeatState {
 				loadSection(curSec + 1);
 		}
 
-		if(PsychUIInputText.focusOn == null && lastFocus == null)
+		if(UIInputText.focusOn == null && lastFocus == null)
 		{
 			var doCut:Bool = false;
 			var canContinue:Bool = true;
@@ -1491,7 +1491,7 @@ class ChartEditorState extends MusicBeatState {
 		easedScrollY = CoolUtil.smoothLerpPrecision(easedScrollY, scrollY, elapsed, SCROLL_EASE_DURATION);
 		easedScrollY = CoolUtil.snap(easedScrollY, scrollY, 1 / 1000);
 		FlxG.camera.scroll.y = easedScrollY;
-		lastFocus = PsychUIInputText.focusOn;
+		lastFocus = UIInputText.focusOn;
 
 		for(i => char in UI.characters){
 			if(char == null) continue;
@@ -3013,33 +3013,33 @@ class ChartEditorState extends MusicBeatState {
 	}
 
 	public static var doModchartOnEditor:Bool = true;
-	var modchartCheckBox:PsychUICheckBox;
+	var modchartCheckBox:UICheckBox;
 	function editorPlayStatePrompt(){
 		FlxG.sound.play(Paths.sound('chartingSounds/openWindow'));
 		openSubState(new BasePrompt(420, 200, 'Preview\nChoose the strums to play.', function(state:BasePrompt){
 			var btnY = 390;
-			var buttons:Array<PsychUIButton> = [];
+			var buttons:Array<UIButton> = [];
 
-			modchartCheckBox = new PsychUICheckBox(0, btnY - 37, 'Preview Modchart?', 100, function() doModchartOnEditor = modchartCheckBox.checked);
+			modchartCheckBox = new UICheckBox(0, btnY - 37, 'Preview Modchart?', 100, function() doModchartOnEditor = modchartCheckBox.checked);
 			modchartCheckBox.checked = doModchartOnEditor;
 			modchartCheckBox.cameras = state.cameras;
 
-			buttons.push(new PsychUIButton(0, btnY, 'Opponent', function(){
+			buttons.push(new UIButton(0, btnY, 'Opponent', function(){
 				openEditorPlayState(0);
 			}));
 
-			buttons.push(new PsychUIButton(0, btnY, 'Player', function(){
+			buttons.push(new UIButton(0, btnY, 'Player', function(){
 				openEditorPlayState(1);
 			}));
 
 			if (PlayState.SONG.lanes >= 3){
 				state.bg.scale.x *= 1.3;
-				buttons.push(new PsychUIButton(0, btnY, 'Girlfriend', function(){
+				buttons.push(new UIButton(0, btnY, 'Girlfriend', function(){
 					openEditorPlayState(2);
 				}));
 			}
 
-			var cancelBtn = new PsychUIButton(0, btnY, 'Cancel', state.close);
+			var cancelBtn = new UIButton(0, btnY, 'Cancel', state.close);
 			cancelBtn.normalStyle.bgColor = FlxColor.RED;
 			cancelBtn.normalStyle.textColor = FlxColor.WHITE;
 			buttons.push(cancelBtn);

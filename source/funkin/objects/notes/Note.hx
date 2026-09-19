@@ -808,7 +808,7 @@ class Note extends FunkinSprite {
 				_curveTransform.redOffset = 255 * segGlow;
 				_curveTransform.greenOffset = 255 * segGlow;
 				_curveTransform.blueOffset = 255 * segGlow;
-				_curveTransform.alphaMultiplier = segAlpha * camAlphaMult;
+				_curveTransform.alphaMultiplier = segAlpha * camAlphaMult * (copyAlpha ? strum.alpha : 1);
 				_curveTransform.alphaOffset = 0;
 
 				camera.drawTriangles(frames.parent, _curveVertices, _curveIndices, _curveUVT, null,

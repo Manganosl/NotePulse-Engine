@@ -4,6 +4,8 @@ import funkin.objects.notes.Note;
 import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.splashes.NoteSplash;
 
+import funkin.states.editors.ui.NoteSplashDebugUI;
+
 class NoteSplashDebugState extends MusicBeatState
 {
 	var config:NoteSplashConfig;
@@ -14,20 +16,10 @@ class NoteSplashDebugState extends MusicBeatState
 	var selection:FlxSprite;
 	var notes:FlxTypedGroup<StrumNote>;
 	var splashes:FlxTypedGroup<FlxSprite>;
-	
-	var imageInputText:PsychUIInputText;
-	var nameInputText:PsychUIInputText;
-	var stepperMinFps:PsychUINumericStepper;
-	var stepperMaxFps:PsychUINumericStepper;
 
-	var offsetsText:FlxText;
-	var curFrameText:FlxText;
-	var curAnimText:FlxText;
-	var savedText:FlxText;
 	var selecArr:Array<Float> = null;
 
-	var missingTextBG:FlxSprite;
-	var missingText:FlxText;
+	var UI:NoteSplashDebugUI;
 
 	public static final defaultTexture:String = 'noteSplashes';
 
@@ -62,115 +54,9 @@ class NoteSplashDebugState extends MusicBeatState
 			splashes.add(splash);
 		}
 
-		//
-		var txtx = 60;
-		var txty = 640;
-
-		var imageName:FlxText = new FlxText(txtx, txty - 120, 'Image Name:', 16);
-		add(imageName);
-
-		imageInputText = new PsychUIInputText(txtx, txty - 100, 360, defaultTexture, 16);
-		imageInputText.onChange = function(old:String, cur:String)
-		{
-			trace('changed image to $cur');
-		}
-		imageInputText.unfocus = function()
-		{
-			textureName = imageInputText.text;
-			try {
-				loadFrames();
-			} catch(e:Dynamic) {
-				trace('ERROR! $e');
-				textureName = defaultTexture;
-				loadFrames();
-
-				missingText.text = 'ERROR WHILE LOADING IMAGE:\n${imageInputText.text}';
-				missingText.screenCenter(Y);
-				missingText.visible = true;
-				missingTextBG.visible = true;
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-
-				new FlxTimer().start(2.5, function(tmr:FlxTimer)
-				{
-					missingText.visible = false;
-					missingTextBG.visible = false;
-				});
-			}
-		};
-		add(imageInputText);
-
-		var animName:FlxText = new FlxText(txtx, txty, 'Animation Name:', 16);
-		add(animName);
-
-		nameInputText = new PsychUIInputText(txtx, txty + 20, 360, '', 16);
-		nameInputText.onChange = function(old:String, cur:String)
-		{
-			trace('changed anim name to $cur');
-			config.anim = cur;
-			curAnim = 1;
-			reloadAnims();
-		};
-		add(nameInputText);
-
-		add(new FlxText(txtx, txty - 50, 0, 'Min/Max Framerate:', 16));
-		stepperMinFps = new PsychUINumericStepper(txtx, txty - 30, 1, 22, 1, 60, 0);
-		stepperMinFps.onValueChange = function(){
-			if(stepperMinFps.value > stepperMaxFps.value)
-				stepperMaxFps.value = stepperMinFps.value;
-			config.minFps = Std.int(stepperMinFps.value);
-			config.maxFps = Std.int(stepperMaxFps.value);
-		}
-		add(stepperMinFps);
-
-		stepperMaxFps = new PsychUINumericStepper(txtx + 60, txty - 30, 1, 26, 1, 60, 0);
-		stepperMaxFps.onValueChange = function(){
-			if(stepperMaxFps.value < stepperMinFps.value)
-				stepperMinFps.value = stepperMaxFps.value;
-			config.minFps = Std.int(stepperMinFps.value);
-			config.maxFps = Std.int(stepperMaxFps.value);
-		}
-		add(stepperMaxFps);
-
-		//
-		offsetsText = new FlxText(300, 150, 680, '', 16);
-		offsetsText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		offsetsText.scrollFactor.set();
-		add(offsetsText);
-
-		curFrameText = new FlxText(300, 100, 680, '', 16);
-		curFrameText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		curFrameText.scrollFactor.set();
-		add(curFrameText);
-
-		curAnimText = new FlxText(300, 50, 680, '', 16);
-		curAnimText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		curAnimText.scrollFactor.set();
-		add(curAnimText);
-
-		var text:FlxText = new FlxText(0, 520, FlxG.width,
-			"Press SPACE to Reset animation\n
-			Press ENTER twice to save to the loaded Note Splash PNG's folder\n
-			A/D change selected note - Arrow Keys to change offset (Hold shift for 10x)\n
-			Ctrl + C/V - Copy & Paste", 16);
-		text.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		text.scrollFactor.set();
-		add(text);
-
-		savedText = new FlxText(0, 340, FlxG.width, '', 24);
-		savedText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		savedText.scrollFactor.set();
-		add(savedText);
-
-		missingTextBG = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
-		missingTextBG.alpha = 0.6;
-		missingTextBG.visible = false;
-		add(missingTextBG);
-
-		missingText = new FlxText(50, 0, FlxG.width - 100, '', 24);
-		missingText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		missingText.scrollFactor.set();
-		missingText.visible = false;
-		add(missingText);
+		UI = new NoteSplashDebugUI(this);
+		UI.createUI();
+		add(UI);
 
 		loadFrames();
 		changeSelection();
@@ -183,7 +69,7 @@ class NoteSplashDebugState extends MusicBeatState
 	var pressEnterToSave:Float = 0;
 	override function update(elapsed:Float)
 	{
-		var notTyping:Bool = PsychUIInputText.focusOn == null;
+		var notTyping:Bool = UIInputText.focusOn == null;
 		if(controls.BACK && notTyping)
 		{
 			MusicBeatState.switchState(new funkin.states.MainMenuState());
@@ -250,12 +136,12 @@ class NoteSplashDebugState extends MusicBeatState
 		{
 			visibleTime -= elapsed;
 			if(visibleTime <= 0)
-				savedText.visible = false;
+				UI.savedText.visible = false;
 		}
 
 		if(FlxG.keys.justPressed.ENTER)
 		{
-			savedText.text = 'Press ENTER again to save.';
+			UI.savedText.text = 'Press ENTER again to save.';
 			if(pressEnterToSave > 0) //save
 			{
 				saveFile();
@@ -268,7 +154,7 @@ class NoteSplashDebugState extends MusicBeatState
 				pressEnterToSave = 0.5;
 				visibleTime = 0.5;
 			}
-			savedText.visible = true;
+			UI.savedText.visible = true;
 		}
 
 		// Reset anim & change anim
@@ -288,7 +174,7 @@ class NoteSplashDebugState extends MusicBeatState
 			else if(forceFrame >= maxFrame) forceFrame = maxFrame - 1;
 			//trace('curFrame: $forceFrame');
 			
-			curFrameText.text = 'Force Frame: ${forceFrame+1} / $maxFrame\n(Press Q/E to change)';
+			UI.curFrameText.text = 'Force Frame: ${forceFrame+1} / $maxFrame\n(Press Q/E to change)';
 			splashes.forEachAlive(function(spr:FlxSprite) {
 				spr.animation.curAnim.paused = true;
 				spr.animation.curAnim.curFrame = forceFrame;
@@ -299,7 +185,7 @@ class NoteSplashDebugState extends MusicBeatState
 	function updateOffsetText()
 	{
 		selecArr = selectedArray();
-		offsetsText.text = selecArr.toString();
+		UI.offsetsText.text = selecArr.toString();
 	}
 
 	var textureName:String = defaultTexture;
@@ -316,9 +202,9 @@ class NoteSplashDebugState extends MusicBeatState
 		NoteSplash.configs.clear();
 		config = NoteSplash.precacheConfig(texturePath);
 		if(config == null) config = NoteSplash.precacheConfig(NoteSplash.defaultNoteSplash);
-		nameInputText.text = config.anim;
-		stepperMinFps.value = config.minFps;
-		stepperMaxFps.value = config.maxFps;
+		UI.nameInputText.text = config.anim;
+		UI.stepperMinFps.value = config.minFps;
+		UI.stepperMaxFps.value = config.maxFps;
 		//
 
 		reloadAnims();
@@ -341,12 +227,12 @@ class NoteSplashDebugState extends MusicBeatState
 
 		var pathSplit:Array<String> = (Paths.getPath('images/$texturePath.png', IMAGE, true).split('.png')[0] + '.txt').split(':');
 		var path:String = pathSplit[pathSplit.length-1].trim();
-		savedText.text = 'Saved to: $path';
+		UI.savedText.text = 'Saved to: $path';
 		File.saveContent(path, strToSave);
 
 		//trace(strToSave);
 		#else
-		savedText.text = 'Can\'t save on this platform, too bad.';
+		UI.savedText.text = 'Can\'t save on this platform, too bad.';
 		#end
 	}
 	
@@ -391,8 +277,8 @@ class NoteSplashDebugState extends MusicBeatState
 			if(curAnim > maxAnims) curAnim = 1;
 			else if(curAnim < 1) curAnim = maxAnims;
 
-			curAnimText.text = 'Current Animation: $curAnim / $maxAnims\n(Press W/S to change)';
-			curFrameText.text = 'Force Frame Disabled\n(Press Q/E to change)';
+			UI.curAnimText.text = 'Current Animation: $curAnim / $maxAnims\n(Press W/S to change)';
+			UI.curFrameText.text = 'Force Frame Disabled\n(Press Q/E to change)';
 
 			for (i in 0...maxNotes)
 			{
@@ -409,8 +295,8 @@ class NoteSplashDebugState extends MusicBeatState
 		}
 		else
 		{
-			curAnimText.text = 'INVALID ANIMATION NAME';
-			curFrameText.text = '';
+			UI.curAnimText.text = 'INVALID ANIMATION NAME';
+			UI.curFrameText.text = '';
 		}
 		updateOffsetText();
 	}

@@ -35,7 +35,7 @@ enum abstract WaveformTarget(String){
 }
 
 @:access(funkin.states.editors.ChartEditorState)
-class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.PsychUIEvent {
+class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent {
     private var charter:ChartEditorState;
 
 	public var waveformTarget:WaveformTarget = INST;
@@ -43,91 +43,91 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 	public var sliderIsDragging:Bool = false;
 	public var sliderWasPlaying:Bool = false;
 
-	public var eventsBox:PsychUIBox;
-	public var songPosSlider:PsychUIVerticalSlider;
-	public var mainBox:PsychUIBox;
+	public var eventsBox:UIBox;
+	public var songPosSlider:UIVerticalSlider;
+	public var mainBox:UIBox;
 	public var mainBoxPosition:FlxPoint = FlxPoint.get(920, 40);
-	public var infoBox:PsychUIBox;
+	public var infoBox:UIBox;
 	public var infoBoxPosition:FlxPoint = FlxPoint.get(1000, 360);
-	public var upperBox:PsychUIBox;
+	public var upperBox:UIBox;
 
 	public var infoText:FlxText;
 
-	public var playerBoxes:Array<PsychUIBox> = [];
-	public var characterDropdowns:Array<PsychUIDropDownMenu> = [];
-	public var hitsoundSliders:Array<PsychUISlider> = [];
-	public var lanesBox:PsychUIBox;
+	public var playerBoxes:Array<UIBox> = [];
+	public var characterDropdowns:Array<UIDropDownMenu> = [];
+	public var hitsoundSliders:Array<UISlider> = [];
+	public var lanesBox:UIBox;
 
-	public var characterBoxes:Array<PsychUIBox> = [];
+	public var characterBoxes:Array<UIBox> = [];
 	public var characters:Array<Character> = [];
 
-	public var songNameInputText:PsychUIInputText;
-	public var allowVocalsCheckBox:PsychUICheckBox;
+	public var songNameInputText:UIInputText;
+	public var allowVocalsCheckBox:UICheckBox;
 
-	public var bpmStepper:PsychUINumericStepper;
-	public var scrollSpeedStepper:PsychUINumericStepper;
-	public var audioOffsetStepper:PsychUINumericStepper;
+	public var bpmStepper:UINumericStepper;
+	public var scrollSpeedStepper:UINumericStepper;
+	public var audioOffsetStepper:UINumericStepper;
 
-	public var stageDropDown:PsychUIDropDownMenu;
-	public var playerDropDown:PsychUIDropDownMenu;
-	public var opponentDropDown:PsychUIDropDownMenu;
-	public var girlfriendDropDown:PsychUIDropDownMenu;
-	public var lanesGfDropDown:PsychUIDropDownMenu;
+	public var stageDropDown:UIDropDownMenu;
+	public var playerDropDown:UIDropDownMenu;
+	public var opponentDropDown:UIDropDownMenu;
+	public var girlfriendDropDown:UIDropDownMenu;
+	public var lanesGfDropDown:UIDropDownMenu;
 	public var pendingLaneAdd:Bool = false;
 	public var pendingLaneRemoveIndex:Int = -1;
 
-	public var showLastGridButton:PsychUIButton;
-	public var showNextGridButton:PsychUIButton;
-	public var noteTypeLabelsButton:PsychUIButton;
-	public var vortexEditorButton:PsychUIButton;
+	public var showLastGridButton:UIButton;
+	public var showNextGridButton:UIButton;
+	public var noteTypeLabelsButton:UIButton;
+	public var vortexEditorButton:UIButton;
 
-	public var playbackSlider:PsychUISlider;
-	public var mouseSnapCheckBox:PsychUICheckBox;
-	public var ignoreProgressCheckBox:PsychUICheckBox;
-	public var metronomeStepper:PsychUINumericStepper;
+	public var playbackSlider:UISlider;
+	public var mouseSnapCheckBox:UICheckBox;
+	public var ignoreProgressCheckBox:UICheckBox;
+	public var metronomeStepper:UINumericStepper;
 
-	public var instVolumeStepper:PsychUINumericStepper;
-	public var instMuteCheckBox:PsychUICheckBox;
-	public var playerVolumeStepper:PsychUINumericStepper;
-	public var playerMuteCheckBox:PsychUICheckBox;
-	public var opponentVolumeStepper:PsychUINumericStepper;
-	public var opponentMuteCheckBox:PsychUICheckBox;
+	public var instVolumeStepper:UINumericStepper;
+	public var instMuteCheckBox:UICheckBox;
+	public var playerVolumeStepper:UINumericStepper;
+	public var playerMuteCheckBox:UICheckBox;
+	public var opponentVolumeStepper:UINumericStepper;
+	public var opponentMuteCheckBox:UICheckBox;
 
-	public var gameOverCharDropDown:PsychUIDropDownMenu;
-	public var gameOverSndInputText:PsychUIInputText;
-	public var gameOverLoopInputText:PsychUIInputText;
-	public var gameOverRetryInputText:PsychUIInputText;
-	public var noRGBCheckBox:PsychUICheckBox;
-	public var pixel4kTextureCheckBox:PsychUICheckBox;
-	public var noteTextureInputText:PsychUIInputText;
-	public var noteSplashesInputText:PsychUIInputText;
+	public var gameOverCharDropDown:UIDropDownMenu;
+	public var gameOverSndInputText:UIInputText;
+	public var gameOverLoopInputText:UIInputText;
+	public var gameOverRetryInputText:UIInputText;
+	public var noRGBCheckBox:UICheckBox;
+	public var pixel4kTextureCheckBox:UICheckBox;
+	public var noteTextureInputText:UIInputText;
+	public var noteSplashesInputText:UIInputText;
 
-	public var subdivisionsStepper:PsychUINumericStepper;
-	public var modifierInput:PsychUIInputText;
-	public var actionsDropdown:PsychUIDropDownMenu;
-	public var timeStepper:PsychUINumericStepper;
-	public var valueStepper:PsychUINumericStepper;
-	public var easeInput:PsychUIInputText;
-	public var playerStepper:PsychUINumericStepper;
+	public var subdivisionsStepper:UINumericStepper;
+	public var modifierInput:UIInputText;
+	public var actionsDropdown:UIDropDownMenu;
+	public var timeStepper:UINumericStepper;
+	public var valueStepper:UINumericStepper;
+	public var easeInput:UIInputText;
+	public var playerStepper:UINumericStepper;
 
-	public var eventDropDown:PsychUIDropDownMenu;
-	public var value1InputText:PsychUIInputText;
-	public var value2InputText:PsychUIInputText;
+	public var eventDropDown:UIDropDownMenu;
+	public var value1InputText:UIInputText;
+	public var value2InputText:UIInputText;
 	public var selectedEventText:FlxText;
 	public var eventDescriptionText:FlxText;
 
-	public var susLengthStepper:PsychUINumericStepper;
-	public var strumTimeStepper:PsychUINumericStepper;
-	public var noteTypeDropDown:PsychUIDropDownMenu;
+	public var susLengthStepper:UINumericStepper;
+	public var strumTimeStepper:UINumericStepper;
+	public var noteTypeDropDown:UIDropDownMenu;
 
-	public var mustHitCheckBox:PsychUICheckBox;
-	public var gfSectionCheckBox:PsychUICheckBox;
-	public var altAnimSectionCheckBox:PsychUICheckBox;
-	public var focusGFCheckBox:PsychUICheckBox;
+	public var mustHitCheckBox:UICheckBox;
+	public var gfSectionCheckBox:UICheckBox;
+	public var altAnimSectionCheckBox:UICheckBox;
+	public var focusGFCheckBox:UICheckBox;
 
-	public var changeBpmCheckBox:PsychUICheckBox;
-	public var changeBpmStepper:PsychUINumericStepper;
-	public var beatsPerSecStepper:PsychUINumericStepper;
+	public var changeBpmCheckBox:UICheckBox;
+	public var changeBpmStepper:UINumericStepper;
+	public var beatsPerSecStepper:UINumericStepper;
 
     public function new(charter:ChartEditorState){
         super();
@@ -185,7 +185,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 		if(FlxG.mouse.overlaps(mainBox.bg, charter.camUI) || FlxG.mouse.overlaps(infoBox.bg, charter.camUI) || FlxG.mouse.overlaps(lanesBox.bg, FlxG.camera)) overlapsUI = true;
 		for(box in playerBoxes) if(FlxG.mouse.overlaps(box.bg, FlxG.camera)) overlapsUI = true;
-		for(box in characterBoxes) if(FlxG.mouse.overlaps(box.bg, charter.camUI)) overlapsUI = true;
+		for(box in characterBoxes) if(box.visible && FlxG.mouse.overlaps(box.bg, charter.camUI)) overlapsUI = true;
 		for(dropdown in characterDropdowns) if(FlxG.mouse.overlaps(dropdown.bg, FlxG.camera)) overlapsUI = true;
 		if(lanesGfDropDown != null && FlxG.mouse.overlaps(lanesGfDropDown.bg, FlxG.camera)) overlapsUI = true;
 
@@ -198,18 +198,18 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		var objX = 10;
 		var objY = 25;
 
-		songNameInputText = new PsychUIInputText(objX, objY, 100, 'None', 8);
+		songNameInputText = new UIInputText(objX, objY, 100, 'None', 8);
 		songNameInputText.onChange = function(old:String, cur:String) PlayState.SONG.song = cur;
 
-		allowVocalsCheckBox = new PsychUICheckBox(objX, objY + 20, 'Allow Vocals', 80, function()
+		allowVocalsCheckBox = new UICheckBox(objX, objY + 20, 'Allow Vocals', 80, function()
 		{
 			PlayState.SONG.needsVoices = allowVocalsCheckBox.checked;
 			charter.loadMusic();
 		});
-		var reloadAudioButton:PsychUIButton = new PsychUIButton(objX + 120, objY, 'Reload Audio', function() charter.loadMusic(true), 80);
+		var reloadAudioButton:UIButton = new UIButton(objX + 120, objY, 'Reload Audio', function() charter.loadMusic(true), 80);
 
 		#if mac
-		var reloadJsonButton:PsychUIButton = new PsychUIButton(objX + 205, objY, 'Reload JSON', function()
+		var reloadJsonButton:UIButton = new UIButton(objX + 205, objY, 'Reload JSON', function()
 		{
 			var cur = Paths.formatToSongPath(songNameInputText.text);
 			var curdiff = Highscore.formatSong(cur, PlayState.storyDifficulty);
@@ -245,7 +245,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 		objY += 65;
 		//(x:Float = 0, y:Float = 0, step:Float = 1, defValue:Float = 0, min:Float = -999, max:Float = 999, decimals:Int = 0, ?wid:Int = 60, ?isPercent:Bool = false)
-		bpmStepper = new PsychUINumericStepper(objX, objY, 1, 1, 1, 400, 3);
+		bpmStepper = new UINumericStepper(objX, objY, 1, 1, 1, 400, 3);
 		bpmStepper.onValueChange = function()
 		{
 			var oldTimes:Array<Float> = charter.cachedSectionTimes.copy();
@@ -253,10 +253,10 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			charter.adaptNotesToNewTimes(oldTimes);
 		};
 
-		scrollSpeedStepper = new PsychUINumericStepper(objX + 90, objY, 0.1, 1, 0.1, 10, 2);
+		scrollSpeedStepper = new UINumericStepper(objX + 90, objY, 0.1, 1, 0.1, 10, 2);
 		scrollSpeedStepper.onValueChange = function() PlayState.SONG.speed = scrollSpeedStepper.value;
 
-		var stepperMania = new PsychUINumericStepper(objX + 180, objY, 1, PlayState.SONG.mania, ExtraKeysHandler.instance.data.minKeys, ExtraKeysHandler.instance.data.maxKeys, 1);
+		var stepperMania = new UINumericStepper(objX + 180, objY, 1, PlayState.SONG.mania, ExtraKeysHandler.instance.data.minKeys, ExtraKeysHandler.instance.data.maxKeys, 1);
 		stepperMania.value = PlayState.SONG.mania;
 		stepperMania.onValueChange = function(){
 			var oldColumns:Int = ChartEditorState.GRID_COLUMNS_PER_PLAYER;
@@ -287,7 +287,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			remove(charter.mustHitIndicator); add(charter.mustHitIndicator);
 		};
 
-		audioOffsetStepper = new PsychUINumericStepper(objX, objY + 40, 1, 0, -500, 500, 0);
+		audioOffsetStepper = new UINumericStepper(objX, objY + 40, 1, 0, -500, 500, 0);
 		audioOffsetStepper.onValueChange = function(){
 			Reflect.setField(PlayState.SONG, "offset", audioOffsetStepper.value);
 			Conductor.offset = audioOffsetStepper.value;
@@ -307,7 +307,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		//
 		
 		objY += 40;
-		stageDropDown = new PsychUIDropDownMenu(objX, objY + 40, [''], function(id:Int, stage:String)
+		stageDropDown = new UIDropDownMenu(objX, objY + 40, [''], function(id:Int, stage:String)
 		{
 			PlayState.SONG.stage = stage;
 			StageData.loadDirectory(PlayState.SONG);
@@ -333,7 +333,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		var btnY = 1;
 		var btnWid = Std.int(tab.width);
 
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  New', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  New', function()
 		{
 			var func:Void->Void = function()
 			{
@@ -354,7 +354,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		{
 			btnY++;
 			btnY += 20;
-			var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Open Events...', function()
+			var btn:UIButton = new UIButton(btnX, btnY, '  Open Events...', function()
 			{
 				if(!charter.fileDialog.completed) return;
 				upperBox.isMinimized = true;
@@ -385,7 +385,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 							function(state:BasePrompt)
 							{
 								var btnY = 390;
-								var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Replace All', function()
+								var btn:UIButton = new UIButton(0, btnY, 'Replace All', function()
 								{
 									for (event in charter.events)
 									{
@@ -412,7 +412,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 								btn.cameras = state.cameras;
 								state.add(btn);
 								
-								var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Add', function()
+								var btn:UIButton = new UIButton(0, btnY, 'Add', function()
 								{
 									for (event in loadedEvents)
 										charter.events.push(charter.createEvent(event));
@@ -425,7 +425,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 								btn.cameras = state.cameras;
 								state.add(btn);
 						
-								var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Cancel', state.close);
+								var btn:UIButton = new UIButton(0, btnY, 'Cancel', state.close);
 								btn.screenCenter(X);
 								btn.x += 125;
 								btn.cameras = state.cameras;
@@ -445,7 +445,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 		btnY++;
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Save', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Save', function()
 		{
 			if(!charter.fileDialog.completed) return;
 			upperBox.isMinimized = true;
@@ -457,7 +457,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		tab_group.add(btn);
 
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Save as...', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Save as...', function()
 		{
 			if(!charter.fileDialog.completed) return;
 			upperBox.isMinimized = true;
@@ -471,7 +471,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		if(ChartEditorState.SHOW_EVENT_COLUMN)
 		{
 			btnY += 20;
-			var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Save Events...', function()
+			var btn:UIButton = new UIButton(btnX, btnY, '  Save Events...', function()
 			{
 				if(!charter.fileDialog.completed) return;
 				upperBox.isMinimized = true;
@@ -487,7 +487,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 		btnY++;
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Reload Chart', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Reload Chart', function()
 		{
 			var func:Void->Void = function()
 			{
@@ -522,7 +522,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 		btnY++;
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Import from V-Slice', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Import from V-Slice', function()
 		{
 			if(upperBox != null) {
 				upperBox.isMinimized = true;
@@ -614,7 +614,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		tab_group.add(btn);
 
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Import from CNE', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Import from CNE', function()
 		{
 			if(upperBox != null) {
 				upperBox.isMinimized = true;
@@ -707,7 +707,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		tab_group.add(btn);
 
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Import from Osu', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Import from Osu', function()
 		{
 			if(upperBox != null) {
 				upperBox.isMinimized = true;
@@ -781,7 +781,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		tab_group.add(btn);
 
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Import from Guitar', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Import from Guitar', function()
 		{
 			if(upperBox != null) {
 				upperBox.isMinimized = true;
@@ -855,7 +855,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		tab_group.add(btn);
 
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Import from SM', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Import from SM', function()
 		{
 			if(upperBox != null) {
 				upperBox.isMinimized = true;
@@ -929,7 +929,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		tab_group.add(btn);
 
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Import from Quaver', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Import from Quaver', function()
 		{
 			if(upperBox != null) {
 				upperBox.isMinimized = true;
@@ -1004,18 +1004,18 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 		btnY++;
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Preview (F12)', charter.editorPlayStatePrompt, btnWid);
+		var btn:UIButton = new UIButton(btnX, btnY, '  Preview (F12)', charter.editorPlayStatePrompt, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
 		
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Playtest (Enter)', charter.goToPlayState, btnWid);
+		var btn:UIButton = new UIButton(btnX, btnY, '  Playtest (Enter)', charter.goToPlayState, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
 
 		btnY++;
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Exit', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Exit', function()
 		{
 			if(!ignoreProgressCheckBox.checked){
 				FlxG.sound.play(Paths.sound('chartingSounds/exitWindow'));
@@ -1042,18 +1042,18 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		var btnY = 1;
 		var btnWid = Std.int(tab.width);
 
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Undo', charter.undo, btnWid);
+		var btn:UIButton = new UIButton(btnX, btnY, '  Undo', charter.undo, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
 
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Redo', charter.redo, btnWid);
+		var btn:UIButton = new UIButton(btnX, btnY, '  Redo', charter.redo, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
 
 		btnY++;
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Select All', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Select All', function()
 		{
 			var sel = charter.selectedNotes;
 			charter.selectedNotes = charter.curRenderedNotes.members.copy();
@@ -1067,7 +1067,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		{
 			btnY++;
 			btnY += 20;
-			var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Lock Events', btnWid);
+			var btn:UIButton = new UIButton(btnX, btnY, '  Lock Events', btnWid);
 			btn.onClick = function()
 			{
 				charter.lockedEvents = !charter.lockedEvents;
@@ -1092,7 +1092,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		
 		btnY++;
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Autosave Settings...', btnWid);
+		var btn:UIButton = new UIButton(btnX, btnY, '  Autosave Settings...', btnWid);
 		btn.onClick = function()
 		{
 			upperBox.isMinimized = true;
@@ -1101,14 +1101,14 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			charter.openSubState(new BasePrompt(400, 160, 'Autosave Settings',
 				function(state:BasePrompt)
 				{
-					var btn:PsychUIButton = new PsychUIButton(state.bg.x + state.bg.width - 40, state.bg.y, 'X', state.close, 40);
+					var btn:UIButton = new UIButton(state.bg.x + state.bg.width - 40, state.bg.y, 'X', state.close, 40);
 					btn.cameras = state.cameras;
 					state.add(btn);
 
-					var checkbox:PsychUICheckBox = null;
-					var timeStepper:PsychUINumericStepper = null;
+					var checkbox:UICheckBox = null;
+					var timeStepper:UINumericStepper = null;
 
-					timeStepper = new PsychUINumericStepper(state.bg.x + 50, state.bg.y + 90, 1, charter.autoSaveCap, 1, 30, 0);
+					timeStepper = new UINumericStepper(state.bg.x + 50, state.bg.y + 90, 1, charter.autoSaveCap, 1, 30, 0);
 					timeStepper.onValueChange = function() {
 						charter.autoSaveTime = 0;
 						checkbox.checked = true;
@@ -1116,14 +1116,14 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 					};
 					timeStepper.cameras = state.cameras;
 
-					checkbox = new PsychUICheckBox(timeStepper.x + 80, timeStepper.y, 'Enabled', 60, function() {
+					checkbox = new UICheckBox(timeStepper.x + 80, timeStepper.y, 'Enabled', 60, function() {
 						charter.autoSaveTime = 0;
 						charter.autoSaveCap = charter.chartEditorSave.data.autoSave = checkbox.checked ? Std.int(timeStepper.value) : 0;
 					});
 					checkbox.checked = (charter.autoSaveCap > 0);
 					checkbox.cameras = state.cameras;
 					
-					var maxFileStepper:PsychUINumericStepper = new PsychUINumericStepper(checkbox.x + 140, checkbox.y, 1, charter.backupLimit, 0, 50, 0);
+					var maxFileStepper:UINumericStepper = new UINumericStepper(checkbox.x + 140, checkbox.y, 1, charter.backupLimit, 0, 50, 0);
 					maxFileStepper.onValueChange = function() {
 						charter.autoSaveTime = 0;
 						checkbox.checked = true;
@@ -1150,7 +1150,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 		btnY++;
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Clear All Notes', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Clear All Notes', function()
 		{
 			var func:Void->Void = function()
 			{
@@ -1173,7 +1173,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		if(ChartEditorState.SHOW_EVENT_COLUMN)
 		{
 			btnY += 20;
-			var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Clear All Events', function()
+			var btn:UIButton = new UIButton(btnX, btnY, '  Clear All Events', function()
 			{
 				var func:Void->Void = function()
 				{
@@ -1210,7 +1210,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		if(charter.chartEditorSave.data.waveformColor != null)
 			charter.waveformSprite.color = CoolUtil.colorFromString(charter.chartEditorSave.data.waveformColor);
 
-		showLastGridButton = new PsychUIButton(btnX, btnY, '', function()
+		showLastGridButton = new UIButton(btnX, btnY, '', function()
 		{
 			charter.showPreviousSection = !charter.showPreviousSection;
 			charter.updateGridVisibility();
@@ -1219,7 +1219,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		tab_group.add(showLastGridButton);
 
 		btnY += 20;
-		showNextGridButton = new PsychUIButton(btnX, btnY, '', function()
+		showNextGridButton = new UIButton(btnX, btnY, '', function()
 		{
 			charter.showNextSection = !charter.showNextSection;
 			charter.updateGridVisibility();
@@ -1229,7 +1229,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 		btnY++;
 		btnY += 20;
-		noteTypeLabelsButton = new PsychUIButton(btnX, btnY, '', function()
+		noteTypeLabelsButton = new UIButton(btnX, btnY, '', function()
 		{
 			charter.showNoteTypeLabels = !charter.showNoteTypeLabels;
 			charter.updateGridVisibility();
@@ -1239,7 +1239,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 		btnY++;
 		btnY += 20;
-		vortexEditorButton = new PsychUIButton(btnX, btnY, charter.vortexEnabled ? '  Vortex Editor ON' : '  Vortex Editor OFF', function()
+		vortexEditorButton = new UIButton(btnX, btnY, charter.vortexEnabled ? '  Vortex Editor ON' : '  Vortex Editor OFF', function()
 		{
 			charter.vortexEnabled = !charter.vortexEnabled;
 			charter.chartEditorSave.data.vortex = charter.vortexEnabled;
@@ -1258,7 +1258,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		
 		btnY++;
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Waveform...', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Waveform...', function()
 		{
 			ClientPrefs.toggleVolumeKeys(false);
 			FlxG.sound.play(Paths.sound('chartingSounds/openWindow'));
@@ -1267,11 +1267,11 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 					upperBox.isMinimized = true;
 					upperBox.bg.visible = false;
 
-					var btn:PsychUIButton = new PsychUIButton(state.bg.x + state.bg.width - 40, state.bg.y, 'X', state.close, 40);
+					var btn:UIButton = new UIButton(state.bg.x + state.bg.width - 40, state.bg.y, 'X', state.close, 40);
 					btn.cameras = state.cameras;
 					state.add(btn);
 
-					var check:PsychUICheckBox = new PsychUICheckBox(state.bg.x + 40, state.bg.y + 80, 'Enabled', 60);
+					var check:UICheckBox = new UICheckBox(state.bg.x + 40, state.bg.y + 80, 'Enabled', 60);
 					check.onClick = function()
 					{
 						charter.chartEditorSave.data.waveformEnabled = charter.waveformEnabled = check.checked;
@@ -1281,11 +1281,11 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 					check.checked = charter.waveformEnabled;
 					state.add(check);
 
-					var waveformC:String = '0000FF';
+					var waveformC:String = '6600FF';
 					if(charter.chartEditorSave.data.waveformColor != null)
 						waveformC = charter.chartEditorSave.data.waveformColor;
 
-					var input:PsychUIInputText = new PsychUIInputText(check.x, check.y + 50, 60, waveformC, 10);
+					var input:UIInputText = new UIInputText(check.x, check.y + 50, 60, waveformC, 10);
 					input.onChange = function(old:String, cur:String)
 					{
 						charter.chartEditorSave.data.waveformColor = cur;
@@ -1297,7 +1297,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 					input.forceCase = UPPER_CASE;
 
 					var options:Array<WaveformTarget> = [INST, PLAYER, OPPONENT];
-					var radioGrp:PsychUIRadioGroup = new PsychUIRadioGroup(check.x + 120, check.y, ['Instrumental', 'Main Vocals', 'Opponent Vocals']);
+					var radioGrp:UIRadioGroup = new UIRadioGroup(check.x + 120, check.y, ['Instrumental', 'Main Vocals', 'Opponent Vocals']);
 					radioGrp.cameras = state.cameras;
 					radioGrp.onClick = function()
 					{
@@ -1318,7 +1318,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		tab_group.add(btn);
 
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Go to...', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Go to...', function()
 		{
 			upperBox.isMinimized = true;
 			upperBox.bg.visible = false;
@@ -1329,9 +1329,9 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 					var curTime:Float = Conductor.songPosition;
 					var currentSec:Int = charter.curSec;
 
-					var timeStepper:PsychUINumericStepper = new PsychUINumericStepper(state.bg.x + 100, state.bg.y + 90, 1, Math.floor(curTime)/1000, 0, FlxG.sound.music.length/1000 - 0.01, 2, 80);
+					var timeStepper:UINumericStepper = new UINumericStepper(state.bg.x + 100, state.bg.y + 90, 1, Math.floor(curTime)/1000, 0, FlxG.sound.music.length/1000 - 0.01, 2, 80);
 					timeStepper.cameras = state.cameras;
-					var sectionStepper:PsychUINumericStepper = new PsychUINumericStepper(timeStepper.x + 160, timeStepper.y, 1, currentSec, 0, PlayState.SONG.notes.length - 1, 0);
+					var sectionStepper:UINumericStepper = new UINumericStepper(timeStepper.x + 160, timeStepper.y, 1, currentSec, 0, PlayState.SONG.notes.length - 1, 0);
 					sectionStepper.cameras = state.cameras;
 
 					var txt1:FlxText = new FlxText(timeStepper.x, timeStepper.y - 15, 100, 'Time (in seconds):');
@@ -1374,7 +1374,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 						updateTime();
 					};
 
-					var btn:PsychUIButton = new PsychUIButton(0, timeTxt.y + 30, 'Go To', function()
+					var btn:UIButton = new UIButton(0, timeTxt.y + 30, 'Go To', function()
 					{
 						charter.curSec = currentSec;
 						FlxG.sound.music.time = FlxMath.bound(curTime, 0, FlxG.sound.music.length - 1);
@@ -1386,7 +1386,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 					btn.x -= 60;
 					state.add(btn);
 
-					var btn:PsychUIButton = new PsychUIButton(0, btn.y, 'Cancel', state.close);
+					var btn:UIButton = new UIButton(0, btn.y, 'Cancel', state.close);
 					btn.cameras = state.cameras;
 					btn.screenCenter(X);
 					btn.x += 60;
@@ -1399,7 +1399,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 		btnY++;
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Theme...', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Theme...', function()
 		{
 			if(!charter.fileDialog.completed) return;
 			upperBox.isMinimized = true;
@@ -1409,37 +1409,37 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			charter.openSubState(new BasePrompt(500, 260, 'Chart Editor Theme',
 				function(state:BasePrompt)
 				{
-					var btn:PsychUIButton = new PsychUIButton(state.bg.x + state.bg.width - 40, state.bg.y, 'X', state.close, 40);
+					var btn:UIButton = new UIButton(state.bg.x + state.bg.width - 40, state.bg.y, 'X', state.close, 40);
 					btn.cameras = state.cameras;
 					state.add(btn);
 
 					var btnY = 320;
-					var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Light', charter.changeTheme.bind(LIGHT));
+					var btn:UIButton = new UIButton(0, btnY, 'Light', charter.changeTheme.bind(LIGHT));
 					btn.screenCenter(X);
 					btn.x -= 180;
 					btn.cameras = state.cameras;
 					state.add(btn);
 			
-					var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Dark', charter.changeTheme.bind(DARK));
+					var btn:UIButton = new UIButton(0, btnY, 'Dark', charter.changeTheme.bind(DARK));
 					btn.screenCenter(X);
 					btn.x -= 60;
 					btn.cameras = state.cameras;
 					state.add(btn);
 					
-					var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Default', charter.changeTheme.bind(DEFAULT));
+					var btn:UIButton = new UIButton(0, btnY, 'Default', charter.changeTheme.bind(DEFAULT));
 					btn.screenCenter(X);
 					btn.cameras = state.cameras;
 					btn.x += 60;
 					state.add(btn);
 			
-					var btn:PsychUIButton = new PsychUIButton(0, btnY, 'V-Slice', charter.changeTheme.bind(VSLICE));
+					var btn:UIButton = new UIButton(0, btnY, 'V-Slice', charter.changeTheme.bind(VSLICE));
 					btn.screenCenter(X);
 					btn.x += 180;
 					btn.cameras = state.cameras;
 					state.add(btn);
 
 					btnY += 60;
-					var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Custom', charter.changeTheme.bind(CUSTOM));
+					var btn:UIButton = new UIButton(0, btnY, 'Custom', charter.changeTheme.bind(CUSTOM));
 					btn.screenCenter(X);
 					btn.x -= 180;
 					btn.cameras = state.cameras;
@@ -1449,7 +1449,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 					if(charter.chartEditorSave.data.customBgColor != null)
 						customBgC = charter.chartEditorSave.data.customBgColor;
 
-					var input:PsychUIInputText = new PsychUIInputText(0, btnY, 80, customBgC, 10);
+					var input:UIInputText = new UIInputText(0, btnY, 80, customBgC, 10);
 					input.maxLength = 6;
 					input.filterMode = ONLY_HEXADECIMAL;
 					input.forceCase = UPPER_CASE;
@@ -1471,7 +1471,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 					if(charter.chartEditorSave.data.customGridColors != null && charter.chartEditorSave.data.customGridColors.length > 1)
 						customGridC = charter.chartEditorSave.data.customGridColors;
 
-					var input:PsychUIInputText = new PsychUIInputText(0, btnY, 80, customGridC[0], 10);
+					var input:UIInputText = new UIInputText(0, btnY, 80, customGridC[0], 10);
 					input.maxLength = 6;
 					input.filterMode = ONLY_HEXADECIMAL;
 					input.forceCase = UPPER_CASE;
@@ -1489,7 +1489,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 					state.add(txt);
 					state.add(input);
 
-					var input:PsychUIInputText = new PsychUIInputText(0, btnY + 30, 80, customGridC[1], 10);
+					var input:UIInputText = new UIInputText(0, btnY + 30, 80, customGridC[1], 10);
 					input.maxLength = 6;
 					input.filterMode = ONLY_HEXADECIMAL;
 					input.forceCase = UPPER_CASE;
@@ -1507,7 +1507,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 					if(charter.chartEditorSave.data.customNextGridColors != null && charter.chartEditorSave.data.customNextGridColors.length > 1)
 						customGridOtherC = charter.chartEditorSave.data.customNextGridColors;
 
-					var input:PsychUIInputText = new PsychUIInputText(0, btnY, 80, customGridOtherC[0], 10);
+					var input:UIInputText = new UIInputText(0, btnY, 80, customGridOtherC[0], 10);
 					input.maxLength = 6;
 					input.filterMode = ONLY_HEXADECIMAL;
 					input.forceCase = UPPER_CASE;
@@ -1525,7 +1525,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 					state.add(txt);
 					state.add(input);
 
-					var input:PsychUIInputText = new PsychUIInputText(0, btnY + 30, 80, customGridOtherC[1], 10);
+					var input:UIInputText = new UIInputText(0, btnY + 30, 80, customGridOtherC[1], 10);
 					input.maxLength = 6;
 					input.filterMode = ONLY_HEXADECIMAL;
 					input.forceCase = UPPER_CASE;
@@ -1545,30 +1545,30 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		tab_group.add(btn);
 
 		btnY += 20;
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Reset UI Boxes', function()
+		var btn:UIButton = new UIButton(btnX, btnY, '  Reset UI Boxes', function()
 		{
 			mainBox.setPosition(mainBoxPosition.x, mainBoxPosition.y);
 			infoBox.setPosition(infoBoxPosition.x, infoBoxPosition.y);
-			UIEvent(PsychUIBox.DROP_EVENT, btn); //to force a save
+			UIEvent(UIBox.DROP_EVENT, btn); //to force a save
 		}, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);
 	}
 
     function createUIBoxes(){
-		infoBox = new PsychUIBox(infoBoxPosition.x, infoBoxPosition.y, 220, 220, ['Information']);
+		infoBox = new UIBox(infoBoxPosition.x, infoBoxPosition.y, 220, 220, ['Information']);
 		infoBox.scrollFactor.set();
 		infoText = new FlxText(15, 15, 230, '', 16);
 		infoText.scrollFactor.set();
 		infoBox.getTab('Information').menu.add(infoText);
 		add(infoBox);
 
-		mainBox = new PsychUIBox(mainBoxPosition.x, mainBoxPosition.y, 300, 280, ['Charting', 'Data', 'Actions', 'Note', 'Section', 'Song']);
+		mainBox = new UIBox(mainBoxPosition.x, mainBoxPosition.y, 300, 280, ['Charting', 'Data', 'Actions', 'Note', 'Section', 'Song']);
 		mainBox.selectedName = 'Charting';
 		mainBox.scrollFactor.set();
 		add(mainBox);
 
-		eventsBox = new PsychUIBox(0, 0, 300, 0, ['Events', 'Modchart']);
+		eventsBox = new UIBox(0, 0, 300, 0, ['Events', 'Modchart']);
 		eventsBox.selectedName = 'Events';
 		eventsBox.scrollFactor.set();
 		eventsBox.canMove = false;
@@ -1581,11 +1581,12 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		if(charter.chartEditorSave.data.infoBoxPosition != null && charter.chartEditorSave.data.infoBoxPosition.length > 1)
 			infoBox.setPosition(charter.chartEditorSave.data.infoBoxPosition[0], charter.chartEditorSave.data.infoBoxPosition[1]);
 
-		upperBox = new PsychUIBox(40, 40, 330, 300, ['File', 'Edit', 'View']);
+		upperBox = new UIBox(40, 40, 330, 300, ['File', 'Edit', 'View']);
 		upperBox.scrollFactor.set();
 		upperBox.isMinimized = true;
 		upperBox.minimizeOnFocusLost = true;
 		upperBox.canMove = false;
+		upperBox.border.visible = false;
 		upperBox.bg.visible = false;
 		add(upperBox);
 
@@ -1606,7 +1607,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
     }
 
     function createSongSlider(){
-		songPosSlider = new PsychUIVerticalSlider(0, 0, null, (FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0, 0, FlxG.height, FlxG.height, 0xFF4D4D4D, FlxColor.WHITE);
+		songPosSlider = new UIVerticalSlider(0, 0, null, (FlxG.sound.music != null && FlxG.sound.music.length > 0) ? (Conductor.songPosition / FlxG.sound.music.length) * FlxG.height : 0, 0, FlxG.height, FlxG.height, 0xFF4D4D4D, FlxColor.WHITE);
 		songPosSlider.valueText.visible = false;
 		songPosSlider.minText.visible = false;
 		songPosSlider.maxText.visible = false;
@@ -1648,31 +1649,31 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		tab_group.add(txt);
 
 		objY += 25;
-		playbackSlider = new PsychUISlider(50, objY, function(v:Float) charter.setPitch(charter.playbackRate = v), 1, 0.1, 5.0, 200);
+		playbackSlider = new UISlider(50, objY, function(v:Float) charter.setPitch(charter.playbackRate = v), 1, 0.1, 5.0, 200);
 		playbackSlider.label = 'Playback Rate';
 		
 		objY += 60;
-		mouseSnapCheckBox = new PsychUICheckBox(objX, objY, 'Mouse Scroll Snap', 100, function() charter.chartEditorSave.data.mouseScrollSnap = mouseSnapCheckBox.checked);
+		mouseSnapCheckBox = new UICheckBox(objX, objY, 'Mouse Scroll Snap', 100, function() charter.chartEditorSave.data.mouseScrollSnap = mouseSnapCheckBox.checked);
 		mouseSnapCheckBox.checked = charter.chartEditorSave.data.mouseScrollSnap;
 
-		ignoreProgressCheckBox = new PsychUICheckBox(objX + 150, objY, 'Ignore Progress Warnings', 100, function() charter.chartEditorSave.data.ignoreProgressWarns = ignoreProgressCheckBox.checked);
+		ignoreProgressCheckBox = new UICheckBox(objX + 150, objY, 'Ignore Progress Warnings', 100, function() charter.chartEditorSave.data.ignoreProgressWarns = ignoreProgressCheckBox.checked);
 		ignoreProgressCheckBox.checked = charter.chartEditorSave.data.ignoreProgressWarns;
 
 		objY += 50;
-		instVolumeStepper = new PsychUINumericStepper(objX, objY, 0.1, 0.6, 0, 1, 1);
+		instVolumeStepper = new UINumericStepper(objX, objY, 0.1, 0.6, 0, 1, 1);
 		instVolumeStepper.onValueChange = charter.updateAudioVolume;
-		playerVolumeStepper = new PsychUINumericStepper(objX + 100, objY, 0.1, 1, 0, 1, 1);
+		playerVolumeStepper = new UINumericStepper(objX + 100, objY, 0.1, 1, 0, 1, 1);
 		playerVolumeStepper.onValueChange = charter.updateAudioVolume;
-		opponentVolumeStepper = new PsychUINumericStepper(objX + 200, objY, 0.1, 1, 0, 1, 1);
+		opponentVolumeStepper = new UINumericStepper(objX + 200, objY, 0.1, 1, 0, 1, 1);
 		opponentVolumeStepper.onValueChange = charter.updateAudioVolume;
 
 		objY += 25;
-		instMuteCheckBox = new PsychUICheckBox(objX, objY, 'Mute', 60, charter.updateAudioVolume);
-		playerMuteCheckBox = new PsychUICheckBox(objX + 100, objY, 'Mute', 60, charter.updateAudioVolume);
-		opponentMuteCheckBox = new PsychUICheckBox(objX + 200, objY, 'Mute', 60, charter.updateAudioVolume);
+		instMuteCheckBox = new UICheckBox(objX, objY, 'Mute', 60, charter.updateAudioVolume);
+		playerMuteCheckBox = new UICheckBox(objX + 100, objY, 'Mute', 60, charter.updateAudioVolume);
+		opponentMuteCheckBox = new UICheckBox(objX + 200, objY, 'Mute', 60, charter.updateAudioVolume);
 
 		objY += 50;
-		metronomeStepper = new PsychUINumericStepper(objX + 100, objY, 0.2, 0, 0, 1, 1);
+		metronomeStepper = new UINumericStepper(objX + 100, objY, 0.2, 0, 0, 1, 1);
 
 		tab_group.add(playbackSlider);
 		tab_group.add(mouseSnapCheckBox);
@@ -1697,28 +1698,28 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		var tab_group = mainBox.getTab('Data').menu;
 		var objX = 10;
 		var objY = 25;
-		gameOverCharDropDown = new PsychUIDropDownMenu(objX, objY, [''], function(id:Int, character:String)
+		gameOverCharDropDown = new UIDropDownMenu(objX, objY, [''], function(id:Int, character:String)
 		{
 			PlayState.SONG.gameOverChar = character;
 			if(character.length < 1) Reflect.deleteField(PlayState.SONG, 'gameOverChar');
 		});
 
 		objY += 40;
-		gameOverSndInputText = new PsychUIInputText(objX, objY, 120, '', 8);
+		gameOverSndInputText = new UIInputText(objX, objY, 120, '', 8);
 		gameOverSndInputText.onChange = function(old:String, cur:String)
 		{
 			PlayState.SONG.gameOverSound = cur;
 			if(cur.trim().length < 1) Reflect.deleteField(PlayState.SONG, 'gameOverSound');
 		}
 		objY += 40;
-		gameOverLoopInputText = new PsychUIInputText(objX, objY, 120, '', 8);
+		gameOverLoopInputText = new UIInputText(objX, objY, 120, '', 8);
 		gameOverLoopInputText.onChange = function(old:String, cur:String)
 		{
 			PlayState.SONG.gameOverLoop = cur;
 			if(cur.trim().length < 1) Reflect.deleteField(PlayState.SONG, 'gameOverLoop');
 		}
 		objY += 40;
-		gameOverRetryInputText = new PsychUIInputText(objX, objY, 120, '', 8);
+		gameOverRetryInputText = new UIInputText(objX, objY, 120, '', 8);
 		gameOverRetryInputText.onChange = function(old:String, cur:String)
 		{
 			PlayState.SONG.gameOverEnd = cur;
@@ -1726,11 +1727,11 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		}
 
 		objY += 35;
-		noRGBCheckBox = new PsychUICheckBox(objX, objY, 'Disable Note RGB', 100, charter.updateNotesRGB);
-		pixel4kTextureCheckBox = new PsychUICheckBox(objX + 140, objY, 'Pixel 4K Texture', 100, charter.updatePixelTexture);
+		noRGBCheckBox = new UICheckBox(objX, objY, 'Disable Note RGB', 100, charter.updateNotesRGB);
+		pixel4kTextureCheckBox = new UICheckBox(objX + 140, objY, 'Pixel 4K Texture', 100, charter.updatePixelTexture);
 		
 		objY += 40;
-		noteTextureInputText = new PsychUIInputText(objX, objY, 120, '');
+		noteTextureInputText = new UIInputText(objX, objY, 120, '');
 		noteTextureInputText.unfocus = function()
 		{
 			var changed:Bool = false;
@@ -1763,7 +1764,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			}
 		};
 
-		noteSplashesInputText = new PsychUIInputText(objX + 140, objY, 120, '');
+		noteSplashesInputText = new UIInputText(objX + 140, objY, 120, '');
 		noteSplashesInputText.onChange = function(old:String, cur:String)
 		{
 			PlayState.SONG.splashSkin = cur;
@@ -1793,14 +1794,14 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		var posX = 10;
 		var posY = 30;
 
-		modifierInput = new PsychUIInputText(posX+150, posY, 120, '', 8);
+		modifierInput = new UIInputText(posX+150, posY, 120, '', 8);
     	modifierInput.onChange = function(old:String, cur:String){
 			charter.updateModEvV1();
 		}
 
 		var modifierLabelText = new FlxText(modifierInput.x, modifierInput.y - 15, 80, 'Modifier:');
 
-		actionsDropdown = new PsychUIDropDownMenu(posX, posY, ["Set", "Ease"], function(index:Int, name:String){
+		actionsDropdown = new UIDropDownMenu(posX, posY, ["Set", "Ease"], function(index:Int, name:String){
 			charter.updateModEvV1();
 		});
 
@@ -1808,24 +1809,24 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 		posY += 60;
 
-		timeStepper = new PsychUINumericStepper(posX, posY, 0.01, 0, 0, 9999, 2);
+		timeStepper = new UINumericStepper(posX, posY, 0.01, 0, 0, 9999, 2);
 		timeStepper.onValueChange = function() {
 			charter.updateModEvV1();
 		};
 
-		valueStepper = new PsychUINumericStepper(posX + 150, posY, 0.01, 0, -999999, 999999, 2);
+		valueStepper = new UINumericStepper(posX + 150, posY, 0.01, 0, -999999, 999999, 2);
 		valueStepper.onValueChange = function() {
 			charter.updateModEvV1();
 		};
 
 		posY += 60;
 
-		easeInput = new PsychUIInputText(posX, posY, 120, '', 8);
+		easeInput = new UIInputText(posX, posY, 120, '', 8);
 		easeInput.onChange = function(old:String, cur:String){
 			charter.updateModEvV1();
 		}
 
-		playerStepper = new PsychUINumericStepper(posX + 150, posY, 1, -1, -1, (PlayState.SONG.lanes - 1), 0);
+		playerStepper = new UINumericStepper(posX + 150, posY, 1, -1, -1, (PlayState.SONG.lanes - 1), 0);
 		playerStepper.onValueChange = function() {
 			charter.updateModEvV1();
 		};
@@ -1855,7 +1856,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		var objX = 10;
 		var objY = 25;
 
-		eventDropDown = new PsychUIDropDownMenu(objX, objY, [], function(id:Int, character:String)
+		eventDropDown = new UIDropDownMenu(objX, objY, [], function(id:Int, character:String)
 		{
 			var eventSelected:Array<String> = charter.eventsList[id];
 			var eventName:String = eventSelected[0];
@@ -1896,7 +1897,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		}
 
 		var objX2 = 140;
-		var removeButton:PsychUIButton = new PsychUIButton(objX2, objY, '-', function()
+		var removeButton:UIButton = new UIButton(objX2, objY, '-', function()
 		{
 			genericEventButton(function(event:EventMetaNote)
 			{
@@ -1920,7 +1921,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 				}
 			});
 		}, 20);
-		var addButton:PsychUIButton = new PsychUIButton(objX2 + 30, objY, '+', function()
+		var addButton:UIButton = new UIButton(objX2 + 30, objY, '+', function()
 		{
 			genericEventButton(function(event:EventMetaNote)
 			{
@@ -1929,11 +1930,11 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 				charter.curEventSelected++;
 			});
 		}, 20);
-		var leftButton:PsychUIButton = new PsychUIButton(objX2 + 80, objY, '<', function()
+		var leftButton:UIButton = new UIButton(objX2 + 80, objY, '<', function()
 		{
 			genericEventButton(function(event:EventMetaNote) charter.curEventSelected = FlxMath.wrap(charter.curEventSelected - 1, 0, event.events.length - 1));
 		}, 20);
-		var rightButton:PsychUIButton = new PsychUIButton(objX2 + 110, objY, '>', function()
+		var rightButton:UIButton = new UIButton(objX2 + 110, objY, '>', function()
 		{
 			genericEventButton(function(event:EventMetaNote) charter.curEventSelected = FlxMath.wrap(charter.curEventSelected + 1, 0, event.events.length - 1));
 		}, 20);
@@ -1967,9 +1968,9 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		}
 
 		objY += 70;
-		value1InputText = new PsychUIInputText(objX, objY, 120, '', 8);
+		value1InputText = new UIInputText(objX, objY, 120, '', 8);
 		value1InputText.onChange = function(old:String, cur:String) changeEventsValue(cur, 1);
-		value2InputText = new PsychUIInputText(objX + 150, objY, 120, '', 8);
+		value2InputText = new UIInputText(objX + 150, objY, 120, '', 8);
 		value2InputText.onChange = function(old:String, cur:String) changeEventsValue(cur, 2);
 
 		objY += 40;
@@ -1998,7 +1999,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		var objX = 10;
 		var objY = 25;
 
-		susLengthStepper = new PsychUINumericStepper(objX, objY, Conductor.stepCrochet / 2, 0, 0, Conductor.stepCrochet * 128, 1, 80);
+		susLengthStepper = new UINumericStepper(objX, objY, Conductor.stepCrochet / 2, 0, 0, Conductor.stepCrochet * 128, 1, 80);
 		susLengthStepper.onValueChange = function()
 		{
 			var halfStep:Float = (Conductor.stepCrochet / 2);
@@ -2020,7 +2021,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		};
 
 		objY += 40;
-		strumTimeStepper = new PsychUINumericStepper(objX, objY, Conductor.stepCrochet, 0, -5000, Math.POSITIVE_INFINITY, 3, 120);
+		strumTimeStepper = new UINumericStepper(objX, objY, Conductor.stepCrochet, 0, -5000, Math.POSITIVE_INFINITY, 3, 120);
 		strumTimeStepper.onValueChange = function()
 		{
 			if(charter.selectedNotes.length < 1) return;
@@ -2042,7 +2043,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		};
 		
 		objY += 40;
-		noteTypeDropDown = new PsychUIDropDownMenu(objX, objY, [], function(id:Int, changeToType:String)
+		noteTypeDropDown = new UIDropDownMenu(objX, objY, [], function(id:Int, changeToType:String)
 		{
 			var newSelected:Array<MetaNote> = [];
 			var typeSelected:String = charter.noteTypes[id].trim();
@@ -2093,9 +2094,9 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 	function addSectionTab()
 	{
-		var affectNotes:PsychUICheckBox = null;
-		var affectEvents:PsychUICheckBox = null;
-		var copyLastSecStepper:PsychUINumericStepper = null;
+		var affectNotes:UICheckBox = null;
+		var affectEvents:UICheckBox = null;
+		var copyLastSecStepper:UINumericStepper = null;
 		var tab_group = mainBox.getTab('Section').menu;
 		var objX = 10;
 		var objY = 10;
@@ -2163,26 +2164,26 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			}
 		}
 
-		mustHitCheckBox = new PsychUICheckBox(objX, objY, 'Must Hit Sec.', 70, function()
+		mustHitCheckBox = new UICheckBox(objX, objY, 'Must Hit Sec.', 70, function()
 		{
 			var sec = charter.getCurChartSection();
 			if(sec != null) sec.mustHitSection = mustHitCheckBox.checked;
 			charter.updateHeads(true);
 		});
-		gfSectionCheckBox = new PsychUICheckBox(objX + 100, objY, 'GF Section', 70, function()
+		gfSectionCheckBox = new UICheckBox(objX + 100, objY, 'GF Section', 70, function()
 		{
 			var sec = charter.getCurChartSection();
 			if(sec != null) sec.gfSection = gfSectionCheckBox.checked;
 			charter.updateHeads(true);
 		});
-		altAnimSectionCheckBox = new PsychUICheckBox(objX + 200, objY, 'Alt Anim', 70, function()
+		altAnimSectionCheckBox = new UICheckBox(objX + 200, objY, 'Alt Anim', 70, function()
 		{
 			var sec = charter.getCurChartSection();
 			if(sec != null) sec.altAnim = altAnimSectionCheckBox.checked;
 		});
 
 		objY += 40;
-		changeBpmCheckBox = new PsychUICheckBox(objX, objY, 'Change BPM', 80, function()
+		changeBpmCheckBox = new UICheckBox(objX, objY, 'Change BPM', 80, function()
 		{
 			var sec = charter.getCurChartSection();
 			if(sec != null)
@@ -2194,7 +2195,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			}
 		});
 
-		focusGFCheckBox = new PsychUICheckBox(objX+100, objY, 'Focus GF', 80, function()
+		focusGFCheckBox = new UICheckBox(objX+100, objY, 'Focus GF', 80, function()
 		{
 			var sec = charter.getCurChartSection();
 			if(sec != null)
@@ -2205,7 +2206,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		});
 
 		objY += 25;
-		changeBpmStepper = new PsychUINumericStepper(objX, objY, 1, 0, 1, 400, 3);
+		changeBpmStepper = new UINumericStepper(objX, objY, 1, 0, 1, 400, 3);
 		changeBpmStepper.onValueChange = function()
 		{
 			var sec = charter.getCurChartSection();
@@ -2219,7 +2220,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			}
 		};
 
-		beatsPerSecStepper = new PsychUINumericStepper(objX + 200, objY, 1, 4, 1, 16, 2);
+		beatsPerSecStepper = new UINumericStepper(objX + 200, objY, 1, 4, 1, 16, 2);
 		beatsPerSecStepper.onValueChange = function()
 		{
 			beatsPerSecStepper.value = Math.round(beatsPerSecStepper.value * 4) / 4;
@@ -2233,12 +2234,12 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		};
 
 		objY += 40;
-		var copyButton:PsychUIButton = new PsychUIButton(objX, objY, 'Copy Section', copyNotesOnSection.bind());
-		var pasteButton:PsychUIButton = new PsychUIButton(objX + 100, objY, 'Paste Section', function()
+		var copyButton:UIButton = new UIButton(objX, objY, 'Copy Section', copyNotesOnSection.bind());
+		var pasteButton:UIButton = new UIButton(objX + 100, objY, 'Paste Section', function()
 		{
 			charter.pasteCopiedNotesToSection(affectNotes.checked, affectEvents.checked);
 		});
-		var clearButton:PsychUIButton = new PsychUIButton(objX + 200, objY, 'Clear', function()
+		var clearButton:UIButton = new UIButton(objX + 200, objY, 'Clear', function()
 		{
 			for (note in charter.curRenderedNotes)
 			{
@@ -2257,12 +2258,12 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		clearButton.normalStyle.textColor = FlxColor.WHITE;
 
 		objY += 25;
-		affectNotes = new PsychUICheckBox(objX, objY, 'Notes', 60);
+		affectNotes = new UICheckBox(objX, objY, 'Notes', 60);
 		affectNotes.checked = true;
-		affectEvents = new PsychUICheckBox(objX + 100, objY, 'Events', 60);
+		affectEvents = new UICheckBox(objX + 100, objY, 'Events', 60);
 
 		objY += 32;
-		var copyLastSecButton:PsychUIButton = new PsychUIButton(objX, objY, 'Copy Last Section', function()
+		var copyLastSecButton:UIButton = new UIButton(objX, objY, 'Copy Last Section', function()
 		{
 			var lastCopiedNotes = charter.copiedNotes;
 			var lastCopiedEvents = charter.copiedEvents;
@@ -2272,14 +2273,14 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			charter.copiedEvents = lastCopiedEvents;
 		});
 		copyLastSecButton.resize(80, 26);
-		copyLastSecStepper = new PsychUINumericStepper(objX + 110, objY + 2, 1, 1, -999, 999, 0);
+		copyLastSecStepper = new UINumericStepper(objX + 110, objY + 2, 1, 1, -999, 999, 0);
 		
 		objY += 40;
-		var swapSectionButton:PsychUIButton = new PsychUIButton(objX, objY, 'Swap Section', function()
+		var swapSectionButton:UIButton = new UIButton(objX, objY, 'Swap Section', function()
 		{
 			swapDaSection(PlayState.SONG.lanes); // CHANGE LATER
 		});
-		var duetSectionButton:PsychUIButton = new PsychUIButton(objX + 100, objY, 'Duet Section', function()
+		var duetSectionButton:UIButton = new UIButton(objX + 100, objY, 'Duet Section', function()
 		{
 			var side:Int = -1;
 			for (note in charter.curRenderedNotes.members)
@@ -2319,7 +2320,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			
 			charter.addUndoAction(ADD_NOTE, {notes: pushedNotes});
 		});
-		var mirrorNotesButton:PsychUIButton = new PsychUIButton(objX + 200, objY, 'Mirror Notes', function()
+		var mirrorNotesButton:UIButton = new UIButton(objX + 200, objY, 'Mirror Notes', function()
 		{
 			var maxData:Int = ChartEditorState.GRID_COLUMNS_PER_PLAYER * ChartEditorState.GRID_PLAYERS;
 			for (note in charter.curRenderedNotes)
@@ -2473,7 +2474,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			character.dance();
 			characters.push(character);
 
-			var charBox = new PsychUIBox(0, 0, Std.int((character.frameWidth*character.scale.x)*1.5), Std.int((character.frameHeight*character.scale.y)*1.75), [char]);
+			var charBox = new UIBox(0, 0, Std.int((character.frameWidth*character.scale.x)*1.5), Std.int((character.frameHeight*character.scale.y)*1.75), [char]);
 			charBox.scrollFactor.set(1, 0);
 			charBox.canMove = true;
 			charBox.canMinimize = true;
@@ -2520,14 +2521,16 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 				playerBox.resize(thisBoxWidth, thisBoxHeight);
 				playerBox.isMinimized = true;
 				playerBox.minimizeOnFocusLost = true;
+				playerBox.border.visible = false;
 				continue;
 			}
 
 			var boxName:String = ((i == 0) ? PlayState.SONG.player2 : ((i == 1) ? PlayState.SONG.player1 : ((i == 2) ? PlayState.SONG.gfVersion : ((PlayState.SONG.extraPlayers[i-3] != null && PlayState.SONG.extraPlayers[i-3] != "") ? PlayState.SONG.extraPlayers[i-3] : 'Player ${i+1}'))));
-			var playerBox = new PsychUIBox(boxX, 0, thisBoxWidth, thisBoxHeight, [boxName]);
+			var playerBox = new UIBox(boxX, 0, thisBoxWidth, thisBoxHeight, [boxName]);
 			playerBox.scrollFactor.set(1, 0);
 			playerBox.canMove = false;
 			playerBox.canMinimize = true;
+			playerBox.border.visible = false;
 			playerBox.isMinimized = true;
 			playerBox.minimizeOnFocusLost = true;
 			add(playerBox);
@@ -2535,9 +2538,9 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 			var tab_group = playerBox.getTab(boxName).menu;
 
-			var hitsoundSlider:PsychUISlider = null;
+			var hitsoundSlider:UISlider = null;
 			if(includeHitsound){
-				hitsoundSlider = new PsychUISlider(10, 100, function(v:Float) {}, 0, 0, 1, thisBoxWidth - 20);
+				hitsoundSlider = new UISlider(10, 100, function(v:Float) {}, 0, 0, 1, thisBoxWidth - 20);
 				hitsoundSlider.label = 'Hitsound Volume';
 				tab_group.add(hitsoundSlider);
 			}
@@ -2547,7 +2550,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			var rightBound:Float = thisBoxWidth - 10;
 			var dropDownY:Float = includeHitsound ? 175 : 100;
 
-			var charDropDown:PsychUIDropDownMenu = new PsychUIDropDownMenu(leftBound, dropDownY, charter.cachedCharacterList, function(id:Int, character:String){
+			var charDropDown:UIDropDownMenu = new UIDropDownMenu(leftBound, dropDownY, charter.cachedCharacterList, function(id:Int, character:String){
 				if(characterBoxes[fieldIndex] != null && characters[fieldIndex] != null && characters[fieldIndex].curCharacter != character){
 					var newChar = new Character(0, 0, character, fieldIndex == 1);
 					newChar.limitSize(300, 300);
@@ -2625,7 +2628,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 			}
 
 			if(fieldIndex >= 3){
-				var deleteCharBtn:PsychUIButton = new PsychUIButton(10, dropDownY, 'X', function(){
+				var deleteCharBtn:UIButton = new UIButton(10, dropDownY, 'X', function(){
 					charDropDown.selectedLabel = '';
 					switch(fieldIndex){
 						case 0: PlayState.SONG.player2 = '';
@@ -2645,7 +2648,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 				tab_group.add(deleteCharBtn);
 			}
 
-			var showCharBoxBtn:PsychUIButton = new PsychUIButton(0, 230, characterBoxes[fieldIndex].visible ? '  Hide Character Box' : '  Show Character Box', function(){
+			var showCharBoxBtn:UIButton = new UIButton(0, 230, characterBoxes[fieldIndex].visible ? '  Hide Character Box' : '  Show Character Box', function(){
 				characterBoxes[fieldIndex].visible = !characterBoxes[fieldIndex].visible;
 			}, Std.int(playerBoxes[fieldIndex].bg.width));
 			showCharBoxBtn.text.alignment = CENTER;
@@ -2653,7 +2656,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 			if(fieldIndex >= 2){
 				showCharBoxBtn.y -= 20;
-				var btn:PsychUIButton = new PsychUIButton(0, 230, '  Remove Lane', function(){
+				var btn:UIButton = new UIButton(0, 230, '  Remove Lane', function(){
 					if(ChartEditorState.GRID_PLAYERS - 1 < 2) return;
 
 					var confirmFunc:Void->Void = function(){
@@ -2685,7 +2688,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 
 	function createLanesTab(){
 		if(lanesBox == null){
-			lanesBox = new PsychUIBox(0, 0, 120, 300, ['Lanes']);
+			lanesBox = new UIBox(0, 0, 120, 300, ['Lanes']);
 			lanesBox.scrollFactor.set(1, 0);
 			lanesBox.isMinimized = true;
 			lanesBox.minimizeOnFocusLost = true;
@@ -2715,7 +2718,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		lanesBox.isMinimized = true;
 		lanesBox.bg.visible = true;
 
-		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, 'Add new lane', function(){
+		var btn:UIButton = new UIButton(btnX, btnY, 'Add new lane', function(){
 			if(ChartEditorState.GRID_PLAYERS + 1 > 999) return;
 			pendingLaneAdd = true;
 		}, btnWid);
@@ -2725,7 +2728,7 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 		tab_group.add(btn);
 
 		btnY += 40;
-		var charDropDown:PsychUIDropDownMenu = new PsychUIDropDownMenu(btnX, btnY, charter.cachedCharacterList, function(id:Int, character:String){
+		var charDropDown:UIDropDownMenu = new UIDropDownMenu(btnX, btnY, charter.cachedCharacterList, function(id:Int, character:String){
 			PlayState.SONG.gfVersion = character;
 			charter.updateJsonData();
 			charter.updateHeads(true);
@@ -2742,21 +2745,21 @@ class ChartEditorUI extends FlxSpriteContainer implements PsychUIEventHandler.Ps
 	public function UIEvent(id:String, sender:Dynamic){
 		switch(id)
 		{
-			case PsychUIButton.CLICK_EVENT, PsychUIDropDownMenu.CLICK_EVENT:
+			case UIButton.CLICK_EVENT, UIDropDownMenu.CLICK_EVENT:
 				charter.ignoreClickForThisFrame = true;
 
-			case PsychUIBox.CLICK_EVENT:
+			case UIBox.CLICK_EVENT:
 				charter.ignoreClickForThisFrame = true;
 				if(sender == upperBox) updateUpperBoxBg();
 
-			case PsychUIBox.MINIMIZE_EVENT:
+			case UIBox.MINIMIZE_EVENT:
 				if(sender == upperBox)
 				{
 					upperBox.bg.visible = !upperBox.isMinimized;
 					updateUpperBoxBg();
 				}
 
-			case PsychUIBox.DROP_EVENT:
+			case UIBox.DROP_EVENT:
 				charter.chartEditorSave.data.mainBoxPosition = [mainBox.x, mainBox.y];
 				charter.chartEditorSave.data.infoBoxPosition = [infoBox.x, infoBox.y];
 		}

@@ -1,9 +1,10 @@
 package funkin.objects.ui;
 
-class PsychUISlider extends FlxSpriteGroup
+class UIVerticalSlider extends FlxSpriteGroup
 {
 	public static final CHANGE_EVENT = "slider_change";
 	public var bar:FlxSprite;
+	public var handleBorder:FlxSprite;
 	public var minText:FlxText;
 	public var maxText:FlxText;
 	public var valueText:FlxText;
@@ -18,36 +19,45 @@ class PsychUISlider extends FlxSpriteGroup
 	public var min(default, set):Float = -999;
 	public var max(default, set):Float = 999;
 	public var decimals(default, set):Int = 2;
-	public function new(x:Float = 0, y:Float = 0, callback:Float->Void, def:Float = 0, min:Float = -999, max:Float = 999, wid:Float = 200, mainColor:FlxColor = FlxColor.WHITE, handleColor:FlxColor = 0xFFAAAAAA)
+
+	public function new(x:Float = 0, y:Float = 0, callback:Float->Void, def:Float = 0, min:Float = -999, max:Float = 999, height:Float = 200, mainColor:FlxColor = 0xFF262A34, handleColor:FlxColor = 0xFFA855F7)
 	{
 		super(x, y);
 		this.onDrag = callback;
 
-		bar = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
-		bar.scale.set(wid, 5);
+		bar = new FlxSprite().makeGraphic(20, 1, FlxColor.WHITE);
+		bar.scale.set(1, height);
 		bar.updateHitbox();
 		bar.color = mainColor;
 		add(bar);
 
+		// Labels
 		minText = new FlxText(0, 0, 80, '', 8);
 		minText.alignment = CENTER;
-		minText.color = mainColor;
+		minText.color = 0xFFF1F1F5;
 		add(minText);
+
 		maxText = new FlxText(0, 0, 80, '', 8);
 		maxText.alignment = CENTER;
-		maxText.color = mainColor;
+		maxText.color = 0xFFF1F1F5;
 		add(maxText);
+
 		valueText = new FlxText(0, 0, 80, '', 8);
 		valueText.alignment = CENTER;
 		valueText.color = handleColor;
 		add(valueText);
-		labelText = new FlxText(0, 0, wid, '', 8);
+
+		labelText = new FlxText(0, 0, 100, '', 8);
 		labelText.alignment = CENTER;
+		labelText.color = 0xFFF1F1F5;
 		add(labelText);
 
-		handle = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
-		handle.scale.set(5, 15);
-		handle.updateHitbox();
+		handleBorder = new FlxSprite().makeGraphic(20 + 2, 5 + 2, FlxColor.WHITE);
+		handleBorder.color = 0xFF14161C;
+		handleBorder.alpha = 0.5;
+		add(handleBorder);
+
+		handle = new FlxSprite().makeGraphic(20, 5, FlxColor.WHITE);
 		handle.color = handleColor;
 		add(handle);
 
@@ -65,10 +75,10 @@ class PsychUISlider extends FlxSpriteGroup
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-
+		
 		if(FlxG.mouse.overlaps(handle, camera)){
 			isPointer = true;
-			Mouse.cursor = MouseCursor.RESIZE_WE;
+			Mouse.cursor = MouseCursor.RESIZE_NS;
 		} else if(FlxG.mouse.overlaps(bar, camera)){
 			isPointer = true;
 			Mouse.cursor = MouseCursor.POINTER;
@@ -84,18 +94,21 @@ class PsychUISlider extends FlxSpriteGroup
 				if(this.onDragStart != null) this.onDragStart(value);
 				movingHandle = true;
 			}
-			
+
 			if(movingHandle)
 			{
 				var lastValue:Float = FlxMath.roundDecimal(value, decimals);
-				var mouseWorldX:Float = FlxG.mouse.getWorldPosition(camera).x;
-				var barScreenX:Float = bar.x - (camera.scroll.x * (1 - bar.scrollFactor.x));
-				value = Math.max(min, Math.min(max, FlxMath.remapToRange(mouseWorldX, barScreenX, barScreenX + bar.width, min, max)));
-
+				value = Math.max(min, Math.min(max, FlxMath.remapToRange(
+					FlxG.mouse.getPositionInCameraView(camera).y,
+					bar.y,
+					bar.y + bar.height,
+					min,
+					max
+				)));
 				if(this.onDrag != null && lastValue != value)
 				{
 					this.onDrag(FlxMath.roundDecimal(value, decimals));
-					if(broadcastSliderEvent) PsychUIEventHandler.event(CHANGE_EVENT, this);
+					if(broadcastSliderEvent) UIEventHandler.event(CHANGE_EVENT, this);
 				}
 			}
 		}
@@ -109,21 +122,28 @@ class PsychUISlider extends FlxSpriteGroup
 
 	function _updatePositions()
 	{
-		minText.x = bar.x - minText.width/2;
-		maxText.x = bar.x + bar.width - maxText.width/2;
-		valueText.x = bar.x + bar.width/2 - valueText.width/2;
+		// Labels
+		minText.x = bar.x + bar.width/2 - minText.width/2;
+		maxText.x = bar.x + bar.width/2 - maxText.width/2;
+		valueText.x = bar.x + bar.width + 4; // value label to the right
 
 		labelText.x = bar.x + bar.width/2 - labelText.width/2;
 		if(label.length > 0) bar.y = labelText.y + 24;
-		
-		minText.y = maxText.y = valueText.y = bar.y + 12;
 
-		_updateHandleX();
-		handle.y = bar.y + bar.height/2 - handle.height/2;
+		minText.y = bar.y + bar.height - minText.height/2;
+		maxText.y = bar.y - maxText.height/2;
+
+		_updateHandleY();
 	}
 
-	function _updateHandleX()
-		handle.x = bar.x - handle.width/2 + FlxMath.remapToRange(FlxMath.roundDecimal(value, decimals), min, max, 0, bar.width);
+	function _updateHandleY()
+	{
+		handle.y = bar.y - handle.height/2 + FlxMath.remapToRange(FlxMath.roundDecimal(value, decimals), min, max, 0, bar.height);
+		handle.x = bar.x + bar.width/2 - handle.width/2;
+		valueText.y = handle.y + handle.height/2 - valueText.height/2;
+		handleBorder.x = handle.x - 1;
+		handleBorder.y = handle.y - 1;
+	}
 
 	function set_decimals(v:Int)
 	{
@@ -141,7 +161,7 @@ class PsychUISlider extends FlxSpriteGroup
 		if(v > max) max = v;
 		min = v;
 		minText.text = Std.string(FlxMath.roundDecimal(min, decimals));
-		_updateHandleX();
+		_updateHandleY();
 		return min;
 	}
 
@@ -150,7 +170,7 @@ class PsychUISlider extends FlxSpriteGroup
 		if(v < min) min = v;
 		max = v;
 		maxText.text = Std.string(FlxMath.roundDecimal(max, decimals));
-		_updateHandleX();
+		_updateHandleY();
 		return max;
 	}
 
@@ -158,7 +178,7 @@ class PsychUISlider extends FlxSpriteGroup
 	{
 		value = Math.max(min, Math.min(max, v));
 		valueText.text = Std.string(FlxMath.roundDecimal(value, decimals));
-		_updateHandleX();
+		_updateHandleY();
 		return value;
 	}
 
@@ -168,6 +188,7 @@ class PsychUISlider extends FlxSpriteGroup
 		_updatePositions();
 		return labelText.text;
 	}
+
 	function get_label()
 		return labelText.text;
 }

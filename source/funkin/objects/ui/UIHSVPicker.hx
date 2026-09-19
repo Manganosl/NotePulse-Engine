@@ -3,14 +3,18 @@ package funkin.objects.ui;
 import openfl.display.BitmapData;
 import flixel.util.FlxSpriteUtil;
 
-class PsychUIHSVPicker extends FlxSpriteGroup {
+class UIHSVPicker extends FlxSpriteGroup {
 	public var bg:FlxSprite;
+	public var bgBorder:FlxSprite;
 	public var preview:FlxSprite;
 
 	var panelBG:FlxSprite;
+	var panelBorder:FlxSprite;
 
 	var svSquare:FlxSprite;
+	var svSquareBorder:FlxSprite;
 	var hueBar:FlxSprite;
+	var hueBarBorder:FlxSprite;
 
 	var svCursor:FlxSprite;
 	var hueCursor:FlxSprite;
@@ -31,14 +35,23 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 	var hueHeight:Int = 16;
 	var buttonSize:Int = 33;
 
-    var hexField:PsychUIInputText;
+    var hexLabel:FlxText;
+    var hexField:UIInputText;
 
 	public function new(x:Float,y:Float)
 	{
 		super(x,y);
 
-		bg = new FlxSprite().makeGraphic(buttonSize,buttonSize,FlxColor.BLACK);
-		bg.alpha = 0.6;
+		bgBorder = new FlxSprite(-1, -1).makeGraphic(1, 1, FlxColor.WHITE);
+		bgBorder.color = 0xFF3A3F52;
+		bgBorder.alpha = 0.55;
+		bgBorder.scale.set(buttonSize + 2, buttonSize + 2);
+		bgBorder.updateHitbox();
+		add(bgBorder);
+
+		bg = new FlxSprite().makeGraphic(buttonSize,buttonSize,FlxColor.WHITE);
+		bg.color = 0xFF1C1F27;
+		bg.alpha = 0.78;
 		add(bg);
 
 		preview = new FlxSprite(2,2).makeGraphic(buttonSize-4,buttonSize-4,FlxColor.WHITE);
@@ -49,20 +62,50 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 	}
 
 	function createBox(){
-		panelBG = new FlxSprite(0, (bg.height + 2)).makeGraphic((svSize + 8), (svSize + hueHeight + 50), FlxColor.BLACK);
-		panelBG.alpha = 0.6;
+		panelBorder = new FlxSprite(-1, (bg.height + 1)).makeGraphic(1, 1, FlxColor.WHITE);
+		panelBorder.color = 0xFF3A3F52;
+		panelBorder.alpha = 0.55;
+		panelBorder.scale.set((svSize + 8) + 2, (svSize + hueHeight + 56) + 2);
+		panelBorder.updateHitbox();
+		panelBorder.visible = false;
+		add(panelBorder);
+
+		panelBG = new FlxSprite(0, (bg.height + 2)).makeGraphic((svSize + 8), (svSize + hueHeight + 56), FlxColor.WHITE);
+		panelBG.color = 0xFF1C1F27;
+		panelBG.alpha = 0.78;
 		panelBG.visible = false;
 		add(panelBG);
+
+		svSquareBorder = new FlxSprite(3, (bg.height + 5)).makeGraphic(1, 1, FlxColor.WHITE);
+		svSquareBorder.color = 0xFF3A3F52;
+		svSquareBorder.alpha = 0.6;
+		svSquareBorder.scale.set(svSize + 2, svSize + 2);
+		svSquareBorder.updateHitbox();
+		svSquareBorder.visible = false;
+		add(svSquareBorder);
 
 		svSquare = new FlxSprite(4, (bg.height + 6));
 		svSquare.visible = false;
 		add(svSquare);
 
+		hueBarBorder = new FlxSprite(3, (bg.height + svSize + 7)).makeGraphic(1, 1, FlxColor.WHITE);
+		hueBarBorder.color = 0xFF3A3F52;
+		hueBarBorder.alpha = 0.6;
+		hueBarBorder.scale.set(svSize + 2, hueHeight + 2);
+		hueBarBorder.updateHitbox();
+		hueBarBorder.visible = false;
+		add(hueBarBorder);
+
 		hueBar = new FlxSprite(4, (bg.height + svSize + 8));
 		hueBar.visible = false;
 		add(hueBar);
 
-        hexField = new PsychUIInputText(4, (hueBar.y - 200), Std.int(panelBG.width * 0.9));
+        hexLabel = new FlxText(4, (hueBar.y + hueHeight + 6), Std.int(panelBG.width - 8), 'HEX', 8);
+        hexLabel.color = 0xFFF1F1F5;
+        hexLabel.visible = false;
+        add(hexLabel);
+
+        hexField = new UIInputText(4, (hexLabel.y + hexLabel.height + 2), Std.int(panelBG.width * 0.9));
         hexField.filterMode = ONLY_HEXADECIMAL;
 		hexField.visible = false;
         hexField.onChange = function(old:String, curString:String) {
@@ -78,13 +121,16 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
         add(hexField);
 
 		svCursor = new FlxSprite();
-		svCursor.makeGraphic(10,10,FlxColor.TRANSPARENT);
-		FlxSpriteUtil.drawCircle(svCursor, 4,4,4,FlxColor.WHITE);
+		svCursor.makeGraphic(14,14,FlxColor.TRANSPARENT);
+		FlxSpriteUtil.drawCircle(svCursor, 7, 7, 5, FlxColor.TRANSPARENT, {thickness: 3, color: 0xFF14161C});
+		FlxSpriteUtil.drawCircle(svCursor, 7, 7, 5, FlxColor.TRANSPARENT, {thickness: 1.5, color: FlxColor.WHITE});
 		svCursor.visible = false;
 		add(svCursor);
 
 		hueCursor = new FlxSprite();
-		hueCursor.makeGraphic(2,hueHeight+4,FlxColor.WHITE);
+		hueCursor.makeGraphic(4, hueHeight + 6, FlxColor.TRANSPARENT);
+		FlxSpriteUtil.drawRect(hueCursor, 0, 0, 4, hueHeight + 6, 0xFF14161C);
+		FlxSpriteUtil.drawRect(hueCursor, 1, 1, 2, hueHeight + 4, FlxColor.WHITE);
 		hueCursor.visible = false;
 		add(hueCursor);
 
@@ -143,14 +189,18 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 
     function toggleMenu() {
         isOpen = !isOpen;
-        panelBG.visible = svSquare.visible = hueBar.visible = svCursor.visible = hueCursor.visible = hexField.visible = isOpen;
+        panelBorder.visible = panelBG.visible = svSquareBorder.visible = svSquare.visible
+			= hueBarBorder.visible = hueBar.visible = svCursor.visible = hueCursor.visible
+			= hexLabel.visible = hexField.visible = isOpen;
 
         if(isOpen) updateCursors();
     }
 
     function closeMenu() {
         isOpen = false;
-        panelBG.visible = svSquare.visible = hueBar.visible = svCursor.visible = hueCursor.visible = hexField.visible = false;
+        panelBorder.visible = panelBG.visible = svSquareBorder.visible = svSquare.visible
+			= hueBarBorder.visible = hueBar.visible = svCursor.visible = hueCursor.visible
+			= hexLabel.visible = hexField.visible = false;
 
         dragSV = dragHue = false;
     }
@@ -173,8 +223,8 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 		svCursor.x = svSquare.x + sat * svSquare.width - svCursor.width/2;
 		svCursor.y = svSquare.y + (1-val) * svSquare.height - svCursor.height/2;
 
-		hueCursor.x = hueBar.x + hue * hueBar.width;
-		hueCursor.y = hueBar.y - 2;
+		hueCursor.x = hueBar.x + hue * hueBar.width - hueCursor.width/2;
+		hueCursor.y = hueBar.y - 3;
 	}
 
 	function generateHueBar(){
@@ -213,7 +263,6 @@ class PsychUIHSVPicker extends FlxSpriteGroup {
 	public function setColorFromHex(hex:String):Void {
 		final lastValue = hexField.text;
 		if(lastValue == hex) return;
-		hexField.text = hex;
 
         var color:FlxColor = FlxColor.fromString('#' + hex);
         hue = color.hue / 360;

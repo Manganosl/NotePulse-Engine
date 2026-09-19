@@ -1,6 +1,6 @@
 package funkin.objects.ui;
 
-class PsychUINumericStepper extends PsychUIInputText
+class UINumericStepper extends UIInputText
 {
 	public static final CHANGE_EVENT = "numericstepper_change";
 
@@ -11,6 +11,8 @@ class PsychUINumericStepper extends PsychUIInputText
 	public var isPercent(default, set):Bool = false;
 	public var buttonPlus:FlxSprite;
 	public var buttonMinus:FlxSprite;
+
+	public var buttonHoverColor:FlxColor = 0xFFA855F7;
 
 	public var onValueChange:Void->Void;
 	public var value(default, set):Float;
@@ -50,34 +52,38 @@ class PsychUINumericStepper extends PsychUIInputText
 	{
 		super.update(elapsed);
 
-		if(buttonPlus != null && buttonPlus.exists && FlxG.mouse.overlaps(buttonPlus, camera))
+		var overPlus:Bool = (buttonPlus != null && buttonPlus.exists && FlxG.mouse.overlaps(buttonPlus, camera));
+		var overMinus:Bool = (buttonMinus != null && buttonMinus.exists && FlxG.mouse.overlaps(buttonMinus, camera));
+
+		if(overPlus || overMinus)
 		{
 			isPointer = true;
 			Mouse.cursor = MouseCursor.POINTER;
-			if(FlxG.mouse.justPressed)
-			{
-				buttonPlus.animation.play('pressed');
-				value += step;
-				_internalOnChange();
-			}
-		} else if(isPointer){
-			isPointer = false;
-			Mouse.cursor = MouseCursor.DEFAULT;
 		}
-		if(buttonMinus != null && buttonMinus.exists && FlxG.mouse.overlaps(buttonMinus, camera))
+		else if(isPointer)
 		{
-			isPointer = true;
-			Mouse.cursor = MouseCursor.POINTER;
-			if(FlxG.mouse.justPressed)
-			{
-				buttonMinus.animation.play('pressed');
-				value -= step;
-				_internalOnChange();
-			}
-		} else if(isPointer){
 			isPointer = false;
 			Mouse.cursor = MouseCursor.DEFAULT;
 		}
+
+		if(buttonPlus != null && buttonPlus.exists)
+			buttonPlus.color = overPlus ? buttonHoverColor : FlxColor.WHITE;
+		if(buttonMinus != null && buttonMinus.exists)
+			buttonMinus.color = overMinus ? buttonHoverColor : FlxColor.WHITE;
+
+		if(overPlus && FlxG.mouse.justPressed)
+		{
+			buttonPlus.animation.play('pressed');
+			value += step;
+			_internalOnChange();
+		}
+		if(overMinus && FlxG.mouse.justPressed)
+		{
+			buttonMinus.animation.play('pressed');
+			value -= step;
+			_internalOnChange();
+		}
+
 		if(FlxG.mouse.released)
 		{
 			if(buttonPlus != null && buttonPlus.exists && buttonPlus.animation.curAnim != null && buttonPlus.animation.curAnim.name != 'normal')
@@ -209,7 +215,7 @@ class PsychUINumericStepper extends PsychUIInputText
 	function _internalOnChange()
 	{
 		if(onValueChange != null) onValueChange();
-		if(broadcastStepperEvent) PsychUIEventHandler.event(CHANGE_EVENT, this);
+		if(broadcastStepperEvent) UIEventHandler.event(CHANGE_EVENT, this);
 	}
 
 	override function setGraphicSize(width:Float = 0, height:Float = 0)

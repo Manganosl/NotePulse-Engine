@@ -394,17 +394,17 @@ class ModSelectorState extends MusicBeatState {
 
 	function promptNewSong() {
 		openSubState(new BasePrompt(FlxG.width / 2, 300, "Enter new song name (No spaces)", function(state:BasePrompt) {
-			var input = new PsychUIInputText(state.bg.x + 20, state.bg.y + 90, 250, "", 16);
+			var input = new UIInputText(state.bg.x + 20, state.bg.y + 90, 250, "", 16);
 			state.add(input);
 
-			state.add(new PsychUIButton(state.bg.x + 20, input.y + 40, "Confirm", function() {
+			state.add(new UIButton(state.bg.x + 20, input.y + 40, "Confirm", function() {
 				var songName = input.text;
 				state.close();
 				openSubState(new BasePrompt(FlxG.width / 2, 300, "Enter new difficulty name (No spaces)", function(state2:BasePrompt) {
-					var input2 = new PsychUIInputText(state2.bg.x + 20, state2.bg.y + 90, 250, "", 16);
+					var input2 = new UIInputText(state2.bg.x + 20, state2.bg.y + 90, 250, "", 16);
 					state2.add(input2);
 
-					state2.add(new PsychUIButton(state2.bg.x + 20, input2.y + 40, "Confirm", function() {
+					state2.add(new UIButton(state2.bg.x + 20, input2.y + 40, "Confirm", function() {
 						saveLevel(makeBlankSong(songName), true, input2.text);
 						state2.close();
 						openSubState(new GoodBye());
@@ -416,10 +416,10 @@ class ModSelectorState extends MusicBeatState {
 
 	function promptNewDifficulty(song:SongMetadata, _) {
 		openSubState(new BasePrompt(FlxG.width / 2, 300, "Enter new difficulty name (No spaces)", function(state:BasePrompt) {
-			var input = new PsychUIInputText(state.bg.x + 20, state.bg.y + 90, 250, "", 16);
+			var input = new UIInputText(state.bg.x + 20, state.bg.y + 90, 250, "", 16);
 			state.add(input);
 
-			state.add(new PsychUIButton(state.bg.x + 20, input.y + 40, "Confirm", function() {
+			state.add(new UIButton(state.bg.x + 20, input.y + 40, "Confirm", function() {
 				saveLevel(makeBlankSong(song.songName), true, input.text);
 				state.close();
 				openSubState(new GoodBye());
@@ -492,7 +492,7 @@ class ModSelectorState extends MusicBeatState {
 			var ts = 10;
 
 			inline function label(x:Float, y:Float, t:String) { state.add(new FlxText(x, y - 14, 0, t, ts)); }
-			inline function input(x:Float, y:Float, v:String) { var i = new PsychUIInputText(x, y, iw, v); state.add(i); return i; }
+			inline function input(x:Float, y:Float, v:String) { var i = new UIInputText(x, y, iw, v); state.add(i); return i; }
 
 			label(sx, sy,      "Mod Name:");           var nameInput      = input(sx, sy,      cfg.name);
 			label(sx, sy+sp,   "Description:");        var descInput      = input(sx, sy+sp,   cfg.description);
@@ -505,14 +505,14 @@ class ModSelectorState extends MusicBeatState {
 			label(sx, sy+sp*8, "Default Transition:"); var transInput     = input(sx, sy+sp*8, cfg.defaultTransition);
 
 			var checkY = transInput.y + 35;
-			var globallyCheck = new PsychUICheckBox(sx, checkY, "Runs Globally?", 100);
-			var forceCheck = new PsychUICheckBox(sx + 180, checkY, "Forces its states?", 100);
+			var globallyCheck = new UICheckBox(sx, checkY, "Runs Globally?", 100);
+			var forceCheck = new UICheckBox(sx + 180, checkY, "Forces its states?", 100);
 			globallyCheck.checked = cfg.runsGlobally;
 			forceCheck.checked = cfg.forceStates;
 			state.add(globallyCheck);
 			state.add(forceCheck);
 
-			var saveBtn = new PsychUIButton(sx, globallyCheck.y + 45, "Save", function() {
+			var saveBtn = new UIButton(sx, globallyCheck.y + 45, "Save", function() {
 				var newData = {
 					name: nameInput.text, description: descInput.text,
 					titleState: titleInput.text, mainMenuState: mainMenuInput.text,
@@ -527,7 +527,7 @@ class ModSelectorState extends MusicBeatState {
 				state.close();
 			});
 			state.add(saveBtn);
-			state.add(new PsychUIButton(saveBtn.x + 110, saveBtn.y, "Cancel", function() {
+			state.add(new UIButton(saveBtn.x + 110, saveBtn.y, "Cancel", function() {
 				state.close();
 			}));
 			state.onClose = (_) -> {

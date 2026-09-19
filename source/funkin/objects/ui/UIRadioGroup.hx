@@ -3,12 +3,12 @@ package funkin.objects.ui;
 import flixel.util.FlxDestroyUtil;
 import flixel.FlxObject;
 
-class PsychUIRadioGroup extends FlxSpriteGroup
+class UIRadioGroup extends FlxSpriteGroup
 {
 	public static final CLICK_EVENT = 'radiogroup_click';
 
 	public var labels(default, set):Array<String> = [];
-	public var radios:Array<PsychUIRadioItem> = [];
+	public var radios:Array<UIRadioItem> = [];
 
 	public var space(default, set):Float = 25;
 	public var textWidth(default, set):Int = 100;
@@ -17,7 +17,7 @@ class PsychUIRadioGroup extends FlxSpriteGroup
 	public var stackHorizontal(default, set):Bool = false;
 
 	public var checked(default, set):Int = -1;
-	public var checkedRadio(default, set):PsychUIRadioItem;
+	public var checkedRadio(default, set):UIRadioItem;
 
 	public var arrowUp:FlxSprite;
 	public var arrowDown:FlxSprite;
@@ -193,7 +193,7 @@ class PsychUIRadioGroup extends FlxSpriteGroup
 		return labels;
 	}
 
-	function set_checkedRadio(v:PsychUIRadioItem)
+	function set_checkedRadio(v:UIRadioItem)
 	{
 		checkedRadio = null;
 		@:bypassAccessor checked = -1;
@@ -306,11 +306,11 @@ class PsychUIRadioGroup extends FlxSpriteGroup
 	public var broadcastRadioGroupEvent:Bool = true;
 	function _addNewRadio()
 	{
-		var radio:PsychUIRadioItem = cast recycle(PsychUIRadioItem);
+		var radio:UIRadioItem = cast recycle(UIRadioItem);
 		radio.onClick = function() {
 			checkedRadio = radio;
 			if(onClick != null) onClick();
-			if(broadcastRadioGroupEvent) PsychUIEventHandler.event(CLICK_EVENT, this);
+			if(broadcastRadioGroupEvent) UIEventHandler.event(CLICK_EVENT, this);
 		};
 		radio.visible = radio.active = true;
 		radio.text.fieldWidth = textWidth;
@@ -319,7 +319,7 @@ class PsychUIRadioGroup extends FlxSpriteGroup
 	}
 }
 
-class PsychUIRadioItem extends PsychUICheckBox
+class UIRadioItem extends UICheckBox
 {
 	public function new(x:Float, y:Float, label:String, textWid:Int = 100)
 	{

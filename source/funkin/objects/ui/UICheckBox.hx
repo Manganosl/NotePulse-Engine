@@ -1,6 +1,6 @@
 package funkin.objects.ui;
 
-class PsychUICheckBox extends FlxSpriteGroup
+class UICheckBox extends FlxSpriteGroup
 {
 	public static final CLICK_EVENT = 'checkbox_click';
 
@@ -46,14 +46,20 @@ class PsychUICheckBox extends FlxSpriteGroup
 		if((mousePos.x >= screenPos.x && mousePos.x < screenPos.x + width/2) && (mousePos.y >= screenPos.y && mousePos.y < screenPos.y + height)){
 			isPointer = true;
 			Mouse.cursor = MouseCursor.POINTER;
+			box.scale.set(1.12, 1.12);
+			box.updateHitbox();
+			text.color = 0xFFA855F7;
 			if(FlxG.mouse.justPressed){
 				checked = !checked;
 				if(onClick != null) onClick();
-				if(broadcastCheckBoxEvent) PsychUIEventHandler.event(CLICK_EVENT, this);
+				if(broadcastCheckBoxEvent) UIEventHandler.event(CLICK_EVENT, this);
 			}
 		} else if(isPointer){
 			isPointer = false;
 			Mouse.cursor = MouseCursor.DEFAULT;
+			box.scale.set(1, 1);
+			box.updateHitbox();
+			text.color = 0xFFF1F1F5;
 		}
 	}
 

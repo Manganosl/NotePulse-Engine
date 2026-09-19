@@ -20,7 +20,9 @@ import funkin.objects.Character;
 import funkin.objects.HealthIcon;
 import funkin.objects.Bar;
 
-class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
+import funkin.states.editors.ui.CharacterEditorUI;
+
+class CharacterEditorState extends MusicBeatState
 {
 	var character:Character;
 	var ghost:FlxSprite;
@@ -47,12 +49,14 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	var _char:String = null;
 	var _goToPlayState:Bool = true;
 
-	var anims = null;
+	var anims:Array<AnimArray> = null;
 	var animsTxtGroup:FlxTypedGroup<FlxText>;
 	var curAnim = 0;
 
 	private var camEditor:FlxCamera;
 	private var camHUD:FlxCamera;
+
+	var UI:CharacterEditorUI;
 
 	public function new(char:String = null, goToPlayState:Bool = true)
 	{
@@ -61,73 +65,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		if(this._char == null) this._char = Character.DEFAULT_CHARACTER;
 
 		super();
-	}
-
-	public function UIEvent(id:String, sender:Dynamic) {
-		if(id == PsychUICheckBox.CLICK_EVENT)
-			unsavedProgress = true;
-
-		if(id == PsychUIInputText.CHANGE_EVENT)
-		{
-			if(sender == healthIconInputText) {
-				var lastIcon = healthIcon.getCharacter();
-				healthIcon.changeIcon(healthIconInputText.text, false);
-				character.healthIcon = healthIconInputText.text;
-				if(lastIcon != healthIcon.getCharacter()) updatePresence();
-				unsavedProgress = true;
-			}
-			else if(sender == vocalsInputText)
-			{
-				character.vocalsFile = vocalsInputText.text;
-				unsavedProgress = true;
-			}
-			else if(sender == imageInputText)
-			{
-				character.imageFile = imageInputText.text;
-				unsavedProgress = true;
-			}
-		}
-		else if(id == PsychUINumericStepper.CHANGE_EVENT)
-		{
-			if (sender == scaleStepper)
-			{
-				reloadCharacterImage();
-				character.jsonScale = sender.value;
-				character.scale.set(character.jsonScale, character.jsonScale);
-				character.updateHitbox();
-				updatePointerPos(false);
-				unsavedProgress = true;
-			}
-			else if(sender == positionXStepper)
-			{
-				character.positionArray[0] = positionXStepper.value;
-				updateCharacterPositions();
-				unsavedProgress = true;
-			}
-			else if(sender == positionYStepper)
-			{
-				character.positionArray[1] = positionYStepper.value;
-				updateCharacterPositions();
-				unsavedProgress = true;
-			}
-			else if(sender == singDurationStepper)
-			{
-				character.singDuration = singDurationStepper.value;
-				unsavedProgress = true;
-			}
-			else if(sender == positionCameraXStepper)
-			{
-				character.cameraPosition[0] = positionCameraXStepper.value;
-				updatePointerPos();
-				unsavedProgress = true;
-			}
-			else if(sender == positionCameraYStepper)
-			{
-				character.cameraPosition[1] = positionCameraYStepper.value;
-				updatePointerPos();
-				unsavedProgress = true;
-			}
-		}
 	}
 
 	override function create()
@@ -140,6 +77,11 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
 		FlxG.cameras.add(camHUD, false);
+
+		UI = new CharacterEditorUI(this);
+		UI.cameras = [camHUD];
+		UI.scrollFactor.set();
+		add(UI);
 
 		loadBG();
 
@@ -163,7 +105,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 		ghost = new FlxSprite();
 		ghost.visible = false;
-		ghost.alpha = ghostAlpha;
+		ghost.alpha = UI.ghostAlpha;
 		add(ghost);
 
 		addCharacter();
@@ -215,7 +157,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		FlxG.mouse.visible = true;
 		FlxG.camera.zoom = 1;
 
-		makeUIMenu();
+		UI.createUI();
 
 		updatePointerPos();
 		updateHealthBar();
@@ -294,7 +236,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		{
 			character.isPlayer = !character.isPlayer;
 			character.flipX = (character.originalFlipX != character.isPlayer);
-			if(check_player != null) check_player.checked = character.isPlayer;
+			if(UI != null && UI.check_player != null) UI.check_player.checked = character.isPlayer;
 		}
 		character.debugMode = true;
 
@@ -303,437 +245,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		updateCharacterPositions();
 		reloadAnimList();
 		if(healthBar != null && healthIcon != null) updateHealthBar();
-	}
-
-	var UI_Box:PsychUIBox;
-	var UI_CharacterBox:PsychUIBox;
-
-	function makeUIMenu()
-	{
-		UI_Box = new PsychUIBox(FlxG.width - 275, 25, 250, 120, ['Ghost', 'Settings']);
-		UI_Box.scrollFactor.set();
-		UI_Box.cameras = [camHUD];
-
-		UI_CharacterBox = new PsychUIBox(UI_Box.x - 100, UI_Box.y + UI_Box.height + 10, 350, 280, ['Animations', 'Character']);
-		UI_CharacterBox.scrollFactor.set();
-		UI_CharacterBox.cameras = [camHUD];
-		add(UI_CharacterBox);
-		add(UI_Box);
-
-		addGhostUI();
-		addSettingsUI();
-		addAnimationsUI();
-		addCharacterUI();
-
-		UI_Box.selectedName = 'Settings';
-		UI_CharacterBox.selectedName = 'Character';
-	}
-
-	var ghostAlpha:Float = 0.6;
-	function addGhostUI()
-	{
-		var tab_group = UI_Box.getTab('Ghost').menu;
-
-		var makeGhostButton:PsychUIButton = new PsychUIButton(25, 15, "Make Ghost", function() {
-			var anim = anims[curAnim];
-			if(!character.isAnimationNull())
-			{
-				var myAnim = anims[curAnim];
-				if(!character.isAnimateAtlas)
-				{
-					ghost.loadGraphic(character.graphic);
-					ghost.frames.frames = character.frames.frames;
-					ghost.animation.copyFrom(character.animation);
-					ghost.animation.play(character.animation.curAnim.name, true, false, character.animation.curAnim.curFrame);
-					ghost.animation.pause();
-				}
-				else if(myAnim != null) //This is VERY unoptimized and bad, I hope to find a better replacement that loads only a specific frame as bitmap in the future.
-				{
-					if(animateGhost == null) //If I created the animateGhost on create() and you didn't load an atlas, it would crash the game on destroy, so we create it here
-					{
-						animateGhost = new FlxAnimate(ghost.x, ghost.y);
-						insert(members.indexOf(ghost), animateGhost);
-						animateGhost.active = false;
-					}
-
-					if(animateGhost == null || animateGhostImage != character.imageFile)
-						animateGhost.frames = Paths.getTextureAtlas(character.imageFile);
-					
-					if(myAnim.indices != null && myAnim.indices.length > 0)
-						animateGhost.anim.addBySymbolIndices('anim', myAnim.name, myAnim.indices, 0, false);
-					else
-						animateGhost.anim.addBySymbol('anim', myAnim.name, 0, false);
-
-					animateGhost.anim.play('anim', true, false, character.anim.frameIndex);
-					animateGhost.anim.pause();
-
-					animateGhostImage = character.imageFile;
-				}
-				
-				var spr:FlxSprite = !character.isAnimateAtlas ? ghost : animateGhost;
-				if(spr != null)
-				{
-					spr.setPosition(character.x, character.y);
-					spr.antialiasing = character.antialiasing;
-					spr.flipX = character.flipX;
-					spr.alpha = ghostAlpha;
-
-					spr.scale.set(character.scale.x, character.scale.y);
-					spr.updateHitbox();
-
-					spr.offset.set(character.offset.x, character.offset.y);
-					spr.visible = true;
-
-					var otherSpr:FlxSprite = (spr == animateGhost) ? ghost : animateGhost;
-					if(otherSpr != null) otherSpr.visible = false;
-				}
-				trace('created ghost image');
-			}
-		});
-
-		var highlightGhost:PsychUICheckBox = new PsychUICheckBox(20 + makeGhostButton.x + makeGhostButton.width, makeGhostButton.y, "Highlight Ghost", 100);
-		highlightGhost.onClick = function()
-		{
-			var value = highlightGhost.checked ? 125 : 0;
-			ghost.colorTransform.redOffset = value;
-			ghost.colorTransform.greenOffset = value;
-			ghost.colorTransform.blueOffset = value;
-			if(animateGhost != null)
-			{
-				animateGhost.colorTransform.redOffset = value;
-				animateGhost.colorTransform.greenOffset = value;
-				animateGhost.colorTransform.blueOffset = value;
-			}
-		};
-
-		var ghostAlphaSlider:PsychUISlider = new PsychUISlider(15, makeGhostButton.y + 25, function(v:Float)
-		{
-			ghostAlpha = v;
-			ghost.alpha = ghostAlpha;
-			if(animateGhost != null) animateGhost.alpha = ghostAlpha;
-
-		}, ghostAlpha, 0, 1);
-		ghostAlphaSlider.label = 'Opacity:';
-
-		tab_group.add(makeGhostButton);
-		tab_group.add(highlightGhost);
-		tab_group.add(ghostAlphaSlider);
-	}
-
-	var check_player:PsychUICheckBox;
-	var charDropDown:PsychUIDropDownMenu;
-	function addSettingsUI()
-	{
-		var tab_group = UI_Box.getTab('Settings').menu;
-
-		check_player = new PsychUICheckBox(10, 60, "Playable Character", 100);
-		check_player.checked = character.isPlayer;
-		check_player.onClick = function()
-		{
-			character.isPlayer = !character.isPlayer;
-			character.flipX = !character.flipX;
-			updateCharacterPositions();
-			updatePointerPos(false);
-		};
-
-		var reloadCharacter:PsychUIButton = new PsychUIButton(140, 20, "Reload Char", function()
-		{
-			addCharacter(true);
-			updatePointerPos();
-			reloadCharacterOptions();
-			reloadCharacterDropDown();
-		});
-
-		var templateCharacter:PsychUIButton = new PsychUIButton(140, 50, "Load Template", function()
-		{
-			final _template:CharacterFile =
-			{
-				animations: [
-					newAnim('idle', 'BF idle dance'),
-					newAnim('singLEFT', 'BF NOTE LEFT0'),
-					newAnim('singDOWN', 'BF NOTE DOWN0'),
-					newAnim('singUP', 'BF NOTE UP0'),
-					newAnim('singRIGHT', 'BF NOTE RIGHT0')
-				],
-				no_antialiasing: false,
-				flip_x: false,
-				healthicon: 'face',
-				image: 'characters/BOYFRIEND',
-				sing_duration: 4,
-				scale: 1,
-				healthbar_colors: [161, 161, 161],
-				camera_position: [0, 0],
-				position: [0, 0],
-				vocals_file: null
-			};
-
-			character.loadCharacterFile(_template);
-			character.color = FlxColor.WHITE;
-			character.alpha = 1;
-			reloadAnimList();
-			reloadCharacterOptions();
-			updateCharacterPositions();
-			updatePointerPos();
-			reloadCharacterDropDown();
-			updateHealthBar();
-		});
-		templateCharacter.normalStyle.bgColor = FlxColor.RED;
-		templateCharacter.normalStyle.textColor = FlxColor.WHITE;
-
-		charDropDown = new PsychUIDropDownMenu(10, 30, [''], function(index:Int, intended:String)
-		{
-			if(intended == null || intended.length < 1) return;
-
-			var isJSON:Bool = true;
-			var characterPath:String = 'characters/$intended.json';
-			var path:String = Paths.getPath(characterPath, TEXT, null, true);
-			#if MODS_ALLOWED
-			if (!FileSystem.exists(path))
-			#else
-			if (!Assets.exists(path))
-			#end
-			{
-				characterPath = 'characters/$intended.xml';
-				path = Paths.getPath(characterPath, TEXT);
-				isJSON = false;
-			}
-			#if MODS_ALLOWED
-			if (FileSystem.exists(path))
-			#else
-			if (Assets.exists(path))
-			#end
-			{
-				_char = intended;
-				check_player.checked = character.isPlayer;
-				addCharacter();
-				reloadCharacterOptions();
-				reloadCharacterDropDown();
-				updatePointerPos();
-			}
-			else
-			{
-				reloadCharacterDropDown();
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-			}
-		});
-		reloadCharacterDropDown();
-		charDropDown.selectedLabel = _char;
-
-		tab_group.add(new FlxText(charDropDown.x, charDropDown.y - 18, 80, 'Character:'));
-		tab_group.add(check_player);
-		tab_group.add(reloadCharacter);
-		tab_group.add(templateCharacter);
-		tab_group.add(charDropDown);
-	}
-
-	var animationDropDown:PsychUIDropDownMenu;
-	var animationInputText:PsychUIInputText;
-	var animationNameInputText:PsychUIInputText;
-	var animationIndicesInputText:PsychUIInputText;
-	var animationFramerate:PsychUINumericStepper;
-	var animationLoopCheckBox:PsychUICheckBox;
-	function addAnimationsUI()
-	{
-		var tab_group = UI_CharacterBox.getTab('Animations').menu;
-
-		animationInputText = new PsychUIInputText(15, 85, 80, '', 8);
-		animationNameInputText = new PsychUIInputText(animationInputText.x, animationInputText.y + 35, 150, '', 8);
-		animationIndicesInputText = new PsychUIInputText(animationNameInputText.x, animationNameInputText.y + 40, 250, '', 8);
-		animationFramerate = new PsychUINumericStepper(animationInputText.x + 170, animationInputText.y, 1, 24, 0, 240, 0);
-		animationLoopCheckBox = new PsychUICheckBox(animationNameInputText.x + 170, animationNameInputText.y - 1, "Should it Loop?", 100);
-
-		animationDropDown = new PsychUIDropDownMenu(15, animationInputText.y - 55, [''], function(selectedAnimation:Int, pressed:String) {
-			var anim:AnimArray = character.animationsArray[selectedAnimation];
-			animationInputText.text = anim.anim;
-			animationNameInputText.text = anim.name;
-			animationLoopCheckBox.checked = anim.loop;
-			animationFramerate.value = anim.fps;
-
-			var indicesStr:String = anim.indices.toString();
-			animationIndicesInputText.text = indicesStr.substr(1, indicesStr.length - 2);
-		});
-
-		var addUpdateButton:PsychUIButton = new PsychUIButton(70, animationIndicesInputText.y + 60, "Add/Update", function() {
-			var indices:Array<Int> = [];
-			var indicesStr:Array<String> = animationIndicesInputText.text.trim().split(',');
-			if(indicesStr.length > 1) {
-				for (i in 0...indicesStr.length) {
-					var index:Int = Std.parseInt(indicesStr[i]);
-					if(indicesStr[i] != null && indicesStr[i] != '' && !Math.isNaN(index) && index > -1) {
-						indices.push(index);
-					}
-				}
-			}
-
-			var lastAnim:String = (character.animationsArray[curAnim] != null) ? character.animationsArray[curAnim].anim : '';
-			var lastOffsets:Array<Int> = [0, 0];
-			for (anim in character.animationsArray)
-				if(animationInputText.text == anim.anim) {
-					lastOffsets = anim.offsets;
-					if(character.animOffsets.exists(animationInputText.text))
-					{
-						if(!character.isAnimateAtlas) character.animation.remove(animationInputText.text);
-						else @:privateAccess character.anim._animations.remove(animationInputText.text);
-					}
-					character.animationsArray.remove(anim);
-				}
-
-			var addedAnim:AnimArray = newAnim(animationInputText.text, animationNameInputText.text);
-			addedAnim.fps = Math.round(animationFramerate.value);
-			addedAnim.loop = animationLoopCheckBox.checked;
-			addedAnim.indices = indices;
-			addedAnim.offsets = lastOffsets;
-			addAnimation(addedAnim.anim, addedAnim.name, addedAnim.fps, addedAnim.loop, addedAnim.indices);
-			character.animationsArray.push(addedAnim);
-
-			reloadAnimList();
-			@:arrayAccess curAnim = Std.int(Math.max(0, character.animationsArray.indexOf(addedAnim)));
-			character.playAnim(addedAnim.anim, true);
-			trace('Added/Updated animation: ' + animationInputText.text);
-		});
-
-		var removeButton:PsychUIButton = new PsychUIButton(180, animationIndicesInputText.y + 60, "Remove", function() {
-			for (anim in character.animationsArray)
-				if(animationInputText.text == anim.anim)
-				{
-					var resetAnim:Bool = false;
-					if(anim.anim == character.getAnimationName()) resetAnim = true;
-					if(character.animOffsets.exists(anim.anim))
-					{
-						if(!character.isAnimateAtlas) character.animation.remove(anim.anim);
-						else @:privateAccess character.anim._animations.remove(anim.anim);
-						character.animOffsets.remove(anim.anim);
-						character.animationsArray.remove(anim);
-					}
-
-					if(resetAnim && character.animationsArray.length > 0) {
-						curAnim = FlxMath.wrap(curAnim, 0, anims.length-1);
-						character.playAnim(anims[curAnim].anim, true);
-						updateTextColors();
-					}
-					reloadAnimList();
-					trace('Removed animation: ' + animationInputText.text);
-					break;
-				}
-		});
-		reloadAnimList();
-		animationDropDown.selectedLabel = anims[0] != null ? anims[0].anim : '';
-
-		tab_group.add(new FlxText(animationDropDown.x, animationDropDown.y - 18, 100, 'Animations:'));
-		tab_group.add(new FlxText(animationInputText.x, animationInputText.y - 18, 100, 'Animation name:'));
-		tab_group.add(new FlxText(animationFramerate.x, animationFramerate.y - 18, 100, 'Framerate:'));
-		tab_group.add(new FlxText(animationNameInputText.x, animationNameInputText.y - 18, 150, 'Animation Symbol Name/Tag:'));
-		tab_group.add(new FlxText(animationIndicesInputText.x, animationIndicesInputText.y - 18, 170, 'ADVANCED - Animation Indices:'));
-
-		tab_group.add(animationInputText);
-		tab_group.add(animationNameInputText);
-		tab_group.add(animationIndicesInputText);
-		tab_group.add(animationFramerate);
-		tab_group.add(animationLoopCheckBox);
-		tab_group.add(addUpdateButton);
-		tab_group.add(removeButton);
-		tab_group.add(animationDropDown);
-	}
-
-	var imageInputText:PsychUIInputText;
-	var healthIconInputText:PsychUIInputText;
-	var vocalsInputText:PsychUIInputText;
-	var singDurationStepper:PsychUINumericStepper;
-	var scaleStepper:PsychUINumericStepper;
-	var positionXStepper:PsychUINumericStepper;
-	var positionYStepper:PsychUINumericStepper;
-	var positionCameraXStepper:PsychUINumericStepper;
-	var positionCameraYStepper:PsychUINumericStepper;
-	var flipXCheckBox:PsychUICheckBox;
-	var noAntialiasingCheckBox:PsychUICheckBox;
-	var healthColorHSV:PsychUIHSVPicker;
-	function addCharacterUI()
-	{
-		var tab_group = UI_CharacterBox.getTab('Character').menu;
-
-		imageInputText = new PsychUIInputText(15, 30, 200, character.imageFile, 8);
-		var reloadImage:PsychUIButton = new PsychUIButton(imageInputText.x + 210, imageInputText.y - 3, "Reload Image", function(){
-			var lastAnim = character.getAnimationName();
-			character.imageFile = imageInputText.text;
-			reloadCharacterImage();
-			if(!character.isAnimationNull()) {
-				character.playAnim(lastAnim, true);
-			}
-		});
-
-		var decideIconColor:PsychUIButton = new PsychUIButton(reloadImage.x, reloadImage.y + 30, "Get Icon Color", function(){
-			var coolColor:FlxColor = FlxColor.fromInt(CoolUtil.dominantColor(healthIcon));
-			character.healthColorArray[0] = coolColor.red;
-			character.healthColorArray[1] = coolColor.green;
-			character.healthColorArray[2] = coolColor.blue;
-			updateHealthBar();
-		});
-
-		healthIconInputText = new PsychUIInputText(15, imageInputText.y + 35, 75, healthIcon.getCharacter(), 8);
-
-		vocalsInputText = new PsychUIInputText(15, healthIconInputText.y + 35, 75, character.vocalsFile != null ? character.vocalsFile : '', 8);
-
-		singDurationStepper = new PsychUINumericStepper(15, vocalsInputText.y + 45, 0.1, 4, 0, 999, 1);
-
-		scaleStepper = new PsychUINumericStepper(15, singDurationStepper.y + 40, 0.1, 1, 0.05, 10, 2);
-
-		flipXCheckBox = new PsychUICheckBox(singDurationStepper.x + 80, singDurationStepper.y, "Flip X", 50);
-		flipXCheckBox.checked = character.flipX;
-		if(character.isPlayer) flipXCheckBox.checked = !flipXCheckBox.checked;
-		flipXCheckBox.onClick = function() {
-			character.originalFlipX = !character.originalFlipX;
-			character.flipX = (character.originalFlipX != character.isPlayer);
-		};
-
-		noAntialiasingCheckBox = new PsychUICheckBox(flipXCheckBox.x, flipXCheckBox.y + 40, "No Antialiasing", 80);
-		noAntialiasingCheckBox.checked = character.noAntialiasing;
-		noAntialiasingCheckBox.onClick = function() {
-			character.antialiasing = false;
-			if(!noAntialiasingCheckBox.checked && ClientPrefs.data.antialiasing) {
-				character.antialiasing = true;
-			}
-			character.noAntialiasing = noAntialiasingCheckBox.checked;
-		};
-
-		positionXStepper = new PsychUINumericStepper(flipXCheckBox.x + 110, flipXCheckBox.y, 10, character.positionArray[0], -9000, 9000, 0);
-		positionYStepper = new PsychUINumericStepper(positionXStepper.x + 70, positionXStepper.y, 10, character.positionArray[1], -9000, 9000, 0);
-
-		positionCameraXStepper = new PsychUINumericStepper(positionXStepper.x, positionXStepper.y + 40, 10, character.cameraPosition[0], -9000, 9000, 0);
-		positionCameraYStepper = new PsychUINumericStepper(positionYStepper.x, positionYStepper.y + 40, 10, character.cameraPosition[1], -9000, 9000, 0);
-
-		var saveCharacterButton:PsychUIButton = new PsychUIButton(reloadImage.x, noAntialiasingCheckBox.y + 40, "Save Character", function() {
-			saveCharacter();
-		});
-
-		healthColorHSV = new PsychUIHSVPicker(singDurationStepper.x, saveCharacterButton.y - 5);
-		healthColorHSV.onChange = function() {
-			character.healthColorArray = healthColorHSV.value;
-			updateHealthBar();
-			unsavedProgress = true;
-		}
-
-		tab_group.add(new FlxText(15, imageInputText.y - 18, 100, 'Image file name:'));
-		tab_group.add(new FlxText(15, healthIconInputText.y - 18, 100, 'Health icon name:'));
-		tab_group.add(new FlxText(15, vocalsInputText.y - 18, 100, 'Vocals File Postfix:'));
-		tab_group.add(new FlxText(15, singDurationStepper.y - 18, 120, 'Sing Animation length:'));
-		tab_group.add(new FlxText(15, scaleStepper.y - 18, 100, 'Scale:'));
-		tab_group.add(new FlxText(positionXStepper.x, positionXStepper.y - 18, 100, 'Character X/Y:'));
-		tab_group.add(new FlxText(positionCameraXStepper.x, positionCameraXStepper.y - 18, 100, 'Camera X/Y:'));
-		tab_group.add(imageInputText);
-		tab_group.add(reloadImage);
-		tab_group.add(decideIconColor);
-		tab_group.add(healthIconInputText);
-		tab_group.add(vocalsInputText);
-		tab_group.add(singDurationStepper);
-		tab_group.add(scaleStepper);
-		tab_group.add(flipXCheckBox);
-		tab_group.add(noAntialiasingCheckBox);
-		tab_group.add(positionXStepper);
-		tab_group.add(positionYStepper);
-		tab_group.add(positionCameraXStepper);
-		tab_group.add(positionCameraYStepper);
-		tab_group.add(healthColorHSV);
-		tab_group.add(saveCharacterButton);
 	}
 
 	function reloadCharacterImage()
@@ -775,25 +286,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		}
 	}
 
-	function reloadCharacterOptions() {
-		if(UI_CharacterBox == null) return;
-
-		check_player.checked = character.isPlayer;
-		imageInputText.text = character.imageFile;
-		healthIconInputText.text = character.healthIcon;
-		vocalsInputText.text = character.vocalsFile != null ? character.vocalsFile : '';
-		singDurationStepper.value = character.singDuration;
-		scaleStepper.value = character.jsonScale;
-		flipXCheckBox.checked = character.originalFlipX;
-		noAntialiasingCheckBox.checked = character.noAntialiasing;
-		positionXStepper.value = character.positionArray[0];
-		positionYStepper.value = character.positionArray[1];
-		positionCameraXStepper.value = character.cameraPosition[0];
-		positionCameraYStepper.value = character.cameraPosition[1];
-		reloadAnimationDropDown();
-		updateHealthBar();
-	}
-
 	var holdingArrowsTime:Float = 0;
 	var holdingArrowsElapsed:Float = 0;
 	var holdingFrameTime:Float = 0;
@@ -807,7 +299,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		if(FlxG.mouse.justReleased || FlxG.mouse.justReleasedRight || FlxG.mouse.justReleasedMiddle) FlxG.sound.play(Paths.sound('chartingSounds/ClickUp'));
 		if(FlxG.keys.justPressed.ANY) FlxG.sound.play(Paths.sound('chartingSounds/keyboard${FlxG.random.int(1,3)}'));
 
-		if(PsychUIInputText.focusOn != null)
+		if(UIInputText.focusOn != null)
 		{
 			ClientPrefs.toggleVolumeKeys(false);
 			return;
@@ -1054,7 +546,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 	inline function updateHealthBar(){
 		var color:FlxColor = FlxColor.fromRGB(character.healthColorArray[0], character.healthColorArray[1], character.healthColorArray[2]);
-		healthColorHSV.setColorFromHex(color.toHexString(false, false));
+		if(UI != null && UI.healthColorHSV != null) UI.healthColorHSV.setColorFromHex(color.toHexString(false, false));
 		healthBar.leftBar.color = healthBar.rightBar.color = FlxColor.fromRGB(character.healthColorArray[0], character.healthColorArray[1], character.healthColorArray[2]);
 		healthIcon.changeIcon(character.healthIcon, false);
 		updatePresence();
@@ -1093,7 +585,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			daLoop++;
 		}
 		updateTextColors();
-		if(animationDropDown != null) reloadAnimationDropDown();
+		if(UI != null && UI.animationDropDown != null) UI.reloadAnimationDropDown();
 	}
 
 	inline function updateTextColors()
@@ -1153,32 +645,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			indices: [],
 			name: name
 		};
-	}
-
-	var characterList:Array<String> = [];
-	function reloadCharacterDropDown() {
-		characterList = Mods.mergeAllTextsNamed('data/characterList.txt', Paths.getSharedPath());
-		var foldersToCheck:Array<String> = Mods.directoriesWithFile(Paths.getSharedPath(), 'characters/');
-		for (folder in foldersToCheck)
-			for (file in FileSystem.readDirectory(folder))
-				if(file.toLowerCase().endsWith('.json') || file.toLowerCase().endsWith('.xml'))
-				{
-					var charToCheck:String = file.substr(0, file.length - (file.toLowerCase().endsWith('.json') ? 5 : 4));
-					if(!characterList.contains(charToCheck))
-						characterList.push(charToCheck);
-				}
-
-		if(characterList.length < 1) characterList.push('');
-		charDropDown.list = characterList;
-		charDropDown.selectedLabel = _char;
-	}
-
-	function reloadAnimationDropDown() {
-		var animList:Array<String> = [];
-		for (anim in anims) animList.push(anim.anim);
-		if(animList.length < 1) animList.push('NO ANIMATIONS'); //Prevents crash
-
-		animationDropDown.list = animList;
 	}
 
 	// save

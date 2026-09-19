@@ -12,20 +12,20 @@ class ModchartEditorUI extends FlxSpriteContainer {
 	public var pHeadIsDragging:Bool = false;
 	public var pHeadWasPlaying:Bool = false;
 
-	public var playbarHead:PsychUIBar;
+	public var playbarHead:UIBar;
     public var infoText:FlxText;
 
-    public var modchartBox:PsychUIBox;
+    public var modchartBox:UIBox;
 
-	public var modifierInput:PsychUIInputText;
-	public var actionsDropdown:PsychUIDropDownMenu;
-	public var timeStepper:PsychUINumericStepper;
-	public var valueStepper:PsychUINumericStepper;
-	public var easeInput:PsychUIInputText;
-	public var playerStepper:PsychUINumericStepper;
+	public var modifierInput:UIInputText;
+	public var actionsDropdown:UIDropDownMenu;
+	public var timeStepper:UINumericStepper;
+	public var valueStepper:UINumericStepper;
+	public var easeInput:UIInputText;
+	public var playerStepper:UINumericStepper;
     
-	public var sustainSegmentsStepper:PsychUINumericStepper;
-	public var showPathsCheckbox:PsychUICheckBox;
+	public var sustainSegmentsStepper:UINumericStepper;
+	public var showPathsCheckbox:UICheckBox;
 
     public function new(modcharter:ModchartEditorState){
         super();
@@ -37,7 +37,7 @@ class ModchartEditorUI extends FlxSpriteContainer {
     }
 
     function createUIBox(){
-		modchartBox = new PsychUIBox(10, 40, 300, 280, ['Modchart', 'Song']);
+		modchartBox = new UIBox(10, 40, 300, 280, ['Modchart', 'Song']);
 		modchartBox.selectedName = 'Modchart';
 		modchartBox.scrollFactor.set();
 		add(modchartBox);
@@ -51,14 +51,14 @@ class ModchartEditorUI extends FlxSpriteContainer {
 		var posX = 10;
 		var posY = 30;
 
-		modifierInput = new PsychUIInputText(posX+150, posY, 120, '', 8);
+		modifierInput = new UIInputText(posX+150, posY, 120, '', 8);
     	modifierInput.onChange = function(old:String, cur:String){
 			modcharter.updateModEvV1();
 		}
 
 		var modifierLabelText = new FlxText(modifierInput.x, modifierInput.y - 15, 80, 'Modifier:');
 
-		actionsDropdown = new PsychUIDropDownMenu(posX, posY, ["Set", "Ease"], function(index:Int, name:String){
+		actionsDropdown = new UIDropDownMenu(posX, posY, ["Set", "Ease"], function(index:Int, name:String){
 			modcharter.updateModEvV1();
 		});
 
@@ -66,24 +66,24 @@ class ModchartEditorUI extends FlxSpriteContainer {
 
 		posY += 60;
 
-		timeStepper = new PsychUINumericStepper(posX, posY, 0.01, 0, 0, 9999, 2);
+		timeStepper = new UINumericStepper(posX, posY, 0.01, 0, 0, 9999, 2);
 		timeStepper.onValueChange = function() {
 			modcharter.updateModEvV1();
 		};
 
-		valueStepper = new PsychUINumericStepper(posX + 150, posY, 0.01, 0, -999999, 999999, 2);
+		valueStepper = new UINumericStepper(posX + 150, posY, 0.01, 0, -999999, 999999, 2);
 		valueStepper.onValueChange = function() {
 			modcharter.updateModEvV1();
 		};
 
 		posY += 60;
 
-		easeInput = new PsychUIInputText(posX, posY, 120, '', 8);
+		easeInput = new UIInputText(posX, posY, 120, '', 8);
 		easeInput.onChange = function(old:String, cur:String){
 			modcharter.updateModEvV1();
 		}
 
-		playerStepper = new PsychUINumericStepper(posX + 150, posY, 1, -1, -1, (PlayState.SONG.lanes - 1), 0);
+		playerStepper = new UINumericStepper(posX + 150, posY, 1, -1, -1, (PlayState.SONG.lanes - 1), 0);
 		playerStepper.onValueChange = function() {
 			modcharter.updateModEvV1();
 		};
@@ -112,7 +112,7 @@ class ModchartEditorUI extends FlxSpriteContainer {
 		var posX = 10;
 		var posY = 25;
 
-		var saveButton:PsychUIButton = new PsychUIButton(posX, posY, 'Save Modchart', function(){
+		var saveButton:UIButton = new UIButton(posX, posY, 'Save Modchart', function(){
 			modcharter.saveChart();
 		}, 100);
 		saveButton.normalStyle.bgColor = FlxColor.GREEN;
@@ -121,13 +121,13 @@ class ModchartEditorUI extends FlxSpriteContainer {
 
 		posY += 40;
 		var sustainSegmentsLabelText = new FlxText(posX, posY - 15, 150, 'Sustain Segments:');
-		sustainSegmentsStepper = new PsychUINumericStepper(posX, posY, 1, 4, 1, 999, 0);
+		sustainSegmentsStepper = new UINumericStepper(posX, posY, 1, 4, 1, 999, 0);
 		sustainSegmentsStepper.onValueChange = function() {
 			for (field in PlayField.fields) field.sustainSegments = Std.int(sustainSegmentsStepper.value);
 		};
 
 		posY += 40;
-		showPathsCheckbox = new PsychUICheckBox(posX, posY + 20, 'Show Note Paths', 80, function(){
+		showPathsCheckbox = new UICheckBox(posX, posY + 20, 'Show Note Paths', 80, function(){
 			for (field in PlayField.fields) field.showNotePaths = !field.showNotePaths;
 		});
 
@@ -146,7 +146,7 @@ class ModchartEditorUI extends FlxSpriteContainer {
 		playbar.add(playbarBG);
 
 		var songLen:Float = (FlxG.sound.music != null ? FlxG.sound.music.length : 0.0001);
-		playbarHead = new PsychUIBar(0, playbarBG.y, null, Conductor.songPosition, 0, songLen, FlxG.width, 0xFF4D4D4D, FlxColor.WHITE);
+		playbarHead = new UIBar(0, playbarBG.y, null, Conductor.songPosition, 0, songLen, FlxG.width, 0xFF4D4D4D, FlxColor.WHITE);
 		playbarHead.y = playbarBG.y;
 		playbarHead.valueText.visible = false;
 		playbarHead.minText.visible = false;
@@ -186,8 +186,8 @@ class ModchartEditorUI extends FlxSpriteContainer {
 		infoText.active = false;
 		playbar.add(infoText);
 
-		var fullScreenBtn:PsychUIButton;
-		fullScreenBtn = new PsychUIButton(0, 0, '>', null, 100);
+		var fullScreenBtn:UIButton;
+		fullScreenBtn = new UIButton(0, 0, '>', null, 100);
 		fullScreenBtn.onClick = () -> {  // To remove that annoying warning
 			fullScreenBtn.text.angle += 180;
 			if(!isFullScreen){

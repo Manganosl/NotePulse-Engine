@@ -1,8 +1,8 @@
 package funkin.objects.ui;
 
-import funkin.objects.ui.PsychUIBox.UIStyleData;
+import funkin.objects.ui.UIBox.UIStyleData;
 
-class PsychUIButton extends FlxSpriteGroup
+class UIButton extends FlxSpriteGroup
 {
 	public static final CLICK_EVENT = 'button_click';
 
@@ -15,28 +15,32 @@ class PsychUIButton extends FlxSpriteGroup
 	public var onClick:Void->Void;
 	
 	public var clickStyle:UIStyleData = {
-		bgColor: FlxColor.BLACK,
-		textColor: FlxColor.WHITE,
+		bgColor: 0xFF6D28D9,
+		textColor: 0xFFF1F1F5,
 		bgAlpha: 1
 	};
 	public var hoverStyle:UIStyleData = {
-		bgColor: FlxColor.WHITE,
-		textColor: FlxColor.BLACK,
+		bgColor: 0xFFA855F7,
+		textColor: 0xFF14161C,
 		bgAlpha: 1
 	};
 	public var normalStyle:UIStyleData = {
-		bgColor: 0xFFAAAAAA,
-		textColor: FlxColor.BLACK,
-		bgAlpha: 1
+		bgColor: 0xFF2A2E39,
+		textColor: 0xFFF1F1F5,
+		bgAlpha: 0.92
 	};
 
+	public var border:FlxSprite;
 	public function new(x:Float = 0, y:Float = 0, label:String = '', ?onClick:Void->Void = null, ?wid:Int = 80, ?hei:Int = 20)
 	{
 		super(x, y);
+		border = new FlxSprite(-1, -1).makeGraphic(1, 1, FlxColor.WHITE);
+		border.color = 0xFF14161C;
+		add(border);
 		bg = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
 		add(bg);
-		bg.color = 0xFFAAAAAA;
-		bg.alpha = 0.6;
+		bg.color = 0xFF2A2E39;
+		bg.alpha = 0.92;
 
 		text = new FlxText(0, 0, 1, '');
 		text.alignment = CENTER;
@@ -94,7 +98,7 @@ class PsychUIButton extends FlxSpriteGroup
 					bg.alpha = clickStyle.bgAlpha;
 					text.color = clickStyle.textColor;
 					if(onClick != null) onClick();
-					if(broadcastButtonEvent) PsychUIEventHandler.event(CLICK_EVENT, this);
+					if(broadcastButtonEvent) UIEventHandler.event(CLICK_EVENT, this);
 				}
 			} else if(isPointer){
             	Mouse.cursor = MouseCursor.DEFAULT;
@@ -107,6 +111,8 @@ class PsychUIButton extends FlxSpriteGroup
 	{
 		bg.setGraphicSize(width, height);
 		bg.updateHitbox();
+		border.setGraphicSize(width + 2, height + 2);
+		border.updateHitbox();
 		text.fieldWidth = width;
 		text.x = bg.x;
 		text.y = bg.y + height/2 - text.height/2;

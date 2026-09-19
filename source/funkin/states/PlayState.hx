@@ -2934,7 +2934,7 @@ class PlayState extends MusicBeatState
 		daNote.x = pos.x;
 		daNote.y = pos.y + daNote.strum.y - 50;
 		daNote.z = pos.z;
-    	daNote.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
+    	daNote.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, (pos.alpha * (daNote.copyAlpha ? daNote.strum.alpha : 1)), 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
 
 		if(daNote.isSustainNote){
 			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4), 10);

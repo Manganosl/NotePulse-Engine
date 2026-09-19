@@ -1,6 +1,6 @@
 package funkin.states;
 
-import funkin.states.scripted.ScriptedState;
+import flixel.addons.display.FlxBackdrop;
 import flixel.FlxObject;
 import flixel.effects.FlxFlicker;
 import lime.app.Application;
@@ -19,10 +19,10 @@ class MainMenuState extends MusicBeatState
 	public static var curColumn:MainMenuColumn = CENTER;
 	var allowMouse:Bool = true; //Turn this off to block mouse movement in menus
 
+	var backdrop:FlxBackdrop;
 	var menuItems:FlxTypedGroup<FlxSprite>;
 	var leftItem:FlxSprite;
 	var rightItem:FlxSprite;
-	public static var block:FlxSprite;
 	var topBar:FlxSprite;
 	var descText:FlxText;
 
@@ -69,7 +69,7 @@ class MainMenuState extends MusicBeatState
 		bg.screenCenter();
 		add(bg);
 
-		var backdrop:flixel.addons.display.FlxBackdrop = new flixel.addons.display.FlxBackdrop(Paths.image('grid'));
+		backdrop = new FlxBackdrop(Paths.image('grid'));
 		backdrop.velocity.set(50, 30);
 		backdrop.scrollFactor.set(2, 2);
 		backdrop.alpha = 0.4;
@@ -136,13 +136,6 @@ class MainMenuState extends MusicBeatState
 		
 		changeItem();
 
-		block = new FlxSprite().makeGraphic(1, 1, 0xFF000000);
-		block.scrollFactor.set();
-		block.scale.set(FlxG.width, FlxG.height);
-		block.updateHitbox();
-		block.visible = false;
-		add(block);
-
 		super.create();
 
 		FlxTween.cancelTweensOf(Main.fpsVar, ["y"]);
@@ -167,8 +160,9 @@ class MainMenuState extends MusicBeatState
 
 	var selectedSomethin:Bool = false;
 
-	var timeNotMoving:Float = 0;
 	override function update(elapsed:Float){
+		camFollow.x = FlxG.mouse.viewX;
+		
 		if (FlxG.sound.music.volume < 0.8)
 			FlxG.sound.music.volume = Math.min(FlxG.sound.music.volume + 0.5 * elapsed, 0.8);
 
@@ -183,7 +177,6 @@ class MainMenuState extends MusicBeatState
 			if (allowMouse && ((FlxG.mouse.deltaScreenX != 0 && FlxG.mouse.deltaScreenY != 0) || FlxG.mouse.justPressed)){ //FlxG.mouse.deltaScreenX/Y checks is more accurate than FlxG.mouse.justMoved
 				allowMouse = false;
 				FlxG.mouse.visible = true;
-				timeNotMoving = 0;
 
 				var selectedItem:FlxSprite;
 				switch(curColumn)
@@ -223,7 +216,7 @@ class MainMenuState extends MusicBeatState
 						var memb:FlxSprite = menuItems.members[i];
 						if(FlxG.mouse.overlaps(memb))
 						{
-							var distance:Float = Math.sqrt(Math.pow(memb.getGraphicMidpoint().x - FlxG.mouse.screenX, 2) + Math.pow(memb.getGraphicMidpoint().y - FlxG.mouse.screenY, 2));
+							var distance:Float = Math.sqrt(Math.pow(memb.getGraphicMidpoint().x - FlxG.mouse.viewX, 2) + Math.pow(memb.getGraphicMidpoint().y - FlxG.mouse.viewY, 2));
 							if (dist < 0 || distance < dist)
 							{
 								dist = distance;
@@ -240,11 +233,6 @@ class MainMenuState extends MusicBeatState
 						changeItem();
 					}
 				}
-			}
-			else
-			{
-				timeNotMoving += elapsed;
-				if(timeNotMoving > 2) FlxG.mouse.visible = false;
 			}
 
 			switch(curColumn)
@@ -279,7 +267,6 @@ class MainMenuState extends MusicBeatState
 			if (controls.BACK)
 			{
 				selectedSomethin = true;
-				FlxG.mouse.visible = false;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				MusicBeatState.switchState(new funkin.states.menus.TitleState());
 			}
@@ -290,7 +277,6 @@ class MainMenuState extends MusicBeatState
 				if (optionShit[curSelected] != 'donate')
 				{
 					selectedSomethin = true;
-					FlxG.mouse.visible = false;
 
 					if (ClientPrefs.data.flashing)
 						FlxFlicker.flicker(magenta, 1.1, 0.15, false);
@@ -354,7 +340,7 @@ class MainMenuState extends MusicBeatState
 			if(ClientPrefs.data.devMode){
 				if (controls.justPressed('debug_1')){
 					selectedSomethin = true;
-					//FlxG.mouse.visible = false;
+					backdrop.visible = false;
 					openSubState(new funkin.substates.EditorSelectorSubstate());
 				}
 			} else {
@@ -372,6 +358,7 @@ class MainMenuState extends MusicBeatState
 
 	override function closeSubState(){
 		selectedSomethin = false;
+		backdrop.visible = true;
 		super.closeSubState();
 	}
 

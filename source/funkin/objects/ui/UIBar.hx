@@ -2,7 +2,7 @@ package funkin.objects.ui;
 
 import flixel.util.FlxSpriteUtil;
 
-class PsychUIBar extends FlxSpriteGroup {
+class UIBar extends FlxSpriteGroup {
 	public static final CHANGE_EVENT = "slider_change";
 	public var bar:FlxSprite;
 	public var barFilled:FlxSprite;
@@ -20,18 +20,18 @@ class PsychUIBar extends FlxSpriteGroup {
 	public var min(default, set):Float = -999;
 	public var max(default, set):Float = 999;
 	public var decimals(default, set):Int = 2;
-	public function new(x:Float = 0, y:Float = 0, callback:Float->Void, def:Float = 0, min:Float = -999, max:Float = 999, wid:Float = 200, mainColor:FlxColor = FlxColor.WHITE, handleColor:FlxColor = 0xFFAAAAAA){
+	public function new(x:Float = 0, y:Float = 0, callback:Float->Void, def:Float = 0, min:Float = -999, max:Float = 999, wid:Float = 200, mainColor:FlxColor = 0xFFBFC3CC, handleColor:FlxColor = 0xFF8000FF){
 		super(x, y);
 		this.onDrag = callback;
 
 		bar = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
-		bar.scale.set(wid, 5);
+		bar.scale.set(wid, 6);
 		bar.updateHitbox();
 		bar.color = mainColor;
 		add(bar);
 
 		barFilled = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
-        barFilled.scale.set(0, 5);
+        barFilled.scale.set(0, 6);
         barFilled.updateHitbox();
         barFilled.color = 0xFF8000FF;
         add(barFilled);
@@ -53,7 +53,7 @@ class PsychUIBar extends FlxSpriteGroup {
 		add(labelText);
 
         handle = new FlxSprite().makeGraphic(20, 20, FlxColor.TRANSPARENT);
-        FlxSpriteUtil.drawCircle(handle, 10, 10, 10, 0xFF8000FF);
+        FlxSpriteUtil.drawCircle(handle, 10, 10, 9, 0xFF8000FF, {thickness: 2, color: 0xFF14161C});
         handle.updateHitbox();
         add(handle);
 
@@ -99,7 +99,7 @@ class PsychUIBar extends FlxSpriteGroup {
 				if(this.onDrag != null && lastValue != value)
 				{
 					this.onDrag(FlxMath.roundDecimal(value, decimals));
-					if(broadcastSliderEvent) PsychUIEventHandler.event(CHANGE_EVENT, this);
+					if(broadcastSliderEvent) UIEventHandler.event(CHANGE_EVENT, this);
 				}
 			}
 		}

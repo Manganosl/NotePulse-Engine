@@ -3,7 +3,7 @@ package funkin.objects.ui;
 import flixel.util.FlxDestroyUtil;
 import flixel.math.FlxPoint;
 
-class PsychUITab extends FlxSprite
+class UITab extends FlxSprite
 {
 	public var name(default, set):String;
 	public var text:FlxText;
@@ -13,8 +13,8 @@ class PsychUITab extends FlxSprite
 	{
 		super();
 		makeGraphic(1, 1, FlxColor.WHITE);
-		color = FlxColor.BLACK;
-		alpha = 0.6;
+		color = 0xFF262A34;
+		alpha = 0.88;
 
 		@:bypassAccessor this.name = name;
 		text = new FlxText(0, 0, 100, name);
@@ -40,7 +40,7 @@ class PsychUITab extends FlxSprite
 		super.destroy();
 	}
 	
-	public function updateMenu(parent:PsychUIBox, elapsed:Float)
+	public function updateMenu(parent:UIBox, elapsed:Float)
 	{
 		if(menu != null && menu.exists && menu.active)
 		{
@@ -49,7 +49,7 @@ class PsychUITab extends FlxSprite
 		}
 	}
 
-	public function drawMenu(parent:PsychUIBox)
+	public function drawMenu(parent:UIBox)
 	{
 		if(menu != null && menu.exists && menu.visible)
 		{

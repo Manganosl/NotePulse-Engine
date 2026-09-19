@@ -1,8 +1,8 @@
 package funkin.objects.ui;
 
-import funkin.objects.ui.PsychUIBox.UIStyleData;
+import funkin.objects.ui.UIBox.UIStyleData;
 
-class PsychUIDropDownMenu extends PsychUIInputText
+class UIDropDownMenu extends UIInputText
 {
 	public static final CLICK_EVENT = "dropdown_click";
 
@@ -82,12 +82,12 @@ class PsychUIDropDownMenu extends PsychUIInputText
 		return selectedLabel;
 	}
 
-	var _items:Array<PsychUIDropDownItem> = [];
+	var _items:Array<UIDropDownItem> = [];
 	public var curScroll:Int = 0;
 	private var isPointer:Bool = false;
 	override function update(elapsed:Float)
 	{
-		var lastFocus = PsychUIInputText.focusOn;
+		var lastFocus = UIInputText.focusOn;
 		super.update(elapsed);
 		if(FlxG.mouse.overlaps(button, camera)){
 			isPointer = true;
@@ -102,18 +102,18 @@ class PsychUIDropDownMenu extends PsychUIInputText
 			{
 				button.animation.play('pressed', true);
 				if(lastFocus != this)
-					PsychUIInputText.focusOn = this;
-				else if(PsychUIInputText.focusOn == this)
-					PsychUIInputText.focusOn = null;
+					UIInputText.focusOn = this;
+				else if(UIInputText.focusOn == this)
+					UIInputText.focusOn = null;
 			}
 		}
 		else if(FlxG.mouse.released && button.animation.curAnim != null && button.animation.curAnim.name != 'normal') button.animation.play('normal', true);
 
-		if(lastFocus != PsychUIInputText.focusOn)
+		if(lastFocus != UIInputText.focusOn)
 		{
-			showDropDown(PsychUIInputText.focusOn == this);
+			showDropDown(UIInputText.focusOn == this);
 		}
-		else if(PsychUIInputText.focusOn == this)
+		else if(UIInputText.focusOn == this)
 		{
 			var wheel:Int = FlxG.mouse.wheel;
 			if(FlxG.keys.justPressed.UP) wheel++;
@@ -190,14 +190,14 @@ class PsychUIDropDownMenu extends PsychUIInputText
 		selectedIndex = num;
 		showDropDown(false);
 		if(onSelect != null) onSelect(num, label);
-		if(broadcastDropDownEvent) PsychUIEventHandler.event(CLICK_EVENT, this);
+		if(broadcastDropDownEvent) UIEventHandler.event(CLICK_EVENT, this);
 	}
 
 	function addOption(option:String)
 	{
 		@:bypassAccessor list.push(option);
 		var curID:Int = list.length - 1;
-		var item:PsychUIDropDownItem = cast recycle(PsychUIDropDownItem, () -> new PsychUIDropDownItem(1, 1, this._itemWidth), true);
+		var item:UIDropDownItem = cast recycle(UIDropDownItem, () -> new UIDropDownItem(1, 1, this._itemWidth), true);
 		item.cameras = cameras;
 		item.label = option;
 		item.visible = item.active = false;
@@ -225,16 +225,16 @@ class PsychUIDropDownMenu extends PsychUIInputText
 	}
 }
 
-class PsychUIDropDownItem extends FlxSpriteGroup
+class UIDropDownItem extends FlxSpriteGroup
 {
 	public var hoverStyle:UIStyleData = {
-		bgColor: 0xFF0066FF,
-		textColor: FlxColor.WHITE,
+		bgColor: 0xFF8000FF,
+		textColor: 0xFFF1F1F5,
 		bgAlpha: 1
 	};
 	public var normalStyle:UIStyleData = {
-		bgColor: FlxColor.WHITE,
-		textColor: FlxColor.BLACK,
+		bgColor: 0xFF2F323D,
+		textColor: 0xFFF1F1F5,
 		bgAlpha: 1
 	};
 
@@ -250,7 +250,7 @@ class PsychUIDropDownItem extends FlxSpriteGroup
 		add(bg);
 
 		text = new FlxText(0, 0, width, 8);
-		text.color = FlxColor.BLACK;
+		text.color = 0xFFF1F1F5;
 		add(text);
 	}
 

@@ -41,7 +41,7 @@ class Prompt extends BasePrompt
 	function promptCreate(_)
 	{
 		var btnY = 390;
-		var btn:PsychUIButton = new PsychUIButton(0, btnY, _yesTxt, function() {
+		var btn:UIButton = new UIButton(0, btnY, _yesTxt, function() {
 			yesFunction();
 			close();
 		});
@@ -52,7 +52,7 @@ class Prompt extends BasePrompt
 		btn.cameras = cameras;
 		add(btn);
 
-		var btn:PsychUIButton = new PsychUIButton(0, btnY, _noTxt, close);
+		var btn:UIButton = new UIButton(0, btnY, _noTxt, close);
 		btn.screenCenter(X);
 		btn.x += 100;
 		btn.cameras = cameras;
