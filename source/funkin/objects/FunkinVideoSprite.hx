@@ -93,7 +93,9 @@ class FunkinVideoSprite extends FlxVideoSprite
 	 */
 	public function delayAndStart(delay:Float = 0)
 	{
-		FlxTimer.wait(delay, play);
+		FlxTimer.wait(delay, function() {
+			if (bitmap != null) play();
+		});
 	}
 	
 	/**
