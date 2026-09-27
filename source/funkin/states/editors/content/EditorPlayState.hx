@@ -324,7 +324,7 @@ class EditorPlayState extends MusicBeatSubstate
 		daNote.z = pos.z;
 
 		if((daNote.playField != null && daNote.playField.sustainSegments == 1) || !daNote.isSustainNote)
-    		daNote.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, pos.alpha, 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
+    		daNote.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, (pos.alpha * (daNote.copyAlpha ? daNote.strum.alpha : 1)), 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);
 
 		if(daNote.isSustainNote){
 			var holdCrochet:Float = Math.max(((initialCrochet + 8) / 4), 10);
