@@ -41,8 +41,5 @@ class ReceptorScrollModifier extends NoteModifier {
 
     var songPos = sPos / moveSpeed;
 		var notePos = -(-diff - sPos) / moveSpeed;
-
-		if(daNote.wasGoodHit) daNote.garbage=true;
-
   }
 }

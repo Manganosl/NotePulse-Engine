@@ -1,7 +1,6 @@
 package funkin.objects.notes;
 
 import flixel.math.FlxRect;
-import flixel.math.FlxPoint;
 
 import funkin.backend.ExtraKeysHandler;
 import funkin.backend.animation.PsychAnimationController;
@@ -10,17 +9,11 @@ import funkin.backend.NoteTypesConfig;
 import funkin.game.shaders.RGBPalette;
 import funkin.game.shaders.RGBPalette.RGBShaderReference;
 
+import funkin.game.modchart.objects.ModchartNote;
+
 import funkin.objects.notes.splashes.NoteSplash;
 import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.PlayField;
-
-import funkin.objects.FunkinSprite;
-import funkin.game.modchart.math.Vector3;
-import funkin.game.modchart.math.MathUtil;
-
-import flixel.FlxCamera;
-import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
-import openfl.geom.ColorTransform;
 
 using StringTools;
 
@@ -43,36 +36,7 @@ typedef NoteSplashData = {
 	a:Float
 }
 
-class Note extends FunkinSprite {
-	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
-	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
-
-	override function destroy() {
-		defScale.put();
-		_curvePoint.put();
-		super.destroy();
-	}	
-	public var z:Float = 0;
-	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
-
-	public var mAngle:Float = 0;
-	public var bAngle:Float = 0;
-	public var visualLength:Float = 0;
-
-	public var extraSusLength:Int = 0;
-
-	var _curveVertices:DrawData<Float>;
-	var _curveIndices:DrawData<Int>;
-	var _curveUVT:DrawData<Float>;
-	var _curveSamplesX:Array<Float> = [];
-	var _curveSamplesY:Array<Float> = [];
-	var _curveTopX:Array<Float> = [];
-	var _curveTopY:Array<Float> = [];
-	var _curveBotX:Array<Float> = [];
-	var _curveBotY:Array<Float> = [];
-	var _curvePoint:FlxPoint = FlxPoint.get();
-	var _curveTransform:ColorTransform;
-
+class Note extends ModchartNote {
 	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
 	public var typeOffsetY:Float = 0;
 
@@ -190,7 +154,6 @@ class Note extends FunkinSprite {
 	public var offsetDirection:Float = 0;
 	public var multAlpha:Float = 1;
 	public var multSpeed:Float = 1;
-	public var modSpeed:Float = 1; // Easier way to get total xmod
 
 	public var copyX:Bool = true;
 	public var copyY:Bool = true;
@@ -624,280 +587,13 @@ class Note extends FunkinSprite {
 				alpha = 0.3;
 	}
 
-	override function draw(){
+	override function draw() {
 		if (isSustainNote && alpha > 0 && visible && strum != null && playField != null
 			&& createdFrom != null && createdFrom.modManager != null && playField.sustainSegments > 1){
 			drawSustain();
 			return;
 		}
 		super.draw();
-	}
-
-	function drawSustain() {
-		if (frames == null || frame == null) {
-			super.draw();
-			return;
-		}
-
-		final pf:Dynamic = createdFrom;
-		final modManager:Dynamic = pf.modManager;
-		final pN:Int = playField != null ? playField.player : 0;
-		final songSpeed:Float = pf.songSpeed;
-
-		@:privateAccess
-		var segLength:Float = Math.max(((pf.initialCrochet + 8) / 4), 10);
-		if (!isSustainEnd && nextNote != null && nextNote.isSustainNote)
-			segLength = Math.max(nextNote.strumTime - strumTime + extraSusLength, 1);
-
-		final halfW:Float = frameWidth * 0.5 * Math.abs(scale.x);
-
-		var tStart:Float = 0;
-		if (clipRect != null && frameHeight > 0)
-			tStart = Math.max(0, Math.min(1, clipRect.y / frameHeight));
-
-		if (tStart >= 1) return;
-
-		_curveSamplesX.resize(0);
-		_curveSamplesY.resize(0);
-
-		var sampleAlphas:Array<Float> = [];
-		var sampleGlows:Array<Float> = [];
-		var sampleVDiffs:Array<Float> = [];
-
-		final segs:Int = playField.sustainSegments;
-
-		var ptX:Float = 0, ptY:Float = 0, ptA:Float = 1, ptG:Float = 0;
-		inline function evalPoint(sampleStrumTime:Float, vDiff:Float):Void {
-			final diff:Float = sampleStrumTime - Conductor.songPosition;
-			final sampBeat:Float = Conductor.getStep(sampleStrumTime) / 4;
-
-			var samplePos = modManager.getPos(strumTime, vDiff, diff, sampBeat, noteData, pN, this, [], vec3Cache);
-			var sx:Float = samplePos.x + offsetX;
-			var sy:Float = samplePos.y + offsetY;
-			if (parent != null) {
-				sx += parent.width / 2 - width / 2;
-				sy += parent.height / 2;
-			}
-			sy += strum.y - 50;
-
-			sx += origin.x - offset.x;
-			sy += origin.y - offset.y;
-
-			ptX = sx;
-			ptY = sy;
-			ptA = samplePos.alpha;
-			ptG = samplePos.glow;
-		}
-
-		final totalLen:Float = frameHeight * Math.abs(scale.y);
-		var fixedEnd:Bool = false;
-		var baseVDiff:Float = 0;
-		var pxPerMs:Float = 0;
-		var dirSign:Float = 1;
-		if(isSustainEnd){
-			baseVDiff = modManager.getVisPos(Conductor.songPosition, strumTime, songSpeed);
-			final rawPx:Float = modManager.getVisPos(Conductor.songPosition, strumTime + 1, songSpeed) - baseVDiff;
-			pxPerMs = Math.abs(rawPx);
-			dirSign = rawPx >= 0 ? 1 : -1;
-			fixedEnd = pxPerMs > 0.0001 && totalLen > 0.0001;
-		}
-
-		if(fixedEnd){
-			final dS:Array<Float> = [0];
-			final dX:Array<Float> = [];
-			final dY:Array<Float> = [];
-			final dA:Array<Float> = [];
-			final dG:Array<Float> = [];
-			final dL:Array<Float> = [0];
-
-			evalPoint(strumTime, baseVDiff);
-			dX.push(ptX); dY.push(ptY); dA.push(ptA); dG.push(ptG);
-
-			final ds:Float = totalLen / (segs * 4);
-			final maxSteps:Int = segs * 4 * 8;
-			var cum:Float = 0;
-			var k:Int = 0;
-			while (cum < totalLen && k < maxSteps) {
-				k++;
-				final sOff:Float = ds * k;
-				evalPoint(strumTime + sOff / pxPerMs, baseVDiff + dirSign * sOff);
-				final last:Int = dX.length - 1;
-				final ddx:Float = ptX - dX[last];
-				final ddy:Float = ptY - dY[last];
-				cum += Math.sqrt(ddx * ddx + ddy * ddy);
-				dS.push(sOff); dX.push(ptX); dY.push(ptY); dA.push(ptA); dG.push(ptG); dL.push(cum);
-			}
-
-			if(cum < totalLen){
-				final n:Int = dX.length;
-				var dirX:Float = 0, dirY:Float = 1;
-				if(n >= 2){
-					final ex:Float = dX[n - 1] - dX[n - 2];
-					final ey:Float = dY[n - 1] - dY[n - 2];
-					final el:Float = Math.sqrt(ex * ex + ey * ey);
-					if (el > 0.0001) { dirX = ex / el; dirY = ey / el; }
-				}
-				final rest:Float = totalLen - cum;
-				dS.push(dS[n - 1]);
-				dX.push(dX[n - 1] + dirX * rest);
-				dY.push(dY[n - 1] + dirY * rest);
-				dA.push(dA[n - 1]);
-				dG.push(dG[n - 1]);
-				dL.push(totalLen);
-			}
-
-			var j:Int = 1;
-			for(i in 0...segs + 1){
-				final target:Float = totalLen * (tStart + (1 - tStart) * (i / segs));
-				while (j < dL.length - 1 && dL[j] < target) j++;
-				final l0:Float = dL[j - 1];
-				final l1:Float = dL[j];
-				final f:Float = (l1 - l0) > 0.00001 ? Math.max(0, Math.min(1, (target - l0) / (l1 - l0))) : 0;
-
-				_curveSamplesX.push(dX[j - 1] + (dX[j] - dX[j - 1]) * f);
-				_curveSamplesY.push(dY[j - 1] + (dY[j] - dY[j - 1]) * f);
-				sampleAlphas.push(dA[j - 1] + (dA[j] - dA[j - 1]) * f);
-				sampleGlows.push(dG[j - 1] + (dG[j] - dG[j - 1]) * f);
-				sampleVDiffs.push(baseVDiff + dirSign * (dS[j - 1] + (dS[j] - dS[j - 1]) * f));
-			}
-		} else {
-			for(i in 0...segs + 1){
-				final t:Float = tStart + (1 - tStart) * (i / segs);
-				final sampleStrumTime:Float = strumTime + segLength * t;
-				final vDiff:Float = modManager.getVisPos(Conductor.songPosition, sampleStrumTime, songSpeed);
-
-				sampleVDiffs.push(vDiff);
-				evalPoint(sampleStrumTime, vDiff);
-
-				_curveSamplesX.push(ptX);
-				_curveSamplesY.push(ptY);
-				sampleAlphas.push(ptA);
-				sampleGlows.push(ptG);
-			}
-		}
-
-		if(_curveVertices == null){
-			_curveVertices = new DrawData<Float>();
-			_curveIndices = DrawData.ofArray([0, 1, 2, 1, 3, 2]);
-			_curveUVT = new DrawData<Float>();
-			_curveTransform = new ColorTransform();
-		}
-
-		final texW:Float = frames.parent.width;
-		final texH:Float = frames.parent.height;
-		final uStart:Float = frame.frame.x / texW, uEnd:Float = (frame.frame.x + frame.frame.width) / texW;
-		final vStart:Float = frame.frame.y / texH, vEnd:Float = (frame.frame.y + frame.frame.height) / texH;
-		final sampleCount:Int = _curveSamplesX.length;
-
-		_curveTopX.resize(0);
-		_curveTopY.resize(0);
-		_curveBotX.resize(0);
-		_curveBotY.resize(0);
-
-		for (i in 0...sampleCount){
-			final px:Float = _curveSamplesX[i], py:Float = _curveSamplesY[i];
-			final prevI:Int = (i > 0) ? i - 1 : i;
-			final nextI:Int = (i < sampleCount - 1) ? i + 1 : i;
-
-			var dx:Float = _curveSamplesX[nextI] - _curveSamplesX[prevI];
-			var dy:Float = _curveSamplesY[nextI] - _curveSamplesY[prevI];
-			final len:Float = Math.sqrt(dx * dx + dy * dy);
-			if(len > 0.0001){
-				dx /= len;
-				dy /= len;
-			} else { 
-				dx = 0;
-				dy = 1;
-			}
-
-			final nx:Float = -dy * halfW;
-			final ny:Float = dx * halfW;
-
-			_curveTopX.push(px + nx);
-			_curveTopY.push(py + ny);
-			_curveBotX.push(px - nx);
-			_curveBotY.push(py - ny);
-		}
-
-		final tPrevs:Array<Float> = [];
-		final tCurs:Array<Float> = [];
-		for (i in 1...sampleCount) {
-			tPrevs.push(tStart + (1 - tStart) * ((i - 1) / playField.sustainSegments));
-			tCurs.push(tStart + (1 - tStart) * (i / playField.sustainSegments));
-		}
-
-		for (camera in cameras){
-			if (camera == null || !camera.visible || !camera.exists) continue;
-
-			final scrollX:Float = camera.scroll.x * scrollFactor.x;
-			final scrollY:Float = camera.scroll.y * scrollFactor.y;
-
-			final angleRad:Float = camera.angle * (Math.PI / 180);
-			final cosA:Float = Math.cos(angleRad);
-			final sinA:Float = Math.sin(angleRad);
-			final camCenterX:Float = camera.width * 0.5;
-			final camCenterY:Float = camera.height * 0.5;
-
-			inline function transform(x:Float, y:Float):{x:Float, y:Float} {
-				final sx:Float = x - scrollX;
-				final sy:Float = y - scrollY;
-				final relX:Float = sx - camCenterX;
-				final relY:Float = sy - camCenterY;
-				final rx:Float = relX * cosA - relY * sinA;
-				final ry:Float = relX * sinA + relY * cosA;
-				return {x: rx + camCenterX, y: ry + camCenterY};
-			}
-
-			final topT:Array<{x:Float, y:Float}> = [for (i in 0...sampleCount) transform(_curveTopX[i], _curveTopY[i])];
-			final botT:Array<{x:Float, y:Float}> = [for (i in 0...sampleCount) transform(_curveBotX[i], _curveBotY[i])];
-
-			final camAlphaMult:Float = MathUtil.clamp(alpha * camera.alpha, 0, 1);
-
-			_curvePoint.set(0, 0);
-
-			for (i in 1...sampleCount){
-				if(strum.sustainReduce && wasGoodHit && sampleVDiffs[i - 1] <= 0 && sampleVDiffs[i] <= 0) continue;
-
-				_curveVertices.length = 0;
-				_curveUVT.length = 0;
-
-				_curveVertices.push(topT[i - 1].x);
-				_curveVertices.push(topT[i - 1].y);
-				_curveVertices.push(botT[i - 1].x);
-				_curveVertices.push(botT[i - 1].y);
-				_curveVertices.push(topT[i].x);
-				_curveVertices.push(topT[i].y);
-				_curveVertices.push(botT[i].x);
-				_curveVertices.push(botT[i].y);
-
-				final vPrev:Float = vStart + (vEnd - vStart) * tPrevs[i - 1];
-				final vCur:Float  = vStart + (vEnd - vStart) * tCurs[i - 1];
-
-				_curveUVT.push(uStart);
-				_curveUVT.push(vPrev);
-				_curveUVT.push(uEnd);
-				_curveUVT.push(vPrev);
-				_curveUVT.push(uStart);
-				_curveUVT.push(vCur);
-				_curveUVT.push(uEnd);
-				_curveUVT.push(vCur);
-
-				final segAlpha:Float = (sampleAlphas[i - 1] + sampleAlphas[i]) * 0.5;
-				final segGlow:Float = (sampleGlows[i - 1] + sampleGlows[i]) * 0.5;
-
-				_curveTransform.redMultiplier = 1 - segGlow;
-				_curveTransform.greenMultiplier = 1 - segGlow;
-				_curveTransform.blueMultiplier = 1 - segGlow;
-				_curveTransform.redOffset = 255 * segGlow;
-				_curveTransform.greenOffset = 255 * segGlow;
-				_curveTransform.blueOffset = 255 * segGlow;
-				_curveTransform.alphaMultiplier = segAlpha * camAlphaMult * (copyAlpha ? strum.alpha : 1);
-				_curveTransform.alphaOffset = 0;
-
-				camera.drawTriangles(frames.parent, _curveVertices, _curveIndices, _curveUVT, null,
-					_curvePoint, blend, true, antialiasing, _curveTransform, shader);
-			}
-		}
 	}
 
 	var rectCache:Null<FlxRect> = null;

@@ -12,7 +12,7 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 	public static var fields:Array<PlayField> = [];
 	private var stateGeneration:(Int, Bool)->Void = null;
 
-	public var sustainSegments:Int = 4;
+	public var sustainSegments:Int = 2;
 
 	public var keysArray:Array<String>;
 
