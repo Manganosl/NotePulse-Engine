@@ -2960,14 +2960,9 @@ class PlayState extends MusicBeatState
 			}
 
 			var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
-			if(daNote.frameHeight != 0) {
-				if((daNote.playField != null && daNote.playField.sustainSegments == 1)){
-					if(!daNote.isSustainEnd){
-						daNote.scale.y = (visualDist / daNote.frameHeight);
-					} else {
-						daNote.scale.y = 1;
-					}
-				} else daNote.scale.y = (visualDist / daNote.frameHeight);
+			if(daNote.frameHeight != 0){
+				if(!daNote.isSustainEnd) daNote.scale.y = (visualDist / daNote.frameHeight);
+				else daNote.scale.y = 1;
 			}
 		daNote.clip(daNote.playField.members[daNote.noteData]);
 		}

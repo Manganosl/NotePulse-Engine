@@ -540,7 +540,7 @@ class Note extends FunkinSprite {
 			}
 		}
 		if(isSustainNote)
-			scale.y = lastScaleY;
+			scale.y = (isSustainEnd) ? scale.y : lastScaleY;
 		updateHitbox();
 		defScale.copyFrom(scale);
 
@@ -640,7 +640,7 @@ class Note extends FunkinSprite {
 		}
 
 		final pf:Dynamic = createdFrom;
-		final modManager = pf.modManager;
+		final modManager:Dynamic = pf.modManager;
 		final pN:Int = playField != null ? playField.player : 0;
 		final songSpeed:Float = pf.songSpeed;
 
@@ -664,14 +664,11 @@ class Note extends FunkinSprite {
 		var sampleGlows:Array<Float> = [];
 		var sampleVDiffs:Array<Float> = [];
 
-		for (i in 0...playField.sustainSegments + 1) {
-			final t:Float = tStart + (1 - tStart) * (i / playField.sustainSegments);
-			final sampleStrumTime:Float = strumTime + segLength * t;
+		final segs:Int = playField.sustainSegments;
+
+		var ptX:Float = 0, ptY:Float = 0, ptA:Float = 1, ptG:Float = 0;
+		inline function evalPoint(sampleStrumTime:Float, vDiff:Float):Void {
 			final diff:Float = sampleStrumTime - Conductor.songPosition;
-			final vDiff:Float = modManager.getVisPos(Conductor.songPosition, sampleStrumTime, songSpeed);
-
-			sampleVDiffs.push(vDiff);
-
 			final sampBeat:Float = Conductor.getStep(sampleStrumTime) / 4;
 
 			var samplePos = modManager.getPos(strumTime, vDiff, diff, sampBeat, noteData, pN, this, [], vec3Cache);
@@ -686,11 +683,97 @@ class Note extends FunkinSprite {
 			sx += origin.x - offset.x;
 			sy += origin.y - offset.y;
 
-			_curveSamplesX.push(sx);
-			_curveSamplesY.push(sy);
+			ptX = sx;
+			ptY = sy;
+			ptA = samplePos.alpha;
+			ptG = samplePos.glow;
+		}
 
-			sampleAlphas.push(samplePos.alpha);
-			sampleGlows.push(samplePos.glow);
+		final totalLen:Float = frameHeight * Math.abs(scale.y);
+		var fixedEnd:Bool = false;
+		var baseVDiff:Float = 0;
+		var pxPerMs:Float = 0;
+		var dirSign:Float = 1;
+		if(isSustainEnd){
+			baseVDiff = modManager.getVisPos(Conductor.songPosition, strumTime, songSpeed);
+			final rawPx:Float = modManager.getVisPos(Conductor.songPosition, strumTime + 1, songSpeed) - baseVDiff;
+			pxPerMs = Math.abs(rawPx);
+			dirSign = rawPx >= 0 ? 1 : -1;
+			fixedEnd = pxPerMs > 0.0001 && totalLen > 0.0001;
+		}
+
+		if(fixedEnd){
+			final dS:Array<Float> = [0];
+			final dX:Array<Float> = [];
+			final dY:Array<Float> = [];
+			final dA:Array<Float> = [];
+			final dG:Array<Float> = [];
+			final dL:Array<Float> = [0];
+
+			evalPoint(strumTime, baseVDiff);
+			dX.push(ptX); dY.push(ptY); dA.push(ptA); dG.push(ptG);
+
+			final ds:Float = totalLen / (segs * 4);
+			final maxSteps:Int = segs * 4 * 8;
+			var cum:Float = 0;
+			var k:Int = 0;
+			while (cum < totalLen && k < maxSteps) {
+				k++;
+				final sOff:Float = ds * k;
+				evalPoint(strumTime + sOff / pxPerMs, baseVDiff + dirSign * sOff);
+				final last:Int = dX.length - 1;
+				final ddx:Float = ptX - dX[last];
+				final ddy:Float = ptY - dY[last];
+				cum += Math.sqrt(ddx * ddx + ddy * ddy);
+				dS.push(sOff); dX.push(ptX); dY.push(ptY); dA.push(ptA); dG.push(ptG); dL.push(cum);
+			}
+
+			if(cum < totalLen){
+				final n:Int = dX.length;
+				var dirX:Float = 0, dirY:Float = 1;
+				if(n >= 2){
+					final ex:Float = dX[n - 1] - dX[n - 2];
+					final ey:Float = dY[n - 1] - dY[n - 2];
+					final el:Float = Math.sqrt(ex * ex + ey * ey);
+					if (el > 0.0001) { dirX = ex / el; dirY = ey / el; }
+				}
+				final rest:Float = totalLen - cum;
+				dS.push(dS[n - 1]);
+				dX.push(dX[n - 1] + dirX * rest);
+				dY.push(dY[n - 1] + dirY * rest);
+				dA.push(dA[n - 1]);
+				dG.push(dG[n - 1]);
+				dL.push(totalLen);
+			}
+
+			var j:Int = 1;
+			for(i in 0...segs + 1){
+				final target:Float = totalLen * (tStart + (1 - tStart) * (i / segs));
+				while (j < dL.length - 1 && dL[j] < target) j++;
+				final l0:Float = dL[j - 1];
+				final l1:Float = dL[j];
+				final f:Float = (l1 - l0) > 0.00001 ? Math.max(0, Math.min(1, (target - l0) / (l1 - l0))) : 0;
+
+				_curveSamplesX.push(dX[j - 1] + (dX[j] - dX[j - 1]) * f);
+				_curveSamplesY.push(dY[j - 1] + (dY[j] - dY[j - 1]) * f);
+				sampleAlphas.push(dA[j - 1] + (dA[j] - dA[j - 1]) * f);
+				sampleGlows.push(dG[j - 1] + (dG[j] - dG[j - 1]) * f);
+				sampleVDiffs.push(baseVDiff + dirSign * (dS[j - 1] + (dS[j] - dS[j - 1]) * f));
+			}
+		} else {
+			for(i in 0...segs + 1){
+				final t:Float = tStart + (1 - tStart) * (i / segs);
+				final sampleStrumTime:Float = strumTime + segLength * t;
+				final vDiff:Float = modManager.getVisPos(Conductor.songPosition, sampleStrumTime, songSpeed);
+
+				sampleVDiffs.push(vDiff);
+				evalPoint(sampleStrumTime, vDiff);
+
+				_curveSamplesX.push(ptX);
+				_curveSamplesY.push(ptY);
+				sampleAlphas.push(ptA);
+				sampleGlows.push(ptG);
+			}
 		}
 
 		if(_curveVertices == null){
