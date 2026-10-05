@@ -24,11 +24,22 @@ class PerspectiveModifier extends NoteModifier {
   var near = 0.01;
   var far = 2;
 
+  public var cullZ:Float = 0.1;  // I hate it when the notes are so big
+
   function FastTan(rad:Float) // thanks schmoovin
   {
     return FlxMath.fastSin(rad) / FlxMath.fastCos(rad);
   }
 
+  var _ta:Float = 1;
+  var _a:Float = 0;
+  var _b:Float = 0;
+
+  override function bind() {
+    _ta = FastTan(fov/2);
+    _a = (near+far)/(near-far);
+    _b = 2*near*far/(near-far);
+  }
 
   public function getVector(curZ:Float,pos:Vector3):Vector3 {
     var halfOffset = new Vector3((FlxG.width / 2) - (Note.swagWidth / 2), (FlxG.height / 2) - (Note.swagWidth / 2));
@@ -38,11 +49,6 @@ class PerspectiveModifier extends NoteModifier {
     var oX = pos.x;
     var oY = pos.y;
 
-    // should I be using a matrix?
-    // .. nah im sure itll be fine just doing this manually
-    // instead of doing a proper perspective projection matrix
-
-    //var aspect = FlxG.width/FlxG.height;
     var aspect = 1;
 
     var shit = curZ-1;
@@ -54,15 +60,29 @@ class PerspectiveModifier extends NoteModifier {
     var a = (near+far)/(near-far);
     var b = 2*near*far/(near-far);
     var z = (a*shit+b);
-    //trace(shit, curZ, z, x/z, y/z);
     var returnedVector = new Vector3(x/z,y/z,z, origAlpha, origGlow).add(halfOffset);
 
     return returnedVector;
   }
 
-	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
-    return getVector(pos.z,pos);
-  
+  override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite) {
+    var hx = (FlxG.width / 2) - (Note.swagWidth / 2);
+    var hy = (FlxG.height / 2) - (Note.swagWidth / 2);
+
+    var oX = pos.x - hx;
+    var oY = pos.y - hy;
+
+    var shit = pos.z - 1;
+    if (shit > 0) shit = 0; // thanks schmovin!!
+
+    var aspect = 1;
+    var x = oX * aspect / _ta;
+    var y = oY / _ta;
+    var z = (_a * shit + _b);
+
+    var alpha = (z <= cullZ) ? 0.0 : pos.alpha;
+    return new Vector3(x / z + hx, y / z + hy, z + 0.0, alpha, pos.glow);
+  }
 
 	override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int){
     receptor.scale.scale(1/pos.z);

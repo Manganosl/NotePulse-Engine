@@ -4,10 +4,17 @@ class SpiralModifier extends NoteModifier {
 	override function getName() return 'spiralX';
 	override function getSubmods() { return [ "spiralY", "spiralZ", "spiralXOffset", "spiralXPeriod", "spiralYOffset", "spiralYPeriod", "spiralZOffset", "spiralZPeriod", ]; } 
 
+	var sY:Modifier;
+	var sZ:Modifier;
+	override function bind() {
+		sY = submods.get("spiralY");
+		sZ = submods.get("spiralZ");
+	}
+
 	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
 		var spiralX = getValue(player);
-		var spiralY = getSubmodValue("spiralY", player); 
-		var spiralZ = getSubmodValue("spiralZ", player) / 100; 
+		var spiralY = subVal(sY, player); 
+		var spiralZ = subVal(sZ, player) / 100; 
 
 		if (spiralX != 0) { 
 			var offset = getSubmodValue("spiralXOffset", player); 

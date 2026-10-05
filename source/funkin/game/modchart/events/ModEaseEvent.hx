@@ -37,13 +37,12 @@ class ModEaseEvent extends ModEvent {
 			var change = (endVal - startVal);
 			var value = startVal + change * easeFunc(progress);
 
-			//mod.setValue(value, player);
-			manager.setValue(modName, value, player);
+			manager.setModValue(mod, value, player);
 		}
 		else if (curStep >= endStep)
 		{
 			finished = true;
-			manager.setValue(modName, endVal, player); // expoInOut doesnt end at the correct value WHAT
+			manager.setModValue(mod, endVal, player); // expoInOut doesnt end at the correct value WHAT
 		}
 	}
 }

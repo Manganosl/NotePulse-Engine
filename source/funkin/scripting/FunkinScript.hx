@@ -92,6 +92,7 @@ class FunkinScript implements HscriptInterface {
 		"Alphabet"					=> funkin.objects.Alphabet,
 		"Note" 						=> funkin.objects.notes.Note,
 		"PlayField"					=> funkin.objects.notes.PlayField,
+		"MirrorField"					=> funkin.objects.notes.MirrorField,
 		"StrumNote"					=> funkin.objects.notes.StrumNote,
 		"ClientPrefs" 				=> funkin.data.ClientPrefs,
 		"Mods" 						=> funkin.backend.Mods,

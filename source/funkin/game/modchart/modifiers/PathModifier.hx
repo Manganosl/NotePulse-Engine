@@ -60,29 +60,90 @@ class PathModifier extends NoteModifier {
     }
   }
 
+  inline function lerpInto(pos:Vector3, gx:Float, gy:Float, gz:Float, ga:Float, gg:Float, t:Float) {
+    var rx = t * gx + pos.x * (1 - t);
+    var ry = t * gy + pos.y * (1 - t);
+    var rz = t * gz + pos.z * (1 - t);
+    var ra = t * ga + pos.alpha * (1 - t);
+    var rg = t * gg + pos.glow * (1 - t);
+    pos.setTo(rx, ry, rz, ra, rg);
+  }
+
+  var sZigzag:Modifier;
+  var sZigzagZ:Modifier;
+  var sSawtooth:Modifier;
+  var sSquare:Modifier;
+  var sBounce:Modifier;
+  var sBounceZ:Modifier;
+  var sXmode:Modifier;
+  var sZmode:Modifier;
+  var sTornado:Modifier;
+  var sTornadoTan:Modifier;
+  var sTornadoZ:Modifier;
+  var sTornadoTanZ:Modifier;
+  var sItg:Modifier;
+  var sItgTan:Modifier;
+  var sDigital:Modifier;
+  var sDigitalZ:Modifier;
+  var cXmode:Array<Modifier>;
+  var cZmode:Array<Modifier>;
+
+  override function bind() {
+    sZigzag = submods.get("zigzag");
+    sZigzagZ = submods.get("zigzagZ");
+    sSawtooth = submods.get("sawtooth");
+    sSquare = submods.get("square");
+    sBounce = submods.get("bounce");
+    sBounceZ = submods.get("bounceZ");
+    sXmode = submods.get("xmode");
+    sZmode = submods.get("zmode");
+    sTornado = submods.get("tornado");
+    sTornadoTan = submods.get("tornadoTan");
+    sTornadoZ = submods.get("tornadoZ");
+    sTornadoTanZ = submods.get("tornadoTanZ");
+    sItg = submods.get("itgTornado");
+    sItgTan = submods.get("itgTornadoTan");
+    sDigital = submods.get("digital");
+    sDigitalZ = submods.get("digitalZ");
+    cXmode = bindColumn("xmode");
+    cZmode = bindColumn("zmode");
+  }
+
   override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite) {
     var outPos = pos.clone();
 
-    if (getValue(player) != 0) {
+    var pathVal = getValue(player);
+    if (pathVal != 0) {
       var vDiff = -timeDiff;
       var progress = (vDiff / -moveSpeed) * totalDists[data];
       var daPath = pathData[data];
 
-      if (progress <= 0) {
-        outPos = pos.lerp(daPath[0].position, getValue(player));
-      } else {
-        var idx:Int = 0;
-        while (idx < daPath.length) {
-          var cData = daPath[idx];
-          var nData = daPath[idx + 1];
-          if (nData != null && cData != null) {
-            if (progress > cData.start && progress < cData.end) {
-              var alpha = (cData.start - progress) / cData.dist;
-              var interpPos:Vector3 = cData.position.lerp(nData.position, alpha);
-              outPos = pos.lerp(interpPos, getValue(player));
+      if (daPath != null && daPath.length > 0) {
+        if (progress <= 0) {
+          var g = daPath[0].position;
+          lerpInto(outPos, g.x, g.y, g.z, g.alpha, g.glow, pathVal);
+        } else {
+          var idx:Int = 0;
+          while (idx < daPath.length) {
+            var cData = daPath[idx];
+            var nData = daPath[idx + 1];
+            if (nData != null && cData != null) {
+              if (progress > cData.start && progress < cData.end) {
+                var alpha = (cData.start - progress) / cData.dist;
+                var c = cData.position;
+                var n = nData.position;
+
+                var ix = alpha * n.x + c.x * (1 - alpha);
+                var iy = alpha * n.y + c.y * (1 - alpha);
+                var iz = alpha * n.z + c.z * (1 - alpha);
+                var ia = alpha * n.alpha + c.alpha * (1 - alpha);
+                var ig = alpha * n.glow + c.glow * (1 - alpha);
+                lerpInto(outPos, ix, iy, iz, ia, ig, pathVal);
+                break;
+              }
             }
+            idx++;
           }
-          idx++;
         }
       }
     }
@@ -92,7 +153,7 @@ class PathModifier extends NoteModifier {
     var keyCunt:Int = PlayState.SONG.mania;
     var keyCount:Int = keyCunt + 1;
 
-    var zigzag = getSubmodValue("zigzag", player);
+    var zigzag = subVal(sZigzag, player);
     if (zigzag != 0) {
       var offset = getSubmodValue("zigzagOffset", player);
       var period = getSubmodValue("zigzagPeriod", player);
@@ -100,7 +161,7 @@ class PathModifier extends NoteModifier {
       outPos.x += (zigzag * (Note.swagWidth * 0.5)) * result;
     }
 
-    var zigzagZ = getSubmodValue("zigzagZ", player);
+    var zigzagZ = subVal(sZigzagZ, player);
     if (zigzagZ != 0) {
       var offset = getSubmodValue("zigzagZOffset", player);
       var period = getSubmodValue("zigzagZPeriod", player);
@@ -108,14 +169,14 @@ class PathModifier extends NoteModifier {
       outPos.z += ((zigzagZ * (Note.swagWidth * 0.5)) * result) / 1280;
     }
 
-    var sawtooth = getSubmodValue("sawtooth", player);
+    var sawtooth = subVal(sSawtooth, player);
     if (sawtooth != 0) {
       var period = getSubmodValue("sawtoothPeriod", player) + 1;
       var p = (0.5 / period * diff) / Note.swagWidth;
       outPos.x += (sawtooth * Note.swagWidth) * (p - Math.floor(p));
     }
 
-    var squareVal = getSubmodValue("square", player);
+    var squareVal = subVal(sSquare, player);
     if(squareVal != 0){
       var offset = getSubmodPercent("squareOffset", player) * 100;
       var period = 60 + (getSubmodPercent("squarePeriod", player) * 60);
@@ -123,7 +184,7 @@ class PathModifier extends NoteModifier {
       outPos.x += squareVal * MathUtil.square(cum) * getSubmodValue("squareAmp", player) * Math.min(1, Math.abs(visualDiff) / 200);
     }
 
-    var bounceVal = getSubmodValue("bounce", player);
+    var bounceVal = subVal(sBounce, player);
     if (bounceVal != 0) {
       var offset = getSubmodValue("bounceOffset", player);
       var period = getSubmodValue("bouncePeriod", player);
@@ -133,7 +194,7 @@ class PathModifier extends NoteModifier {
       }
     }
 
-    var bounceZVal = getSubmodValue("bounceZ", player);
+    var bounceZVal = subVal(sBounceZ, player);
     if (bounceZVal != 0) {
       var offset = getSubmodValue("bounceZOffset", player);
       var period = getSubmodValue("bounceZPeriod", player);
@@ -144,21 +205,21 @@ class PathModifier extends NoteModifier {
     }
 
     // I'll use this mod to handle Psych's note directions
-    var xmode = getSubmodValue("xmode", player) + getSubmodValue('xmode$data', player);
-    var noteDegrees:Float = (PlayField.fields[player].members[data].direction - 90);
+    var xmode = subVal(sXmode, player) + colVal(cXmode, data, player);
+    var noteDegrees:Float = xmode != 0 ? (PlayField.fields[player].members[data].direction - 90) : 0;
     if (xmode != 0 && noteDegrees != 0) {
       var mod = (player + 1) * 2 - 3;
       if(obj is Note) noteDegrees += cast(obj, Note).offsetDirection;
       outPos.x += (xmode + FlxAngle.asRadians(noteDegrees)) * (diff * mod);
     }
 
-    var zmode = getSubmodValue("zmode", player) + getSubmodValue('zmode$data', player);
+    var zmode = subVal(sZmode, player) + colVal(cZmode, data, player);
     if (zmode != 0) {
       var mod = (player + 1) * 2 - 3;
       outPos.z += (zmode * (diff * mod)) / 1280;
     }
 
-    var tornadoVal = getSubmodValue("tornado", player);
+    var tornadoVal = subVal(sTornado, player);
     if (tornadoVal != 0) {
       var playerColumn = column % keyCount;
       var columnPhaseShift = (playerColumn * PI_THIRD) + getSubmodValue("tornadoOffset", player);
@@ -168,7 +229,7 @@ class PathModifier extends NoteModifier {
       outPos.x += offsetX * tornadoVal;
     }
 
-    var tornadoTanVal = getSubmodValue("tornadoTan", player);
+    var tornadoTanVal = subVal(sTornadoTan, player);
     if (tornadoTanVal != 0) {
       var playerColumn = column % keyCount;
       var columnPhaseShift = (playerColumn * PI_THIRD) + getSubmodValue("tornadoTanOffset", player);
@@ -178,7 +239,7 @@ class PathModifier extends NoteModifier {
       outPos.x += offsetX * tornadoTanVal;
     }
 
-    var tornadoZVal = getSubmodValue("tornadoZ", player);
+    var tornadoZVal = subVal(sTornadoZ, player);
     if (tornadoZVal != 0) {
       var playerColumn = column % keyCount;
       var columnPhaseShift = (playerColumn * PI_THIRD) + getSubmodValue("tornadoZOffset", player);
@@ -188,7 +249,7 @@ class PathModifier extends NoteModifier {
       outPos.z += (offsetX * tornadoZVal) / 1280;
     }
 
-    var tornadoTanZVal = getSubmodValue("tornadoTanZ", player);
+    var tornadoTanZVal = subVal(sTornadoTanZ, player);
     if (tornadoTanZVal != 0) {
       var playerColumn = column % keyCount;
       var columnPhaseShift = (playerColumn * PI_THIRD) + getSubmodValue("tornadoTanZOffset", player) + Math.PI;
@@ -198,8 +259,8 @@ class PathModifier extends NoteModifier {
       outPos.z += (offsetX * tornadoTanZVal) / 1280;
     }
 
-    var itgTornadoVal = getSubmodValue("itgTornado", player);
-    var itgTornadoTanVal = getSubmodValue("itgTornadoTan", player);
+    var itgTornadoVal = subVal(sItg, player);
+    var itgTornadoTanVal = subVal(sItgTan, player);
 
     if (itgTornadoVal != 0 || itgTornadoTanVal != 0) {
       var wide = keyCount > 4;
@@ -232,7 +293,7 @@ class PathModifier extends NoteModifier {
       }
     }
 
-    var digitalVal = getSubmodValue("digital", player);
+    var digitalVal = subVal(sDigital, player);
     if (digitalVal > 0) {
       var steps = this.getSubmodValue("digitalSteps", player) + 1;
       var period = this.getSubmodValue("digitalPeriod", player);
@@ -241,7 +302,7 @@ class PathModifier extends NoteModifier {
       outPos.x += (digitalVal * (Note.swagWidth * 0.5)) * Math.floor(0.5 + (steps * Math.sin(getDigitalAngle(diff, offset, period)))) / steps;
     }
 
-    var digitalZVal = getSubmodValue("digitalZ", player);
+    var digitalZVal = subVal(sDigitalZ, player);
     if (digitalZVal > 0) {
       var steps = this.getSubmodValue("digitalZSteps", player) + 1;
       var period = this.getSubmodValue("digitalZPeriod", player);

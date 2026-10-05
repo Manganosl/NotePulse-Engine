@@ -29,6 +29,21 @@ class Modifier implements flixel.util.FlxDestroyUtil.IFlxDestroyable{
 
 	public var lowerCaseName:String;
 
+	public function bind():Void {}
+
+	inline function subVal(m:Modifier, player:Int):Float
+		return m == null ? 0 : m.getValue(player);
+
+	inline function colVal(arr:Array<Modifier>, data:Int, player:Int):Float {
+		if (arr == null || data < 0 || data >= arr.length) return 0;
+		var m = arr[data];
+		return m == null ? 0 : m.getValue(player);
+	}
+
+	/** Resuelve submods '<baseName><i><suffix>' para todas las columnas. **/
+	function bindColumn(baseName:String, suffix:String = ''):Array<Modifier>
+		return [for (i in 0...PlayState.SONG.mania + 1) submods.get('$baseName$i$suffix')];
+
     public function getModType()
 		return MISC_MOD; // if this is NOTE_MOD then this will be called on notes & receptors
 	
@@ -91,11 +106,11 @@ class Modifier implements flixel.util.FlxDestroyUtil.IFlxDestroyable{
 	public function setCurrentValue(value:Float, player:Int = -1){
 		if(player == -1){
 			for(idx in 0...percents.length){
-				modMgr.touchMod(getName(), idx);
+				if (modMgr.hasNodes) modMgr.touchMod(lowerCaseName ?? getName(), idx);
 				percents[idx] = value;
 			} 
 		} else {
-			modMgr.touchMod(getName(), player);
+			if (modMgr.hasNodes) modMgr.touchMod(lowerCaseName ?? getName(), player);
 			percents[player] = value;
 		}
 	}

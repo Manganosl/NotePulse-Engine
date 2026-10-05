@@ -71,7 +71,7 @@ class ModchartNote extends FunkinSprite {
 		@:privateAccess
 		var segLength:Float = Math.max(((pf.initialCrochet + 8) / 4), 10);
 		if (!n.isSustainEnd && n.nextNote != null && n.nextNote.isSustainNote)
-			segLength = Math.max(n.nextNote.strumTime - n.strumTime + extraSusLength, 1);
+			segLength = Math.max(n.nextNote.strumTime - n.strumTime + 2 + extraSusLength, 1);
 
 		final halfW:Float = frameWidth * 0.5 * Math.abs(scale.x);
 

@@ -1,57 +1,56 @@
 package funkin.game.modchart.modifiers;
 
 class RotateModifier extends NoteModifier { // this'll be rotateX in ModManager
-	override function getName() return '${prefix}rotateX';
+	var _name:String;
+	override function getName() return _name;
 	override function getOrder() return Modifier.ModifierOrder.LAST + 2;
 	
 	public var daOrigin:Vector3;
 	
 	var prefix:String;
+
+	var sRotY:Modifier;
+	var sRotZ:Modifier;
+	var cRotX:Array<Modifier>;
+	var cRotY:Array<Modifier>;
+	var cRotZ:Array<Modifier>;
 	
 	public function new(modMgr:ModManager, ?prefix:String = '', ?origin:Vector3, ?parent:Modifier)
 	{
 		this.prefix = prefix;
+		this._name = '${prefix}rotateX';
 		this.daOrigin = origin;
 		super(modMgr, parent);
 	}
-	
-	// thanks schmoovin'
-	function rotateV3(vec:Vector3, xA:Float, yA:Float, zA:Float):Vector3
+
+	override function bind()
 	{
-		var rotateZ = MathUtil.rotate(vec.x, vec.y, zA);
-		var offZ = Vector3.get(rotateZ.x, rotateZ.y, vec.z);
-		
-		var rotateX = MathUtil.rotate(offZ.z, offZ.y, xA);
-		var offX = Vector3.get(offZ.x, rotateX.y, rotateX.x);
-		
-		var rotateY = MathUtil.rotate(offX.x, offX.z, yA);
-		var offY = Vector3.get(rotateY.x, offX.y, rotateY.y);
-		
-		offZ.put();
-		offX.put();
-		
-		rotateZ.putWeak();
-		rotateX.putWeak();
-		rotateY.putWeak();
-		
-		return offY;
+		sRotY = submods.get('${prefix}rotateY');
+		sRotZ = submods.get('${prefix}rotateZ');
+		cRotX = bindColumn('${prefix}rotate', 'X');
+		cRotY = bindColumn('${prefix}rotate', 'Y');
+		cRotZ = bindColumn('${prefix}rotate', 'Z');
 	}
 	
 	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
 	{
-		var origin:Vector3 = Vector3.get(modMgr.getBaseX(data, player), (FlxG.height / 2) - (Note.swagWidth / 2));
-		if (daOrigin != null) origin = daOrigin;
-		
-		var diff = pos.subtract(origin);
-		var scale = FlxG.height;
-		diff.z *= scale;
-		var out = rotateV3(diff, getValue(player) + getSubmodValue('${prefix}rotate${data}X', player), 
-					getSubmodValue('${prefix}rotateY', player) + getSubmodValue('${prefix}rotate${data}Y', player),
-					getSubmodValue('${prefix}rotateZ', player) + getSubmodValue('${prefix}rotate${data}Z', player));
-		out.z /= scale;
-		
-		origin.add(out, pos);
-		out.put(); // hehehehe
+		var ox:Float;
+		var oy:Float;
+		var oz:Float = 0;
+		if (daOrigin != null) {
+			ox = daOrigin.x;
+			oy = daOrigin.y;
+			oz = daOrigin.z;
+		} else {
+			ox = modMgr.getBaseX(data, player);
+			oy = (FlxG.height / 2) - (Note.swagWidth / 2);
+		}
+
+		MathUtil.rotatePos3D(pos, ox, oy, oz,
+			getValue(player) + colVal(cRotX, data, player),
+			subVal(sRotY, player) + colVal(cRotY, data, player),
+			subVal(sRotZ, player) + colVal(cRotZ, data, player),
+			FlxG.height);
 		
 		return pos;
 	}

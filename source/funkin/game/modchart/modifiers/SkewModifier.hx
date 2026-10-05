@@ -4,24 +4,34 @@ class SkewModifier extends NoteModifier {
     override function getName() return 'skewX';
     override function getOrder() return PRE_REVERSE;
 
-    function getSkew(isNote:Bool, data:Int, player:Int):Array<Float> {
-        var skew:Array<Float> = [0, 0];
+    var sSkewY:Modifier;
+    var sNoteSkewX:Modifier;
+    var sNoteSkewY:Modifier;
+    var cSkewX:Array<Modifier>;
+    var cSkewY:Array<Modifier>;
+    var cNoteSkewX:Array<Modifier>;
+    var cNoteSkewY:Array<Modifier>;
 
-        skew[0] = getValue(player);
-        skew[1] = getSubmodValue("skewY", player);
+    override function bind() {
+        sSkewY = submods.get("skewY");
+        sNoteSkewX = submods.get("noteSkewX");
+        sNoteSkewY = submods.get("noteSkewY");
+        cSkewX = bindColumn('skewX');
+        cSkewY = bindColumn('skewY');
+        cNoteSkewX = bindColumn('noteSkewX');
+        cNoteSkewY = bindColumn('noteSkewY');
+    }
 
-        skew[0] += getSubmodValue('skewX${data}', player);
-        skew[1] += getSubmodValue('skewY${data}', player);
-
+    var _kx:Float = 0;
+    var _ky:Float = 0;
+    function computeSkew(isNote:Bool, data:Int, player:Int):Void {
         if(isNote){
-            skew[0] = getSubmodValue("noteSkewX", player);
-            skew[1] = getSubmodValue("noteSkewY", player);
-
-            skew[0] += getSubmodValue('noteSkewX${data}', player);
-            skew[1] += getSubmodValue('noteSkewY${data}', player);
+            _kx = subVal(sNoteSkewX, player) + colVal(cNoteSkewX, data, player);
+            _ky = subVal(sNoteSkewY, player) + colVal(cNoteSkewY, data, player);
+        } else {
+            _kx = getValue(player) + colVal(cSkewX, data, player);
+            _ky = subVal(sSkewY, player) + colVal(cSkewY, data, player);
         }
-
-        return skew;
     }
     
     override function shouldExecute(player:Int, val:Float) return true;
@@ -31,13 +41,13 @@ class SkewModifier extends NoteModifier {
 
     override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int) {
         if(note.isSustainNote) return;
-        var skew:Array<Float> = getSkew(true, note.noteData, player);
-        note.skewOffset.set(skew[0], skew[1]);
+        computeSkew(true, note.noteData, player);
+        note.skewOffset.set(_kx, _ky);
     }
 
     override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int) {
-        var skew:Array<Float> = getSkew(false, receptor.noteData, player);
-        receptor.skewOffset.set(skew[0], skew[1]);
+        computeSkew(false, receptor.noteData, player);
+        receptor.skewOffset.set(_kx, _ky);
     }
 
     override function getSubmods() {

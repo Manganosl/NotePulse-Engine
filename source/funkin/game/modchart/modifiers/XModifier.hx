@@ -7,14 +7,18 @@ class XModifier extends NoteModifier {
     override function shouldExecute(player:Int, val:Float)
         return true;
 
+    var cXmod:Array<Modifier>;
+    override function bind()
+        cXmod = bindColumn('xmod');
+
     override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:flixel.FlxSprite)
     {
-        var xmod = getValue(player) * getSubmodValue('xmod' + data, player);
+        var xmod = getValue(player) * colVal(cXmod, data, player);
         var note:Note = (obj is Note) ? cast obj : null;
         var multSpeed:Float = (note != null) ? note.multSpeed : 1;
 
-		var reverse:Dynamic = modMgr.register.get("reverse");
-		var reversePercent = reverse.getReverseValue(data, player);
+		var rev = modMgr.reverseMod;
+		var reversePercent = rev != null ? rev.getReverseValue(data, player) : 0;
 		var mult = MathUtil.scale(reversePercent, 0, 1, 1, -1);
 
         var speed = xmod * multSpeed;
@@ -26,7 +30,7 @@ class XModifier extends NoteModifier {
 
     override function updateNote(beat:Float, daNote:Note, pos:Vector3, player:Int)
     {
-        var xmod = getValue(player) * getSubmodValue('xmod' + daNote.noteData, player);
+        var xmod = getValue(player) * colVal(cXmod, daNote.noteData, player);
         daNote.modSpeed = xmod;
     }
 

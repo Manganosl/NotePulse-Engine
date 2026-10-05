@@ -12,7 +12,7 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 	public static var fields:Array<PlayField> = [];
 	private var stateGeneration:(Int, Bool)->Void = null;
 
-	public var sustainSegments:Int = 2;
+	public var sustainSegments:Int = 4;
 
 	public var keysArray:Array<String>;
 
@@ -23,10 +23,10 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 
 	public var showNotePaths:Bool = false;
 	public var notePathGroup:FlxTypedGroup<MeshRender>;
-	public var notePathSamples:Int = 24;
+	public var notePathSamples:Int = 32;
 	public var notePathThickness:Float = 3.5;
 	public var notePathCamMargin:Float = 48;
-	public var notePathMaxLength:Float = 1250;
+	public var notePathMaxLength:Float = 1450;
 	public var notePathBaseAlpha:Float = 0.75;
 	var notePathMeshes:Map<Int, MeshRender> = [];
 	var notePathVecCache:Vector3 = new Vector3();

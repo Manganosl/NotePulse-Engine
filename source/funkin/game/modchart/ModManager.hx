@@ -93,6 +93,14 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 
 	var aliases:Map<String, String> = [];
 
+	public var hasNodes:Bool = false;
+	public var reverseMod:ReverseModifier = null;
+
+	var nameCache:Map<String, String> = [];
+	var nameCacheSize:Int = 0;
+	var updateMods:Array<Modifier> = [];
+	var scratchNodes:Array<Node> = [];
+
 	var nodes:Map<String, Array<Node>> = [];
 	var nodeArray:Array<Node> = [];
 	var touchedMods:Array<Array<String>> = [[], []];
@@ -111,7 +119,19 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 				miscmodRegister.set(modName, mod);
 		}
 		timeline.addMod(modName);
-		modArray.push(mod);
+
+		if (modName == "reverse") reverseMod = Std.downcast(mod, ReverseModifier);
+		mod.bind();
+
+		var order = mod.getOrder();
+		var i = modArray.length;
+		while (i > 0 && modArray[i - 1].getOrder() > order) i--;
+		modArray.insert(i, mod);
+		if (mod.doesUpdate()){
+			var j = updateMods.length;
+			while (j > 0 && updateMods[j - 1].getOrder() > order) j--;
+			updateMods.insert(j, mod);
+		}
 
 		for (a => m in mod.getAliases())
 			registerAlias(a, m);
@@ -125,19 +145,26 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
         }
 
 		setValue(modName, 0); // so if it should execute it gets added Automagically
-		modArray.sort((a, b) -> Std.int(a.getOrder() - b.getOrder()));
-        // TODO: sort by mod.getOrder()
     }
 
 	inline public function registerAux(name:String)
 		quickRegister(new SubModifier(name, this));
 
-	public function registerAlias(alias:String, mod:String)
+	public function registerAlias(alias:String, mod:String){
 		aliases.set(alias.toLowerCase(), mod.toLowerCase());
+		nameCache.clear();
+		nameCacheSize = 0;
+	}
 
 	function getActualModName(m:String):String {
+		var cached = nameCache.get(m);
+		if (cached != null) return cached;
 		var norm = m.toLowerCase();
-		return aliases.exists(norm) ? aliases.get(norm) : norm;
+		if (aliases.exists(norm)) norm = aliases.get(norm);
+		if (nameCacheSize >= 4096){ nameCache.clear(); nameCacheSize = 0; }
+		nameCache.set(m, norm);
+		nameCacheSize++;
+		return norm;
 	}
 
 	public function registerNode(node:Node){
@@ -148,6 +175,7 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 			nodes.get(key).push(node);
 		}
 		nodeArray.push(node);
+		hasNodes = true;
 	}
 
 	public function quickNode(inputMods:Array<String>, nodeFunc:(values:Array<Float>, player:Int) -> Array<Float>, ?outputMods:Array<String>){
@@ -167,7 +195,7 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 
 	public function touchMod(name:String, player:Int)
 	{
-		if (player < 0) return;
+		if (player < 0 || !hasNodes) return;
 
 		name = getActualModName(name);
 		if (touchedMods[player] == null)
@@ -181,10 +209,12 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 	{
 		if (nodeArray.length == 0) return;
 
-		for (player => mods in touchedMods){
+		for (player in 0...touchedMods.length){
+			var mods = touchedMods[player];
 			if (mods == null) continue;
 
-			var runningNodes:Array<Node> = [];
+			var runningNodes = scratchNodes;
+			runningNodes.resize(0);
 
 			for (mod in mods){
 				var nodeList = nodes.get(mod);
@@ -236,11 +266,15 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 	inline public function get(modName:String)
 		return register.get(getActualModName(modName));
 	
-	inline public function getPercent(modName:String, player:Int)
-		return !register.exists(getActualModName(modName)) ? 0 : get(modName).getPercent(player);
+	inline public function getPercent(modName:String, player:Int){
+		var m = get(modName);
+		return m == null ? 0 : m.getPercent(player);
+	}
 
-	inline public function getValue(modName:String, player:Int):Float
-		return !register.exists(getActualModName(modName)) ? 0 : get(modName).getValue(player);
+	inline public function getValue(modName:String, player:Int):Float {
+		var m = get(modName);
+		return m == null ? 0 : m.getValue(player);
+	}
 
     inline public function setPercent(modName:String, val:Float, player:Int=-1)
 		setValue(modName, val / 100, player);
@@ -248,11 +282,15 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 	inline public function setCurrentPercent(modName:String, val:Float, player:Int = -1)
 		setCurrentValue(modName, val / 100, player);
 
-	inline public function getTargetPercent(modName:String, player:Int)
-		return !register.exists(getActualModName(modName)) ? 0 : get(modName).getTargetPercent(player);
+	inline public function getTargetPercent(modName:String, player:Int){
+		var m = get(modName);
+		return m == null ? 0 : m.getTargetPercent(player);
+	}
 
-	inline public function getTargetValue(modName:String, player:Int)
-		return !register.exists(getActualModName(modName)) ? 0 : get(modName).getTargetValue(player);
+	inline public function getTargetValue(modName:String, player:Int){
+		var m = get(modName);
+		return m == null ? 0 : m.getTargetValue(player);
+	}
 
 	public function setCurrentValue(modName:String, val:Float, player:Int = -1)
 	{
@@ -272,7 +310,17 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 
 	private function flushActiveMods(player:Int){
 		if (activeModsDirty[player]){
-			activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
+			var list = activeMods[player];
+			for (i in 1...list.length){
+				var x = list[i];
+				var ox = register.get(x).getOrder();
+				var j = i - 1;
+				while (j >= 0 && register.get(list[j]).getOrder() > ox){
+					list[j + 1] = list[j];
+					j--;
+				}
+				list[j + 1] = x;
+			}
 
 			var objs = activeNoteModObjs[player];
 			if (objs == null) { objs = []; activeNoteModObjs[player] = objs; }
@@ -310,53 +358,65 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 					Log.warn('Tried to set null modifier "$modName"');
 				return;
 			}
-			var mod = daMod.parent == null ? daMod : daMod.parent;
-			var name = mod.getName().toLowerCase();
-            // optimization shit!! :)
-            // thanks 4mbr0s3 for giving an alternative way to do all of this cus andromeda has smth similar in Flexy but like
-            // this is a better way to do it
-            // (ofc its not EXACTLY what 4mbr0s3 did but.. y'know, it's close to it)
-
-			// so this actually has an issue
-			// this doesnt take into account any other submods
-			// so if you turn a submod off
-			// it turns the parent mod off, too, when it shouldnt
-			// so what I need to do is like, check other submods before removing the parent
-
-			if (activeMods[player] == null)
-				activeMods[player] = [];
-
-			daMod.setValue(val, player);
-
-			if (!activeMods[player].contains(name) && mod.shouldExecute(player, val)){
-				if (daMod.getName().toLowerCase() != name)
-					activeMods[player].push(daMod.getName().toLowerCase());
-				activeMods[player].push(name);
-			} else if (!mod.shouldExecute(player, val)){
-
-				// there is prob a better way to do this
-				// i just dont know it
-				var modParent = daMod.parent;
-				if (modParent == null){
-					for (name => mod in daMod.submods)
-					{
-						modParent = daMod; // because if this gets called at all, there's atleast 1 submod!!
-						break;
-					}
-				}
-				if (daMod != modParent)
-					activeMods[player].remove(daMod.getName().toLowerCase());
-				if (modParent != null){
-					if (!shouldKeepParentActive(modParent, player)){
-						activeMods[player].remove(modParent.getName().toLowerCase());
-					}
-				} else
-					activeMods[player].remove(daMod.getName().toLowerCase());
-			}
-
-			activeModsDirty[player] = true;
+			applyValue(daMod, val, player);
 		}
-    }
+	}
+
+	/**
+	 * Igual que setValue pero con el Modifier ya resuelto (sin lookup de nombre).
+	 * Lo usan los eventos de ease/set, que se ejecutan cada frame.
+	 **/
+	public function setModValue(daMod:Modifier, val:Float, player:Int=-1){
+		player = getP(player);
+		if (player == -1)
+		{
+			for (field in PlayField.fields)
+				setModValue(daMod, val, field.player);
+		}
+		else
+			applyValue(daMod, val, player);
+	}
+
+	function applyValue(daMod:Modifier, val:Float, player:Int){
+		var mod = daMod.parent == null ? daMod : daMod.parent;
+		var name = mod.lowerCaseName;
+
+		var list = activeMods[player];
+		if (list == null){
+			list = [];
+			activeMods[player] = list;
+		}
+
+		daMod.setValue(val, player);
+
+		var changed = false;
+		if (mod.shouldExecute(player, val)){
+			if (!list.contains(name)){
+				if (daMod.lowerCaseName != name)
+					list.push(daMod.lowerCaseName);
+				list.push(name);
+				changed = true;
+			}
+		} else {
+			var modParent = daMod.parent;
+			if (modParent == null){
+				for (_ in daMod.submods){
+					modParent = daMod;
+					break;
+				}
+			}
+			if (daMod != modParent)
+				if (list.remove(daMod.lowerCaseName)) changed = true;
+			if (modParent != null){
+				if (!shouldKeepParentActive(modParent, player))
+					if (list.remove(modParent.lowerCaseName)) changed = true;
+			} else
+				if (list.remove(daMod.lowerCaseName)) changed = true;
+		}
+
+		if (changed)
+			activeModsDirty[player] = true;
+	}
 
     public function new(daState:Dynamic){
 		this.state = daState;
@@ -364,17 +424,27 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 	}
 
 	public function update(elapsed:Float){
-		for (pN => mods in activeMods)
-			touchedMods[pN] = mods == null ? [] : mods.copy();
+		if (hasNodes){
+			for (pN in 0...activeMods.length){
+				var t = touchedMods[pN];
+				if (t == null){ t = []; touchedMods[pN] = t; }
+				t.resize(0);
+				var mods = activeMods[pN];
+				if (mods != null) for (m in mods) t.push(m);
+			}
+		}
 
-		for (mod in modArray)
-			if (mod.active && mod.doesUpdate())
-			    mod.update(elapsed);
+		for (mod in updateMods)
+			if (mod.active)
+				mod.update(elapsed);
 
-		runNodes();
-
-		for (pN in 0...touchedMods.length)
-			touchedMods[pN] = [];
+		if (hasNodes){
+			runNodes();
+			for (pN in 0...touchedMods.length){
+				var t = touchedMods[pN];
+				if (t != null) t.resize(0);
+			}
+		}
 	}
 
     public function updateTimeline(curStep:Float)
@@ -387,31 +457,32 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 
 	public function updateObject(beat:Float, obj:FlxSprite, pos:Vector3, player:Int){
 		final note:Note = (obj is Note ? cast obj : null);
-		final strum:StrumNote = (obj is StrumNote ? cast obj : null);
+		final strum:StrumNote = (note == null && (obj is StrumNote) ? cast obj : null);
+		final isNote = note != null;
+		final isSustain = isNote && note.isSustainNote;
 		
 		if(strum != null) strum.modPos.x = (pos.x - obj.width * .5);
 		else obj.x = (pos.x - obj.width * .5);
-		if(obj is Note && note.isSustainNote)
+		if(isSustain)
 			obj.x += note.parent.width/2 - note.width + note.offsetX;
 		
-		if(note != null && note.isSustainNote){
+		if(isSustain){
 			note.y = pos.y + note.offsetY + (note.strum.y - 50);
 		} else {
 			if(strum != null) strum.modPos.y = (pos.y - obj.height * .5 + strum.y - 50);
-			else if (note != null) note.y = (note.offsetY + pos.y - obj.height * .5);
+			else if (isNote) note.y = (note.offsetY + pos.y - obj.height * .5);
 			else obj.y = (pos.y - obj.height * .5);
 		}
 		
-		if(activeMods[player] != null){
+		var mods = activeMods[player];
+		if(mods != null){
 			flushActiveMods(player);
 			if(obj.active){
-				var isNote = obj is Note;
-				var isStrum = !isNote && (obj is StrumNote);
-				if(isNote || isStrum){
-					for (mod in activeNoteModObjs[player]){
-						if(isNote) mod.updateNote(beat, cast obj, pos, player);
-						else mod.updateReceptor(beat, cast obj, pos, player);
-					}
+				var objs = activeNoteModObjs[player];
+				if(isNote){
+					for (mod in objs) mod.updateNote(beat, note, pos, player);
+				} else if (strum != null){
+					for (mod in objs) mod.updateReceptor(beat, strum, pos, player);
 				}
 			}
 		}
@@ -419,11 +490,10 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 		obj.centerOrigin();
 		obj.centerOffsets();
 
-		if((obj is Note)){
-			var cum:Note = cast obj;
-			if (cum.isSustainNote) cum.origin.y = cum.offset.y = 0;
-			cum.offset.x += cum.typeOffsetX;
-			cum.offset.y += cum.typeOffsetY;
+		if(isNote){
+			if (isSustain) note.origin.y = note.offset.y = 0;
+			note.offset.x += note.typeOffsetX;
+			note.offset.y += note.typeOffsetY;
 		}
     }
 
@@ -438,8 +508,9 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 
 		if (!obj.active) return pos;
 
-		pos.x = PlayField.fields[player].members[data].x;
-		pos.y = PlayField.fields[player].members[data].y + diff;
+		var base = PlayField.fields[player].members[data];
+		pos.x = base.x;
+		pos.y = base.y + diff;
 		pos.z = 0;
 		pos.alpha = 1;
 		pos.glow = 0;

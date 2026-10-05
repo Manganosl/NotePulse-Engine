@@ -4,49 +4,88 @@ class ScaleModifier extends NoteModifier {
     override function getName() return 'tiny';
     override function getOrder() return PRE_REVERSE;
 
-    function getScale(sprite:Dynamic, scale:FlxPoint, data:Int, player:Int) {
-        var y = scale.y;
+    var sZoom:Modifier;
+    var sMini:Modifier;
+    var sScale:Modifier;
+    var sTinyX:Modifier;
+    var sTinyY:Modifier;
+    var sScaleX:Modifier;
+    var sScaleY:Modifier;
+    var sStretch:Modifier;
+    var sSquish:Modifier;
+    var cTinyX:Array<Modifier>;
+    var cTinyY:Array<Modifier>;
+    var cScaleX:Array<Modifier>;
+    var cScaleY:Array<Modifier>;
+    var cStretch:Array<Modifier>;
+    var cSquish:Array<Modifier>;
 
-        var zoom = getSubmodValue("zoom", player);
-        var mini = getSubmodValue("mini", player);
+    override function bind() {
+        sZoom = submods.get("zoom");
+        sMini = submods.get("mini");
+        sScale = submods.get("scale");
+        sTinyX = submods.get("tinyX");
+        sTinyY = submods.get("tinyY");
+        sScaleX = submods.get("scaleX");
+        sScaleY = submods.get("scaleY");
+        sStretch = submods.get("stretch");
+        sSquish = submods.get("squish");
+        cTinyX = bindColumn('tiny', 'X');
+        cTinyY = bindColumn('tiny', 'Y');
+        cScaleX = bindColumn('scale', 'X');
+        cScaleY = bindColumn('scale', 'Y');
+        cStretch = bindColumn('stretch');
+        cSquish = bindColumn('squish');
+    }
+
+    var _sx:Float = 1;
+    var _sy:Float = 1;
+
+    function computeScale(baseX:Float, baseY:Float, isSustain:Bool, data:Int, player:Int) {
+        var x = baseX;
+        var y = baseY;
+
+        var zoom = subVal(sZoom, player);
+        var mini = subVal(sMini, player);
         var zoomMult = 1 + (zoom - (mini * 0.5));
 
-        scale.x *= zoomMult;
-        scale.y *= zoomMult;
+        x *= zoomMult;
+        y *= zoomMult;
 
-        scale.x *= 1 - getValue(player);
-        scale.y *= 1 - getValue(player);
+        x *= 1 - getValue(player);
+        y *= 1 - getValue(player);
 
-        scale.x *= getSubmodValue("scale", player);
-        scale.y *= getSubmodValue("scale", player);
+        x *= subVal(sScale, player);
+        y *= subVal(sScale, player);
 
-        var tinyX = getSubmodValue("tinyX", player) + getSubmodValue('tiny${data}X', player);
-        var tinyY = getSubmodValue("tinyY", player) + getSubmodValue('tiny${data}Y', player);
+        var tinyX = subVal(sTinyX, player) + colVal(cTinyX, data, player);
+        var tinyY = subVal(sTinyY, player) + colVal(cTinyY, data, player);
 
-        scale.x *= 1 - tinyX;
-        scale.y *= 1 - tinyY;
+        x *= 1 - tinyX;
+        y *= 1 - tinyY;
 
-        var scaleX = getSubmodValue("scaleX", player) + getSubmodValue('scale${data}X', player);
-        var scaleY = getSubmodValue("scaleY", player) + getSubmodValue('scale${data}Y', player);
+        var scaleX = subVal(sScaleX, player) + colVal(cScaleX, data, player);
+        var scaleY = subVal(sScaleY, player) + colVal(cScaleY, data, player);
 
-        scale.x *= scaleX;
-        scale.y *= scaleY;
+        x *= scaleX;
+        y *= scaleY;
 
-        var stretch = getSubmodValue("stretch", player) + getSubmodValue('stretch${data}', player);
-        var squish = getSubmodValue("squish", player) + getSubmodValue('squish${data}', player);
+        var stretch = subVal(sStretch, player) + colVal(cStretch, data, player);
+        var squish = subVal(sSquish, player) + colVal(cSquish, data, player);
 
         var stretchX = lerp(1, 0.5, stretch);
         var stretchY = lerp(1, 2, stretch);
         var squishX = lerp(1, 2, squish);
         var squishY = lerp(1, 0.5, squish);
 
-        scale.x *= squishX * stretchX;
-        scale.y *= squishY * stretchY;
+        x *= squishX * stretchX;
+        y *= squishY * stretchY;
         
-        if ((sprite is Note) && sprite.isSustainNote)
-            scale.y = y;
+        if (isSustain)
+            y = baseY;
 
-        return scale;
+        _sx = x;
+        _sy = y;
     }
     
     override function shouldExecute(player:Int, val:Float) return true;
@@ -55,17 +94,15 @@ class ScaleModifier extends NoteModifier {
     override function ignoreUpdateNote() return false;
 
     override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int) {
-        var scale = getScale(note, FlxPoint.weak(note.defScale.x, note.defScale.y), note.noteData, player);
-        if(note.isSustainNote) scale.y = note.defScale.y;
+        computeScale(note.defScale.x, note.defScale.y, note.isSustainNote, note.noteData, player);
+        if(note.isSustainNote) _sy = note.defScale.y;
         
-        note.scale.copyFrom(scale);
-        scale.putWeak();
+        note.scale.set(_sx, _sy);
     }
 
     override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int) {
-        var scale = getScale(receptor, FlxPoint.weak(receptor.defScale.x, receptor.defScale.y), receptor.noteData, player);
-        receptor.scale.copyFrom(scale);
-        scale.putWeak();
+        computeScale(receptor.defScale.x, receptor.defScale.y, false, receptor.noteData, player);
+        receptor.scale.set(_sx, _sy);
     }
 
     private var _origin:Vector3 = new Vector3(); 
@@ -84,8 +121,8 @@ class ScaleModifier extends NoteModifier {
     }
 
     override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite) {
-        var zoom = getSubmodValue("zoom", player);
-        var mini = getSubmodValue("mini", player);
+        var zoom = subVal(sZoom, player);
+        var mini = subVal(sMini, player);
 
         if (zoom != 0 || mini != 0) {
             var zoomMult = 1 + (zoom - (mini * 0.5));
