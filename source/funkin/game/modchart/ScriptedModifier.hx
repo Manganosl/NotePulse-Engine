@@ -36,6 +36,10 @@ class ScriptedModifier extends Modifier {
 			script.set("getValue", this.getValue);
 			script.set("getSubmodValue", this.getSubmodValue);
 			script.set("getSubmodPercent", this.getSubmodPercent);
+
+			script.set("subVal", this.subVal);
+			script.set("colVal", this.colVal);
+			script.set("bindColumn", this.bindColumn);
 			
 			modName = (script.call('getName', []) ?? modName);
 			modType = (script.call('getModType', []) ?? MISC_MOD);
@@ -47,6 +51,8 @@ class ScriptedModifier extends Modifier {
 		
 		script?.call('onCreateMod', [modMgr, name, prefix, parent]);
 	}
+
+	public override function bind():Void script?.call('bind', []);
 	
 	public override function getOrder():Int return modOrder;
 	public override function getName():String return modName;

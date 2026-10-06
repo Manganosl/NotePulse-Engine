@@ -20,7 +20,7 @@ abstract ModifierOrder(Int) to Int{
 	
 }
 
-class Modifier implements flixel.util.FlxDestroyUtil.IFlxDestroyable{
+class Modifier implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 	public var modMgr:ModManager;
 	public var percents:Array<Float> = [0, 0];
 	public var submods:Map<String, Modifier> = [];
@@ -29,18 +29,39 @@ class Modifier implements flixel.util.FlxDestroyUtil.IFlxDestroyable{
 
 	public var lowerCaseName:String;
 
+	/**
+	 * Called once after registering the modifier
+	 */
 	public function bind():Void {}
 
-	inline function subVal(m:Modifier, player:Int):Float
-		return m == null ? 0 : m.getValue(player);
+	/**
+	 * Null-Safe way of getting a submod's value
+	 * @param mod The modifier
+	 * @param player The modifier's player
+	 * @return The submod's value
+	 */
+	inline function subVal(mod:Modifier, player:Int):Float
+		return mod == null ? 0 : mod.getValue(player);
 
+	/**
+	 * Null-Safe way of getting a submod's column value created by `bindColumn()`
+	 * @param arr The submod columns array
+	 * @param data The column
+	 * @param player The modifier's player
+	 * @return The submod's column value
+	 */
 	inline function colVal(arr:Array<Modifier>, data:Int, player:Int):Float {
 		if (arr == null || data < 0 || data >= arr.length) return 0;
-		var m = arr[data];
-		return m == null ? 0 : m.getValue(player);
+		var mod = arr[data];
+		return mod == null ? 0 : mod.getValue(player);
 	}
 
-	/** Resuelve submods '<baseName><i><suffix>' para todas las columnas. **/
+	/**
+	 * Get the submods for all columns
+	 * @param baseName The submod's name
+	 * @param suffix A suffix (Pretty self-explanatory)
+	 * @return The submods array
+	 */
 	function bindColumn(baseName:String, suffix:String = ''):Array<Modifier>
 		return [for (i in 0...PlayState.SONG.mania + 1) submods.get('$baseName$i$suffix')];
 

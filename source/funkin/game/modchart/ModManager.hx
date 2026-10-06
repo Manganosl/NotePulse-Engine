@@ -362,10 +362,6 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 		}
 	}
 
-	/**
-	 * Igual que setValue pero con el Modifier ya resuelto (sin lookup de nombre).
-	 * Lo usan los eventos de ease/set, que se ejecutan cada frame.
-	 **/
 	public function setModValue(daMod:Modifier, val:Float, player:Int=-1){
 		player = getP(player);
 		if (player == -1)
