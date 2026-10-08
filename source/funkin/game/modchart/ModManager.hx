@@ -47,13 +47,24 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 		quickRegister(new RotateModifier(this, 'center', new Vector3((FlxG.width* 0.5) - (Note.swagWidth/2), (FlxG.height* 0.5) - Note.swagWidth/2)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
 		quickRegister(new SubModifier("noteSpawnTime", this));
-		setValue("noteSpawnTime", 2000);
-		setValue("scale", 1);
-		setValue("scaleX", 1);
-		setValue("scaleY", 1);
-		setValue("xmod", 1);
+		setDefaultValues();
+	}
+
+	function setDefaultValues(player:Int = -1){
+		setValue("noteSpawnTime", 2000, player);
+		setValue("scale", 1, player);
+		setValue("scaleX", 1, player);
+		setValue("scaleY", 1, player);
+		setValue("xmod", 1, player);
 		for(i in 0...PlayState.SONG.mania+1)
-			setValue('xmod$i', 1);
+			setValue('xmod$i', 1, player);
+	}
+
+	public function registerPlayer(player:Int){
+		receptors[player] = PlayField.fields[player].members;
+		for (mod in modArray)
+			setModValue(mod, 0, player);
+		setDefaultValues(player);
 	}
 
 	public function registerScriptedModifiers(){
