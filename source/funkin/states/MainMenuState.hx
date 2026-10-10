@@ -6,6 +6,7 @@ import flixel.effects.FlxFlicker;
 import lime.app.Application;
 import funkin.states.options.OptionsState;
 import funkin.backend.Discord;
+import funkin.substates.quickPanel.QuickPanelState;
 
 enum MainMenuColumn {
 	LEFT;
@@ -128,15 +129,12 @@ class MainMenuState extends MusicBeatState
 		descText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		descText.scrollFactor.set();
 		add(descText);
-
-		var modsText:FlxText = new FlxText(12, FlxG.height - 44, 0, "[TAB] Mod Loader", 12);
-		modsText.scrollFactor.set();
-		modsText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
-		add(modsText);
 		
 		changeItem();
 
 		super.create();
+
+		openTopSubState(new QuickPanelState());
 
 		FlxTween.cancelTweensOf(Main.fpsVar, ["y"]);
 		FlxTween.tween(Main.fpsVar, {y: 125}, 1, {ease: FlxEase.circOut});
@@ -163,6 +161,9 @@ class MainMenuState extends MusicBeatState
 	override function update(elapsed:Float){
 		camFollow.x = FlxG.mouse.viewX;
 		
+		if(FlxG.sound.music == null)
+			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+
 		if (FlxG.sound.music.volume < 0.8)
 			FlxG.sound.music.volume = Math.min(FlxG.sound.music.volume + 0.5 * elapsed, 0.8);
 
@@ -345,10 +346,6 @@ class MainMenuState extends MusicBeatState
 				}
 			} else {
 				if(controls.justPressed('debug_1')) FlxG.sound.play(Paths.sound('cancelMenu'));
-			}
-			if(FlxG.keys.justPressed.TAB){
-				selectedSomethin = true;
-				MusicBeatState.switchState(new funkin.states.editors.ModSelectorState(funkin.states.scripted.ScriptedState, [null]));
 			}
 			#end
 		}

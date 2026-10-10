@@ -15,7 +15,7 @@ import flixel.addons.display.FlxRuntimeShader;
 
 import funkin.game.shaders.CustomShader;
 
-class MusicBeatState extends FlxState
+class MusicBeatState extends FlxTransitionableState
 {
 	#if (!flash && sys)
 	public var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();

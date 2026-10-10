@@ -102,6 +102,9 @@ class Init extends FlxState {
 			Mods.currentLoadedMod = null;
 			Mods.modPack = null;
 			funkin.scripting.GlobalHandler.stopGlobalHX();
+			FlxTween.cancelTweensOf(Main.fpsVar);
+			Main.fpsVar.y = 10;
+			funkin.substates.quickPanel.QuickPanelState.freeplayAllowed = true;
 			MusicBeatState.switchState(new TitleState());
 		}
 

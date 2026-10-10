@@ -18,10 +18,6 @@ import funkin.states.menus.StoryMenuState;
 import funkin.states.MainMenuState;
 import funkin.states.init.*;
 
-import funkin.objects.audio.PolygonSpectogram;
-import funkin.objects.audio.PolygonSpectogram.VISTYPE;
-import funkin.objects.audio.SpectogramSprite.SPECDIRECTION;
-
 import funkin.objects.audio.BarSpectogram;
 
 
@@ -143,15 +139,11 @@ class TitleState extends MusicBeatState
 	var danceLeft:Bool = false;
 	var titleText:FlxSprite;
 	var swagShader:ColorSwap = null;
-	var viz:PolygonSpectogram;
 
 	function startIntro()
 	{
-		if (!initialized)
-		{
-			if(FlxG.sound.music == null) {
-				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
-			}
+		if(FlxG.sound.music == null) {
+			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 		}
 
 		Conductor.bpm = titleJSON.bpm;
@@ -169,14 +161,6 @@ class TitleState extends MusicBeatState
 		// bg.setGraphicSize(Std.int(bg.width * 0.6));
 		// bg.updateHitbox();
 		add(bg);
-
-		viz = new PolygonSpectogram(FlxG.sound.music, FlxColor.WHITE, 1280, 2, SPECDIRECTION.HORIZONTAL);
-		viz.waveAmplitude = 180;
-		viz.thickness = 4;
-		viz.y = 360;
-		viz.color = 0xFF525252;
-		viz.alpha = 0.75;
-		add(viz);
 
 		logoBl = new FlxSprite(titleJSON.titlex, titleJSON.titley);
 		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');

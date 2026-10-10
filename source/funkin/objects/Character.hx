@@ -7,7 +7,6 @@ import openfl.utils.AssetType;
 import openfl.utils.Assets;
 import funkin.data.Song;
 import funkin.data.Section;
-import animate.FlxAnimate;
 import funkin.backend.parsers.CodenameParser;
 import haxe.Json;
 
@@ -49,7 +48,7 @@ enum CharacterSpriteType
 	TEXTURE_ATLAS;
 }
 
-class Character extends FlxAnimate
+class Character extends FunkinSprite
 {
 	/**
 	 * In case a character is missing, it will use this on its place
@@ -586,7 +585,7 @@ class Character extends FlxAnimate
 	}
 
 	public function playGhostAnim(ghostID = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0){
-		var ghost:FlxAnimate = new FlxAnimate();
+		var ghost:FunkinSprite = new FunkinSprite();
 		ghost.scale.copyFrom(scale);
 		ghost.frames = frames;
 		setupGhostAnims(ghost);
@@ -653,7 +652,7 @@ class Character extends FlxAnimate
 		ghostTweenGrp[myIndex] = twn;
 	}
 
-	public function setupGhostAnims(target:FlxAnimate){
+	public function setupGhostAnims(target:FunkinSprite){
 		if (animationsArray == null || animationsArray.length <= 0) return;
 
 		for (anim in animationsArray){

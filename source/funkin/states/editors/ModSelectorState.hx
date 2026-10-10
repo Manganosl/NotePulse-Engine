@@ -136,15 +136,19 @@ class ModSelectorState extends MusicBeatState {
 				Mods.currentLoadedMod = null;
 				Mods.modPack = null;
 				GlobalHandler.stopGlobalHX();
-				FlxG.sound.music.stop();
+				if(FlxG.sound.music != null)
+					FlxG.sound.music.stop();
 				FlxTween.cancelTweensOf(Main.fpsVar);
 				Main.fpsVar.y = 10;
+				funkin.substates.quickPanel.QuickPanelState.freeplayAllowed = true;
 				MusicBeatState.switchState(new funkin.states.menus.TitleState());
 				return;
 			}
 			setMod(modArray[curSelected - 1], true);
+			funkin.substates.quickPanel.QuickPanelState.freeplayAllowed = true;
 			GlobalHandler.loadGlobalHX();
-			FlxG.sound.music.stop();
+			if(FlxG.sound.music != null)
+				FlxG.sound.music.stop();
 			FlxTween.cancelTweensOf(Main.fpsVar);
 			Main.fpsVar.y = 10;
 			Application.current.window.title = (((Mods.currentLoadedMod != null && Mods.currentLoadedMod != "" && Mods.modPack.name != null && Mods.modPack.name != "") ? Mods.modPack.name : "NotePulse Engine"));

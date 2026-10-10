@@ -61,6 +61,8 @@ import openfl.ui.Mouse;
 import lime.ui.MouseCursor;
 import openfl.ui.MouseCursor as OpenflCursor;
 
+import funkin.objects.FunkinSprite;
+
 using StringTools;
 
 #if PRETTY_TRACE

@@ -1,6 +1,7 @@
 package funkin.states.scripted;
 
 import funkin.scripting.FunkinScript;
+import funkin.substates.quickPanel.QuickPanelState;
 
 class ScriptedState extends MusicBeatState
 {
@@ -20,6 +21,9 @@ class ScriptedState extends MusicBeatState
 
 	override public function create():Void {
 		super.create();
+
+		openTopSubState(new QuickPanelState());
+
 		if(initialScriptPath != null) startHScript(initialScriptPath);
 
 		if(hscript != null) callOnHScript('onCreatePost');

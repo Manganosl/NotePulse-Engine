@@ -29,6 +29,7 @@ class FunkinDebugDisplay extends Sprite
   static final OTHERS_OFFSET:Int = 8;
   static final DEBUG_BOX_GAP:Int = 6;
   static final DEBUG_BOX_MIN_HEIGHT:Int = 20;
+  static final CORNER_RADIUS:Float = 10; // Radio de las esquinas redondeadas
 
   /**
    * The current display mode. See `FunkinDebugDisplayMode`.
@@ -124,11 +125,11 @@ class FunkinDebugDisplay extends Sprite
 
     background = new Shape();
     background.graphics.beginFill(0x3d3f41, 1);
-    background.graphics.drawRect(0, 0, bgWidth, bgHeight);
+    background.graphics.drawRoundRect(0, 0, bgWidth, bgHeight, CORNER_RADIUS, CORNER_RADIUS);
     background.graphics.endFill();
     background.graphics.beginFill(0x2c2f30, 1);
-    background.graphics.drawRect(INNER_RECT_DIFF, INNER_RECT_DIFF, OUTER_RECT_DIMENSIONS[0] * BG_WIDTH_MULTIPLIER,
-      OUTER_RECT_DIMENSIONS[1] * BG_HEIGHT_MULTIPLIER);
+    background.graphics.drawRoundRect(INNER_RECT_DIFF, INNER_RECT_DIFF, (OUTER_RECT_DIMENSIONS[0] * BG_WIDTH_MULTIPLIER),
+      (OUTER_RECT_DIMENSIONS[1] * BG_HEIGHT_MULTIPLIER), CORNER_RADIUS - 2, CORNER_RADIUS - 2);
     background.graphics.endFill();
     background.alpha = backgroundOpacity;
     addChild(background);
@@ -231,10 +232,10 @@ class FunkinDebugDisplay extends Sprite
 
     debugBackground.graphics.clear();
     debugBackground.graphics.beginFill(0x3d3f41, 1);
-    debugBackground.graphics.drawRect(0, 0, boxWidth, boxHeight);
+    debugBackground.graphics.drawRoundRect(0, 0, boxWidth, boxHeight, CORNER_RADIUS, CORNER_RADIUS);
     debugBackground.graphics.endFill();
     debugBackground.graphics.beginFill(0x2c2f30, 1);
-    debugBackground.graphics.drawRect(INNER_RECT_DIFF, INNER_RECT_DIFF, boxWidth - (INNER_RECT_DIFF * 2), boxHeight - (INNER_RECT_DIFF * 2));
+    debugBackground.graphics.drawRoundRect(INNER_RECT_DIFF, INNER_RECT_DIFF, boxWidth - (INNER_RECT_DIFF * 2), boxHeight - (INNER_RECT_DIFF * 2), CORNER_RADIUS - 2, CORNER_RADIUS - 2);
     debugBackground.graphics.endFill();
     debugBackground.alpha = backgroundOpacity;
   }
@@ -309,11 +310,11 @@ class FunkinDebugDisplay extends Sprite
     fpsGraph.textDisplay.text = info.join('\n');
 
     #if !html5
-    gcMemGraph.textDisplay.text = 'GC MEM: ${FlxStringUtil.formatBytes(gcMem).toUpperCase()} / ${FlxStringUtil.formatBytes(gcMemPeak).toUpperCase()}';
+    gcMemGraph.textDisplay.text = 'GC MEM: ${FlxStringUtil.formatBytes(gcMem).toUpperCase()} /${FlxStringUtil.formatBytes(gcMemPeak).toUpperCase()}';
 
     if (taskMemGraph != null)
     {
-      taskMemGraph.textDisplay.text = 'TASK MEM: ${FlxStringUtil.formatBytes(taskMem).toUpperCase()} / ${FlxStringUtil.formatBytes(taskMemPeak).toUpperCase()}';
+      taskMemGraph.textDisplay.text = 'TASK MEM: ${FlxStringUtil.formatBytes(taskMem).toUpperCase()} /${FlxStringUtil.formatBytes(taskMemPeak).toUpperCase()}';
     }
     #end
   }
@@ -327,10 +328,10 @@ class FunkinDebugDisplay extends Sprite
       info.push('FPS: $currentFPS');
 
       #if !html5
-      info.push('GC MEM: ${FlxStringUtil.formatBytes(gcMem).toUpperCase()} / ${FlxStringUtil.formatBytes(gcMemPeak).toUpperCase()}');
+      info.push('GC MEM: ${FlxStringUtil.formatBytes(gcMem).toUpperCase()} /${FlxStringUtil.formatBytes(gcMemPeak).toUpperCase()}');
 
       if (MemoryUtil.supportsTaskMem())
-        info.push('TASK MEM: ${FlxStringUtil.formatBytes(taskMem).toUpperCase()} / ${FlxStringUtil.formatBytes(taskMemPeak).toUpperCase()}');
+        info.push('TASK MEM: ${FlxStringUtil.formatBytes(taskMem).toUpperCase()} /${FlxStringUtil.formatBytes(taskMemPeak).toUpperCase()}');
       #end
 
       infoDisplay.text = info.join('\n');
@@ -345,6 +346,7 @@ class FunkinDebugDisplay extends Sprite
 
     final stateName:String = FlxG.state != null ? Type.getClassName(Type.getClass(FlxG.state)) : 'null';
     final subStateName:String = FlxG.state != null && FlxG.state.subState != null ? Type.getClassName(Type.getClass(FlxG.state.subState)) : 'none';
+    final topSubStateName:String = FlxG.state != null && FlxG.state.topSubState != null ? Type.getClassName(Type.getClass(FlxG.state.topSubState)) : 'none';
 
     @:privateAccess
     if(stateName != 'funkin.states.scripted.ScriptedState')
@@ -356,6 +358,11 @@ class FunkinDebugDisplay extends Sprite
       info.push('Substate: $subStateName');
     else
       info.push('Substate: ${funkin.states.scripted.ScriptedSubstate.lastScriptPath}');
+    @:privateAccess
+    if(stateName != 'funkin.states.scripted.ScriptedSubstate')
+      info.push('Top Substate: $topSubStateName');
+    else
+      info.push('Top Substate: ${funkin.states.scripted.ScriptedSubstate.lastScriptPath}');
     info.push('Members: ${FlxG.state != null ? FlxG.state.members.length : 0}');
     info.push('Cameras: ${FlxG.cameras.list.length}');
     info.push('Sounds: ${FlxG.sound.list.length}');
