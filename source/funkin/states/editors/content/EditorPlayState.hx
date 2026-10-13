@@ -154,6 +154,11 @@ class EditorPlayState extends MusicBeatSubstate
 		for(i in 0...PlayState.SONG.lanes)
 			generateStaticArrows(i);
 
+		for(field in PlayField.fields){
+			field.notePathGroup.cameras = [camHUD];
+			add(field.notePathGroup);
+		}
+
 		if(PlayState.SONG.lanes >= 3){
 			for(i in 0...gfStrums.length)
 				gfStrums.members[i].x = (opponentStrums.members[i].x + playerStrums.members[i].x) / 2;
@@ -294,9 +299,22 @@ class EditorPlayState extends MusicBeatSubstate
 				strum.modPos.x = pos.x;
 				strum.modPos.y = pos.y + strum.y - 50;
 				strum.z = pos.z;
+				strum.scale.x = pos.scaleX * strum.defScale.x;
+				strum.scale.y = pos.scaleY * strum.defScale.y;
+				strum.skewOffset.x = pos.skewX;
+				strum.skewOffset.y = pos.skewY;
+				strum.angle3D.x = pos.angleX;
+				strum.angle3D.y = pos.angleY;
+				strum.angle3D.z = pos.angleZ;
 				strum.rgbShader.alphaMult = pos.alpha;
 				strum.rgbShader.flash = pos.glow;
 			});
+
+			var camBaseL:Float = camHUD.scroll.x;
+			var camBaseT:Float = camHUD.scroll.y;
+			var camBaseR:Float = camHUD.scroll.x + camHUD.width / camHUD.zoom;
+			var camBaseB:Float = camHUD.scroll.y + camHUD.height / camHUD.zoom;
+			field.updateNotePaths(curDecBeat, Conductor.songPosition, playbackRate, songSpeed, spawnTime, camBaseL, camBaseT, camBaseR, camBaseB);
 		}
 		
 		var time:Float = CoolUtil.floorDecimal((Conductor.songPosition - ClientPrefs.data.noteOffset) / 1000, 1);
@@ -316,12 +334,23 @@ class EditorPlayState extends MusicBeatSubstate
 		modManager.updateObject(curDecBeat, daNote, pos, pN);
 
 		pos.x += daNote.offsetX;
-		if(daNote.isSustainNote) pos.x += daNote.parent.width/2 - daNote.width/2;
+		if(daNote.isSustainNote){
+			pos.x += daNote.parent.width/2 - daNote.width/2;
+			pos.y += daNote.parent.height/2;
+		}
 		pos.y += daNote.offsetY;
-		if(daNote.isSustainNote) pos.y += daNote.parent.height/2;
 		daNote.x = pos.x;
 		daNote.y = pos.y + daNote.strum.y - 50;
 		daNote.z = pos.z;
+		daNote.scale.x = pos.scaleX * daNote.defScale.x;
+		if(!daNote.isSustainNote){
+			daNote.scale.y = pos.scaleY * daNote.defScale.y;
+			daNote.skewOffset.x = pos.skewX;
+			daNote.skewOffset.y = pos.skewY;
+			daNote.angle3D.x = pos.angleX;
+			daNote.angle3D.y = pos.angleY;
+			daNote.angle3D.z = pos.angleZ;
+		}
 
 		if((daNote.playField != null && daNote.playField.sustainSegments == 1) || !daNote.isSustainNote)
     		daNote.setColorTransform(1 - pos.glow, 1 - pos.glow, 1 - pos.glow, (pos.alpha * (daNote.copyAlpha ? daNote.strum.alpha : 1)), 255 * pos.glow, 255 * pos.glow, 255 * pos.glow, 0);

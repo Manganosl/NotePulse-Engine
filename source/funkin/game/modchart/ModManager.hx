@@ -25,6 +25,7 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 			ReverseModifier,
 			InvertModifier,
 			DrunkModifier,
+			FreezeModifier,
 			BeatModifier,
 			AlphaModifier,
 			ReceptorScrollModifier, 
@@ -44,7 +45,7 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 			quickRegister(Type.createInstance(mod, [this]));
 
 		quickRegister(new RotateModifier(this));
-		quickRegister(new RotateModifier(this, 'center', new Vector3((FlxG.width* 0.5) - (Note.swagWidth/2), (FlxG.height* 0.5) - Note.swagWidth/2)));
+		quickRegister(new RotateModifier(this, 'center', new DrawInstruction((FlxG.width* 0.5) - (Note.swagWidth/2), (FlxG.height* 0.5) - Note.swagWidth/2)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
 		quickRegister(new SubModifier("noteSpawnTime", this));
 		setDefaultValues();
@@ -462,7 +463,7 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 		return obj != null ? obj.x : 0;
 	}
 
-	public function updateObject(beat:Float, obj:FlxSprite, pos:Vector3, player:Int){
+	public function updateObject(beat:Float, obj:FlxSprite, pos:DrawInstruction, player:Int){
 		final note:Note = (obj is Note ? cast obj : null);
 		final strum:StrumNote = (note == null && (obj is StrumNote) ? cast obj : null);
 		final isNote = note != null;
@@ -508,10 +509,10 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 		return -(0.45 * (songPos - strumTime) * songSpeed);
 	}
 	
-	public function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, ?exclusions:Array<String>, ?pos:Vector3):Vector3
+	public function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, ?exclusions:Array<String>, ?pos:DrawInstruction):DrawInstruction
 	{
 		if (pos == null)
-			pos = new Vector3();
+			pos = new DrawInstruction();
 
 		if (!obj.active) return pos;
 
@@ -519,8 +520,7 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 		pos.x = base.x;
 		pos.y = base.y + diff;
 		pos.z = 0;
-		pos.alpha = 1;
-		pos.glow = 0;
+		pos.resetDraw();
 
 		if (activeMods[player] != null && obj.active){
 			flushActiveMods(player);

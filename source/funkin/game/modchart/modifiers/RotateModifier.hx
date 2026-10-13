@@ -5,7 +5,7 @@ class RotateModifier extends NoteModifier { // this'll be rotateX in ModManager
 	override function getName() return _name;
 	override function getOrder() return Modifier.ModifierOrder.LAST + 2;
 	
-	public var daOrigin:Vector3;
+	public var daOrigin:DrawInstruction;
 	
 	var prefix:String;
 
@@ -15,7 +15,7 @@ class RotateModifier extends NoteModifier { // this'll be rotateX in ModManager
 	var cRotY:Array<Modifier>;
 	var cRotZ:Array<Modifier>;
 	
-	public function new(modMgr:ModManager, ?prefix:String = '', ?origin:Vector3, ?parent:Modifier)
+	public function new(modMgr:ModManager, ?prefix:String = '', ?origin:DrawInstruction, ?parent:Modifier)
 	{
 		this.prefix = prefix;
 		this._name = '${prefix}rotateX';
@@ -32,7 +32,7 @@ class RotateModifier extends NoteModifier { // this'll be rotateX in ModManager
 		cRotZ = bindColumn('${prefix}rotate', 'Z');
 	}
 	
-	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite)
 	{
 		var ox:Float;
 		var oy:Float;

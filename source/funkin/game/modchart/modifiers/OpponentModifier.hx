@@ -3,7 +3,7 @@ package funkin.game.modchart.modifiers;
 class OpponentModifier extends NoteModifier {
 	override function getName()
 		return 'opponentSwap';
-    override function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+    override function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite){
         if(player >= 2) return pos; // Temp fix
         if(getValue(player) == 0) return pos;
         var nPlayer = Std.int(MathUtil.scale(player, 0, 1, 1, 0));

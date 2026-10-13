@@ -11,6 +11,7 @@ class AlphaModifier extends NoteModifier
 
 	var sAlpha:Modifier;
 	var sNoteAlpha:Modifier;
+	var sReceptorAlpha:Modifier;
 	var sHidden:Modifier;
 	var sHiddenOffset:Modifier;
 	var sSudden:Modifier;
@@ -22,6 +23,7 @@ class AlphaModifier extends NoteModifier
 	var sDontGlow:Modifier;
 	var cAlpha:Array<Modifier>;
 	var cNoteAlpha:Array<Modifier>;
+	var cReceptorAlpha:Array<Modifier>;
 	var cDark:Array<Modifier>;
 	var cHidden:Array<Modifier>;
 	var cHiddenOffset:Array<Modifier>;
@@ -32,6 +34,7 @@ class AlphaModifier extends NoteModifier
 	override function bind(){
 		sAlpha = submods.get("alpha");
 		sNoteAlpha = submods.get("noteAlpha");
+		sReceptorAlpha = submods.get("receptorAlpha");
 		sHidden = submods.get("hidden");
 		sHiddenOffset = submods.get("hiddenOffset");
 		sSudden = submods.get("sudden");
@@ -43,6 +46,7 @@ class AlphaModifier extends NoteModifier
 		sDontGlow = submods.get("dontUseStealthGlow");
 		cAlpha = bindColumn("alpha");
 		cNoteAlpha = bindColumn("noteAlpha");
+		cReceptorAlpha = bindColumn("receptorAlpha");
 		cDark = bindColumn("dark");
 		cHidden = bindColumn("hidden");
 		cHiddenOffset = bindColumn("hiddenOffset");
@@ -133,7 +137,7 @@ class AlphaModifier extends NoteModifier
 
 	override function shouldExecute(player:Int, val:Float) return true;
 
-	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite):Vector3{
+	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite):DrawInstruction{
 		if(!Std.isOfType(obj, StrumNote)){
 			var column = data;
 			var yPos:Float = visualDiff + 50;
@@ -154,7 +158,8 @@ class AlphaModifier extends NoteModifier
 			pos.alpha = finalAlpha * alphaMod;
 			pos.glow = glow;
 		} else {
-			var alphaMod = (1 - subVal(sAlpha, player)) * (1 - colVal(cAlpha, data, player));
+			var alphaMod = (1 - subVal(sAlpha, player)) * (1 - colVal(cAlpha, data, player))
+				* (1 - subVal(sReceptorAlpha, player) * (1 - colVal(cReceptorAlpha, data, player)));
 			var dark = subVal(sDark, player);
 			var darkCol = colVal(cDark, data, player);
 			if (dark != 0 || darkCol != 0)
@@ -167,6 +172,7 @@ class AlphaModifier extends NoteModifier
 	override function getSubmods(){
 		var subMods:Array<String> = [
 			"noteAlpha",
+			"receptorAlpha",
 			"alpha",
 			"hidden",
 			"hiddenOffset",
@@ -181,6 +187,7 @@ class AlphaModifier extends NoteModifier
 		];
 		for(i in 0...PlayState.SONG.mania+1){
 			subMods.push('noteAlpha$i');
+			subMods.push('receptorAlpha$i');
 			subMods.push('alpha$i');
 			subMods.push('dark$i');
 			subMods.push('hidden$i');

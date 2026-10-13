@@ -813,8 +813,8 @@ class QuickPanelGroup extends FlxSpriteGroup
       host.persistentDraw = true;
       host.persistentUpdate = (host == quickPanelState);
       host.openTopSubState(blockerSubState);
-      if (host.topSubState != null && host.topSubState != blockerSubState) trace(
-        "WARNING: QuickPanelGroup is opening a blocker substate while another substate is already open. This may cause issues."
+      if (host.topSubState != null && host.topSubState != blockerSubState) Log.warn(
+        "QuickPanelGroup is opening a blocker substate while another substate is already open. This may cause issues."
       );
     }
     else
@@ -825,9 +825,9 @@ class QuickPanelGroup extends FlxSpriteGroup
   {
     if (blockerSubState == null) return;
     FlxG.state.persistentUpdate = true;
+    if (FlxG.state.subState != null) FlxG.state.subState.persistentUpdate = true;
     blockerSubState.close();
     if (FlxG.state.topSubState != null) FlxG.state.topSubState.persistentUpdate = true;
-    if (FlxG.state.subState != null) FlxG.state.subState.persistentUpdate = true;
     blockerSubState = null;
   }
 

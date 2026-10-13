@@ -125,7 +125,8 @@ class OptionsState extends MusicBeatState
 		add(titleText);
 		add(descText);
 
-		if(Mods.currentLoadedMod != null && Mods.currentLoadedMod != ""){
+		var hasModOptions:Bool = false;
+        if(Mods.currentLoadedMod != null && Mods.currentLoadedMod != ""){
             var configPath:String = Paths.modsJson("config");
             if(Paths.exists(configPath)){
                 try {
@@ -137,29 +138,30 @@ class OptionsState extends MusicBeatState
 
                     modParsedJson = Json.parse(rawJson);
                     if(modParsedJson != null) {
-						if(modParsedJson.options == null || modParsedJson.options.length < 1) return;
-                        if(modParsedJson.configName != null && modParsedJson.configName != "")
-                            modConfigName = modParsedJson.configName;
+                        if(modParsedJson.options != null && modParsedJson.options.length > 0) {
+                            if(modParsedJson.configName != null && modParsedJson.configName != "")
+                                modConfigName = modParsedJson.configName;
 
-                        if(modParsedJson.configDesc != null && modParsedJson.configDesc != "")
-                            modConfigDesc = modParsedJson.configDesc;
-                        else
-                            modConfigDesc = 'Options for ${Mods.modPack.name != null ? Mods.modPack.name : Mods.currentLoadedMod}';
+                            if(modParsedJson.configDesc != null && modParsedJson.configDesc != "")
+                                modConfigDesc = modParsedJson.configDesc;
+                            else
+                                modConfigDesc = 'Options for ${Mods.modPack.name != null ? Mods.modPack.name : Mods.currentLoadedMod}';
 
-                        options.push(modConfigName);
+                            hasModOptions = true;
+                        }
                     }
                 } catch(e:Dynamic) {}
             }
         }
 
-		for (num => option in options)
-		{
-			var optionText:Alphabet = new Alphabet(0, 0, option, true);
-			optionText.screenCenter();
-			optionText.y += (100 * (num - (options.length / 2))) + 50;
-			optionText.scrollFactor.set(0, 0.25);
-			grpOptions.add(optionText);
-		}
+        if(hasModOptions) options.push(modConfigName);
+        for (num => option in options){
+            var optionText:Alphabet = new Alphabet(0, 0, option, true);
+            optionText.screenCenter();
+            optionText.y += (100 * (num - (options.length / 2))) + 50;
+            optionText.scrollFactor.set(0, 0.25);
+            grpOptions.add(optionText);
+        }
 
 		descriptionChange(options[curSelected]);
 		changeSelection(0, false);
@@ -200,10 +202,12 @@ class OptionsState extends MusicBeatState
 	{
 		super.update(elapsed);
 
-		if(doControls)
-			FlxG.camera.scroll.y = CoolUtil.fpsLerp(FlxG.camera.scroll.y, grpOptions.members[curSelected].y - 300, 0.25);
-		else
-			FlxG.camera.scroll.y = 0;
+		if(grpOptions != null && grpOptions.members[curSelected] != null){
+			if(doControls)
+				FlxG.camera.scroll.y = CoolUtil.fpsLerp(FlxG.camera.scroll.y, grpOptions.members[curSelected].y - 300, 0.25);
+			else
+				FlxG.camera.scroll.y = 0;
+		}
 
 		selectorLeft.x = CoolUtil.fpsLerp(selectorLeft.x, intendedSelLeftX, 0.25);
 		selectorRight.x = CoolUtil.fpsLerp(selectorRight.x, intendedSelRightX, 0.25);

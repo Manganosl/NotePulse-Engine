@@ -11,7 +11,7 @@ class XModifier extends NoteModifier {
     override function bind()
         cXmod = bindColumn('xmod');
 
-    override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:flixel.FlxSprite)
+    override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:flixel.FlxSprite)
     {
         var xmod = getValue(player) * colVal(cXmod, data, player);
         var note:Note = (obj is Note) ? cast obj : null;
@@ -28,7 +28,7 @@ class XModifier extends NoteModifier {
         return pos;
     }
 
-    override function updateNote(beat:Float, daNote:Note, pos:Vector3, player:Int)
+    override function updateNote(beat:Float, daNote:Note, pos:DrawInstruction, player:Int)
     {
         var xmod = getValue(player) * colVal(cXmod, daNote.noteData, player);
         daNote.modSpeed = xmod;

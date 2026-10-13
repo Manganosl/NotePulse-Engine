@@ -1,5 +1,6 @@
 package funkin.scripting;
 
+import funkin.game.modchart.math.DrawInstruction;
 #if HSCRIPT_ALLOWED
 import hscript.Expr.Error;
 import hscript.Parser;
@@ -111,6 +112,7 @@ class FunkinScript implements HscriptInterface {
 		"SubModifier" 				=> funkin.game.modchart.SubModifier,
 		"NoteModifier" 				=> funkin.game.modchart.NoteModifier,
 		"ScriptedModifier" 			=> funkin.game.modchart.ScriptedModifier,
+		"DrawInstruction"			=> funkin.game.modchart.math.DrawInstruction,
 		"EventTimeline" 			=> funkin.game.modchart.EventTimeline,
 		"Modifier" 					=> funkin.game.modchart.Modifier,
 		"StepCallbackEvent" 		=> funkin.game.modchart.events.StepCallbackEvent,

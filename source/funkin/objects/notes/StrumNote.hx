@@ -15,10 +15,10 @@ import funkin.game.shaders.RGBPalette;
 import funkin.game.shaders.RGBPalette.RGBShaderReference;
 
 import funkin.objects.FunkinSprite;
-import funkin.game.modchart.math.Vector3;
+import funkin.game.modchart.math.DrawInstruction;
 
 class StrumNote extends FunkinSprite {
-	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
+	public var vec3Cache:DrawInstruction = new DrawInstruction(); // for drawinstruction operations in modchart code
 	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
 	
 	public var zIndex:Float = 0;

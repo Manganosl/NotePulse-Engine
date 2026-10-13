@@ -11,7 +11,7 @@ class SpiralModifier extends NoteModifier {
 		sZ = submods.get("spiralZ");
 	}
 
-	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite){
 		var spiralX = getValue(player);
 		var spiralY = subVal(sY, player); 
 		var spiralZ = subVal(sZ, player) / 100; 

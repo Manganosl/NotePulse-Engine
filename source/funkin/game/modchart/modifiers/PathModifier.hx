@@ -3,7 +3,7 @@ package funkin.game.modchart.modifiers;
 import flixel.math.FlxAngle;
 
 typedef PathInfo = {
-  var position:Vector3;
+  var position:DrawInstruction;
   var dist:Float;
   var start:Float;
   var end:Float;
@@ -26,14 +26,14 @@ class PathModifier extends NoteModifier {
     return 5000;
   }
 
-  public function getPath():Array<Array<Vector3>> {
+  public function getPath():Array<Array<DrawInstruction>> {
     return [];
   }
 
   public function new(modMgr:ModManager, ?parent:Modifier) {
     super(modMgr, parent);
     moveSpeed = getMoveSpeed();
-    var path:Array<Array<Vector3>> = getPath();
+    var path:Array<Array<DrawInstruction>> = getPath();
     for (dir in 0...path.length) {
       var idx = 0;
       totalDists[dir] = 0;
@@ -43,14 +43,14 @@ class PathModifier extends NoteModifier {
 
         if (idx != 0) {
           var last = pathData[dir][idx - 1];
-          totalDists[dir] += Math.abs(Vector3.distance(last.position, pos));
+          totalDists[dir] += Math.abs(DrawInstruction.distance(last.position, pos));
           var totalDist = totalDists[dir];
           last.end = totalDist;
           last.dist = last.start - totalDist;
         }
 
         pathData[dir].push({
-          position: pos.add(new Vector3(-Note.swagWidth / 2, -Note.swagWidth / 2)),
+          position: pos.add(new DrawInstruction(-Note.swagWidth / 2, -Note.swagWidth / 2)),
           start: totalDists[dir],
           end: 0,
           dist: 0
@@ -60,7 +60,7 @@ class PathModifier extends NoteModifier {
     }
   }
 
-  inline function lerpInto(pos:Vector3, gx:Float, gy:Float, gz:Float, ga:Float, gg:Float, t:Float) {
+  inline function lerpInto(pos:DrawInstruction, gx:Float, gy:Float, gz:Float, ga:Float, gg:Float, t:Float) {
     var rx = t * gx + pos.x * (1 - t);
     var ry = t * gy + pos.y * (1 - t);
     var rz = t * gz + pos.z * (1 - t);
@@ -109,7 +109,7 @@ class PathModifier extends NoteModifier {
     cZmode = bindColumn("zmode");
   }
 
-  override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite) {
+  override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite) {
     var outPos = pos.clone();
 
     var pathVal = getValue(player);

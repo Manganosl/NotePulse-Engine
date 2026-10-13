@@ -34,6 +34,30 @@ class Mods {
 		"ndlls"
 	];
 
+	public static var multipleForcedMods(get, never):Bool;
+
+	static function get_multipleForcedMods():Bool {
+        var list:Array<String> = Mods.parseList().enabled;
+        if(list == null || list.length == 0) return false;
+
+        var counter:Int = 0;
+        var previousMod:String = Mods.currentLoadedMod;
+
+        for(mod in list){
+            Mods.currentLoadedMod = mod;
+            if(Mods.modPack != null && Mods.modPack.forceStates){
+                counter++;
+                if(counter >= 2){
+                    Mods.currentLoadedMod = previousMod;
+                    return true;
+                }
+            }
+        }
+
+        Mods.currentLoadedMod = previousMod;
+        return false;
+    }
+
 	private static function get_currentModDirectory(){
 		if(currentLoadedMod != null && currentLoadedMod != "") return currentLoadedMod;
 		return currentModDirectory;
@@ -261,8 +285,7 @@ class Mods {
 		#end
 	}
 
-	public static function loadTopMod()
-	{
+	public static function loadTopMod(){
 		if(Mods.currentLoadedMod != null && Mods.currentLoadedMod != "") return;
 		Mods.currentModDirectory = '';
 		
@@ -271,7 +294,7 @@ class Mods {
 		if(list != null && list[0] != null){
 			for(mod in list){
 				Mods.currentLoadedMod = mod;
-				if(modPack != null && modPack.forceStates){
+				if(modPack != null && modPack.forceStates && multipleForcedMods){
 					Mods.currentModDirectory = mod;
 					return;
 				}

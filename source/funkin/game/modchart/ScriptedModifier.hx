@@ -61,7 +61,7 @@ class ScriptedModifier extends Modifier {
 	
 	public override function getSubmods():Array<String> return cast (script?.call('getSubmods', []) ?? []);
 	
-	public override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+	public override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite){
 		return (script?.call('getPos', [time, visualDiff, timeDiff, beat, pos, data, player, obj]) ?? pos);
 	}
 	

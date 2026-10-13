@@ -3,7 +3,7 @@ package funkin.game.modchart.objects;
 import flixel.math.FlxPoint;
 
 import funkin.objects.FunkinSprite;
-import funkin.game.modchart.math.Vector3;
+import funkin.game.modchart.math.DrawInstruction;
 import funkin.game.modchart.math.MathUtil;
 
 import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
@@ -24,7 +24,7 @@ typedef CurveData = {
 }
 
 class ModchartNote extends FunkinSprite {
-	public var vec3Cache:Vector3 = new Vector3();
+	public var vec3Cache:DrawInstruction = new DrawInstruction();
 	public var defScale:FlxPoint = FlxPoint.get();
 
 	public var z:Float = 0;

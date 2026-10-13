@@ -41,9 +41,9 @@ class ScaleModifier extends NoteModifier {
     var _sx:Float = 1;
     var _sy:Float = 1;
 
-    function computeScale(baseX:Float, baseY:Float, isSustain:Bool, data:Int, player:Int) {
-        var x = baseX;
-        var y = baseY;
+    function computeScale(isSustain:Bool, data:Int, player:Int) {
+        var x:Float = 1;
+        var y:Float = 1;
 
         var zoom = subVal(sZoom, player);
         var mini = subVal(sMini, player);
@@ -82,7 +82,7 @@ class ScaleModifier extends NoteModifier {
         y *= squishY * stretchY;
         
         if (isSustain)
-            y = baseY;
+            y = 1;
 
         _sx = x;
         _sy = y;
@@ -93,21 +93,9 @@ class ScaleModifier extends NoteModifier {
     override function ignoreUpdateReceptor() return false;
     override function ignoreUpdateNote() return false;
 
-    override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int) {
-        computeScale(note.defScale.x, note.defScale.y, note.isSustainNote, note.noteData, player);
-        if(note.isSustainNote) _sy = note.defScale.y;
-        
-        note.scale.set(_sx, _sy);
-    }
+    private var _origin:DrawInstruction = new DrawInstruction(); 
 
-    override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int) {
-        computeScale(receptor.defScale.x, receptor.defScale.y, false, receptor.noteData, player);
-        receptor.scale.set(_sx, _sy);
-    }
-
-    private var _origin:Vector3 = new Vector3(); 
-
-    private function getFieldOrigin(field:PlayField):Vector3 {
+    private function getFieldOrigin(field:PlayField):DrawInstruction {
         final FKC = field.keyCount;
         if (FKC % 2 == 0) {
             final RKN = Math.floor(FKC / 2);
@@ -120,7 +108,11 @@ class ScaleModifier extends NoteModifier {
         return _origin;
     }
 
-    override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite) {
+    override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite) {
+        var note:Note = (obj is Note) ? cast obj : null;
+        computeScale(note != null && note.isSustainNote, data, player);
+        pos.multiplyScale(_sx, _sy);
+
         var zoom = subVal(sZoom, player);
         var mini = subVal(sMini, player);
 

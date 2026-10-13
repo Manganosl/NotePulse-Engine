@@ -5,7 +5,7 @@ import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.StrumNote.StrumBoundaries;
 import funkin.objects.audio.MeshRender;
 import funkin.game.modchart.ModManager;
-import funkin.game.modchart.math.Vector3;
+import funkin.game.modchart.math.DrawInstruction;
 import funkin.states.PlayState;
 
 class PlayField extends FlxTypedSpriteContainer<StrumNote> {
@@ -23,13 +23,16 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 
 	public var showNotePaths:Bool = false;
 	public var notePathGroup:FlxTypedGroup<MeshRender>;
-	public var notePathSamples:Int = 32;
+	public var notePathSamples:Int = 40;
 	public var notePathThickness:Float = 3.5;
 	public var notePathCamMargin:Float = 48;
 	public var notePathMaxLength:Float = 1450;
 	public var notePathBaseAlpha:Float = 0.75;
 	var notePathMeshes:Map<Int, MeshRender> = [];
-	var notePathVecCache:Vector3 = new Vector3();
+	var notePathVecCache:DrawInstruction = new DrawInstruction();
+	var pathX:Array<Float> = [];
+	var pathY:Array<Float> = [];
+	static var noExclusions:Array<String> = [];
 
 	public var inControl(null, set):Bool;
 	public var downScroll(null, set):Bool;
@@ -158,6 +161,8 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 			notePathGroup = null;
 		}
 		notePathMeshes.clear();
+		pathX.resize(0);
+		pathY.resize(0);
 		super.destroy();
 	}
 
@@ -202,6 +207,8 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 		});
 		for(strum in members)
 			strum.camera = value;
+		if(notePathGroup != null)
+			notePathGroup.camera = value;
 		return camera = value;
 	}
 
@@ -211,6 +218,8 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 		});
 		for(strum in members)
 			strum.cameras = value;
+		if(notePathGroup != null)
+			notePathGroup.cameras = value;
 		return cameras = value;
 	}
 
@@ -235,14 +244,14 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 			return;
 		}
 
-		var camL:Float = camBaseL - notePathCamMargin;
-		var camT:Float = camBaseT - notePathCamMargin;
-		var camR:Float = camBaseR + notePathCamMargin;
-		var camB:Float = camBaseB + notePathCamMargin;
+		final camL:Float = camBaseL - notePathCamMargin;
+		final camT:Float = camBaseT - notePathCamMargin;
+		final camR:Float = camBaseR + notePathCamMargin;
+		final camB:Float = camBaseB + notePathCamMargin;
 
-		forEachAlive(function(strum:StrumNote) {
-			updateNotePathMesh(strum, modManager, curDecBeat, songPosition, playbackRate, songSpeed, spawnTime, camL, camT, camR, camB);
-		});
+		for(strum in members)
+			if (strum != null && strum.exists && strum.alive)
+				updateNotePathMesh(strum, modManager, curDecBeat, songPosition, playbackRate, songSpeed, spawnTime, camL, camT, camR, camB);
 
 		notePathGroup.visible = true;
 	}
@@ -253,56 +262,73 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 		var maxTDiff:Float = spawnTime * playbackRate;
 		if (songSpeed < 1) maxTDiff /= songSpeed;
 
-		var spawnDiff:Float = modManager.getVisPos(songPosition, songPosition + maxTDiff, songSpeed);
-		var spawnPos = modManager.getPos(songPosition + maxTDiff, spawnDiff, maxTDiff, curDecBeat, strum.noteData, player, strum, [], notePathVecCache);
-		var spawnX:Float = spawnPos.x;
-		var spawnY:Float = spawnPos.y + strum.y - 50;
-		var recvX:Float = strum.modPos.x;
-		var recvY:Float = strum.modPos.y;
+		final spawnDiff:Float = modManager.getVisPos(songPosition, songPosition + maxTDiff, songSpeed);
+		final spawnPos = modManager.getPos(songPosition + maxTDiff, spawnDiff, maxTDiff, curDecBeat, strum.noteData, player, strum, noExclusions, notePathVecCache);
+		final spawnX:Float = spawnPos.x;
+		final spawnY:Float = spawnPos.y + strum.y - 50;
+		final recvX:Float = strum.modPos.x;
+		final recvY:Float = strum.modPos.y;
 
-		var boxLeft:Float = Math.min(spawnX, recvX);
-		var boxRight:Float = Math.max(spawnX, recvX);
-		var boxTop:Float = Math.min(spawnY, recvY);
-		var boxBottom:Float = Math.max(spawnY, recvY);
+		final boxLeft:Float = Math.min(spawnX, recvX);
+		final boxRight:Float = Math.max(spawnX, recvX);
+		final boxTop:Float = Math.min(spawnY, recvY);
+		final boxBottom:Float = Math.max(spawnY, recvY);
 
-		var onScreen:Bool = boxRight >= camL && boxLeft <= camR && boxBottom >= camT && boxTop <= camB;
+		final onScreen:Bool = boxRight >= camL && boxLeft <= camR && boxBottom >= camT && boxTop <= camB;
 		mesh.visible = onScreen;
 		if (!onScreen) return;
 
 		mesh.alpha = notePathBaseAlpha * strum.rgbShader.alphaMult;
 
-		var points:Array<FlxPoint> = [];
-		points.push(FlxPoint.get(spawnX, spawnY));
+		final cx:Float = strum.width * 0.5;
+		final cy:Float = strum.height * 0.5;
+		final maxLen:Float = notePathMaxLength;
+		final samples:Int = notePathSamples;
 
-		for (i in 1...notePathSamples + 1)
-		{
-			var frac:Float = i / notePathSamples;
-			var tDiff:Float = maxTDiff * (1 - frac);
-			var diff:Float = modManager.getVisPos(songPosition, songPosition + tDiff, songSpeed);
-			var time:Float = songPosition + tDiff;
+		pathX.resize(0);
+		pathY.resize(0);
 
-			if (i == notePathSamples) { time = 0; diff = 0; tDiff = 0; }
+		var total:Float = 0;
+		for (k in 0...samples + 1) {
+			final i:Int = samples - k;
+			var px:Float;
+			var py:Float;
 
-			var pos = modManager.getPos(time, diff, tDiff, curDecBeat, strum.noteData, player, strum, [], notePathVecCache);
-			points.push(FlxPoint.get(pos.x, pos.y + strum.y - 50));
-		}
+			if (i == 0) {
+				px = spawnX + cx;
+				py = spawnY + cy;
+			} else {
+				var tDiff:Float = maxTDiff * (1 - i / samples);
+				var diff:Float = modManager.getVisPos(songPosition, songPosition + tDiff, songSpeed);
+				var time:Float = songPosition + tDiff;
 
-		var centerX:Float = strum.width * 0.5;
-		var centerY:Float = strum.height * 0.5;
-		if (centerX != 0 || centerY != 0)
-			for (p in points)
-			{
-				p.x += centerX;
-				p.y += centerY;
+				if (i == samples) { time = 0; diff = 0; tDiff = 0; }
+
+				final pos = modManager.getPos(time, diff, tDiff, curDecBeat, strum.noteData, player, strum, noExclusions, notePathVecCache);
+				px = pos.x + cx;
+				py = pos.y + strum.y - 50 + cy;
 			}
 
-		clampPathLength(points, notePathMaxLength);
+			if (k > 0) {
+				final dx:Float = px - pathX[k - 1];
+				final dy:Float = py - pathY[k - 1];
+				final seg:Float = Math.sqrt(dx * dx + dy * dy);
+
+				if (maxLen > 0 && total + seg > maxLen) {
+					final t:Float = seg > 0.001 ? (maxLen - total) / seg : 0;
+					pathX.push(pathX[k - 1] + dx * t);
+					pathY.push(pathY[k - 1] + dy * t);
+					break;
+				}
+				total += seg;
+			}
+
+			pathX.push(px);
+			pathY.push(py);
+		}
 
 		mesh.clear();
-		buildLineStrip(mesh, points, notePathThickness);
-
-		for (p in points)
-			p.put();
+		buildLineStrip(mesh, pathX, pathY, notePathThickness);
 	}
 
 	static function clampPathLength(points:Array<FlxPoint>, maxLen:Float):Void {
@@ -336,28 +362,32 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 		}
 	}
 
-	static function buildLineStrip(mesh:MeshRender, points:Array<FlxPoint>, thickness:Float):Void {
-		if (points.length < 2) return;
+	static function buildLineStrip(mesh:MeshRender, xs:Array<Float>, ys:Array<Float>, thickness:Float):Void {
+		if (xs.length < 2) return;
 
-		var half:Float = thickness * 0.5;
-		for (i in 0...points.length - 1)
+		final half:Float = thickness * 0.5;
+		var j:Int = xs.length - 1;
+		while (j > 0)
 		{
-			var p0 = points[i];
-			var p1 = points[i + 1];
+			final x0:Float = xs[j];
+			final y0:Float = ys[j];
+			final x1:Float = xs[j - 1];
+			final y1:Float = ys[j - 1];
+			j--;
 
-			var dx:Float = p1.x - p0.x;
-			var dy:Float = p1.y - p0.y;
-			var len:Float = Math.sqrt(dx * dx + dy * dy);
+			final dx:Float = x1 - x0;
+			final dy:Float = y1 - y0;
+			final len:Float = Math.sqrt(dx * dx + dy * dy);
 			if (len < 0.001) continue;
 
-			var nx:Float = -dy / len * half;
-			var ny:Float = dx / len * half;
+			final nx:Float = -dy / len * half;
+			final ny:Float = dx / len * half;
 
 			mesh.build_quad(
-				p0.x + nx, p0.y + ny,
-				p0.x - nx, p0.y - ny,
-				p1.x - nx, p1.y - ny,
-				p1.x + nx, p1.y + ny
+				x0 + nx, y0 + ny,
+				x0 - nx, y0 - ny,
+				x1 - nx, y1 - ny,
+				x1 + nx, y1 + ny
 			);
 		}
 	}

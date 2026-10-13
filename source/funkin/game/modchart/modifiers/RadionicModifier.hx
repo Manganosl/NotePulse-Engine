@@ -7,7 +7,7 @@ class RadionicModifier extends NoteModifier {
   override function getName()
     return 'radionic';
 
-  override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite):Vector3
+  override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite):DrawInstruction
   {
     var perc = getValue(player);
     if (perc == 0) return pos;

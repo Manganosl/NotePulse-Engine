@@ -41,10 +41,8 @@ class PerspectiveModifier extends NoteModifier {
     _b = 2*near*far/(near-far);
   }
 
-  public function getVector(curZ:Float,pos:Vector3):Vector3 {
-    var halfOffset = new Vector3((FlxG.width / 2) - (Note.swagWidth / 2), (FlxG.height / 2) - (Note.swagWidth / 2));
-    var origAlpha = pos.alpha;
-    var origGlow = pos.glow;
+  public function getVector(curZ:Float,pos:DrawInstruction):DrawInstruction {
+    var halfOffset = new DrawInstruction((FlxG.width / 2) - (Note.swagWidth / 2), (FlxG.height / 2) - (Note.swagWidth / 2));
     pos = pos.subtract(halfOffset);
     var oX = pos.x;
     var oY = pos.y;
@@ -60,12 +58,12 @@ class PerspectiveModifier extends NoteModifier {
     var a = (near+far)/(near-far);
     var b = 2*near*far/(near-far);
     var z = (a*shit+b);
-    var returnedVector = new Vector3(x/z,y/z,z, origAlpha, origGlow).add(halfOffset);
+    var returnedVector = new DrawInstruction(x/z,y/z,z).copyDrawFrom(pos).add(halfOffset);
 
     return returnedVector;
   }
 
-  override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite) {
+  override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite) {
     var hx = (FlxG.width / 2) - (Note.swagWidth / 2);
     var hy = (FlxG.height / 2) - (Note.swagWidth / 2);
 
@@ -81,14 +79,10 @@ class PerspectiveModifier extends NoteModifier {
     var z = (_a * shit + _b);
 
     var alpha = (z <= cullZ) ? 0.0 : pos.alpha;
-    return new Vector3(x / z + hx, y / z + hy, z + 0.0, alpha, pos.glow);
-  }
-
-	override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int){
-    receptor.scale.scale(1/pos.z);
-  }
-  
-	override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int){
-    note.scale.scale(1/pos.z);
+    var res = new DrawInstruction(x / z + hx, y / z + hy, z + 0.0, alpha, pos.glow);
+    res.copyDrawFrom(pos);
+    res.alpha = alpha;
+    res.multiplyScale(1 / z, 1 / z);
+    return res;
   }
 }

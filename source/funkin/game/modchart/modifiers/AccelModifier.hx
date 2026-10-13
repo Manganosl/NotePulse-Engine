@@ -11,7 +11,7 @@ class AccelModifier extends NoteModifier
 		sBrake = submods.get("brake");
 	}
 
-	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite){
 		var wave = subVal(sWave, player);
 		var brake = subVal(sBrake, player);
 		var boost = getValue(player);

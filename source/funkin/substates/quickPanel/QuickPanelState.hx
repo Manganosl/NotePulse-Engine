@@ -61,7 +61,7 @@ class QuickPanelState extends MusicBeatSubstate
       },
       icon: 'back',
       description: "Return to the base game's title screen.",
-      disabled: (Mods.currentLoadedMod == null || Mods.currentLoadedMod == "")
+      disabled: ((Mods.currentLoadedMod == null || Mods.currentLoadedMod == "") || (Mods.modPack != null && Mods.modPack.forceStates && !Mods.multipleForcedMods))
     },
     {
       text: 'Mods',
@@ -72,7 +72,7 @@ class QuickPanelState extends MusicBeatSubstate
       },
       icon: 'mods',
       description: "Select a mod to load.",
-      disabled: false
+      disabled: (Mods.modPack != null && Mods.modPack.forceStates && !Mods.multipleForcedMods)
     },
     {
       text: 'Freeplay',

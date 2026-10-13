@@ -44,7 +44,7 @@ class MathUtil {
 		return p;
 	}
 
-	public static function rotatePos3D(pos:Vector3, ox:Float, oy:Float, oz:Float, xA:Float, yA:Float, zA:Float, zScale:Float):Void {
+	public static function rotatePos3D(pos:DrawInstruction, ox:Float, oy:Float, oz:Float, xA:Float, yA:Float, zA:Float, zScale:Float):Void {
 		var dx = pos.x - ox;
 		var dy = pos.y - oy;
 		var dz = (pos.z - oz) * zScale;

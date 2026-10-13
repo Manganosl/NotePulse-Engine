@@ -101,7 +101,7 @@ class DrunkModifier extends NoteModifier {
 		}
 	}
 
-	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite){
 		var time = (Conductor.songPosition/1000);
 		var t = getTerms(data);
 

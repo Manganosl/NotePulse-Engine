@@ -71,23 +71,29 @@ class Init extends FlxState {
 
 		Highscore.load();
 
-	    if (mustUpdate) {
+		if(mustUpdate){
 			FlxTransitionableState.skipNextTransOut = true;
-	    	FlxG.switchState(new OutdatedState());
-	    } else {
-			FlxTransitionableState.skipNextTransOut = true;
-			if(Mods.currentLoadedMod != "" && Mods.modPack != null){
-				GlobalHandler.loadGlobalHX();
-				Application.current.window.title = (((Mods.currentLoadedMod != null && Mods.currentLoadedMod != "" && Mods.modPack.name != null && Mods.modPack.name != "") ? Mods.modPack.name : "NotePulse Engine"));
-	    		if(Mods.modPack.forceStates && Mods.modPack.titleState != null && Mods.modPack.titleState != "") {
-					FlxG.switchState(new ScriptedState(Mods.modPack.titleState));
-				} else {
-					FlxG.switchState(new TitleState());
-				}
-			} else {
-				FlxG.switchState(new TitleState());
-			}
-	    }
+			FlxG.switchState(new OutdatedState());
+			return;
+		}
+
+		FlxTransitionableState.skipNextTransOut = true;
+
+		var useModState:Bool = Mods.currentLoadedMod != "" && Mods.modPack != null && !Mods.multipleForcedMods && Mods.modPack.forceStates;
+		if(useModState){
+			GlobalHandler.loadGlobalHX();
+			Application.current.window.title = (Mods.modPack.name != null && Mods.modPack.name != "") ? Mods.modPack.name : "NotePulse Engine";
+		}
+
+		if(Mods.multipleForcedMods){
+			Log.warn("Multiple mods are trying to force their states, so none will be loaded");
+		}
+
+		if(useModState && Mods.modPack.titleState != null && Mods.modPack.titleState != ""){
+			FlxG.switchState(new ScriptedState(Mods.modPack.titleState));
+		} else {
+			FlxG.switchState(new TitleState());
+		}
     }
 
 	function handleDaKeys(){

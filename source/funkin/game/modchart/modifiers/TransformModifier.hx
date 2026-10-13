@@ -43,7 +43,7 @@ class TransformModifier extends NoteModifier { // this'll be transformX in ModMa
 		cNZ = bindColumn('transformNote', 'Z');
 	}
 	
-	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite)
 	{
 		pos.x += getValue(player) + subVal(sXa, player);
 		pos.y += subVal(sY, player) + subVal(sYa, player);

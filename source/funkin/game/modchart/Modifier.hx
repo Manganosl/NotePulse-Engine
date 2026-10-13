@@ -208,9 +208,9 @@ class Modifier implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
     // data is the column/direction/notedata
     // note/receptor is self-explanatory
 
-    public function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int){}
-	public function updateNote(beat:Float, note:Note, pos:Vector3, player:Int){}
-	public function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)return pos;
+    public function updateReceptor(beat:Float, receptor:StrumNote, pos:DrawInstruction, player:Int){}
+	public function updateNote(beat:Float, note:Note, pos:DrawInstruction, player:Int){}
+	public function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, pos:DrawInstruction, data:Int, player:Int, obj:FlxSprite)return pos;
 
     public function update(elapsed:Float){}
 
