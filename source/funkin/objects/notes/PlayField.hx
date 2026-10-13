@@ -27,7 +27,6 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 	public var notePathThickness:Float = 3.5;
 	public var notePathCamMargin:Float = 48;
 	public var notePathMaxLength:Float = 1450;
-	public var notePathBaseAlpha:Float = 0.75;
 	var notePathMeshes:Map<Int, MeshRender> = [];
 	var notePathVecCache:DrawInstruction = new DrawInstruction();
 	var pathX:Array<Float> = [];
@@ -228,7 +227,7 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 		if (mesh == null) {
 			mesh = new MeshRender(0, 0, FlxColor.WHITE);
 			mesh.cameras = notePathGroup.cameras;
-			mesh.alpha = notePathBaseAlpha;
+			mesh.alpha = 0;
 			notePathGroup.add(mesh);
 			notePathMeshes.set(lane, mesh);
 		}
@@ -239,7 +238,7 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 		if (notePathGroup == null) return;
 
 		var modManager = ModManager.instance;
-		if (modManager == null || !showNotePaths) {
+		if(modManager == null){
 			notePathGroup.visible = false;
 			return;
 		}
@@ -259,6 +258,9 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 	function updateNotePathMesh(strum:StrumNote, modManager:ModManager, curDecBeat:Float, songPosition:Float, playbackRate:Float, songSpeed:Float, spawnTime:Float, camL:Float, camT:Float, camR:Float, camB:Float):Void {
 		var mesh = getNotePathMesh(strum.noteData);
 
+		mesh.alpha = showNotePaths ? 0.75 : 1 - mesh.alphaMult;
+		if(mesh.alpha == 0) return;
+
 		var maxTDiff:Float = spawnTime * playbackRate;
 		if (songSpeed < 1) maxTDiff /= songSpeed;
 
@@ -277,8 +279,6 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 		final onScreen:Bool = boxRight >= camL && boxLeft <= camR && boxBottom >= camT && boxTop <= camB;
 		mesh.visible = onScreen;
 		if (!onScreen) return;
-
-		mesh.alpha = notePathBaseAlpha * strum.rgbShader.alphaMult;
 
 		final cx:Float = strum.width * 0.5;
 		final cy:Float = strum.height * 0.5;

@@ -10,6 +10,8 @@ import flixel.util.FlxColor;
 @:nullSafety
 class MeshRender extends FlxStrip
 {
+	public var alphaMult:Float = 0; // Used for modcharts
+
 	public var vertex_count(default, null):Int = 0;
 	public var index_count(default, null):Int = 0;
 	

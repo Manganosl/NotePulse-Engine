@@ -21,6 +21,7 @@ class AlphaModifier extends NoteModifier
 	var sDark:Modifier;
 	var sStealthPast:Modifier;
 	var sDontGlow:Modifier;
+	var sPathAlpha:Modifier;
 	var cAlpha:Array<Modifier>;
 	var cNoteAlpha:Array<Modifier>;
 	var cReceptorAlpha:Array<Modifier>;
@@ -30,6 +31,7 @@ class AlphaModifier extends NoteModifier
 	var cSudden:Array<Modifier>;
 	var cSuddenOffset:Array<Modifier>;
 	var cStealth:Array<Modifier>;
+	var cPathAlpha:Array<Modifier>;
 
 	override function bind(){
 		sAlpha = submods.get("alpha");
@@ -44,6 +46,7 @@ class AlphaModifier extends NoteModifier
 		sDark = submods.get("dark");
 		sStealthPast = submods.get("stealthPastReceptors");
 		sDontGlow = submods.get("dontUseStealthGlow");
+		sPathAlpha = submods.get("pathAlpha");
 		cAlpha = bindColumn("alpha");
 		cNoteAlpha = bindColumn("noteAlpha");
 		cReceptorAlpha = bindColumn("receptorAlpha");
@@ -53,6 +56,7 @@ class AlphaModifier extends NoteModifier
 		cSudden = bindColumn("sudden");
 		cSuddenOffset = bindColumn("suddenOffset");
 		cStealth = bindColumn("stealth");
+		cPathAlpha = bindColumn("pathAlpha");
 	}
 
 	inline function both(s:Modifier, c:Array<Modifier>, column:Int, player:Int):Float
@@ -159,7 +163,7 @@ class AlphaModifier extends NoteModifier
 			pos.glow = glow;
 		} else {
 			var alphaMod = (1 - subVal(sAlpha, player)) * (1 - colVal(cAlpha, data, player))
-				* (1 - subVal(sReceptorAlpha, player) * (1 - colVal(cReceptorAlpha, data, player)));
+				* (1 - subVal(sReceptorAlpha, player)) * (1 - colVal(cReceptorAlpha, data, player));
 			var dark = subVal(sDark, player);
 			var darkCol = colVal(cDark, data, player);
 			if (dark != 0 || darkCol != 0)
@@ -167,6 +171,17 @@ class AlphaModifier extends NoteModifier
 			pos.alpha = alphaMod;
 		}
 		return pos;
+	}
+
+	override function updateReceptor(beat:Float, receptor:StrumNote, pos:DrawInstruction, player:Int){
+		if(receptor.parentField != null){
+			@:privateAccess
+			var mesh = receptor.parentField.notePathMeshes.get(receptor.noteData);
+			if(mesh != null){
+				receptor.parentField.notePathGroup.members[receptor.noteData].alphaMult =
+					(1 - subVal(sPathAlpha, player)) * (1 - colVal(cPathAlpha, receptor.noteData, player));
+			}
+		}
 	}
 
 	override function getSubmods(){
@@ -183,7 +198,8 @@ class AlphaModifier extends NoteModifier
 			"dark",
 			"useStealthGlow",
 			"stealthPastReceptors",
-			"dontUseStealthGlow"
+			"dontUseStealthGlow",
+			"pathAlpha"
 		];
 		for(i in 0...PlayState.SONG.mania+1){
 			subMods.push('noteAlpha$i');
@@ -195,6 +211,7 @@ class AlphaModifier extends NoteModifier
 			subMods.push('sudden$i');
 			subMods.push('suddenOffset$i');
 			subMods.push('stealth$i');
+			subMods.push('pathAlpha$i');
 		}
 		return subMods;
 	}
