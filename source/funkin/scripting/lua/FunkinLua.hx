@@ -1608,7 +1608,7 @@ class FunkinLua {
 		if(this != null) this.hscript = new HaxeFunctions(this);
 		HaxeFunctions.implement(this);
 		#end
-		#if flxanimate FlxAnimateFunctions.implement(this); #end
+		FlixelAnimateFunctions.implement(this);
 		ReflectionFunctions.implement(this);
 		TextFunctions.implement(this);
 		ExtraFunctions.implement(this);

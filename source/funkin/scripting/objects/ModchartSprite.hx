@@ -4,7 +4,7 @@ import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxAxes;
 import flixel.system.FlxAssets;
 
-class ModchartSprite extends FlxSprite
+class ModchartSprite extends FunkinSprite
 {
 	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
 	public function new(?x:Float = 0, ?y:Float = 0)
