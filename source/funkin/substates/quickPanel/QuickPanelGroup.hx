@@ -126,8 +126,15 @@ class QuickPanelGroup extends FlxSpriteGroup
    */
   public var curState:PanelState = CLOSED;
 
+  static final BUTTON_PADDING:Float = 20;
+  static final SLICE_FAT:Float = 1.88;
+  static final SLICE_ANGLE_RANGE:Float = 4.45;
+  static final SLICE_REACH:Float = ((QuickPanelButton.ITEM_HEIGHT + BUTTON_PADDING) * 2) / Math.tan(SLICE_ANGLE_RANGE * Math.PI / 180);
+
   var curSelected:Int = 0;
   var grpButtons:FlxTypedSpriteGroup<QuickPanelButton>;
+  var grpNormalButtons:FlxTypedSpriteGroup<QuickPanelButton>;
+  var grpDebugButtons:FlxTypedSpriteGroup<QuickPanelButton>;
 
   /**
    * utility var, this one gets our current button easily
@@ -319,8 +326,13 @@ class QuickPanelGroup extends FlxSpriteGroup
     pullTabHitbox.y = (FlxG.height / 2) - (pullTabHitbox.height / 2);
     add(pullTabHitbox);
 
-    grpButtons = new FlxTypedSpriteGroup<QuickPanelButton>();
-    add(grpButtons);
+    grpNormalButtons = new FlxTypedSpriteGroup<QuickPanelButton>();
+    add(grpNormalButtons);
+
+    grpDebugButtons = new FlxTypedSpriteGroup<QuickPanelButton>();
+    add(grpDebugButtons);
+
+    grpButtons = grpNormalButtons;
 
     tickSound.loadEmbedded(Paths.sound('quick-panel/tab-pull'));
     tickSound.volume = 1;
@@ -673,17 +685,86 @@ class QuickPanelGroup extends FlxSpriteGroup
    */
   function populateButtons()
   {
-    var index:Int = 0;
-    for (button in quickPanelState.panelButtonData)
-    {
-      var buttonToCreate:QuickPanelButton = new QuickPanelButton(button);
+    fillButtons(grpNormalButtons, quickPanelState.panelButtonData);
+    fillButtons(grpDebugButtons, quickPanelState.debugPanelButtonData);
 
-      grpButtons.add(buttonToCreate);
+    showButtons(quickPanelState.debugMode);
+  }
+
+  function fillButtons(group:FlxTypedSpriteGroup<QuickPanelButton>, data:Array<QuickPanelButtonData>)
+  {
+    var index:Int = 0;
+    for (button in data)
+    {
+      var buttonToCreate:QuickPanelButton = new QuickPanelButton(button, buttonFactor(data.length));
+
+      group.add(buttonToCreate);
 
       buttonToCreate.panelGroup = this;
       buttonToCreate.curIndex = index;
 
       index += 1;
+    }
+  }
+
+  function showButtons(debug:Bool)
+  {
+    grpButtons = debug ? grpDebugButtons : grpNormalButtons;
+
+    grpNormalButtons.visible = !debug;
+    grpNormalButtons.active = !debug;
+
+    grpDebugButtons.visible = debug;
+    grpDebugButtons.active = debug;
+
+    panelShader.fat = SLICE_FAT * buttonFactor(grpButtons.members.length);
+  }
+
+  function buttonFactor(count:Int):Float
+  {
+    if (count <= 4) return 1;
+
+    var needed:Float = (count - 1) * (QuickPanelButton.ITEM_HEIGHT + BUTTON_PADDING) + QuickPanelButton.ITEM_HEIGHT;
+
+    return Math.min(1, (FlxG.height - 40) / needed);
+  }
+
+  function layoutSpan(count:Int):Float
+  {
+    if (count <= 4) return (QuickPanelButton.ITEM_HEIGHT + BUTTON_PADDING) * 4;
+
+    return (count - 1) * buttonFactor(count) * (QuickPanelButton.ITEM_HEIGHT + BUTTON_PADDING);
+  }
+
+  function buttonOffsetY(index:Int, count:Int):Float
+  {
+    if (count <= 1) return 0;
+
+    var span:Float = layoutSpan(count);
+
+    return -span / 2 + (span / (count - 1)) * index;
+  }
+
+  /**
+   * Switch between the normal and the debug buttons
+   */
+  public function reloadButtons():Void
+  {
+    for (button in grpButtons.members)
+    {
+      button.selected = false;
+    }
+
+    showButtons(quickPanelState.debugMode);
+
+    curSelected = 0;
+
+    repositionButtons();
+
+    if (curState == OPEN)
+    {
+      panelShader.sliceVisible = true;
+      changeSelection();
     }
   }
 
@@ -695,23 +776,19 @@ class QuickPanelGroup extends FlxSpriteGroup
     var count:Int = grpButtons.members.length;
     if (count == 0) return;
 
-    var padding:Float = 20;
     var angleRange:Float = 5;
     var angleStep:Float = count > 1 ? (angleRange * 2) / (count - 1) : 0;
     var angleDistance:Float = 20;
 
-    var span:Float = (QuickPanelButton.ITEM_HEIGHT + padding) * 4;
-    var step:Float = count > 1 ? span / (count - 1) : 0;
-    var startOffset = (FlxG.height / 2) - (count > 1 ? span / 2 : 0) - (QuickPanelButton.ITEM_HEIGHT / 2);
-
     for (blah => button in grpButtons.members)
     {
       var targetAngle = angleRange - (angleStep * blah);
-      var dist = Math.abs(Math.cos(targetAngle) * angleDistance);
+      var arc:Float = count > 1 ? buttonOffsetY(blah, count) / (layoutSpan(count) / 2) : 0;
+      var dist = count > 4 ? angleDistance * Math.abs(Math.cos(angleRange)) * arc * arc : Math.abs(Math.cos(targetAngle) * angleDistance);
       var baseX = left ? -panel.width + 58 : 98;
 
       button.x = grpButtons.x + (left ? baseX + dist : baseX - dist);
-      button.y = grpButtons.y + startOffset + (step * blah);
+      button.y = grpButtons.y + (FlxG.height / 2) - (button.guide.height / 2) + buttonOffsetY(blah, count);
 
       button.angle = left ? -targetAngle : targetAngle;
 
@@ -756,7 +833,7 @@ class QuickPanelGroup extends FlxSpriteGroup
     if (o == pullHint) return 1;
     if (o == panel) return panelOnTop ? 10 : 11;
     if (o == pullTabVisual) return panelOnTop ? 11 : 10;
-    if (o == grpButtons) return 12;
+    if (o == grpNormalButtons || o == grpDebugButtons) return 12;
     if (o == pullTabHitbox) return 200;
     return 100;
   }
@@ -778,6 +855,8 @@ class QuickPanelGroup extends FlxSpriteGroup
 
   function grabPanel():Void
   {
+    if (curState == CLOSED) quickPanelState.restoreNormalPanel();
+
     if (curState == OPEN)
     {
       pullLerp = left ? screenEdge - TAB_BASE_X : screenEdge + TAB_BASE_X;
@@ -831,7 +910,7 @@ class QuickPanelGroup extends FlxSpriteGroup
     blockerSubState = null;
   }
 
-  function openPanel(instant:Bool = false):Void
+  public function openPanel(instant:Bool = false):Void
   {
     curState = OPEN;
     openBlocker();
@@ -880,13 +959,18 @@ class QuickPanelGroup extends FlxSpriteGroup
     if (instant)
     {
       this.x = screenEdge;
+      quickPanelState.restoreNormalPanel();
     }
     else
     {
       moveTween = FlxTween.tween(this, {
         x: screenEdge
       }, 0.4, {
-        ease: FlxEase.expoOut
+        ease: FlxEase.expoOut,
+        onComplete: (_) ->
+        {
+          if (curState == CLOSED) quickPanelState.restoreNormalPanel();
+        }
       });
     }
 
@@ -993,6 +1077,7 @@ class QuickPanelGroup extends FlxSpriteGroup
         if (FlxG.keys.justPressed.TAB)
         {
           resetTabFade();
+          quickPanelState.restoreNormalPanel();
           openPanel();
           FlxG.sound.play(Paths.sound('quick-panel/open-tab-click'));
           return;
@@ -1149,11 +1234,8 @@ class QuickPanelGroup extends FlxSpriteGroup
     }
 
     var count:Int = grpButtons.members.length;
-    var angleRange:Float = 4.45;
-    var angleStep:Float = count > 1 ? (angleRange * 2) / (count - 1) : 0;
-    var targetAngle = -90 + (angleRange - (angleStep * curSelected));
 
-    panelShader.dir = targetAngle;
+    panelShader.dir = -90 - Math.atan(buttonOffsetY(curSelected, count) / SLICE_REACH) * (180 / Math.PI);
 
     quickPanelState.updateDescription(currentButton.data.description ?? 'bruh');
 

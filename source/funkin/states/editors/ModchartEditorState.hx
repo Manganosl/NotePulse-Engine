@@ -2072,7 +2072,6 @@ class ModchartEditorState extends MusicBeatState
 	function reloadManager(){
 		modManager = new ModManager(this);
 		modManager.doTraces = false;
-		modManager.receptors = [for(i in PlayField.fields) i.members];
 		modManager.registerDefaultModifiers();
 		modManager.registerScriptedModifiers();
 		if(ui != null && ui.sustainSegmentsStepper != null) 

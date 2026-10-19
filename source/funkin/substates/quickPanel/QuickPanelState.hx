@@ -16,6 +16,7 @@ import funkin.substates.quickPanel.CircleWipeShader;
 import funkin.game.shaders.BoilShader;
 import funkin.backend.utils.PropertyAnimator;
 import funkin.substates.quickPanel.QuickPanelGroup;
+import funkin.states.editors.ModSelectorState;
 import funkin.scripting.GlobalHandler;
 
 class QuickPanelState extends MusicBeatSubstate
@@ -43,7 +44,10 @@ class QuickPanelState extends MusicBeatSubstate
 
   var left:Bool = false;
 
-  public static var freeplayAllowed:Bool = true;
+  public var debugMode:Bool = false;
+  var pendingDebug:Bool = false;
+
+  public static var freeplayAllowed:Bool = true;  // Unused rn
   public var panelButtonData:Array<QuickPanelButtonData> = [
     {
       text: 'Exit Mod',
@@ -56,7 +60,6 @@ class QuickPanelState extends MusicBeatSubstate
 				GlobalHandler.stopGlobalHX();
 				FlxTween.cancelTweensOf(Main.fpsVar);
 				Main.fpsVar.y = 10;
-        freeplayAllowed = true;
         FlxG.switchState(() -> new funkin.states.menus.TitleState());
       },
       icon: 'back',
@@ -75,17 +78,6 @@ class QuickPanelState extends MusicBeatSubstate
       disabled: (Mods.modPack != null && Mods.modPack.forceStates && !Mods.multipleForcedMods)
     },
     {
-      text: 'Freeplay',
-      callback: () ->
-      {
-        QuickPanelGroup.playMenuMusic();
-        FlxG.switchState(() -> new funkin.states.menus.FreeplayState());
-      },
-      icon: 'freeplay',
-      description: "Choose and play any song you've previously unlocked.",
-      disabled: !freeplayAllowed
-    },
-    {
       text: 'Options',
       callback: () ->
       {
@@ -97,6 +89,140 @@ class QuickPanelState extends MusicBeatSubstate
       disabled: false
     }
   ];
+
+  public var debugPanelButtonData:Array<QuickPanelButtonData> = [
+    {
+      text: 'Chart Editor',
+      callback: () ->
+      {
+        FlxG.switchState(new ModSelectorState(funkin.states.editors.ChartEditorState, []));
+      },
+      icon: 'chartedit',
+      description: "Load and edit charts and events.",
+      disabled: false
+    },
+    {
+      text: 'Character Editor',
+      callback: () ->
+      {
+        FlxG.switchState(new ModSelectorState(funkin.states.editors.CharacterEditorState, [null, false]));
+      },
+      icon: 'charedit',
+      description: "Load and edit your characters.",
+      disabled: false
+    },
+    {
+      text: 'Week Editor',
+      callback: () ->
+      {
+        FlxG.switchState(new ModSelectorState(funkin.states.editors.WeekEditorState, []));
+      },
+      icon: 'freeplay',
+      description: "Edit the weeks that will be loaded.",
+      disabled: false
+    },
+    {
+      text: 'Dialogue Editor',
+      callback: () ->
+      {
+        FlxG.switchState(new ModSelectorState(funkin.states.editors.DialogueEditorState, []));
+      },
+      icon: 'dialogueedit',
+      description: "Create and edit dialogue sequences.",
+      disabled: false
+    },
+    {
+      text: 'Dialogue Character Editor',
+      callback: () ->
+      {
+        FlxG.switchState(new ModSelectorState(funkin.states.editors.DialogueCharacterEditorState, []));
+      },
+      icon: 'dialoguecharedit',
+      description: "Configure characters for dialogue scenes.",
+      disabled: false
+    },
+    {
+      text: 'Menu Character Editor',
+      callback: () ->
+      {
+        FlxG.switchState(new ModSelectorState(funkin.states.editors.MenuCharacterEditorState, []));
+      },
+      icon: 'menucharedit',
+      description: "Edit characters appearing in the story mode menu.",
+      disabled: false
+    },
+    {
+      text: 'Stage Editor',
+      callback: () ->
+      {
+        FlxG.switchState(new ModSelectorState(funkin.states.editors.StageEditorState, []));
+      },
+      icon: 'stageedit',
+      description: "Design and position stage elements.",
+      disabled: false
+    },
+    {
+      text: 'Modchart Editor',
+      callback: () ->
+      {
+        FlxG.switchState(new ModSelectorState(funkin.states.editors.ModchartEditorState, []));
+      },
+      icon: 'modchartedit',
+      description: "Edit and preview a modchart.",
+      disabled: false
+    },
+    {
+      text: 'Note Splash Debug',
+      callback: () ->
+      {
+        FlxG.switchState(new ModSelectorState(funkin.states.editors.NoteSplashDebugState, []));
+      },
+      icon: 'splashdebug',
+      description: "Debug and preview note splash animations.",
+      disabled: false
+    },
+    {
+      text: 'Mod Config Editor',
+      callback: () ->
+      {
+        FlxG.switchState(new ModSelectorState(funkin.states.editors.content.Prompt.BasePrompt, []));
+      },
+      icon: 'options',
+      description: "Configure mod properties.",
+      disabled: false
+    }
+  ];
+
+  public function getButtonData():Array<QuickPanelButtonData>
+  {
+    return debugMode ? debugPanelButtonData : panelButtonData;
+  }
+
+  public function openDebugPanel():Void
+  {
+    if (panel == null)
+    {
+      pendingDebug = true;
+      return;
+    }
+
+    debugMode = true;
+    panel.reloadButtons();
+
+    if (panel.curState == PanelState.CLOSED)
+    {
+      FlxG.sound.play(Paths.sound('quick-panel/open-tab-click'));
+      panel.openPanel();
+    }
+  }
+
+  public function restoreNormalPanel():Void
+  {
+    if (!debugMode || panel == null) return;
+
+    debugMode = false;
+    panel.reloadButtons();
+  }
 
   public function repositionSide(_left:Bool = false)
   {
@@ -195,6 +321,12 @@ class QuickPanelState extends MusicBeatSubstate
     if(FlxG.state.subState != null){
       FlxG.state.subState.persistentDraw = true;
       FlxG.state.subState.persistentUpdate = true;
+    }
+
+    if (pendingDebug)
+    {
+      pendingDebug = false;
+      openDebugPanel();
     }
   }
 

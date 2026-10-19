@@ -180,12 +180,6 @@ class MirrorField extends PlayField {
 		super.update(elapsed);
 		adoptSourceCameras();
 
-		var currentModManager = ModManager.instance;
-		if(currentModManager != lastModManager){
-			lastModManager = currentModManager;
-			if(currentModManager != null && currentModManager.receptors[player] != members) currentModManager.registerPlayer(player);
-		}
-
 		if(sourceField != null && sourceField.exists) syncFromSource();
 	}
 

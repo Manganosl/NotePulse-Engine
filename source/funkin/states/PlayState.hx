@@ -862,7 +862,6 @@ class PlayState extends MusicBeatState
 		callOnScripts('preInitModchart');
 
 		modManager = new ModManager(this);
-		modManager.receptors = [for(i in PlayField.fields) i.members];
 		modManager.registerDefaultModifiers();
 		modManager.registerScriptedModifiers();
 		for(func in modManagerEvArray) func();

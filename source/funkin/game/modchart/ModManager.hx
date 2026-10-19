@@ -26,6 +26,7 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 			InvertModifier,
 			DrunkModifier,
 			FreezeModifier,
+			ExtrasModifier,
 			BeatModifier,
 			AlphaModifier,
 			ReceptorScrollModifier, 
@@ -62,7 +63,6 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 	}
 
 	public function registerPlayer(player:Int){
-		receptors[player] = PlayField.fields[player].members;
 		for (mod in modArray)
 			setModValue(mod, 0, player);
 		setDefaultValues(player);
@@ -82,7 +82,6 @@ class ModManager implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
 
 	public var state:Dynamic;
 	public static var instance:ModManager;
-	public var receptors:Array<Array<StrumNote>> = []; // for modifiers to be able to access receptors directly if they need to
 	public var timeline:EventTimeline = new EventTimeline();
 
 	public var notemodRegister:Map<String, Modifier> = [];

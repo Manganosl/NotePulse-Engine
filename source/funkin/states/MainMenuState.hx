@@ -39,6 +39,7 @@ class MainMenuState extends MusicBeatState
 	var magenta:FlxSprite;
 	var camFollow:FlxObject;
 
+	var quickPanel:QuickPanelState;
 	override function create() {
 		if (Mods.currentLoadedMod == null || Mods.currentLoadedMod.length == 0) {
 			#if MODS_ALLOWED
@@ -134,7 +135,8 @@ class MainMenuState extends MusicBeatState
 
 		super.create();
 
-		openTopSubState(new QuickPanelState());
+		quickPanel = new QuickPanelState();
+		openTopSubState(quickPanel);
 
 		FlxTween.cancelTweensOf(Main.fpsVar, ["y"]);
 		FlxTween.tween(Main.fpsVar, {y: 125}, 1, {ease: FlxEase.circOut});
@@ -340,9 +342,7 @@ class MainMenuState extends MusicBeatState
 			#if desktop
 			if(ClientPrefs.data.devMode){
 				if (controls.justPressed('debug_1')){
-					selectedSomethin = true;
-					backdrop.visible = false;
-					openSubState(new funkin.substates.EditorSelectorSubstate());
+					quickPanel.openDebugPanel();
 				}
 			} else {
 				if(controls.justPressed('debug_1')) FlxG.sound.play(Paths.sound('cancelMenu'));

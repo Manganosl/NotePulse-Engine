@@ -21,6 +21,8 @@ class QuickPanelButton extends FlxSpriteGroup
   public static final ITEM_WIDTH:Int = 320;
   public static final ITEM_HEIGHT:Int = 100;
   public static final ICON_WIDTH:Int = 100;
+  public static final TEXT_SIZE:Int = 38;
+  public static final MIN_TEXT_SIZE:Int = 14;
 
   var boilShaderIcon:BoilShader;
   var boilShaderText:BoilShader;
@@ -61,6 +63,14 @@ class QuickPanelButton extends FlxSpriteGroup
   var ICON_SCALE_X:Float;
   var ICON_SCALE_Y:Float;
 
+  /**
+   * Used when the panel has to fit more buttons than usual.
+   */
+  public var factor:Float = 1;
+
+  var itemH:Int;
+  var iconW:Int;
+
   // for mobile, when you tap this button itll force select this index
   public var curIndex:Int = 0;
   public var panelGroup:QuickPanelGroup;
@@ -73,33 +83,57 @@ class QuickPanelButton extends FlxSpriteGroup
   {
     left = _left;
 
-    buttonText.x = guide.x + (left ? guide.width - (ICON_WIDTH + buttonText.width + 20) : ICON_WIDTH + 20);
-    icon.x = guide.x + (left ? guide.width - ICON_WIDTH : 0);
+    buttonText.x = guide.x + (left ? guide.width - (iconW + buttonText.width + 20) : iconW + 20);
+    icon.x = guide.x + (left ? guide.width - iconW : 0);
 
     // makes sense... right?
     buttonText.alignment = left ? RIGHT : LEFT;
   }
 
-  public function new(_data:QuickPanelButtonData)
+  /**
+   * Reduces the size of this text, and only this one, until it fits in a single line.
+   */
+  function fitText():Void
+  {
+    var available:Float = ITEM_WIDTH - (iconW + 20) - 4;
+    var size:Int = Std.int(buttonText.size);
+
+    buttonText.wordWrap = false;
+
+    while (buttonText.textField.textWidth > available && size > MIN_TEXT_SIZE)
+    {
+      size -= 1;
+      buttonText.size = size;
+    }
+
+    buttonText.wordWrap = true;
+  }
+
+  public function new(_data:QuickPanelButtonData, _factor:Float = 1)
   {
     super();
 
     data = _data;
+    factor = _factor;
+
+    itemH = Math.round(ITEM_HEIGHT * factor);
+    iconW = Math.round(ICON_WIDTH * factor);
 
     alphaMultiplier = data.disabled ? 0.5 : 1.0;
 
     guide = new FunkinSprite(0, 0);
-    guide.makeGraphic(ITEM_WIDTH, ITEM_HEIGHT, 0x00D1D1D1);
+    guide.makeGraphic(ITEM_WIDTH, itemH, 0x00D1D1D1);
     guide.alpha = 0;
     guide.x = 0;
     guide.y = 0;
     add(guide);
 
-    buttonText = new FlxText(0, 0, ITEM_WIDTH - (ICON_WIDTH + 20), '${data.text ?? 'NO TEXT'}', 30);
-    buttonText.setFormat(Paths.font('FunkinOptions.otf'), 38, 0xFFCCCCCC, LEFT);
-    buttonText.x = ICON_WIDTH + 20;
-    buttonText.y = (ITEM_HEIGHT / 2) - (buttonText.height / 2);
-    buttonText.offset.y = -6;
+    buttonText = new FlxText(0, 0, ITEM_WIDTH - (iconW + 20), '${data.text ?? 'NO TEXT'}', 30);
+    buttonText.setFormat(Paths.font('FunkinOptions.otf'), TEXT_SIZE, 0xFFCCCCCC, LEFT);
+    fitText();
+    buttonText.x = iconW + 20;
+    buttonText.y = (itemH / 2) - (buttonText.height / 2);
+    buttonText.offset.y = -6 * factor;
     add(buttonText);
 
     icon = new FunkinSprite(0, 0);
@@ -107,7 +141,7 @@ class QuickPanelButton extends FlxSpriteGroup
     add(icon);
 
     icon.antialiasing = true;
-    icon.setGraphicSize(ICON_WIDTH, ICON_WIDTH);
+    icon.setGraphicSize(iconW, iconW);
 
     ICON_SCALE_X = icon.scale.x;
     ICON_SCALE_Y = icon.scale.y;
@@ -165,121 +199,22 @@ class QuickPanelButton extends FlxSpriteGroup
 
     paScale = new PropertyAnimator(this);
 
+    var bumpValues:Array<Float> = [1.04, 1.04, 1.04, 1.04, 1.04, 1.04, 0.98, 0.98, 0.98, 0.98, 1];
+    var bumpBigValues:Array<Float> = [1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 0.95, 0.95, 0.95, 0.95, 1];
+
     paScale.addAnimationByName('bump', 30);
 
-    paScale.addProperty('bump', 'icon.scale.x', [
-      ICON_SCALE_X + 0.05,
-      ICON_SCALE_X + 0.05,
-      ICON_SCALE_X + 0.02,
-      ICON_SCALE_X + 0.02,
-      ICON_SCALE_X + 0.02,
-      ICON_SCALE_X + 0.02,
-      ICON_SCALE_X - 0.01,
-      ICON_SCALE_X - 0.01,
-      ICON_SCALE_X - 0.01,
-      ICON_SCALE_X - 0.01,
-      ICON_SCALE_X
-    ]);
-
-    paScale.addProperty('bump', 'icon.scale.y', [
-      ICON_SCALE_Y + 0.05,
-      ICON_SCALE_Y + 0.05,
-      ICON_SCALE_Y + 0.02,
-      ICON_SCALE_Y + 0.02,
-      ICON_SCALE_Y + 0.02,
-      ICON_SCALE_Y + 0.02,
-      ICON_SCALE_Y - 0.01,
-      ICON_SCALE_Y - 0.01,
-      ICON_SCALE_Y - 0.01,
-      ICON_SCALE_Y - 0.01,
-      ICON_SCALE_Y
-    ]);
-
-    paScale.addProperty('bump', 'scale.x', [
-      1.04,
-      1.04,
-      1.04,
-      1.04,
-      1.04,
-      1.04,
-      0.98,
-      0.98,
-      0.98,
-      0.98,
-      1
-    ]);
-
-    paScale.addProperty('bump', 'scale.y', [
-      1.04,
-      1.04,
-      1.04,
-      1.04,
-      1.04,
-      1.04,
-      0.98,
-      0.98,
-      0.98,
-      0.98,
-      1
-    ]);
+    paScale.addProperty('bump', 'icon.scale.x', bumpValues.map(v -> ICON_SCALE_X * v));
+    paScale.addProperty('bump', 'icon.scale.y', bumpValues.map(v -> ICON_SCALE_Y * v));
+    paScale.addProperty('bump', 'buttonText.scale.x', bumpValues);
+    paScale.addProperty('bump', 'buttonText.scale.y', bumpValues);
 
     paScale.addAnimationByName('bumpBig', 30);
 
-    paScale.addProperty('bumpBig', 'icon.scale.x', [
-      ICON_SCALE_X + 0.05,
-      ICON_SCALE_X + 0.05,
-      ICON_SCALE_X + 0.02,
-      ICON_SCALE_X + 0.02,
-      ICON_SCALE_X + 0.02,
-      ICON_SCALE_X + 0.02,
-      ICON_SCALE_X - 0.01,
-      ICON_SCALE_X - 0.01,
-      ICON_SCALE_X - 0.01,
-      ICON_SCALE_X - 0.01,
-      ICON_SCALE_X
-    ]);
-
-    paScale.addProperty('bumpBig', 'icon.scale.y', [
-      ICON_SCALE_Y + 0.05,
-      ICON_SCALE_Y + 0.05,
-      ICON_SCALE_Y + 0.02,
-      ICON_SCALE_Y + 0.02,
-      ICON_SCALE_Y + 0.02,
-      ICON_SCALE_Y + 0.02,
-      ICON_SCALE_Y - 0.01,
-      ICON_SCALE_Y - 0.01,
-      ICON_SCALE_Y - 0.01,
-      ICON_SCALE_Y - 0.01,
-      ICON_SCALE_Y
-    ]);
-
-    paScale.addProperty('bumpBig', 'scale.x', [
-      1.2,
-      1.2,
-      1.2,
-      1.2,
-      1.2,
-      1.2,
-      0.95,
-      0.95,
-      0.95,
-      0.95,
-      1
-    ]);
-
-    paScale.addProperty('bumpBig', 'scale.y', [
-      1.2,
-      1.2,
-      1.2,
-      1.2,
-      1.2,
-      1.2,
-      0.95,
-      0.95,
-      0.95,
-      0.95,
-      1
-    ]);
+    paScale.addProperty('bumpBig', 'icon.scale.x', bumpBigValues.map(v -> ICON_SCALE_X * v));
+    paScale.addProperty('bumpBig', 'icon.scale.y', bumpBigValues.map(v -> ICON_SCALE_Y * v));
+    paScale.addProperty('bumpBig', 'buttonText.scale.x', bumpBigValues);
+    paScale.addProperty('bumpBig', 'buttonText.scale.y', bumpBigValues);
 
     paScale.setDefaultProperties();
 
@@ -304,8 +239,8 @@ class QuickPanelButton extends FlxSpriteGroup
     {
       paScale.stop();
 
-      scale.x = 1;
-      scale.y = 1;
+      buttonText.scale.x = 1;
+      buttonText.scale.y = 1;
       icon.scale.x = ICON_SCALE_X;
       icon.scale.y = ICON_SCALE_Y;
     }

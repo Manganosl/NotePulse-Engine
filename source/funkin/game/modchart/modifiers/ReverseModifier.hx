@@ -31,7 +31,7 @@ class ReverseModifier extends NoteModifier {
 	
 	public function getReverseValue(dir:Int, player:Int, ?scrolling = false){
 		var scroll = (scrolling == true);
-		var kNum = modMgr.receptors[player].length;
+		var kNum = PlayField.fields[player].length;
 		var val:Float = 0;
 		if (dir >= kNum / 2) val += subVal(scroll ? sSplitS : sSplit, player);
 		
@@ -86,11 +86,8 @@ class ReverseModifier extends NoteModifier {
 			"unboundedReverse"
 		];
 		
-		var receptors = modMgr.receptors[0];
 		for (i in 0...PlayState.SONG.mania+1)
-		{
 			subMods.push('reverse${i}');
-		}
 		return subMods;
 	}
 }
