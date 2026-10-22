@@ -106,6 +106,7 @@
 	<!--Psych stuff needed-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/>
+	<haxeflag name="--macro" value="addMetadata('@:nullSafety(Off)', 'hxvlc.openfl.Video')" if="VIDEOS_ALLOWED"/>
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 	<haxelib name="flixel-animate"/>
 
@@ -164,8 +165,6 @@
 	<haxedef name="HXCPP_CATCH_SEGV" />
 	<haxedef name="HXCPP_GC_DYNAMIC_SIZE" />
 	<haxedef name="HXCPP_CPP17" />
-	<haxedef name="HXCPP_GC_GENERATIONAL" />
-	<haxedef name="HXCPP_GC_BIG_BLOCKS" />
 	<haxedef name="HXCPP_FAST_LINK"/>
 	
 	<!--Disable deprecated warnings-->
