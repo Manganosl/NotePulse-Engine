@@ -79,6 +79,20 @@ class Init extends FlxState {
 
 		FlxTransitionableState.skipNextTransOut = true;
 
+		if(!Mods.multipleForcedMods){
+            var enabledMods:Array<String> = Mods.parseList().enabled;
+            if (enabledMods != null) {
+                for (mod in enabledMods) {
+                    var pack:Dynamic = Mods.getPack(mod);
+                    if (pack != null && pack.forceStates == true) {
+                        Mods.currentLoadedMod = mod;
+                        Mods.currentModDirectory = mod;
+                        break;
+                    }
+                }
+            }
+        }
+
 		var useModState:Bool = Mods.currentLoadedMod != "" && Mods.modPack != null && !Mods.multipleForcedMods && Mods.modPack.forceStates;
 		if(useModState){
 			GlobalHandler.loadGlobalHX();
@@ -110,7 +124,6 @@ class Init extends FlxState {
 			funkin.scripting.GlobalHandler.stopGlobalHX();
 			FlxTween.cancelTweensOf(Main.fpsVar);
 			Main.fpsVar.y = 10;
-			funkin.substates.quickPanel.QuickPanelState.freeplayAllowed = true;
 			MusicBeatState.switchState(new TitleState());
 		}
 

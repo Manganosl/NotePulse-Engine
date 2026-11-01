@@ -52,7 +52,7 @@ class EventTimeline {
         var lo = 0;
         var hi = list.length;
         while (lo < hi){
-            var mid = (lo + hi) >>> 1;
+            var mid:Int = Std.int((lo + hi) / 2);
             if (list[mid].executionStep <= step) lo = mid + 1;
             else hi = mid;
         }

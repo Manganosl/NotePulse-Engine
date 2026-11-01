@@ -10,6 +10,8 @@ class ScriptedState extends MusicBeatState
 	private var initialScriptPath:String;
 	public static var instance:ScriptedState;
 
+	public var quickPanel:QuickPanelState;
+
 	private var softlocked:Bool = false;
 
 	public function new(?scriptPath:String = null){
@@ -22,7 +24,7 @@ class ScriptedState extends MusicBeatState
 	override public function create():Void {
 		super.create();
 
-		openTopSubState(new QuickPanelState());
+		openTopSubState(quickPanel = new QuickPanelState());
 
 		if(initialScriptPath != null) startHScript(initialScriptPath);
 
