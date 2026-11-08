@@ -86,34 +86,33 @@ class MusicBeatState extends FlxTransitionableState
 	}
 	#end
 
-	public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
-		var returnVal:Dynamic = LuaUtils.Function_Continue;
-
+	public function callOnHScript(event:String, args:Array<Dynamic>, ignoreStops:Bool = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
+		var returnVal = LuaUtils.Function_Continue;
 		#if HSCRIPT_ALLOWED
-		if(exclusions == null) exclusions = new Array();
-		if(excludeValues == null) excludeValues = new Array();
-		excludeValues.push(LuaUtils.Function_Continue);
+		if(exclusions == null) exclusions = [];
+		if(excludeValues == null) excludeValues = [];
 
-		var len:Int = hscriptArray.length;
-		if (len < 1) return returnVal;
-		for(i in 0...len) {
-			var script:FunkinScript = hscriptArray[i];
-			if(script == null || exclusions.contains(script.scriptName)) continue;
+		for (sc in hscriptArray) {
+			if(sc == null || sc.interp == null) continue;
+			if(exclusions.contains(sc.scriptName)) continue;
 
 			var myValue:Dynamic = null;
 			try {
-				var callValue = script.call(funcToCall, args);
-				myValue = callValue;
-				if((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops) {
-					returnVal = myValue;
-					break;
-				}
+				myValue = sc.call(event, args);
+			} catch(e:Dynamic) {
+				continue;
+			}
 
-				if(myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
+			// What the actual fuck, why do I need to check if its a fucking String
+			if(!ignoreStops && (myValue is String) && (myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll)) {
+				break;
+			}
+
+			if(myValue != null && myValue != LuaUtils.Function_Continue && !excludeValues.contains(myValue)) {
+				returnVal = myValue;
 			}
 		}
 		#end
-
 		return returnVal;
 	}
 

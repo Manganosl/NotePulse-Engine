@@ -363,31 +363,33 @@ class KeybindShowcase extends FlxTypedGroup<FlxBasic> {
 	public var background:FlxSprite;
 	public var keyText:FlxText;
 	public var keyCodes:Array<Int>;
+	public var linkedStrum:StrumNote;
 	public dynamic function onComplete():Void {}
 
-	public function new(x:Float,y:Float,keyCodes:Array<Int>, camera:FlxCamera, strumHalved:Float, mania:Int) {
+	public function new(linkedStrum:StrumNote, keyCodes:Array<Int>, mania:Int) {
 		super();
 
 		this.keyCodes = keyCodes;
+		this.linkedStrum = linkedStrum;
 
-		var xOffset = x + strumHalved;
+		var xOffset = linkedStrum.modPos.x + (linkedStrum.width / 2);
+		var yOffset = ClientPrefs.data.downScroll ? linkedStrum.modPos.y - 30 : linkedStrum.modPos.y + linkedStrum.height + 5;
 		
 		var size = 20 - (mania - 3);
 
-		keyText = new FlxText(xOffset + 4,y + 4, InputFormatter.getKeyName(keyCodes[0]));
+		keyText = new FlxText(xOffset + 4, yOffset + 4, InputFormatter.getKeyName(keyCodes[0]));
 		keyText.setFormat(Paths.font("vcr.ttf"), size, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		keyText.x -= keyText.width / 2;
 		xOffset = keyText.x;
+		keyText.scrollFactor.set();
 
-		background = new FlxSprite(xOffset-4,y);
+		background = new FunkinSprite(xOffset-4, yOffset);
 		background.makeGraphic(Std.int(keyText.width + 8), Std.int(keyText.height + 8), 0xFF000000);
 		background.alpha = 0.5;
+		background.scrollFactor.set();
 
 		add(background);
 		add(keyText);
-
-		background.cameras = [camera];
-		keyText.cameras = [camera];
 
 		new FlxTimer().start(2, function(tmr:FlxTimer) {
 			FlxTween.tween(keyText, {alpha: 0}, 0.5, {ease: FlxEase.linear, onComplete: function(t) {
@@ -399,17 +401,26 @@ class KeybindShowcase extends FlxTypedGroup<FlxBasic> {
 
 				FlxTween.tween(keyText, {alpha: 1}, 0.5);
 	
-				keyText.x = x + strumHalved + 4;
-				keyText.x -= keyText.width / 2;
-				xOffset = keyText.x;
-				background.x = xOffset - 4;
 				background.makeGraphic(Std.int(keyText.width + 8), Std.int(keyText.height + 8), 0xFF000000);
 				new FlxTimer().start(2.5, function(tmr:FlxTimer) {
 					FlxTween.tween(keyText, {alpha: 0}, 0.5, {ease: FlxEase.linear, onComplete: function(t) {
-						onComplete();
+						if(onComplete != null) onComplete();
+						destroy();
 					}});
 				});
 			}});
 		});
+	}
+
+	override public function update(elapsed:Float){
+		super.update(elapsed);
+
+		var xOffset = linkedStrum.modPos.x + (linkedStrum.width / 2);
+		var yOffset = ClientPrefs.data.downScroll ? linkedStrum.modPos.y - 30 : linkedStrum.modPos.y + linkedStrum.height + 5;
+		keyText.x = ((xOffset + 4) - (keyText.width / 2));
+		keyText.y = yOffset;
+		xOffset = keyText.x;
+		background.x = xOffset - 4;
+		background.y = yOffset;
 	}
 }

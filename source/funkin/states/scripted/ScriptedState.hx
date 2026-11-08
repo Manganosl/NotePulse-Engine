@@ -28,7 +28,7 @@ class ScriptedState extends MusicBeatState
 
 		if(initialScriptPath != null) startHScript(initialScriptPath);
 
-		if(hscript != null) callOnHScript('onCreatePost');
+		if(hscript != null) callOnHScript('onCreatePost', []);
 	}
 
 	public function startHScript(scriptToLoad:String):Bool {
@@ -69,7 +69,7 @@ class ScriptedState extends MusicBeatState
 	}
 
 	override public function destroy():Void {
-		if(hscript != null) callOnHScript('onDestroy');
+		if(hscript != null) callOnHScript('onDestroy', []);
 		hscript = null;
 
 		super.destroy();

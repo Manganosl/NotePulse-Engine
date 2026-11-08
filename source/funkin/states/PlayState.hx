@@ -1,6 +1,5 @@
 package funkin.states;
 
-import funkin.objects.notes.StrumNote.KeybindShowcase;
 import funkin.backend.ExtraKeysHandler;
 import funkin.data.Highscore;
 import funkin.data.StageData;
@@ -1900,9 +1899,8 @@ class PlayState extends MusicBeatState
 					if (split[0] != null) duration = Std.parseFloat(split[0].trim());
 					if (split[1] != null) leEase = split[1].trim();
 					if (Math.isNaN(duration)) duration = 0;
-					
-					if (duration > 0) FlxTween.tween(FlxG.camera, {zoom: targetZoom}, duration, {ease: FlxEase.circOut});
-					else FlxG.camera.zoom = targetZoom;
+					if (duration > 0) FlxTween.tween(camGame, {zoom: targetZoom}, duration, {ease: LuaUtils.getTweenEaseByString(leEase)});
+					else camGame.zoom = targetZoom;
 				}
 				defaultCamZoom = targetZoom;
 
@@ -3093,33 +3091,6 @@ class PlayState extends MusicBeatState
 			babyArrow.postAddedToGroup();
 
 			i++;
-		}
-
-		if (ClientPrefs.data.keybindShowcase) {
-			var source = !isPlayerOpponent ? playerStrums : opponentStrums;
-			if(playField != source) return;
-			var keyLength = source.members.length;
-
-			for (i in 0...keyLength)
-			{
-				var ref = source.members[i];
-				if (ref == null) continue;
-
-				var keyShowcase = new KeybindShowcase(
-					ref.x,
-					ClientPrefs.data.downScroll ? ref.y - 30 : ref.y + ref.height + 5,
-					ClientPrefs.keyBinds.get(keysArray[i]),
-					camHUD,
-					ref.width / 2,
-					SONG.mania
-				);
-
-				keyShowcase.onComplete = function() {
-					remove(keyShowcase);
-				};
-
-				add(keyShowcase);
-			}
 		}
 	}
 

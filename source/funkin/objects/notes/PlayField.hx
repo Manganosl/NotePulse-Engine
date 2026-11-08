@@ -1,5 +1,7 @@
 package funkin.objects.notes;
 
+import flixel.group.FlxContainer.FlxTypedContainer;
+import flixel.group.FlxSpriteContainer;
 import flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer;
 import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.StrumNote.StrumBoundaries;
@@ -148,9 +150,8 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
         this.player = fields.length;
 		this.keyCount = (PlayState.SONG != null && PlayState.SONG.mania != null) ? PlayState.SONG.mania + 1 : 4;
 
-		fields.push(this);
-
 		notePathGroup = new FlxTypedGroup<MeshRender>();
+		fields.push(this);
     }
 
 	override public function destroy() {
@@ -220,6 +221,23 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 		if(notePathGroup != null)
 			notePathGroup.cameras = value;
 		return cameras = value;
+	}
+
+	public function getKeybindShowcase(){
+		var keyLength = this.members.length;
+		var keybindShowcase:FlxTypedContainer<KeybindShowcase> = new FlxTypedContainer<KeybindShowcase>();
+		for (i in 0...keyLength){
+			var ref = this.members[i];
+			if (ref == null) continue;
+
+			var keyShowcase = new KeybindShowcase(
+				ref,
+				ClientPrefs.keyBinds.get(keysArray[i]),
+				this.keyCount - 1
+			);
+			keybindShowcase.add(keyShowcase);
+		}
+		return keybindShowcase;
 	}
 
 	function getNotePathMesh(lane:Int):MeshRender {

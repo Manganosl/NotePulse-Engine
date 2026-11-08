@@ -536,7 +536,7 @@ class FunkinScript implements HscriptInterface {
 		var pos:PosInfos = {fileName: e.origin, lineNumber: e.line, className: null, methodName: null};
 		warn(getErrorMessage(e), pos);
 		#else
-		trace(getErrorMessage(e), {fileName: posInfos.fileName, lineNumber: posInfos.lineNumber, className: null, methodName: null});
+		trace(getErrorMessage(e));
 		#end
 	}
 
@@ -658,11 +658,18 @@ class FunkinScript implements HscriptInterface {
 		if(interp != null) interp.variables.set(variable, data);
 
 	public function call(func:String, args:Array<Dynamic>):Dynamic {
-		if(interp == null) return null;
+		if(interp == null) {
+			return null;
+		}
 
 		var functionVar = interp.variables.get(func);
 		if(functionVar == null || !Reflect.isFunction(functionVar)) return null;
-		return (args != null && args.length > 0) ? Reflect.callMethod(null, functionVar, args) : functionVar();
+
+		try {
+			return (args != null && args.length > 0) ? Reflect.callMethod(null, functionVar, args) : functionVar();
+		} catch(e:Dynamic) {
+			return null;
+		}
 	}
 }
 
