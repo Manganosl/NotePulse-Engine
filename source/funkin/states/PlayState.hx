@@ -1150,18 +1150,7 @@ class PlayState extends MusicBeatState
 		FunkinLua.customFunctions.clear();
 		#end
 
-		#if HSCRIPT_ALLOWED
-		for (script in hscriptArray)
-			if(script != null)
-			{
-				script.call('onDestroy', []);
-				script.stop();
-				script = null;
-			}
-
-		while (hscriptArray.length > 0)
-			hscriptArray.pop();
-		#end
+		super.destroy();
 
 		stagesFunc(function(stage:BaseStage) stage.destroy());
 		modManager.destroy();
@@ -1177,7 +1166,6 @@ class PlayState extends MusicBeatState
 		Note.globalRgbShaders = [];
 		funkin.backend.NoteTypesConfig.clearNoteTypesData();
 		instance = null;
-		super.destroy();
 	}
 
 	//// Start | Countdown ////

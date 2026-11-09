@@ -9,6 +9,7 @@ import haxe.io.Path;
 import funkin.scripting.LuaUtils;
 import funkin.scripting.lua.FunkinLua;
 import funkin.scripting.FunkinScript;
+import funkin.scripting.ScriptPack;
 #if !flash
 import flixel.addons.display.FlxRuntimeShader;
 #end
@@ -27,8 +28,21 @@ class MusicBeatState extends FlxTransitionableState
 	private var curStep:Int = 0;
 	private var curBeat:Int = 0;
 	#if HSCRIPT_ALLOWED
-	public var hscriptArray:Array<FunkinScript> = [];
+	public var scriptPack:ScriptPack = new ScriptPack("MusicBeatState");
+
+	public var hscriptArray(get, never):Array<FunkinScript>; // To keep compatibility or something like that
+	function get_hscriptArray():Array<FunkinScript> return scriptPack.scripts;
 	public var instancesExclude:Array<String> = [];
+
+	/**
+	 * If `true` will load a HScript file called like the state in mod/states
+	 */
+	public var autoStateScripts:Bool = true;
+	public var stateScriptName:String = null;
+
+	var _autoScripts:Array<FunkinScript> = [];
+	var _autoScriptsLoaded:Bool = false;
+	var _autoScriptsPosted:Bool = false;
 	#end
 
 	private var curDecStep:Float = 0;
@@ -42,6 +56,11 @@ class MusicBeatState extends FlxTransitionableState
 	var _psychCameraInitialized:Bool = false;
 
 	override function destroy() {
+		#if HSCRIPT_ALLOWED
+		scriptPack.destroy();
+		_autoScripts = [];
+		#end
+
 		super.destroy();
 	}
 
@@ -79,41 +98,25 @@ class MusicBeatState extends FlxTransitionableState
 		return false;
 	}
 
-	public function initHScript(file:String) {
-		var newScript = new FunkinScript(file);
-		if(newScript != null) hscriptArray.push(newScript);
-		return newScript;
+	/**
+	 * Creates a script from a file
+	 * @return The script
+	 */
+	public function initHScript(file:String):Null<FunkinScript> {
+		return scriptPack.add(new FunkinScript(file));
 	}
 	#end
 
+	/**
+	 * Calls a function on the state's scriptPack
+	 * Kept this just in case some mod uses it, its better to just make the call on the scriptPack directly
+	 */
 	public function callOnHScript(event:String, args:Array<Dynamic>, ignoreStops:Bool = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
-		var returnVal = LuaUtils.Function_Continue;
 		#if HSCRIPT_ALLOWED
-		if(exclusions == null) exclusions = [];
-		if(excludeValues == null) excludeValues = [];
-
-		for (sc in hscriptArray) {
-			if(sc == null || sc.interp == null) continue;
-			if(exclusions.contains(sc.scriptName)) continue;
-
-			var myValue:Dynamic = null;
-			try {
-				myValue = sc.call(event, args);
-			} catch(e:Dynamic) {
-				continue;
-			}
-
-			// What the actual fuck, why do I need to check if its a fucking String
-			if(!ignoreStops && (myValue is String) && (myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll)) {
-				break;
-			}
-
-			if(myValue != null && myValue != LuaUtils.Function_Continue && !excludeValues.contains(myValue)) {
-				returnVal = myValue;
-			}
-		}
+		return scriptPack.call(event, args, ignoreStops, exclusions, excludeValues);
+		#else
+		return LuaUtils.Function_Continue;
 		#end
-		return returnVal;
 	}
 
 	public function setOnHScript(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
@@ -128,11 +131,36 @@ class MusicBeatState extends FlxTransitionableState
 		#end
 	}
 
+	#if HSCRIPT_ALLOWED
+	function stateScriptsEnabled():Bool {
+		return autoStateScripts && !(this is PlayState) && !(this is ScriptedState) && !(this is funkin.states.handlers.CrashHandlerState);
+	}
+
+	function loadStateScripts():Void {
+		if(_autoScriptsLoaded) return;
+		_autoScriptsLoaded = true;
+		if(!stateScriptsEnabled()) return;
+
+		var name:String = (stateScriptName != null ? stateScriptName : Type.getClassName(Type.getClass(this)).split(".").pop());
+		var path:String = Paths.modState(name);
+		if(!FileSystem.exists(path)) return;
+
+		var script = scriptPack.add(new FunkinScript(path, this));
+		if(script != null) _autoScripts.push(script);
+	}
+
+	inline function callStateScripts(func:String, ?args:Array<Dynamic>):Void {
+		if(_autoScripts.length > 0) callOnHScript(func, args == null ? [] : args, true);
+	}
+	#end
+
 	override function create() {
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		#if MODS_ALLOWED Mods.updatedOnState = false; #end
 
 		if(!_psychCameraInitialized) initPsychCamera();
+
+		#if HSCRIPT_ALLOWED loadStateScripts(); #end
 
 		super.create();
 
@@ -156,6 +184,15 @@ class MusicBeatState extends FlxTransitionableState
 	public static var timePassedOnState:Float = 0;
 	override function update(elapsed:Float)
 	{
+		#if HSCRIPT_ALLOWED
+		loadStateScripts();
+		if(!_autoScriptsPosted) {
+			_autoScriptsPosted = true;
+			callStateScripts('onCreatePost');
+		}
+		callStateScripts('onUpdate', [elapsed]);
+		#end
+
 		var oldStep:Int = curStep;
 		timePassedOnState += elapsed;
 
@@ -184,6 +221,8 @@ class MusicBeatState extends FlxTransitionableState
 		});
 
 		super.update(elapsed);
+
+		#if HSCRIPT_ALLOWED callStateScripts('onUpdatePost', [elapsed]); #end
 	}
 
 	private function updateSection():Void
@@ -287,6 +326,8 @@ class MusicBeatState extends FlxTransitionableState
 			stage.stepHit();
 		});
 
+		#if HSCRIPT_ALLOWED callStateScripts('onStepHit', [curStep]); #end
+
 		if (curStep % 4 == 0)
 			beatHit();
 	}
@@ -300,6 +341,8 @@ class MusicBeatState extends FlxTransitionableState
 			stage.curDecBeat = curDecBeat;
 			stage.beatHit();
 		});
+
+		#if HSCRIPT_ALLOWED callStateScripts('onBeatHit', [curBeat]); #end
 	}
 
 	public function sectionHit():Void
@@ -308,6 +351,8 @@ class MusicBeatState extends FlxTransitionableState
 			stage.curSection = curSection;
 			stage.sectionHit();
 		});
+
+		#if HSCRIPT_ALLOWED callStateScripts('onSectionHit', [curSection]); #end
 	}
 
 	function stagesFunc(func:BaseStage->Void)
@@ -326,14 +371,12 @@ class MusicBeatState extends FlxTransitionableState
 
 	#if HSCRIPT_ALLOWED
 	public function importScript(path:String, absolute:Bool = false) {
-		var scriptPath = ((Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0) ? Paths.mods(Mods.currentModDirectory + '/' + path + (path.endsWith(".hx") ? "" : ".hx")) : Paths.mods(path));
-		try {
-			this.hscriptArray.push(new FunkinScript((absolute ? path : scriptPath)));
-			return true;
-		} catch(e) {
-			FunkinLua.luaTrace('importScript: Path "${(absolute ? path : scriptPath)}" does not exist!', true, false, 0xFFFF0000);
+		var script = scriptPack.importScript(path, absolute);
+		if(script == null) {
+			FunkinLua.luaTrace('importScript: Path "$path" does not exist!', true, false, 0xFFFF0000);
+			return false;
 		}
-		return false;
+		return true;
 	}
 	#end
 

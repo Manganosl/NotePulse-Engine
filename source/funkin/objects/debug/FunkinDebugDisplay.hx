@@ -310,11 +310,11 @@ class FunkinDebugDisplay extends Sprite
     fpsGraph.textDisplay.text = info.join('\n');
 
     #if !html5
-    gcMemGraph.textDisplay.text = 'GC MEM: ${FlxStringUtil.formatBytes(gcMem).toUpperCase()} /${FlxStringUtil.formatBytes(gcMemPeak).toUpperCase()}';
+    gcMemGraph.textDisplay.text = 'GC MEM: ${FlxStringUtil.formatBytes(gcMem).toUpperCase()} / ${FlxStringUtil.formatBytes(gcMemPeak).toUpperCase()}';
 
     if (taskMemGraph != null)
     {
-      taskMemGraph.textDisplay.text = 'TASK MEM: ${FlxStringUtil.formatBytes(taskMem).toUpperCase()} /${FlxStringUtil.formatBytes(taskMemPeak).toUpperCase()}';
+      taskMemGraph.textDisplay.text = 'TASK MEM: ${FlxStringUtil.formatBytes(taskMem).toUpperCase()} / ${FlxStringUtil.formatBytes(taskMemPeak).toUpperCase()}';
     }
     #end
   }

@@ -2,6 +2,7 @@ package funkin.states.base;
 
 import flixel.FlxSubState;
 import funkin.scripting.FunkinScript;
+import funkin.scripting.ScriptPack;
 import funkin.scripting.LuaUtils;
 #if !flash
 import flixel.addons.display.FlxRuntimeShader;
@@ -48,42 +49,19 @@ class MusicBeatSubstate extends FlxSubState
 		return false;
 	}
 
-	public function initHScript(file:String) {
-		var newScript = new FunkinScript(file);
-		if(newScript != null) hscriptArray.push(newScript);
-		return newScript;
+	public function initHScript(file:String):Null<FunkinScript> {
+		return scriptPack.add(new FunkinScript(file));
 	}
 	#end
 
 	public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
-		var returnVal:Dynamic = LuaUtils.Function_Continue;
-
 		#if HSCRIPT_ALLOWED
-		if(exclusions == null) exclusions = new Array();
-		if(excludeValues == null) excludeValues = new Array();
+		if(excludeValues == null) excludeValues = [];
 		excludeValues.push(LuaUtils.Function_Continue);
-
-		var len:Int = hscriptArray.length;
-		if (len < 1) return returnVal;
-		for(i in 0...len) {
-			var script:FunkinScript = hscriptArray[i];
-			if(script == null || exclusions.contains(script.scriptName)) continue;
-
-			var myValue:Dynamic = null;
-			try {
-				var callValue = script.call(funcToCall, args);
-				myValue = callValue;
-				if((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops) {
-					returnVal = myValue;
-					break;
-				}
-
-				if(myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
-			}
-		}
+		return scriptPack.call(funcToCall, args, ignoreStops, exclusions, excludeValues);
+		#else
+		return LuaUtils.Function_Continue;
 		#end
-
-		return returnVal;
 	}
 
 	public function setOnHScript(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
@@ -107,7 +85,10 @@ class MusicBeatSubstate extends FlxSubState
 	private var curStep:Int = 0;
 	private var curBeat:Int = 0;
 	#if HSCRIPT_ALLOWED
-	public var hscriptArray:Array<FunkinScript> = [];
+	public var scriptPack:ScriptPack = new ScriptPack("MusicBeatSubstate", true);
+	
+	public var hscriptArray(get, never):Array<FunkinScript>;
+	function get_hscriptArray():Array<FunkinScript> return scriptPack.scripts;
 	public var instancesExclude:Array<String> = [];
 	#end
 
@@ -221,14 +202,12 @@ class MusicBeatSubstate extends FlxSubState
 
 	#if HSCRIPT_ALLOWED
 	public function importScript(path:String, absolute:Bool = false) {
-		var scriptPath = ((Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0) ? Paths.mods(Mods.currentModDirectory + '/' + path + (path.endsWith(".hx") ? "" : ".hx")) : Paths.mods(path));
-		try {
-			this.hscriptArray.push(new FunkinScript((absolute ? path : scriptPath)));
-			return true;
-		} catch(e) {
-			FunkinLua.luaTrace('importScript: Path "${(absolute ? path : scriptPath)}" does not exist!', true, false, 0xFFFF0000);
+		var script = scriptPack.importScript(path, absolute);
+		if(script == null) {
+			FunkinLua.luaTrace('importScript: Path "$path" does not exist!', true, false, 0xFFFF0000);
+			return false;
 		}
-		return false;
+		return true;
 	}
 	#end
 

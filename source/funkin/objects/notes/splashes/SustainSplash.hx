@@ -44,6 +44,7 @@ class SustainSplash extends FunkinSprite {
 
 	public inline function show(note:Note) {
 		if(strum.animation.curAnim != null && strum.animation.curAnim.name == "static") return;
+		if(!strum.visible || strum.alpha == 0) return;
 		updatedThisFrame = true;
 
 		var tempShader:RGBPalette = null;
@@ -81,7 +82,7 @@ class SustainSplash extends FunkinSprite {
 
 		updatedThisFrame = true;
 
-		if (miss) {
+		if (miss || !strum.visible || strum.alpha == 0) {
 			visible = false;
 			return;
 		}

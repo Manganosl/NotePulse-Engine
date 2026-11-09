@@ -195,22 +195,46 @@ class FunkinScript implements HscriptInterface {
 	//Scripts attached to this script. You can make some goofy chains with this.
 	public var subScripts:Array<funkin.scripting.FunkinScript> = [];
 
+	// True when theres an error with the script
+	public var isDummy:Bool = false;
+
+	// True after load()
+	public var loaded(default, null):Bool = false;
+
+	// I thought this would be cool
+	public static final SCRIPT_EXTENSIONS:Array<String> = ["hx", "hscript", "hsc", "hxs"];
+
+	var parentObject:Dynamic = null;
+	var ignoreScriptErrors:Bool = false;
+	var _importedPaths:Array<String> = [];
+	var _lastCallErrors:Map<String, String> = [];
+
+	static var _redirectsInitialized:Bool = false;
+
 	/**
 	 * Creates a new haxe script instance that runs interpreted haxe code.
 	 *
-	 * @param	path			The path to the haxe script.
+	 * @param path			The path to the haxe script.
 	 *							NOTE: This does not support direct code strings. See the
 	 *							`HaxeFunctions` class for a version supporting code strings.
-	 * @param	_parentClass	The parent state instance this script will be assigned to. 
-	 * @param	_autoRunScript	(This is used internally by `HaxeFunctions` and is not recommened to use)
-	 * @param  	_ignoreErrors	Whether the script should ignore the critical error popup if an error is found.
+	 * @param _parentClass	The parent state instance this script will be assigned to. 
+	 * @param _autoRunScript	(This is used internally by `HaxeFunctions` and is not recommened to use)
+	 * @param _ignoreErrors	Whether the script should ignore the critical error popup if an error is found.
+	 * @param _autoLoad		Whether the script should be executed right after being parsed.
 	 */
-    public function new(path:String, ?_parentClass:Dynamic = null, ?_autoRunScript:Bool = true, ?_ignoreErrors:Bool = false) {
+    public function new(path:String, ?_parentClass:Dynamic = null, ?_autoRunScript:Bool = true, ?_ignoreErrors:Bool = false, ?_autoLoad:Bool = true) {
 		if(!_autoRunScript) return;
+
+		if(!_redirectsInitialized) {
+			_redirectsInitialized = true;
+			redirectImports(getDefaultImportRedirects());
+		}
 
         if(parser == null) initParser();
 		if(interp == null) initInterp();
         scriptName = path;
+		parentObject = _parentClass;
+		ignoreScriptErrors = _ignoreErrors;
 
 		#if MODS_ALLOWED
 		if(scriptName != null && scriptName.length > 0){
@@ -220,16 +244,40 @@ class FunkinScript implements HscriptInterface {
 		}
 		#end
 
+		parseFile();
+		if(_autoLoad) load();
+	}
+
+	static inline function fileExists(path:String):Bool
+		return #if sys FileSystem.exists(path) #else Assets.exists(path) #end;
+
+	static inline function readFile(path:String):String
+		return #if sys File.getContent(path) #else Assets.getText(path) #end;
+
+	function parseFile():Void {
+		if(scriptName == null || scriptName.length < 1 || !fileExists(scriptName)) {
+			isDummy = true;
+			Log.error('Script "$scriptName" does not exist!');
+			return;
+		}
+
 		try {
 			parser.line = 1; //Reset the parser position.
-			expr = parser.parseString(#if sys File.getContent(path) #else Assets.getText(path) #end, path);
+			expr = parser.parseString(readFile(scriptName), scriptName);
+		} catch(e) {
+			handleLoadError(e);
+		}
+	}
 
-			expr = stripScriptMetadata(expr);
+	public function load():Void {
+		if(loaded || isDummy || expr == null || interp == null) return;
+		loaded = true;
 
+		try {
 			interp.variables.set("this", this);
 			for(varToBring => val in classes) interp.variables.set(varToBring, val);
 
-			this.setParent((_parentClass != null ? _parentClass : LuaUtils.getHScriptParent()));
+			this.setParent((parentObject != null ? parentObject : LuaUtils.getHScriptParent()));
 			addHScriptExtras(this.interp, LuaUtils.isPlayStateScript(interp.scriptObject));
 
 			interp.variables.set("getModSetting", function(saveTag:String, ?modName:String = null) {
@@ -243,11 +291,55 @@ class FunkinScript implements HscriptInterface {
 				return LuaUtils.getModSetting(saveTag, modName);
 			});
 
+			expr = stripScriptMetadata(expr);
 			interp.execute(expr);
 			call("onCreate", []);
 		} catch(e) {
-			if(!_ignoreErrors) FlxG.stage.window.alert('Error on haxe script.\n${e.toString()}', 'Error on Haxe Script!');
+			handleLoadError(e);
 		}
+	}
+
+	function handleLoadError(e:Dynamic):Void {
+		if(!ignoreScriptErrors) FlxG.stage.window.alert('Error on haxe script.\n${Std.string(e)}', 'Error on Haxe Script!');
+		else Log.error('[$scriptName] Error on haxe script: ${Std.string(e)}');
+	}
+
+	/**
+	 * Hot-reloads the script
+	 * @return `false` if the script can't be reloaded
+	 */
+	public function reload():Bool {
+		if(isDummy || scriptName == null) return false;
+
+		var saved:Map<String, Dynamic> = [];
+		var oldParent:Dynamic = parentObject;
+		if(interp != null) {
+			oldParent = interp.scriptObject;
+			for(k => v in interp.variables)
+				if(!Reflect.isFunction(v)) saved.set(k, v);
+		}
+
+		stopSubScripts();
+		expr = null;
+		loaded = false;
+		_librariesAllowed = true;
+		_importedPaths = [];
+		_lastCallErrors = [];
+		parentObject = oldParent;
+
+		initParser();
+		initInterp();
+		interp.allowStaticVariables = interp.allowPublicVariables = false;
+
+		parseFile();
+		load();
+
+		if(interp != null) {
+			for(k => v in saved) interp.variables.set(k, v);
+			interp.allowStaticVariables = interp.allowPublicVariables = true;
+		}
+
+		return true;
 	}
 
 	public static function addHScriptExtras(obj:Interp, isPlayState:Bool = false) {
@@ -467,14 +559,84 @@ class FunkinScript implements HscriptInterface {
 
 	var _librariesAllowed:Bool = true;
 	function onImportFailed(cl:Array<String>, classAlias:Null<String>):Bool {
-		if(_librariesAllowed) { //Custom hscript libraries
-			var scriptPath = Paths.getScriptPath("libraries/" + cl.join("/") + ".hx", this.modFolder);
-			if(#if sys FileSystem.exists(scriptPath) #else Assets.exists(scriptPath) #end) {
-				return _includeSubscript(scriptPath, true);
-			}
+		if(!_librariesAllowed || cl == null || cl.length < 1) return false;
+
+		var scriptPath:Null<String> = findSourceFile(cl.join("/"));
+		if(scriptPath == null) return false;
+		if(_importedPaths.contains(scriptPath)) return true;
+		_importedPaths.push(scriptPath);
+
+		try {
+			parser.line = 1;
+			var importedExpr:Expr = parser.parseString(readFile(scriptPath), cl.join("/") + ".hx");
+			@:privateAccess interp.exprReturn(importedExpr);
+		} catch(e) {
+			Log.error('Error while importing "${cl.join(".")}" from source/ ${Std.string(e)}');
+			return false;
 		}
 
-		return false;
+		return true;
+	}
+
+	function findSourceFile(relPath:String):Null<String> {
+		var folders:Array<String> = [];
+		#if MODS_ALLOWED
+		if(modFolder != null && modFolder.length > 0) folders.push(modFolder);
+		if(Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0 && !folders.contains(Mods.currentModDirectory))
+			folders.push(Mods.currentModDirectory);
+		for(mod in Mods.getGlobalMods())
+			if(!folders.contains(mod)) folders.push(mod);
+		#end
+		if(folders.length < 1) folders.push("");
+
+		for(folder in folders){
+			for(ext in SCRIPT_EXTENSIONS) {
+				var scriptPath = Paths.getScriptPath('source/$relPath.$ext', folder);
+				if(fileExists(scriptPath)) return scriptPath;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Makes `import oldClass;` load `newClass` instead
+	 * Being used for the old Psych's packages
+	 * @param oldName The old package
+	 * @param newName The new package
+	 */
+	public static function redirectImport(oldName:String, newName:String):Void
+		Interp.importRedirects.set(oldName, newName);
+
+	public static function redirectImports(redirects:Map<String, String>):Void {
+		if(redirects == null) return;
+		for(oldName => newName in redirects) redirectImport(oldName, newName);
+	}
+
+	// Should I add more? Probably, but these are the basic ones and I doubt anyone imported something like uh... Idk PsychCamera
+	public static function getDefaultImportRedirects():Map<String, String> {
+		var redirects:Map<String, String> = [];
+
+		redirects["states.PlayState"] = "funkin.states.PlayState";
+		redirects["states.MainMenuState"] = "funkin.states.MainMenuState";
+		redirects["states.FreeplayState"] = "funkin.states.menus.FreeplayState";
+		redirects["states.StoryMenuState"] = "funkin.states.menus.StoryMenuState";
+		redirects["states.TitleState"] = "funkin.states.menus.TitleState";
+		redirects["substates.GameOverSubstate"] = "funkin.substates.GameOverSubstate";
+		redirects["objects.Character"] = "funkin.objects.Character";
+		redirects["objects.Note"] = "funkin.objects.notes.Note";
+		redirects["objects.StrumNote"] = "funkin.objects.notes.StrumNote";
+		redirects["objects.Alphabet"] = "funkin.objects.Alphabet";
+		redirects["objects.HealthIcon"] = "funkin.objects.HealthIcon";
+		redirects["backend.ClientPrefs"] = "funkin.data.ClientPrefs";
+		redirects["backend.Mods"] = "funkin.backend.Mods";
+		redirects["backend.Conductor"] = "funkin.backend.Conductor";
+		redirects["backend.Paths"] = "funkin.backend.Paths";
+		redirects["backend.CoolUtil"] = "funkin.backend.utils.CoolUtil";
+		redirects["backend.MusicBeatState"] = "funkin.states.base.MusicBeatState";
+		redirects["backend.MusicBeatSubstate"] = "funkin.states.base.MusicBeatSubstate";
+		redirects["psychlua.CustomSubstate"] = "funkin.scripting.CustomSubstate";
+
+		return redirects;
 	}
 
 	public static function getErrorMessage( e : Expr.Error ):String {
@@ -561,7 +723,7 @@ class FunkinScript implements HscriptInterface {
 	function _includeSubscript(path:String, absolute:Bool = false):Bool {
 		var scriptPath = (absolute ? path : Paths.getScriptPath(path, this.modFolder));
 
-		if(#if sys FileSystem.exists(scriptPath) #else Assets.exists(scriptPath) #end) {
+		if(fileExists(scriptPath)){
 			var hscriptToPush = new FunkinScript(scriptPath, this.getScriptParent(), true, true);
 			hscriptToPush.call("onScriptImported", [this]);
 			subScripts.push(hscriptToPush);
@@ -640,12 +802,16 @@ class FunkinScript implements HscriptInterface {
 	}
 
 	//SCRIPT CALLBACKS
-	public function stop() {
+	function stopSubScripts(){
 		for(sub in subScripts) {
 			sub.call("onDestroy", []);
 			sub.stop();
 		}
 		subScripts = [];
+	}
+
+	public function stop() {
+		stopSubScripts();
 
 		expr = null;
 		interp = null;
@@ -658,9 +824,7 @@ class FunkinScript implements HscriptInterface {
 		if(interp != null) interp.variables.set(variable, data);
 
 	public function call(func:String, args:Array<Dynamic>):Dynamic {
-		if(interp == null) {
-			return null;
-		}
+		if(interp == null) return null;
 
 		var functionVar = interp.variables.get(func);
 		if(functionVar == null || !Reflect.isFunction(functionVar)) return null;
@@ -668,6 +832,11 @@ class FunkinScript implements HscriptInterface {
 		try {
 			return (args != null && args.length > 0) ? Reflect.callMethod(null, functionVar, args) : functionVar();
 		} catch(e:Dynamic) {
+			var msg:String = Std.string(e);
+			if(_lastCallErrors.get(func) != msg) {
+				_lastCallErrors.set(func, msg);
+				Log.error('[$scriptName] error in $func(): $msg');
+			}
 			return null;
 		}
 	}
@@ -677,7 +846,7 @@ class FunkinScript implements HscriptInterface {
 
 /* Ignore this. It's for if hscript is removed */
 class FunkinScript {
-	public function new(path:String, ?_parentClass:Dynamic, ?_autoRunScript:Bool, ?_ignoreErrors:Bool) {
+	public function new(path:String, ?_parentClass:Dynamic, ?_autoRunScript:Bool, ?_ignoreErrors:Bool, ?_autoLoad:Bool) {
 		throw "FunkinScript is not supported on this platform!";
 	}
 }
