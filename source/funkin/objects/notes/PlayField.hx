@@ -166,6 +166,9 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 		super.destroy();
 	}
 
+	/**
+	 * Adapts the strumline to fit the screen depending on keyCount
+	 */
 	public function adaptStrumline() {
 		var strumLineWidth:Float = 0;
 		var strumLineIsBig:Bool = false;
@@ -183,12 +186,21 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 		}
 	}
 
+	/**
+	 * Calls the provided function for each Playfield
+	 * @param func The function to call
+	 */
 	public static function forEachField(func:PlayField->Void){
 		for (field in fields)
 			if (field != null && field.exists && field.alive)
 				func(field);
 	}
 
+	/**
+	 * Calls the provided function for each note in the playfield
+	 * @param func The function to call
+	 * @param onlySpawnedNotes Whether to only call the function for spawned notes
+	 */
 	public function forEachNote(func:Note->Void, onlySpawnedNotes = false){
 		for (note in notes){
 			if (note != null && note.exists && note.alive){
@@ -223,6 +235,10 @@ class PlayField extends FlxTypedSpriteContainer<StrumNote> {
 		return cameras = value;
 	}
 
+	/**
+	 * Creates a showcase of the keybinds for the playfield
+	 * @return A FlxTypedContainer containing the keybind showcases
+	 */
 	public function getKeybindShowcase(){
 		var keyLength = this.members.length;
 		var keybindShowcase:FlxTypedContainer<KeybindShowcase> = new FlxTypedContainer<KeybindShowcase>();

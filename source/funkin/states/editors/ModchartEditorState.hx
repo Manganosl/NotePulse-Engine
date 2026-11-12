@@ -1490,7 +1490,7 @@ class ModchartEditorState extends MusicBeatState
 			if((daNote.playField != null && daNote.playField.sustainSegments == 1)){
 				var rad = Math.atan2(diffY, diffX);
 				var deg = rad * (180 / Math.PI);
-				daNote.mAngle = (deg != 0) ? (deg + 90) : 0;
+				daNote.angle3D.z = (deg != 0) ? (deg + 90) : 0;
 			}
 
 			var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);

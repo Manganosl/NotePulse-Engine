@@ -150,6 +150,7 @@ class MetaNote extends Note {
     public var songData:Array<Dynamic>;
     public var sustain:MetaSustain;
     public var chartY:Float = 0;
+    public var layoutVer:Int = -1;
     public var chartNoteData:Int = 0;
     public var fieldID:Int;
 
@@ -240,6 +241,13 @@ class MetaNote extends Note {
         } else {
             sustain = FlxDestroyUtil.destroy(sustain);
         }
+
+        layoutVer = -1;
+    }
+
+    public function setSustainPixelHeight(pixels:Float) {
+        if (sustain == null) return;
+        sustain.sustainHeight = Math.max(ChartEditorState.GRID_SIZE / 4, pixels);
     }
 
     public var hasSustain(get, never):Bool;

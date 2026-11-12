@@ -77,7 +77,7 @@ class SustainSplash extends FunkinSprite {
 		}
 	}
 
-	public inline function hide(miss:Bool = false) {
+	public inline function hide(miss:Bool = false, ?note:Note) {
 		if (animation.curAnim != null && animation.curAnim.name == "splash") return;
 
 		updatedThisFrame = true;
@@ -90,6 +90,10 @@ class SustainSplash extends FunkinSprite {
 		if (animation.curAnim == null || animation.curAnim.name != "splash") {
 			animation.play("splash");
 			angle = offsetAngle;
+			if(note != null){
+				var ct = note.colorTransform;
+				setColorTransform(ct.redMultiplier, ct.greenMultiplier, ct.blueMultiplier, ct.alphaMultiplier, ct.redOffset, ct.greenOffset, ct.blueOffset, ct.alphaOffset);
+			}
 			centerSplash();
 		}
 	}
@@ -114,7 +118,6 @@ class SustainSplash extends FunkinSprite {
 		centerOffsets();
 		scale.x = strum.scale.x * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleX;
 		scale.y = strum.scale.y * (1 / (!PlayState.isPixelStage ? 0.7 : 6)) + offsetScaleY;
-		alpha = strum.alpha + offsetAlpha;
 		x = strum.modPos.x + (strum.width / 2) - (width / 2) + offsetX;
 		y = strum.modPos.y + (strum.height / 2) - (height / 2) + offsetY;
 	}

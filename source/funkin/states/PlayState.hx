@@ -1084,7 +1084,7 @@ class PlayState extends MusicBeatState
 
 								if (daNote.isSustainNote && daNote.wasGoodHit && !daNote.strum.sustainSplash.updatedThisFrame) {
 									if (daNote.isSustainEnd) {
-										if(!cpuControlled && !daNote.strum.cpuControlled) daNote.strum.sustainSplash.hide(false);
+										if(!cpuControlled && !daNote.strum.cpuControlled) daNote.strum.sustainSplash.hide(false, daNote);
 									} else {
 										daNote.strum.sustainSplash.show(daNote);
 									}
@@ -2970,7 +2970,7 @@ class PlayState extends MusicBeatState
 			if((daNote.playField != null && daNote.playField.sustainSegments == 1)){
 				var rad = Math.atan2(diffY, diffX);
 				var deg = rad * (180 / Math.PI);
-				daNote.mAngle = (deg != 0) ? (deg + 90) : 0;
+				daNote.angle3D.z = (deg != 0) ? (deg + 90) : 0;
 			}
 
 			var visualDist = Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);

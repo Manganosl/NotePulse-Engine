@@ -584,6 +584,14 @@ class Character extends FunkinSprite
 		super.draw();
 	}
 
+	/**
+	 * Plays a ghost animation for the character
+	 * @param ghostID The ID of the ghost to play the animation on
+	 * @param animName The name of the animation to play
+	 * @param force Whether to force the animation to play
+	 * @param reversed Whether the animation should be played in reverse
+	 * @param frame The frame to start the animation on
+	 */
 	public function playGhostAnim(ghostID = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0){
 		var ghost:FunkinSprite = new FunkinSprite();
 		ghost.scale.copyFrom(scale);
@@ -684,6 +692,12 @@ class Character extends FunkinSprite
 		}
 	}
 
+	/**
+	 * Limits the size of the character based on maximum width and height
+	 * Used on the Chart Editor, I think its kind of useless tho
+	 * @param maxWidth The maximum width.
+	 * @param maxHeight The maximum height.
+	 */
 	public function limitSize(maxWidth:Float, maxHeight:Float):Void {
 		if (maxWidth <= 0 || maxHeight <= 0)
 			return;

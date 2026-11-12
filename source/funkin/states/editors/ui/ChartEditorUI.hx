@@ -76,8 +76,7 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 	public var pendingLaneAdd:Bool = false;
 	public var pendingLaneRemoveIndex:Int = -1;
 
-	public var showLastGridButton:UIButton;
-	public var showNextGridButton:UIButton;
+	public var beatLinesButton:UIButton;
 	public var noteTypeLabelsButton:UIButton;
 	public var vortexEditorButton:UIButton;
 
@@ -1056,7 +1055,7 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 		var btn:UIButton = new UIButton(btnX, btnY, '  Select All', function()
 		{
 			var sel = charter.selectedNotes;
-			charter.selectedNotes = charter.curRenderedNotes.members.copy();
+			charter.selectedNotes = charter.getSectionItems();
 			charter.addUndoAction(SELECT_NOTE, {old: sel, current: charter.selectedNotes.copy()});
 			charter.onSelectNote();
 		}, btnWid);
@@ -1210,22 +1209,12 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 		if(charter.chartEditorSave.data.waveformColor != null)
 			charter.waveformSprite.color = CoolUtil.colorFromString(charter.chartEditorSave.data.waveformColor);
 
-		showLastGridButton = new UIButton(btnX, btnY, '', function()
-		{
-			charter.showPreviousSection = !charter.showPreviousSection;
+		beatLinesButton = new UIButton(btnX, btnY, '', function(){
+			charter.showBeatLines = !charter.showBeatLines;
 			charter.updateGridVisibility();
 		}, btnWid);
-		showLastGridButton.text.alignment = LEFT;
-		tab_group.add(showLastGridButton);
-
-		btnY += 20;
-		showNextGridButton = new UIButton(btnX, btnY, '', function()
-		{
-			charter.showNextSection = !charter.showNextSection;
-			charter.updateGridVisibility();
-		}, btnWid);
-		showNextGridButton.text.alignment = LEFT;
-		tab_group.add(showNextGridButton);
+		beatLinesButton.text.alignment = LEFT;
+		tab_group.add(beatLinesButton);
 
 		btnY++;
 		btnY += 20;
@@ -1251,7 +1240,7 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 				note.playAnim('static');
 				note.resetAnim = 0;
 			}
-			charter.prevGridBg.vortexLineEnabled = charter.gridBg.vortexLineEnabled = charter.nextGridBg.vortexLineEnabled = charter.vortexEnabled;
+			charter.gridBg.vortexLineEnabled = charter.vortexEnabled;
 		}, btnWid);
 		vortexEditorButton.text.alignment = LEFT;
 		tab_group.add(vortexEditorButton);
@@ -1520,7 +1509,7 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 						charter.changeTheme(CUSTOM);
 					}
 
-					var txt:FlxText = new FlxText(input.x, input.y - 15, 120, 'Next Grid Colors:');
+					var txt:FlxText = new FlxText(input.x, input.y - 15, 120, 'Alt. Section Colors:');
 					txt.cameras = state.cameras;
 					state.add(txt);
 					state.add(input);
@@ -1556,11 +1545,12 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 	}
 
     function createUIBoxes(){
-		infoBox = new UIBox(infoBoxPosition.x, infoBoxPosition.y, 220, 220, ['Information']);
+		infoBox = new UIBox(infoBoxPosition.x, infoBoxPosition.y, 220, 250, ['Information']);
 		infoBox.scrollFactor.set();
 		infoText = new FlxText(15, 15, 230, '', 16);
 		infoText.scrollFactor.set();
-		infoBox.getTab('Information').menu.add(infoText);
+		var infoMenu = infoBox.getTab('Information').menu;
+		infoMenu.add(infoText);
 		add(infoBox);
 
 		mainBox = new UIBox(mainBoxPosition.x, mainBoxPosition.y, 300, 280, ['Charting', 'Data', 'Actions', 'Note', 'Section', 'Song']);
@@ -1580,6 +1570,8 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 			mainBox.setPosition(charter.chartEditorSave.data.mainBoxPosition[0], charter.chartEditorSave.data.mainBoxPosition[1]);
 		if(charter.chartEditorSave.data.infoBoxPosition != null && charter.chartEditorSave.data.infoBoxPosition.length > 1)
 			infoBox.setPosition(charter.chartEditorSave.data.infoBoxPosition[0], charter.chartEditorSave.data.infoBoxPosition[1]);
+		keepOnScreen(mainBox);
+		keepOnScreen(infoBox);
 
 		upperBox = new UIBox(40, 40, 330, 300, ['File', 'Edit', 'View']);
 		upperBox.scrollFactor.set();
@@ -1916,7 +1908,7 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 				{
 					charter.selectedNotes.remove(event);
 					charter.events.remove(event);
-					charter.curRenderedNotes.remove(event, true);
+					charter.visibleNotes.remove(event, true);
 					charter.addUndoAction(DELETE_NOTE, {events: [event]});
 				}
 			});
@@ -2011,12 +2003,13 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 				{
 					for (note in charter.selectedNotes)
 					{
-						if(note == null && !note.isEvent) continue;
+						if(note == null || note.isEvent) continue;
 						note.setSustainLength(note.sustainLength + (susLengthStepper.value - charter.susLengthLastVal), Conductor.stepCrochet, charter.curZoom);
 					}
 				}
 				else if(charter.selectedNotes.length == 1) charter.selectedNotes[0].setSustainLength(susLengthStepper.value, Conductor.stepCrochet, charter.curZoom);
 				charter.susLengthLastVal = susLengthStepper.value;
+				charter.softReloadNotes();
 			}
 		};
 
@@ -2079,7 +2072,7 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 
 	function swapDaSection(pAm:Int){
 		var maxData:Int = ChartEditorState.GRID_COLUMNS_PER_PLAYER * pAm;
-		for (note in charter.curRenderedNotes)
+		for (note in charter.getSectionItems())
 		{
 			if(note != null && !note.isEvent)
 			{
@@ -2241,7 +2234,7 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 		});
 		var clearButton:UIButton = new UIButton(objX + 200, objY, 'Clear', function()
 		{
-			for (note in charter.curRenderedNotes)
+			for (note in charter.getSectionItems())
 			{
 				if(note == null) continue;
 
@@ -2283,7 +2276,7 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 		var duetSectionButton:UIButton = new UIButton(objX + 100, objY, 'Duet Section', function()
 		{
 			var side:Int = -1;
-			for (note in charter.curRenderedNotes.members)
+			for (note in charter.getSectionItems())
 			{
 				if(note == null || note.isEvent) continue;
 
@@ -2300,7 +2293,7 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 			}
 
 			var pushedNotes:Array<MetaNote> = [];
-			for (note in charter.curRenderedNotes.members)
+			for (note in charter.getSectionItems())
 			{
 				if(note == null || note.isEvent) continue;
 
@@ -2323,7 +2316,7 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 		var mirrorNotesButton:UIButton = new UIButton(objX + 200, objY, 'Mirror Notes', function()
 		{
 			var maxData:Int = ChartEditorState.GRID_COLUMNS_PER_PLAYER * ChartEditorState.GRID_PLAYERS;
-			for (note in charter.curRenderedNotes)
+			for (note in charter.getSectionItems())
 			{
 				if(note == null || note.isEvent) continue;
 
@@ -2760,9 +2753,15 @@ class ChartEditorUI extends FlxSpriteContainer implements UIEventHandler.UIEvent
 				}
 
 			case UIBox.DROP_EVENT:
+				keepOnScreen(mainBox);
+				keepOnScreen(infoBox);
 				charter.chartEditorSave.data.mainBoxPosition = [mainBox.x, mainBox.y];
 				charter.chartEditorSave.data.infoBoxPosition = [infoBox.x, infoBox.y];
 		}
+	}
+
+	function keepOnScreen(box:UIBox):Void {
+		box.setPosition(FlxMath.bound(box.x, 0, FlxG.width - 120), FlxMath.bound(box.y, 0, FlxG.height - 60));
 	}
 
 	function updateUpperBoxBg(){
